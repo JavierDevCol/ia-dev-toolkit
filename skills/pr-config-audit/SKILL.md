@@ -66,7 +66,7 @@ pasos de build/deploy, rollback, migraciones BD, diagramas de arquitectura, docu
 ## Fase 0 — Tipo de análisis
 
 > ¿El análisis es para un **microservicio nuevo** (inventario completo)
-> o una **funcionalidad en uno existente** (solo delta del PR)?
+> o una **funcionalidad en uno existente** (solo delta del PR/diff)?
 
 | Opción | Alcance |
 |--------|---------|
