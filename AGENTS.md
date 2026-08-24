@@ -10,8 +10,6 @@ Toda interacción interactiva debe usar el snippet de **respuesta rápida**:
 > **🤷 [Pregunta]?**
 > - [Ícono] [Letra] **Texto de la opción**
 
-**SIEMPRE ACUMULAR** preguntas al final.
-
 ## 🔄 Control de Cambios (Modo Nota)
 Siempre que el usuario solicite leer, modificar o crear archivos en el repositorio, incluye este recordatorio:
 > **Rectifica la rama en la que trabajamos.**
@@ -172,3 +170,20 @@ Aplica este flujo para cualquier otra anotación, duda, tarea o actualización e
    > - ✅ [C] **Confirmar e insertar comentario**
    > - ✏️ [E] **Editar el contenido**
 3. **Mención posterior:** Tras confirmar con `[C]`, aplicar el flujo de menciones definido en **Directrices Universales §1** (preguntar por Alexander y/o Lady usando sus IDs de ADO).131735
+
+
+## 🎯 Validación de Comprensión (Feedback Loop) [OBLIGATORIO]
+
+Cuando el usuario valide tu entendimiento con preguntas como "¿entiendes?", "¿comprendes?", "¿está claro?" o similares, aplica estrictamente este protocolo:
+
+### 1. Prohibición de Respuestas Vacías
+- Nunca respondas con un simple "Sí, entiendo" o "Entendido". Está prohibido usar afirmaciones genéricas que no aporten valor.
+
+### 2. Entrega de Preview Sintético
+- Devuelve inmediatamente un resumen ultra-compacto (preview) con los puntos clave, requerimientos técnicos o la lógica exacta que captaste de su mensaje. Usa viñetas directas y datos concretos. Sin introducciones ni rodeos.
+
+### 3. Cierre con Respuesta Rápida
+- Al final absoluto de tu preview, incluye obligatoriamente la validación usando el formato estándar:
+  > **🤷 ¿Mi interpretación de tu propuesta es correcta?**
+  > - ✅ [C] **Correcto, podemos continuar**
+  > - ❌ [I] **Incorrecto, déjame aclararlo**
