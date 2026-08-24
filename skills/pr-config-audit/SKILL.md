@@ -12,9 +12,29 @@ description: >
   indicando exactamente qué crear/actualizar y dónde (Variable Group, path de Vault,
   archivo de config, declaración de cola, etc.).
 metadata:
-  author: javier.otero
-  version: 2.0.0
+  memory_skill: ./memory_skill.json
 ---
+
+## Convenciones de la skill
+
+Leer {{memory_skill}} . Si el archivo no existe o los campos son `null`, usar los defaults indicados.
+
+### Configuración (`config`)
+
+| Campo | Default | Descripción |
+|-------|---------|-------------|
+| `name_repo_source` | `pr_remote` | Obtener nombre del repo del PR (remote) |
+| `name_ms_source` | `same_as_repo` | Nombre microservicio = nombre repo |
+| `id_source` | `user_or_pr_link` | ID del documento: usuario indica o se detecta del link PR |
+| `version_pattern.auto_detect_last_tag` | `true` | Buscar último tag automáticamente |
+| `version_pattern.suggest_next` | `true` | Sugerir siguiente versión (patch) |
+| `version_pattern.force_v_prefix` | `true` | Agregar prefijo `v` si el usuario no lo incluye |
+
+### Memoria (`memory`)
+
+| Campo | Default | Descripción |
+|-------|---------|-------------|
+| `output_base_path` | `null` | Ruta base para guardar el documento de salida |
 
 # PR Config Audit
 
@@ -46,7 +66,7 @@ pasos de build/deploy, rollback, migraciones BD, diagramas de arquitectura, docu
 ## Fase 0 — Tipo de análisis
 
 > ¿El análisis es para un **microservicio nuevo** (inventario completo)
-> o una **funcionalidad en uno existente** (solo delta del PR)?
+> o una **funcionalidad en uno existente** (solo delta del PR/diff)?
 
 | Opción | Alcance |
 |--------|---------|
@@ -98,6 +118,7 @@ Para cada cola detectada, registrar:
 | **Consumidores** | Qué servicios/métodos la consumen |
 | **Acción** | Crear / Actualizar / Eliminar / Solo documentar |
 | **Ambientes** | DES, QA, PROD (o varios) |
+| **Se Crea** | AUTO / MANUAL | 
 
 ## Fase B3 — Clasificación de Redis
 
@@ -146,17 +167,20 @@ Variables sin origen claro:
   Pregunta: ¿Dónde obtiene el equipo este valor?
 ```
 
-**Regla:** No asumir origen. Si el usuario no sabe → `⚠️ Pendiente de definir`.
-
 **Preguntas de contexto:**
 - Nombres de Variable Groups por ambiente (`vg-{app}-des`, `vg-{app}-qa`, etc.)
 - URL/base path de Vault y convención de nombres
 - Ambientes destino (DES, QA, PROD)
-- PR de referencia (si no se detectó automáticamente)
 - **Ubicación del archivo de salida:**
-  Preguntar al usuario la ruta base y la versión del release (ej. v1.2.3). Construir la carpeta: `<ruta-base>/entrega_release/{nombre_repo}/{release}/`
-  - `{nombre_repo}` se obtiene del remoto: `basename $(git remote get-url origin) .git`
-  - `{release}` es la versión que indique el usuario
+  - Si `memory.output_base_path` tiene valor → preguntar: *"¿Usar esta ruta guardada? [ruta]"*
+  - Si es `null` → preguntar al usuario la ruta base
+  - Construir la carpeta: `<ruta-base>/entrega_release/{nombre_repo}/{release}/`
+
+**Datos del PR** (según `config`):
+- `{nombre_repo}` → según `config.name_repo_source`
+- `{nombre microservicio}` → según `config.name_ms_source`
+- `{ID}` → según `config.id_source`
+- `{release}` → sugerir según `config.version_pattern`
 
 ## Fase D — Preview y confirmación
 
@@ -232,43 +256,23 @@ Mostrar resumen consolidado antes de generar el documento:
 (3) Cancelar
 ════════════════════════════════════════════════════
 
-**Nota:** La ubicación se definió en Fase C. El archivo se genera dentro de `<ruta-base>/entrega_release/{nombre_repo}/{release}/`.
+**Persistencia:** Actualizar `memory_skill.json` → `memory.output_base_path` con la ruta base usada para que esté disponible en la próxima ejecución.
 ```
 
 **Reglas:** Solo incluir secciones con cambios. NO incluir migraciones, service connections,
 infraestructura, health checks, ni pasos de deploy.
 
 ## Fase E — Generación del documento
-
-Usar como base `assets/template-CONFIG-ENTORNO-PR.md`.
-
-Generar `CONFIG-ENTORNO-PR-{ID} ({nombre microservicio}).md` donde `{ID}` es el número de PR o nombre de rama analizado y `{nombre microservicio}` es el nombre del microservicio (ej. `CONFIG-ENTORNO-PR-42 (ms-banca-simulacion-productos).md`). La ruta base y release los define el usuario en Fase C. Construir: `<ruta-base>/entrega_release/{nombre_repo}/{release}/`
-
-- `{nombre_repo}` se obtiene del remoto: `basename $(git remote get-url origin) .git`
-- `{release}` es la versión que indique el usuario (ej. v1.2.3)
+Generar `CONFIG-ENTORNO-PR-{ID} ({nombre microservicio}).md`, Usando como base `assets/template-CONFIG-ENTORNO-PR.md`.
 
 El alcance según Fase 0:
 - **MS nuevo:** inventario completo de variables, colas, redis y migraciones
 - **Funcionalidad:** solo el delta detectado en el PR/diff
 
-Estructura del documento:
-1. Resumen del cambio / contexto
-2. Tabla de variables clasificadas por origen (VG / Vault / config file)
-3. Detalle de acciones por plataforma:
-   - Variable Groups ADO: qué crear/actualizar en cada grupo
-   - Vault: qué paths crear por ambiente
-   - Config files: qué archivos modificar y cómo
-   - Colas RabbitMQ: qué colas, exchanges y bindings crear por ambiente
-   - Redis: qué configuraciones de caché, sesiones, pub-sub o estructuras crear/actualizar
-   - Migraciones BD: qué scripts ejecutar, herramienta, tablas afectadas y ambientes
-4. Variables pendientes (⚠️) si las hay
-
-No incluir secretos reales. Alertar si hay secretos hardcodeados.
-
 ## Reglas obligatorias
 
 1. Solo documentar configuración de variables — nada de setup local, infra, deploy, health checks
-2. Generar `CONFIG-ENTORNO-PR-{ID} ({nombre microservicio}).md` dentro de `<ruta-base>/entrega_release/{nombre_repo}/{release}/` ({ID} = nº de PR o nombre de rama, {nombre microservicio} = nombre del microservicio). Preguntar al usuario la ruta base y la versión del release.
+2. Generar documento según convenciones definidas en Fase C y estructura de `memory_skill.json`.
 3. Nunca asumir origen de variables — preguntar al usuario con archivo+línea de contexto
 4. Nunca incluir secretos reales; alertar si hay secretos commiteados
 5. Mostrar preview antes de generar el documento final
@@ -291,10 +295,3 @@ No incluir secretos reales. Alertar si hay secretos hardcodeados.
 - PR creado o diff disponible entre ramas
 - Usuario con conocimiento de dónde se configuran las variables del proyecto
 
-## Salida esperada
-
-`CONFIG-ENTORNO-PR-{ID} ({nombre microservicio}).md` dentro de `<ruta-base>/entrega_release/{nombre_repo}/{release}/`. {ID} = nº de PR o nombre de rama, {nombre microservicio} = nombre del microservicio. La ruta base y release los define el usuario en Fase C.
-
-## Proceso detallado
-
-Ver ejemplo completo en la [Fase D — Preview y confirmación](#fase-d--preview-y-confirmación).

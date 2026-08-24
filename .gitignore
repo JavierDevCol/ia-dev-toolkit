@@ -3,7 +3,6 @@
 
 # Environment variables
 .env
-
 opencode.json
 
 config_consultas.json

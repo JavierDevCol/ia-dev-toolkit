@@ -165,14 +165,15 @@ git checkout release/v2.2.3
 git commit -m "fix: ajuste solicitado por banco en DES"
 git push origin release/v2.2.3
 
-# 2. Propagar el fix a develop (back-merge limpio)
-git checkout develop
-git merge --no-ff release/v2.2.3
-git push origin develop   # directo si develop lo permite; PR si está protegida
-
-# 3. Crear rama RC efímera para el PR al banco
+# 2. Crear rama RC efímera y probar en DEVELOP antes de propagar
 git checkout -b release/v2.2.3-rc.1 release/v2.2.3
 git push origin release/v2.2.3-rc.1
+# El pipeline despliega en DEVELOP → validar que el fix funciona correctamente
+
+# 3. Propagar el fix a develop mediante PR (back-merge validado)
+# Crear PR: release/v2.2.3 → develop
+# El PR debe incluir descripción del fix y link al WI/bug original
+# Requiere al menos 1 approval (ver §8)
 
 # 4. El banco crea PR release/v2.2.3-rc.1 → des, mergea y taggea v2.2.3-rc.1 en des
 
@@ -180,6 +181,8 @@ git push origin release/v2.2.3-rc.1
 git push origin --delete release/v2.2.3-rc.1
 git branch -d release/v2.2.3-rc.1
 ```
+
+> ⚠️ **Regla de oro:** Nunca hacer back-merge a develop sin haber probado el fix en DEVELOP primero. El paso 2 es obligatorio, excepto para fixes triviales (typo, config) que no afectan lógica de negocio.
 
 #### Aprobación final
 
@@ -189,10 +192,9 @@ Cuando el banco aprueba la versión (después de 0 o más RCs):
 # El banco crea PR desde release/vX.Y.Z (rama base, no RC) → des
 # El banco mergea y taggea el tag final vX.Y.Z (sin sufijo RC) en des
 
-# CEIBA hace back-merge final a develop y elimina la rama base
-git checkout develop
-git merge --no-ff release/v2.2.3
-git push origin develop
+# CEIBA hace back-merge final a develop mediante PR y elimina la rama base
+# Crear PR: release/v2.2.3 → develop
+# Requiere al menos 1 approval (ver §8)
 
 git push origin --delete release/v2.2.3
 git branch -d release/v2.2.3
@@ -282,16 +284,18 @@ git checkout release/v2.2.3
 git commit -m "fix: corregir [descripción]"
 git push origin release/v2.2.3
 
-# Back-merge a develop
-git checkout develop
-git merge --no-ff release/v2.2.3
-git push origin develop
-
-# Crear RC efímera para el PR
+# Probar fix en DEVELOP antes de propagar
 git checkout -b release/v2.2.3-rc.1 release/v2.2.3
 git push origin release/v2.2.3-rc.1
+# El pipeline despliega en DEVELOP → validar que el fix funciona
+
+# Back-merge a develop mediante PR (ya validado)
+# Crear PR: release/v2.2.3 → develop
+# Requiere al menos 1 approval (ver §8)
 
 # El banco mergea PR a des → tag v2.2.3-rc.1 → eliminar RC
+git push origin --delete release/v2.2.3-rc.1
+git branch -d release/v2.2.3-rc.1
 ```
 
 ### 5.2 Hotfix en PRU, PREPRO o PRO (bug reportado por el banco)
@@ -315,10 +319,9 @@ git commit -m "fix: corregir [descripción]"
 # 3. Verificar que develop tiene el problema y necesita el fix
 git log develop --oneline | head -10   # confirmar que el bug existe en develop
 
-# 4. Merge a develop PRIMERO (merge limpio)
-git checkout develop
-git merge --no-ff hotfix/arreglo-x
-git push origin develop   # directo si develop lo permite; PR si está protegida
+# 4. Merge a develop PRIMERO mediante PR
+# Crear PR: hotfix/arreglo-x → develop
+# Requiere al menos 1 approval (ver §8)
 
 # 5. Crear nuevo release desde develop (ya tiene el fix)
 git checkout develop

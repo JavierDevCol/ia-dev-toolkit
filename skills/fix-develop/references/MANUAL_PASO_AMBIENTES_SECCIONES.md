@@ -31,16 +31,25 @@ Cuando el bug se detecta en DES y aún no ha sido promovido a PRU, se aplica el 
 
 ```bash
 git checkout release/v2.2.3
+# aplicar fix
 git commit -m "fix: corregir [descripción]"
 git push origin release/v2.2.3
 
-git checkout develop
-git merge --no-ff release/v2.2.3
-git push origin develop
-
+# Probar fix en DEVELOP antes de propagar
 git checkout -b release/v2.2.3-rc.1 release/v2.2.3
 git push origin release/v2.2.3-rc.1
+# El pipeline despliega en DEVELOP → validar que el fix funciona
+
+# Back-merge a develop mediante PR (ya validado)
+# Crear PR: release/v2.2.3 → develop
+# Requiere al menos 1 approval (ver §8)
+
+# El banco mergea PR a des → tag v2.2.3-rc.1 → eliminar RC
+git push origin --delete release/v2.2.3-rc.1
+git branch -d release/v2.2.3-rc.1
 ```
+
+> ⚠️ **Regla de oro:** Nunca hacer back-merge a develop sin haber probado el fix en DEVELOP primero. El paso 2 es obligatorio, excepto para fixes triviales (typo, config) que no afectan lógica de negocio.
 
 > **Nota:** Este flujo lo gestiona `fix-release`, no `fix-develop`.
 
@@ -59,13 +68,22 @@ git checkout -b hotfix/arreglo-x v2.2.3-pro
 # aplicar fix
 git commit -m "fix: corregir [descripción]"
 
-git checkout develop
-git merge --no-ff hotfix/arreglo-x
-git push origin develop
+# Verificar que develop tiene el problema
+git log develop --oneline | head -10
 
-git checkout develop && git pull
+# Merge a develop PRIMERO mediante PR
+# Crear PR: hotfix/arreglo-x → develop
+# Requiere al menos 1 approval (ver §8)
+
+# Crear nuevo release desde develop (ya tiene el fix)
+git checkout develop
+git pull
 git checkout -b release/v2.2.4
 git push origin release/v2.2.4
+
+# Eliminar hotfix branch
+git branch -d hotfix/arreglo-x
+git push origin --delete hotfix/arreglo-x
 ```
 
 > **Nota:** Este flujo lo gestiona `fix-release`, no `fix-develop`.
