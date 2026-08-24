@@ -1,6 +1,5 @@
 .idea
 .vscode/
-
 # Environment variables
 .env
 opencode.json
@@ -12,3 +11,4 @@ config_consultas.json
 Icon?
 
 .DS_Store
+.git-cfg
