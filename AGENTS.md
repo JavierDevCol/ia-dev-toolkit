@@ -23,6 +23,14 @@ Siempre que el usuario solicite leer, modificar o crear archivos en el repositor
 ---
 
 ## 🗂️ Bitácora Técnica del Proyecto: skill bitacora-tecnica
+1. Criterio de Activación Autónoma: Evalúa la conversación en tiempo real. Ignora consultas teóricas, preguntas puntuales o soporte superficial.
+2. Detección de Hitos y Consenso: Activa la propuesta únicamente cuando se presente alguno de estos escenarios:
+- Decisiones de arquitectura, infraestructura o diseño del sistema.
+- Acuerdo para modificar código: Cambios estructurales en código existente, refactorizaciones aprobadas, modificación de lógica de negocio o ajustes de dependencias.
+- Solución de errores complejos o bloqueantes.
+3. Notificación Contextual: Al final de la respuesta donde se acuerde la modificación, añade la siguiente nota:
+- Detecté un acuerdo para modificar código / decisión técnica. Si deseas registrar este hito en la bitácora de la sesión, avísame y lo genero.
+4. Ejecución Condicional: Tras la confirmación del usuario, valida la existencia del archivo de la sesión para crearlo o anexar el nuevo registro.
 
 ---
 
