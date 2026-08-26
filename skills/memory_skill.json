@@ -1,0 +1,22 @@
+{
+  "handoff-release": {
+    "config": {
+      "environments": {
+        "dev": "DEV",
+        "staging": "STAGING",
+        "prod": "PROD"
+      },
+      "roles": {
+        "preparer": "Equipo Dev",
+        "deployer": "Equipo Ops"
+      },
+      "branch_format": "release/vX.Y.Z",
+      "tag_format": "vX.Y.Z-{env}",
+      "output_path": null
+    },
+    "memory": {
+      "last_release": null,
+      "output_base_path": null
+    }
+  }
+}
