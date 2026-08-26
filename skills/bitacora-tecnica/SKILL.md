@@ -8,6 +8,7 @@ description: >
   de código, evidencias de debugging, o el estado actual de una tarea.
   Ejecuta esta skill cada que se solicite crear una bitácora o cuando
   se quiera retomar/iniciar/implementar alguna solución.
+compatibility: Requires git
 metadata:
   author: CEIBA DevOps
   version: 2.0.0

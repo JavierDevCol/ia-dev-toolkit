@@ -8,6 +8,7 @@ description: >
   vincular work items al PR al crearlo. También activa cuando mencione: crear
   PR, abrir PR, nuevo pull request, generar pull request, create pull request,
   open pull request, new PR.
+compatibility: Requires Azure DevOps MCP server configured
 ---
 
 # ADO PR Creator

@@ -7,6 +7,7 @@ description: >
   feature lista para release, ajustar release (RC), hotfix release.
   NOTA: No debes activarte para desarrollo normal de features, solo
   para preparación de entregas formales al banco.
+compatibility: Requires BancaPorWhatsApp project context
 metadata:
   author: CEIBA DevOps
   version: 1.0.0

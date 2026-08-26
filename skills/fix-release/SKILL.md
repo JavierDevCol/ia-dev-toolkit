@@ -7,6 +7,7 @@ description: >
   crear release candidate, o propagar fix por todos los ambientes.
   No la uses para entregas iniciales de release (usar entrega-ambiente-banco)
   ni para bugs durante desarrollo (usar fix-develop).
+compatibility: Requires git
 metadata:
   author: CEIBA DevOps
   version: 1.0.0

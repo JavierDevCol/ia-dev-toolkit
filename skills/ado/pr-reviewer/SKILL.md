@@ -12,6 +12,7 @@ description: >
   review, análisis de PR, PR review, validar PR, pendientes de PR, pull request,
   PR ID, PR link. Also triggers on: review pull request, PR analysis, check
   coding standards, merge conflicts.
+compatibility: Requires Azure DevOps MCP server configured
 ---
 
 # ADO PR Reviewer

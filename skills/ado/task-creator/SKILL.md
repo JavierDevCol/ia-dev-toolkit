@@ -9,6 +9,7 @@ description: >
   trabajo ejecutable. También activa cuando mencione: agregar tareas, crear
   subtareas, desglosar HU, agg-tarea, plan de trabajo, crear tareas desde archivo.
   Also triggers on: create child tasks, batch task creation, break down user story.
+compatibility: Requires Azure DevOps MCP server configured
 ---
 
 # ADO Task Creator

@@ -7,6 +7,7 @@ description: >
   qué necesita el usuario (rama o commit) y ejecuta directamente.
   No la uses para entregas (usar entrega-ambiente-banco) ni para
   fixes post-entrega (usar fix-release).
+compatibility: Requires git
 metadata:
   author: CEIBA DevOps
   version: 2.0.0

@@ -7,6 +7,7 @@ description: >
   sincronizar docs con Git, hacer push selectivo, revisar git status de un repo
   de documentación, o gestionar qué archivos commitear. Also triggers on: push
   selected files, sync documentation, selective git commit, upload docs to repo.
+compatibility: Requires git, Python 3
 ---
 
 # Git Documentation Synchronizer

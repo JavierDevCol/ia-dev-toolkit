@@ -6,6 +6,7 @@ description: >
   bug durante feature, bug en DES antes de entrega formal, o corrección rápida
   sobre develop. No la uses para bugs en releases ya entregados al banco
   (usar fix-release) ni para entregas formales (usar entrega-ambiente-banco).
+compatibility: Requires git
 metadata:
   author: CEIBA DevOps
   version: 1.0.0

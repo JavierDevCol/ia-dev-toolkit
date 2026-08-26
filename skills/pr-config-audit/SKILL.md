@@ -11,6 +11,7 @@ description: >
   sobre orígenes desconocidos, muestra un preview   y genera CONFIG-ENTORNO-PR-{ID} ({nombre microservicio}).md
   indicando exactamente qué crear/actualizar y dónde (Variable Group, path de Vault,
   archivo de config, declaración de cola, etc.).
+compatibility: Requires git. Optional: HashiCorp Vault, RabbitMQ, Redis
 metadata:
   memory_skill: ./memory_skill.json
 ---

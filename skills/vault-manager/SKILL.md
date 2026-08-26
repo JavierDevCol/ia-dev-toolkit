@@ -8,6 +8,7 @@ description: >
   credenciales, tokens, o quiera consultar/administrar Vault.
   Also triggers on: vault secrets, read secret, vault login, vault
   commands, hashicorp vault.
+compatibility: Requires HashiCorp Vault CLI, kubectl
 ---
 ## Prerequisitos
 1. Verificar que vault CLI esté instalado: `vault --version`

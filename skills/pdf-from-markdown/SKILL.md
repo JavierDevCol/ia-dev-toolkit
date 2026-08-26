@@ -10,7 +10,7 @@ description: >
   Use this skill when the user mentions: convert markdown to PDF, export document
   as PDF, generate PDF from Mermaid, render diagrams to PDF, or any combination
   of Markdown/Mermaid and PDF output.
-compatibility: Requires Node.js (npx), bash, and optionally @mermaid-js/mermaid-cli (mmdc) installed globally.
+compatibility: Requires Node.js, @mermaid-js/mermaid-cli
 metadata:
   author: javier.garcia
   version: "2.0"

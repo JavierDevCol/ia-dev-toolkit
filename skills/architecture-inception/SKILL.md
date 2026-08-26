@@ -2,7 +2,7 @@
 name: architecture-inception
 description: Analiza la documentación inicial de un proyecto para definir la arquitectura base, patrones de diseño, estructura de carpetas, comunicación de componentes y workflow de Git. Usar cuando el usuario inicie un proyecto desde cero, pase especificaciones técnicas iniciales o solicite la blueprint arquitectónica.
 license: MIT
-compatibility: Requiere un agente con rol de Arquitecto de Software o soporte para diagramación Mermaid.
+compatibility: No special requirements
 ---
 
 # Architecture Inception & Blueprint Skill

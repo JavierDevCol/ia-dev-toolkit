@@ -6,6 +6,7 @@ description: >
   de entrega (RELEASE, FEATURE, FIX, HOTFIX) o un comentario técnico
   general a un WI, incluyendo menciones a colaboradores y reasignación.
   No la uses para crear o modificar campos del WI (usar bmm-crear-hu-devops).
+compatibility: Requires Azure DevOps MCP server configured
 metadata:
   author: CEIBA DevOps
   version: 1.0.0

@@ -7,6 +7,7 @@ description: >
   crea enums de opciones de menú y genera tests unitarios.
   Triggers: crear estrategia, nueva estrategia, agregar etapa, nuevo flujo conversacional,
   nueva etapa FSM, strategy, add strategy, create strategy.
+compatibility: Requires specific codebase structure (ms-banca-conversacion)
 ---
 
 # Crear Estrategia — ms-banca-conversacion

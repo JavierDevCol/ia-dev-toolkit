@@ -9,6 +9,7 @@ description: >
   "build fallido", "check pipeline status", "revisar stage", "ver cambios del
   build", "pipeline run details". Obtiene información del build, logs por etapa,
   cambios asociados, estado de stages y genera un reporte estructurado.
+compatibility: Requires Azure DevOps MCP server configured
 ---
 
 # ADO Pipeline Analyzer

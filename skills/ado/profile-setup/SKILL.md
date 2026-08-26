@@ -6,6 +6,7 @@ description: >
   o el usuario quiera agregar un nuevo perfil.
   Triggers on: configurar perfil, nuevo perfil, setup agente,
   inicializar, config no existe, >nuevo-perfil.
+compatibility: Requires Azure DevOps MCP server configured
 ---
 
 ## FASE 1 — DATOS BASICOS DEL PERFIL

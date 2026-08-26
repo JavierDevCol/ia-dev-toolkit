@@ -1,6 +1,7 @@
 ---
 name: transversales-workitems
 description: "Crea, actualiza y verifica work items de la célula transversal BMM en Azure DevOps (Feature 128821, org GestionRequerimientos, proyecto FINTIA) haciendo cumplir el protocolo de incidentes vía el MCP de Azure DevOps apuntando al proyecto FINTIA (servidor bmm-dashboard-devops-mcp). Soporta incidentes nuevos e incidentes ya resueltos (registro retroactivo). Activa cuando el usuario diga: crear/registrar work item transversal, registrar incidente nuevo o ya resuelto, crear ticket transversal, levantar bug, actualizar work item, verificar work item, validar ticket contra el protocolo, revisar si el work item cumple el protocolo."
+compatibility: Requires Azure DevOps MCP server, FINTIA project
 argument-hint: "crear | actualizar <id> | verificar <id> — y los datos del incidente"
 user-invocable: true
 ---

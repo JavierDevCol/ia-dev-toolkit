@@ -12,6 +12,7 @@ description: >
   historia, push HU, publicar historia de usuario, crear work item desde archivo.
   Also triggers on: publish user story, push HU to ADO, create work item from local file,
   sync local story to Azure DevOps.
+compatibility: Requires Azure DevOps MCP server configured
 ---
 
 # ADO HU Publisher

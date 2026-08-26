@@ -1,6 +1,7 @@
 ---
 name: mermaid-diagram
 description: Usa esta skill cuando necesites crear, validar o corregir diagramas Mermaid (sequence, flowchart, state, C4). Aplica estándares de colores, formatos HEX/RGBA según tipo, y técnicas avanzadas como subgraphs anidados. Activa cuando el usuario pida diagramas, flujos, arquitecturas visuales, o documentación gráfica de sistemas.
+compatibility: No special requirements
 ---
 
 # Mermaid Diagram Skill
