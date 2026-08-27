@@ -2,9 +2,9 @@
 name: handoff-release
 description: >
   Usa esta skill cuando necesites preparar y orquestar la entrega de un release
-  al banco. Se activa al crear ramas release desde develop, generar release notes,
-  o preparar el handoff entre equipos de Dev y Ops. No usar para hotfixes o
-  ajustes RC post-entrega.
+  a entornos de destino. Se activa al crear ramas release desde develop, generar
+  release notes, o preparar el handoff entre equipos de Dev y Ops. No usar para
+  hotfixes o ajustes RC post-entrega.
 ---
 
 # Handoff Release
