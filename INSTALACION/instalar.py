@@ -19,6 +19,10 @@ import shutil
 import subprocess
 import platform
 import json
+import tarfile
+import io
+import urllib.request
+import urllib.error
 from pathlib import Path
 from datetime import datetime
 
@@ -941,39 +945,107 @@ def main():
 def ensure_repo_available():
     temp_repo_path = get_temp_repo_path()
 
-    if temp_repo_path.exists() and (temp_repo_path / ".git").exists():
-        print_info(f"Repositorio encontrado en {temp_repo_path}")
-        try:
-            subprocess.run(
-                ["git", "-C", str(temp_repo_path), "pull", "--ff-only"],
-                capture_output=True,
-                text=True,
-                timeout=60
-            )
+    # Si ya existe el repo local con las carpetas necesarias, usarlo
+    if temp_repo_path.exists():
+        required_dirs = ["skills", "agents", "workflows", "tools", "config"]
+        if all((temp_repo_path / d).exists() for d in required_dirs):
+            print_info(f"Repositorio local encontrado en {temp_repo_path}")
+            # Intentar actualizar
+            try:
+                if (temp_repo_path / ".git").exists():
+                    subprocess.run(
+                        ["git", "-C", str(temp_repo_path), "pull", "--ff-only"],
+                        capture_output=True, text=True, timeout=60
+                    )
+                else:
+                    # Sin git, verificar si tiene contenido reciente
+                    print_info("Repositorio sin git, usando versión local")
+            except Exception:
+                pass
             return temp_repo_path
-        except Exception:
-            pass
 
-    print_info("Clonando repositorio...")
+    # Descargar solo lo necesario desde GitHub API
+    print_info("Descargando componentes desde GitHub...")
+    return download_from_github(temp_repo_path)
+
+
+def download_from_github(dest_path):
+    """Descarga solo las carpetas necesarias desde GitHub usando la API."""
+    # Extraer owner/repo de la URL
+    # REPO_URL = "https://github.com/JavierDevCol/squad-skills.git"
+    parts = REPO_URL.replace("https://github.com/", "").replace(".git", "").split("/")
+    owner, repo = parts[0], parts[1]
+
+    # URL del tarball
+    tarball_url = f"https://github.com/{owner}/{repo}/archive/refs/heads/{REPO_BRANCH}.tar.gz"
+
+    # Carpetas necesarias para el instalador
+    REQUIRED_DIRS = ["skills", "agents", "workflows", "tools", "config"]
+
     try:
-        if temp_repo_path.exists():
-            shutil.rmtree(temp_repo_path)
+        print_info(f"Descargando desde {tarball_url}...")
+        req = urllib.request.Request(tarball_url, headers={"User-Agent": "squad-skills-installer"})
+        response = urllib.request.urlopen(req, timeout=120)
+        tarball_data = response.read()
 
-        result = subprocess.run(
-            ["git", "clone", "--depth", "1", "--branch", REPO_BRANCH, REPO_URL, str(temp_repo_path)],
-            capture_output=True,
-            text=True,
-            timeout=120
-        )
+        print_info(f"Descargado: {len(tarball_data) / 1024:.0f} KB")
+        print_info("Extrayendo componentes necesarios...")
 
-        if result.returncode == 0:
-            print_success("Repositorio clonado")
-            return temp_repo_path
-        else:
-            print_error(f"Error al clonar: {result.stderr}")
+        # Crear directorio destino
+        dest_path.mkdir(parents=True, exist_ok=True)
+
+        # Extraer solo las carpetas necesarias del tarball
+        with tarfile.open(fileobj=io.BytesIO(tarball_data), mode="r:gz") as tar:
+            # El tarball tiene prefijo "squad-skills-main/"
+            prefix = f"{repo}-{REPO_BRANCH}/"
+
+            for member in tar.getmembers():
+                # Verificar si el archivo pertenece a una carpeta necesaria
+                if not member.name.startswith(prefix):
+                    continue
+
+                rel_path = member.name[len(prefix):]
+                if not rel_path:
+                    continue
+
+                # Verificar si pertenece a una carpeta requerida
+                is_required = False
+                for req_dir in REQUIRED_DIRS:
+                    if rel_path.startswith(req_dir + "/") or rel_path == req_dir:
+                        is_required = True
+                        break
+
+                if not is_required:
+                    continue
+
+                # Extraer archivo
+                dest_file = dest_path / rel_path
+
+                if member.isdir():
+                    dest_file.mkdir(parents=True, exist_ok=True)
+                elif member.isfile():
+                    dest_file.parent.mkdir(parents=True, exist_ok=True)
+                    src_file = tar.extractfile(member)
+                    if src_file:
+                        with open(dest_file, "wb") as f:
+                            f.write(src_file.read())
+
+        print_success(f"Componentes descargados en {dest_path}")
+
+        # Verificar que se descargaron las carpetas necesarias
+        missing = [d for d in REQUIRED_DIRS if not (dest_path / d).exists()]
+        if missing:
+            print_warning(f"Carpetas no encontradas: {', '.join(missing)}")
             return None
+
+        return dest_path
+
+    except urllib.error.URLError as e:
+        print_error(f"Error de red: {e}")
+        print_info("Verifica tu conexión a internet")
+        return None
     except Exception as e:
-        print_error(f"Error: {e}")
+        print_error(f"Error al descargar: {e}")
         return None
 
 
