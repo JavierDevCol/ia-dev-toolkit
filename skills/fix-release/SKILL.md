@@ -34,14 +34,18 @@ El banco pide cambios. Release branch `release/vX.Y.Z` sigue vivo.
 3. Crear RC efímera `release/vX.Y.Z-rc.N`. Push.
 4. Aprobación final → back-merge final + eliminar release branch.
 
+**Config (obligatorio si aplica):** Si el fix agrega variables, colas, secretos o configuración Vault, ejecutar `pr-config-audit` sobre el diff (rama fix vs `develop`) y generar `CONFIG-ENTORNO-PR` **antes** de la entrega. Adjuntar ese documento al PR.
+
 ### Opción 2 — Hotfix en PRU/PREPRO/PRO
 
 Nuevo release con PATCH incrementado.
 
 1. Hotfix branch desde tag del ambiente afectado. Validar tests. Commit.
-2. Merge a develop PRIMERO (via PR). Esperar aprobación.
+2. Merge a desarrollo PRIMERO (via PR). Esperar aprobación.
 3. Delegar a `entrega-ambiente-banco` o crear release simple: `release/vX.Y.Z+1`.
 4. Limpiar hotfix branch.
+
+**Config (obligatorio si aplica):** Si el hotfix agrega variables, colas, secretos o configuración Vault, ejecutar `pr-config-audit` sobre el diff (rama hotfix vs `develop`) y generar `CONFIG-ENTORNO-PR` **antes** de delegar la entrega a `entrega-ambiente-banco`.
 
 ### Opción 3 — Hotfix en DES
 
@@ -66,3 +70,4 @@ Igual que Opción 1 (Ajuste RC).
 - **Hotfix desde develop:** Siempre desde el tag del ambiente afectado. develop puede tener commits que contaminan el fix.
 - **Tag RC vs final:** Banco taggea `vX.Y.Z-rc.1` al mergear RC; taggea `vX.Y.Z` (sin RC) como final.
 - **Saltar ambientes:** Hotfix pasa por TODOS los ambientes. No promover directamente a PRO.
+- **Omitir `pr-config-audit`:** Si el fix toca variables/secretos/Vault y no se genera `CONFIG-ENTORNO-PR`, la config queda sin documentar en ADO Variable Groups / Vault. Ejecutarlo antes de entregar.
