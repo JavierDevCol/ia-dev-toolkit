@@ -18,5 +18,27 @@
       "last_release": null,
       "output_base_path": null
     }
+  },
+  "ado": {
+    "config": {
+      "perfil_activo": null,
+      "perfiles": {}
+    },
+    "memory": {}
+  },
+  "pr-config-audit": {
+    "config": {
+      "name_repo_source": "pr_remote",
+      "name_ms_source": "same_as_repo",
+      "id_source": "user_or_pr_link",
+      "version_pattern": {
+        "auto_detect_last_tag": true,
+        "suggest_next": true,
+        "force_v_prefix": true
+      }
+    },
+    "memory": {
+      "output_base_path": null
+    }
   }
 }

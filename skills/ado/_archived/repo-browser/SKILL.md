@@ -17,19 +17,19 @@ Exploración de repositorios Git vinculados al proyecto del perfil activo en Azu
 
 ## Contexto del perfil activo
 
-Esta skill recibe del agente orquestador el contexto ya resuelto:
+Esta skill lee del perfil activo (standalone) en `memory_skill.json` → `[ado].config.perfiles[perfil_activo]`:
 - `project_name` — proyecto ADO resuelto desde `project_map.repos`
 - `user_email` — email del perfil activo
 - `base_reports_path` — ruta base de reportes
 
-La skill **no lee `config_consultas.json` directamente**. Todo el contexto es inyectado por el agente.
+La skill lee el perfil activo desde `memory_skill.json` → `[ado].config.perfiles[perfil_activo]` (standalone).
 
 ## Comando: LISTAR-REPOS
 
 ### Fase A — Validación de Perfil
 
 1. Verifica que el agente haya pasado `project_name`.
-2. Si `project_name` está vacío o ausente → detén el flujo e informa: "El agente no resolvió el proyecto para el dominio `repos`. Verifica que `project_map.repos` esté configurado en `config_consultas.json`.".
+2. Si `project_name` está vacío o ausente → detén el flujo e informa: "El perfil activo no resolvió el proyecto para el dominio `repos`. Verifica que `project_map.repos` esté configurado en `memory_skill.json` → `[ado].config.perfiles[perfil_activo]`."
 
 ### Fase B — Extracción desde ADO
 
@@ -73,7 +73,7 @@ Al finalizar:
 
 ## Errores comunes
 
-- Si `ado/repo_list_repos_by_project` devuelve lista vacía → responde: "No se encontraron repositorios para el proyecto **[project_name]**. Verifica que `project_map.repos` tenga el nombre correcto en `config_consultas.json`."
+- Si `ado/repo_list_repos_by_project` devuelve lista vacía → responde: "No se encontraron repositorios para el proyecto **[project_name]**. Verifica que `project_map.repos` tenga el nombre correcto en `memory_skill.json` → `[ado].config.perfiles[perfil_activo]`."
 - Si la API devuelve error de permisos (403/401) → responde: "No tienes acceso al proyecto **[project_name]**. Contacta al administrador del proyecto en Azure DevOps."
 - Si la llamada falla por timeout o error de red → reintenta una vez. Si persiste, informa al usuario.
 

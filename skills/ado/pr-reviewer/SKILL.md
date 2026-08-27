@@ -32,15 +32,13 @@ Input → Resolve PR → Extract data → Load standards → Analyze → Report 
 
 ### Context
 
-Receives pre-resolved context from the orchestrating agent (does **not** read config directly):
+Reads from `memory_skill.json` → `[ado].config.perfiles[perfil_activo]` (standalone):
 
 | Field | Source |
 |-------|--------|
 | `project_name` | `project_map.repos` |
-| `user_email` | Active reviewer profile |
-| `base_reports_path` | Reports base path |
-
-If context missing, ask user to re-invoke from the main agent.
+| `user_email` | `user_email` from active profile |
+| `base_reports_path` | `base_reports_path` from active profile |
 
 ### Standards Configuration
 

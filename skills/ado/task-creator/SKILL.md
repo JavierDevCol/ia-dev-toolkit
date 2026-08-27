@@ -17,7 +17,7 @@ Two-phase workflow for creating child tasks in Azure DevOps: design from a conte
 
 ## Implementation
 
-This skill receives resolved context from the orchestrator: `project_name`, `user_email`, `config_extras`. It never reads `config_consultas.json` directly.
+This skill reads the active profile + `config_extras` + `project_map` from `memory_skill.json` → `[ado].config.perfiles[perfil_activo]` (standalone). The user may provide project context explicitly, or it is read from the active profile.
 
 ### Phase 1 — Design
 

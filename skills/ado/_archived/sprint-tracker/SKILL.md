@@ -12,12 +12,12 @@ compatibility: Requires Azure DevOps MCP server configured
 
 ## CONTEXTO
 
-Esta skill recibe del agente orquestador el contexto ya resuelto:
+Esta skill lee del perfil activo (standalone) en `memory_skill.json` → `[ado].config.perfiles[perfil_activo]`:
 - `project_name` — proyecto ADO resuelto desde `project_map.workitems`
 - `user_email` — email del perfil activo
 - `default_query` — configuración de consulta del perfil activo
 
-La skill **no lee `config_consultas.json` directamente**. Todo el contexto es inyectado por el agente.
+La skill lee el perfil activo desde `memory_skill.json` → `[ado].config.perfiles[perfil_activo]` (standalone).
 
 ## CONSULTAR_TRABAJO
 

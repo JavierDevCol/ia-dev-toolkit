@@ -30,7 +30,7 @@ Identifies the target build, fetches run metadata/changes/stages/logs, classifie
 
 ## Context Injection
 
-When used within an agent suite, receives `project_name` and `base_reports_path` from the orchestrator. Standalone: user must provide project context.
+Reads `project_name` (from `project_map.repos`/`pipelines`) and `base_reports_path` from `memory_skill.json` → `[ado].config.perfiles[perfil_activo]` (standalone).
 
 ## Core Flow
 

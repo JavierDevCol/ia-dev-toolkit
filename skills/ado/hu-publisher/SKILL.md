@@ -24,7 +24,7 @@ Publishes locally drafted User Stories (Markdown) to Azure DevOps: parse → pre
 
 ## Context Injection
 
-From orchestrator: `project_name`, `user_email`, `config_extras` (area, iteration, estimation, tags, process type). Standalone: user supplies org URL, project, iteration.
+Reads `project_name`, `user_email`, `config_extras` (area, iteration, estimation, tags, process type) from `memory_skill.json` → `[ado].config.perfiles[perfil_activo]` (standalone).
 
 ## Core Flow
 

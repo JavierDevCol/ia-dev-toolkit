@@ -1,15 +1,15 @@
 ---
 name: ado-profile-setup
-description: Use when config_consultas.json does not exist, the active profile is incomplete or invalid, or the user wants to add a new profile to the Azure DevOps agent configuration.
+description: Use when the active `[ado]` profile in memory_skill.json is incomplete or invalid, or the user wants to add a new Azure DevOps profile.
 ---
 
 # ADO Profile Setup
 
-Creates and manages user profiles in `config_consultas.json`, the central config file that maps Azure DevOps email, projects, and default queries to an active profile.
+Creates and manages user profiles in `memory_skill.json` → section `[ado].config`, the central config that maps Azure DevOps email, projects, and default queries to an active profile.
 
 ## When to Use
 
-- `config_consultas.json` does not exist at workspace root
+- `memory_skill.json` lacks the `[ado]` section or has no `perfiles`
 - Active profile has missing or invalid fields
 - User requests a new profile (command: `>nuevo-perfil`)
 - Agent needs project/email context before other ADO skills run
@@ -44,7 +44,7 @@ For **[B]**, call `ado/wit_get_work_item(id)` to extract type, area, tags, paren
 
 ### Phase 3 — Write JSON
 
-- File: `config_consultas.json` at workspace root, 2-space indent
+- File: `memory_skill.json` at skills root, under `[ado].config`, 2-space indent
 - Does not exist → create, insert new profile, set as active
 - Exists valid → insert new profile, activate it, leave others untouched
 - Exists invalid → ask to overwrite; if no → cancel
@@ -56,8 +56,8 @@ Full JSON schema: [references/config-schema.md](references/config-schema.md)
 | Scenario | Action |
 |----------|--------|
 | First run (no config) | Phase 1 → 2 → 3 |
-| Add profile to existing config | Phase 1 → 2, insert into `perfiles`, set `perfil_activo` |
-| Fix broken config | Ask overwrite → Phase 1 → 2 → 3 |
+| Add profile to existing `[ado]` config | Phase 1 → 2, insert into `perfiles`, set `perfil_activo` |
+| Fix broken `[ado]` config | Ask overwrite → Phase 1 → 2 → 3 |
 
 ## Common Mistakes
 

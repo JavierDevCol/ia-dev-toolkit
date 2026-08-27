@@ -24,7 +24,7 @@ Guided creation of Pull Requests in Azure DevOps with duplicate detection, branc
 
 ## Context Injection
 
-Receives from orchestrator: `project_repos`, `project_workitems`, `user_email`. May differ per domain.
+Reads `project_repos`, `project_workitems`, `user_email` from `memory_skill.json` → `[ado].config.perfiles[perfil_activo]` (standalone).
 
 ## Core Flow
 

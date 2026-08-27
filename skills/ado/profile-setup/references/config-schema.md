@@ -1,10 +1,14 @@
-# Profile Config Schema & Templates
+# Profile Config Schema & Templates (sección `[ado]` en `memory_skill.json`)
 
 ## JSON Structure
 
+Esta sección vive en `skills/memory_skill.json` bajo la clave `"ado"`:
+
 ```json
 {
-  "perfil_activo": "NOMBRE",
+  "ado": {
+    "config": {
+      "perfil_activo": "NOMBRE",
   "perfiles": {
     "NOMBRE": {
       "user_email": "EMAIL",
@@ -35,7 +39,8 @@
         "idioma_reportes": "es"
       }
     }
-  }
+  },
+  "memory": {}
 }
 ```
 
@@ -105,7 +110,7 @@ When building from a WI example, extract:
 
 ## Write Rules
 
-- File: `config_consultas.json` at workspace root
+- File: `skills/memory_skill.json` → `[ado].config`
 - Indentation: 2 spaces
 - Does not exist → create template, insert new profile, set as active
 - Exists valid → insert new profile name, activate it, do not modify others
