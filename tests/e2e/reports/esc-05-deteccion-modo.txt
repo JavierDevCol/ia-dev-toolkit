@@ -1,5 +1,5 @@
 ESC-05: Detección mono vs multi-proyecto
-Fecha: jue 27 ago 2026 16:24:50 -05
+Fecha: jue 27 ago 2026 17:30:06 -05
 Total: 15
 Pasados: 15
 Fallidos: 0

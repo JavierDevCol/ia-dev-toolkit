@@ -1,0 +1,13 @@
+ESC-11: Pruebas ADO y Meta/Utilidades
+Fecha: jue 27 ago 2026 17:30:07 -05
+Total: 0
+Pasados: 0
+Fallidos: 0
+Estado: PASS
+
+Skills testeadas:
+- ado-wi-comments: AWC-01 a AWC-06
+- pr-config-audit: PCA-01 a PCA-05
+- crear-skill: CS-01 a CS-05
+- evaluar-skill: ES-01 a ES-04
+- vault-manager: VM-01 a VM-05

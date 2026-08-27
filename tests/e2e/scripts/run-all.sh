@@ -5,7 +5,6 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPORTS_DIR="$SCRIPT_DIR/../reports"
 
-# Colores
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 YELLOW='\033[1;33m'
@@ -56,6 +55,10 @@ run_test "$SCRIPT_DIR/test-04-transiciones.sh" "ESC-04: Transiciones de estado i
 run_test "$SCRIPT_DIR/test-05-deteccion-modo.sh" "ESC-05: Detección mono vs multi-proyecto"
 run_test "$SCRIPT_DIR/test-06-deteccion-filesystem.sh" "ESC-06: Detección de estado por filesystem"
 run_test "$SCRIPT_DIR/test-07-escenarios-especificos.sh" "ESC-07: Escenarios específicos"
+run_test "$SCRIPT_DIR/test-08-sac-core.sh" "ESC-08: Pruebas SAC Core"
+run_test "$SCRIPT_DIR/test-09-git-release.sh" "ESC-09: Pruebas Git/Release"
+run_test "$SCRIPT_DIR/test-10-documentacion.sh" "ESC-10: Pruebas Documentación"
+run_test "$SCRIPT_DIR/test-11-ado-meta.sh" "ESC-11: Pruebas ADO y Meta/Utilidades"
 
 # ---- RESUMEN FINAL ----
 echo ""

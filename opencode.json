@@ -10,14 +10,15 @@
       },
       "models": {
         "mimo-v2.5-pro": {
-          "name": "mimo-v2.5-pro",
+          "name": "ONAD-PRO",
           "limit": {
             "context": 1048576,
             "output": 131072
           },
           "modalities": {
             "input": [
-              "text"
+              "text",
+              "image"
             ],
             "output": [
               "text"
@@ -25,7 +26,7 @@
           }
         },
         "mimo-v2.5": {
-          "name": "mimo-v2.5",
+          "name": "ONAD",
           "limit": {
             "context": 1048576,
             "output": 131072

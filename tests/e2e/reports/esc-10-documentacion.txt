@@ -1,0 +1,14 @@
+ESC-10: Pruebas Documentación
+Fecha: jue 27 ago 2026 17:30:07 -05
+Total: 6
+Pasados: 6
+Fallidos: 0
+Estado: PASS
+
+Skills testeadas:
+- crear-adr: CADR-01 a CADR-08
+- bitacora-tecnica: BT-01 a BT-06
+- crear-workflow: CW-01 a CW-04
+- mermaid-diagram: MD-01 a MD-06
+- pdf-from-markdown: PFM-01 a PFM-05
+- git-doc-sync: GDS-01 a GDS-05

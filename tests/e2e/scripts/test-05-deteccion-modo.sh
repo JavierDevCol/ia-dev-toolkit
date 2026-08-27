@@ -3,7 +3,7 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-FIXTURES_DIR="$SCRIPT_DIR/../fixtures"
+FIXTURES_DIR="$SCRIPT_DIR/../tmp"
 REPORTS_DIR="$SCRIPT_DIR/../reports"
 
 # Colores

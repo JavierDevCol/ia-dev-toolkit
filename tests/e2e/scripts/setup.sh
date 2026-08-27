@@ -3,17 +3,15 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-FIXTURES_DIR="$SCRIPT_DIR/../fixtures"
+FIXTURES_DIR="$SCRIPT_DIR/../tmp"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 
-# Colores
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
 
 log_ok() { echo -e "${GREEN}✅ $1${NC}"; }
-log_err() { echo -e "${RED}❌ $1${NC}"; }
 log_info() { echo -e "${YELLOW}ℹ️  $1${NC}"; }
 
 # ============================================
@@ -26,7 +24,6 @@ setup_mono() {
     rm -rf "$WS"
     mkdir -p "$WS"
     
-    # Crear marcador de proyecto (simula proyecto Java)
     cat > "$WS/pom.xml" << 'EOF'
 <?xml version="1.0" encoding="UTF-8"?>
 <project>
@@ -37,7 +34,6 @@ setup_mono() {
 </project>
 EOF
     
-    # Crear estructura de proyecto
     mkdir -p "$WS/src/main/java/com/test"
     mkdir -p "$WS/src/test/java/com/test"
     
@@ -51,14 +47,11 @@ public class Application {
 }
 EOF
     
-    # Crear .SAC/config con CONFIG_SYSTEM y CONFIG_USER
     mkdir -p "$WS/.SAC/config"
     mkdir -p "$WS/.SAC/session"
     
-    # Copiar CONFIG_SYSTEM.yaml del repo y reemplazar {project-root}
     sed "s|{project-root}|$WS|g" "$REPO_ROOT/config/config/CONFIG_SYSTEM.yaml" > "$WS/.SAC/config/CONFIG_SYSTEM.yaml"
     
-    # Crear CONFIG_USER.yaml
     cat > "$WS/.SAC/config/CONFIG_USER.yaml" << EOF
 usuario:
   nombre: "Tester"
@@ -69,6 +62,41 @@ idioma: "es"
 proyecto:
   nombre: "mi-proyecto"
   tipo: "mono"
+EOF
+
+    cat > "$WS/.SAC/workspace.md" << 'EOF'
+# Workspace: mi-proyecto
+
+> **Tipo:** Mono-Proyecto
+> **Stack:** Java 21 + Spring Boot 3.2
+> **Última Actualización:** 2026-08-27
+
+## Scorecard
+
+| Aspecto | Puntuación | Estado |
+|---------|------------|--------|
+| Arquitectura | 8/10 | ✅ |
+| Stack | 9/10 | ✅ |
+| Testing | 7/10 | ⚠️ |
+| DevOps | 6/10 | ⚠️ |
+| Documentación | 5/10 | ⚠️ |
+
+## Proyecto
+
+- **Nombre:** mi-proyecto
+- **Descripción:** Proyecto de prueba para tests E2E
+- **Tipo:** API REST
+- **Estado:** Desarrollo
+
+## Stack Tecnológico
+
+| Categoría | Tecnología | Versión |
+|-----------|------------|---------|
+| Lenguaje | Java | 21 |
+| Framework | Spring Boot | 3.2 |
+| Base de Datos | PostgreSQL | 15 |
+| Testing | JUnit 5 | 5.10 |
+| Build | Maven | 3.9 |
 EOF
     
     log_ok "Workspace mono-proyecto creado"
@@ -84,7 +112,6 @@ setup_multi() {
     rm -rf "$WS"
     mkdir -p "$WS"
     
-    # Crear sub-proyecto 1 (Java)
     mkdir -p "$WS/backend/src/main/java/com/test"
     cat > "$WS/backend/pom.xml" << 'EOF'
 <?xml version="1.0" encoding="UTF-8"?>
@@ -96,7 +123,6 @@ setup_multi() {
 </project>
 EOF
     
-    # Crear sub-proyecto 2 (Node)
     mkdir -p "$WS/frontend/src"
     cat > "$WS/frontend/package.json" << 'EOF'
 {
@@ -108,7 +134,6 @@ EOF
 }
 EOF
     
-    # Crear .SAC/config
     mkdir -p "$WS/.SAC/config"
     mkdir -p "$WS/.SAC/session"
     

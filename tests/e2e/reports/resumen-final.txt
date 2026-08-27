@@ -1,9 +1,9 @@
 RESUMEN FINAL — Pruebas E2E Skills SAC
-Fecha: jue 27 ago 2026 16:24:51 -05
+Fecha: jue 27 ago 2026 17:30:07 -05
 ==========================================
 
-Escenarios ejecutados: 7
-Pasados: 7
+Escenarios ejecutados: 11
+Pasados: 11
 Fallidos: 0
 
 Detalle:
@@ -14,5 +14,9 @@ Detalle:
   ✅ ESC-05: Detección mono vs multi-proyecto
   ✅ ESC-06: Detección de estado por filesystem
   ✅ ESC-07: Escenarios específicos
+  ✅ ESC-08: Pruebas SAC Core
+  ✅ ESC-09: Pruebas Git/Release
+  ✅ ESC-10: Pruebas Documentación
+  ✅ ESC-11: Pruebas ADO y Meta/Utilidades
 
 Estado: ALL PASS ✅

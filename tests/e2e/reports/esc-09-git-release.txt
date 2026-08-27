@@ -1,0 +1,13 @@
+ESC-09: Pruebas Git/Release
+Fecha: jue 27 ago 2026 17:30:07 -05
+Total: 0
+Pasados: 0
+Fallidos: 0
+Estado: PASS
+
+Skills testeadas:
+- git-branch-commit: GBC-01 a GBC-08
+- handoff-release: HR-01 a HR-05
+- fix-develop: FD-01 a FD-05
+- fix-release: FR-01 a FR-05
+- entrega-ambiente-banco: EAB-01 a EAB-05

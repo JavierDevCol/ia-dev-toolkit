@@ -1,5 +1,5 @@
 ESC-06: Detección de estado por filesystem
-Fecha: jue 27 ago 2026 16:24:51 -05
+Fecha: jue 27 ago 2026 17:30:06 -05
 Total: 22
 Pasados: 22
 Fallidos: 0

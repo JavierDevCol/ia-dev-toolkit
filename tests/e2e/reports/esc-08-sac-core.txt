@@ -1,0 +1,11 @@
+ESC-08: Pruebas SAC Core
+Fecha: jue 27 ago 2026 17:30:07 -05
+Total: 17
+Pasados: 17
+Fallidos: 0
+Estado: PASS
+
+Skills testeadas:
+- init-reglas-arquitectonicas: IRA-01 a IRA-06
+- validar-ca: VCA-01 a VCA-08
+- analizar-calidad-codigo: AQC-01 a AQC-08
