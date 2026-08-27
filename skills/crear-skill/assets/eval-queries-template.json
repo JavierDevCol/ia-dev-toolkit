@@ -1,0 +1,71 @@
+{
+  "skill_name": "{{NOMBRE_SKILL}}",
+  "description": "Template para eval queries de optimización de descriptions",
+  "instructions": "Reemplaza los placeholders y ajusta según la skill específica",
+  "should_trigger": [
+    {
+      "query": "{{PROMPT_DIRECTO_CON_KEYWORDS}}",
+      "note": "Keyword matching directo"
+    },
+    {
+      "query": "{{PROMPT_CASUAL_CON_CONTEXTO}}",
+      "note": "Lenguaje casual pero relevante"
+    },
+    {
+      "query": "{{PROMPT_IMPLícITO_SIN_KEYWORDS}}",
+      "note": "Describe necesidad sin mencionar dominio"
+    },
+    {
+      "query": "{{PROMPT_CON_PATHS_ESPECÍFICOS}}",
+      "note": "Incluye archivos rutas reales"
+    },
+    {
+      "query": "{{PROMPT_MULTI_PASO}}",
+      "note": "Tarea compleja que involucra la skill"
+    }
+  ],
+  "should_not_trigger": [
+    {
+      "query": "{{NEAR_MISS_COMPARTE_KEYWORDS}}",
+      "note": "Similar pero necesita algo diferente"
+    },
+    {
+      "query": "{{TAREA_COMPLETAMENTE_DIFERENTE}}",
+      "note": "Sin relevancia"
+    },
+    {
+      "query": "{{TAREA_SIMPLE_QUE_EL_AGENTE_SABE_HACER}}",
+      "note": "No necesita skill"
+    }
+  ],
+  "examples": {
+    "csv_analysis": {
+      "should_trigger": [
+        "Analiza este CSV de ventas mensuales",
+        "Hay un csv en mis downloads con datos de clientes, necesito un gráfico",
+        "Mi jefe quiere un reporte de tendencias de estos datos tabulares",
+        "process this spreadsheet and give me summary stats"
+      ],
+      "should_not_trigger": [
+        "Actualiza las fórmulas en mi Excel de presupuesto",
+        "Escribe un script Python que lea un CSV y lo suba a PostgreSQL",
+        "Qué es un CSV?",
+        "Convierte este JSON a YAML"
+      ]
+    },
+    "code_review": {
+      "should_trigger": [
+        "Revisa este PR para issues de seguridad",
+        "¿Hay SQL injection en este código?",
+        "Check this code for race conditions",
+        "Necesito una code review antes de merge"
+      ],
+      "should_not_trigger": [
+        "Escribe una función que calcule el factorial",
+        "Explica qué es SQL injection",
+        "Cuál es la diferencia entre HTTP y HTTPS?",
+        "Ayúdame con mi tarea de matemáticas"
+      ]
+    }
+  }
+}

@@ -1,0 +1,84 @@
+{
+  "skill_name": "template",
+  "description": "Templates de test cases para diferentes tipos de skills",
+  "templates": {
+    "code_skill": {
+      "description": "Skills que generan o modifican código",
+      "evals": [
+        {
+          "id": 1,
+          "prompt": "Crea una función que calcule el factorial de un número",
+          "expected_output": "Función en Python/JS que calcula factorial con manejo de edge cases",
+          "assertions": [
+            "El código compila sin errores",
+            "Maneja caso base (0! = 1)",
+            "Maneja números negativos",
+            "Incluye documentación"
+          ]
+        }
+      ]
+    },
+    "documentation_skill": {
+      "description": "Skills que generan documentación",
+      "evals": [
+        {
+          "id": 1,
+          "prompt": "Documenta esta API REST de usuarios",
+          "expected_output": "Documentación completa con endpoints, parámetros, ejemplos",
+          "assertions": [
+            "Incluye todos los endpoints",
+            "Cada endpoint tiene parámetros documentados",
+            "Incluye ejemplos de request/response",
+            "Incluye códigos de error"
+          ]
+        }
+      ]
+    },
+    "analysis_skill": {
+      "description": "Skills que analizan datos o código",
+      "evals": [
+        {
+          "id": 1,
+          "prompt": "Analiza este archivo CSV de ventas mensuales",
+          "expected_output": "Análisis con estadísticas, tendencias y visualizaciones",
+          "assertions": [
+            "Calcula métricas clave (promedio, mediana, max, min)",
+            "Identifica tendencias",
+            "Genera visualizaciones",
+            "Incluye conclusiones"
+          ]
+        }
+      ]
+    },
+    "workflow_skill": {
+      "description": "Skills que ejecutan flujos de trabajo",
+      "evals": [
+        {
+          "id": 1,
+          "prompt": "Ejecuta el workflow de definición de visión de producto",
+          "expected_output": "Workflow completado con todas las fases y artefactos generados",
+          "assertions": [
+            "Sigue las fases en orden",
+            "Genera todos los artefactos requeridos",
+            "Cada fase tiene entregable",
+            "El output final está completo"
+          ]
+        }
+      ]
+    }
+  },
+  "should_trigger_examples": [
+    "Analyze this CSV file",
+    "Create a function that...",
+    "Document this API",
+    "Run the workflow for...",
+    "Help me with this code"
+  ],
+  "should_not_trigger_examples": [
+    "What's the weather?",
+    "Tell me a joke",
+    "How do I cook pasta?",
+    "What year was Python created?",
+    "Explain quantum physics"
+  ]
+}
