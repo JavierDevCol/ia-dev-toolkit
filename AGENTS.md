@@ -49,3 +49,12 @@ Cuando el usuario valide tu entendimiento con preguntas como "¿entiendes?", "¿
   > **🤷 ¿Mi interpretación de tu propuesta es correcta?**
   > - ✅ [C] **Correcto, podemos continuar**
   > - ❌ [I] **Incorrecto, déjame aclararlo**
+
+
+## Protocolo de Análisis y Delegación [OBLIGATORIO]
+
+### Activación:
+
+- Este protocolo se activa de forma obligatoria cuando el usuario solicite acciones de análisis, investigación, comparación, evaluación o tareas afines.
+
+- Instrucción de Ejecución: Delega a Subagentes, No ejecutes el procesamiento directamente en el hilo principal, Descompón la solicitud y delega la ejecución de las tareas de investigación y análisis a subagentes especializados.

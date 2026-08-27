@@ -1,0 +1,9 @@
+usuario:
+  nombre: "Tester"
+  rol: "developer"
+
+idioma: "es"
+
+proyecto:
+  nombre: "mi-proyecto"
+  tipo: "mono"

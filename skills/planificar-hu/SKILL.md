@@ -52,7 +52,7 @@ Definir componentes, interfaces y contratos con rutas reales. Opcionalmente dise
 
 ### 4. Generación del plan
 
-Crear `{hu_folder}/[ID-HU]/Plan.md` desde plantilla. Modo Particionada genera también `Plan.md` por task hija con sub-fases. Actualizar backbone `[A] → [P]`.
+Crear `{hu_folder}/[ID-HU]/Plan.md` desde `{file:./assets/Plan.md}`. Modo Particionada genera también `Plan.md` por task hija con sub-fases. Actualizar backbone `[A] → [P]`.
 
 ```
 ✅ PLAN GENERADO: [ID-HU] | Modo: [Plano/Particionada] | Fases: [N] | Tareas: [M] | Est: [X]h

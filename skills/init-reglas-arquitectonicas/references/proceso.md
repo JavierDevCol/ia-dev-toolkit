@@ -6,8 +6,9 @@
 
 ## 1. Cargar Configuración
 
-- Leer `.SAC/config/CONFIG_SYSTEM.yaml` → obtener `archivos.reglas_arquitectonicas`, `plantillas.reglas_arquitectonicas`, `archivos.workspace`
+- Leer `.SAC/config/CONFIG_SYSTEM.yaml` → obtener `archivos.reglas_arquitectonicas`, `archivos.workspace`
 - Leer `.SAC/config/CONFIG_USER.yaml` (si existe) → obtener idioma
+- **Plantilla propia:** leer `{file:./assets/reglas_arquitectonicas_plantilla.md}`
 - Verificar que existe contexto del proyecto:
   - Buscar `{archivos.workspace}` o archivo de contexto en `{contextos_folder}/`
   - Si NO existe → Informar: "Necesito conocer el proyecto primero. Ejecuta >tomar_contexto"
@@ -81,7 +82,7 @@
 ## 7. Generar Archivo de Reglas
 
 - Crear `{artifacts_folder}/` si no existe
-- Generar `{archivos.reglas_arquitectonicas}` desde `{plantillas.reglas_arquitectonicas}`
+- Generar `{archivos.reglas_arquitectonicas}` desde `{file:./assets/reglas_arquitectonicas_plantilla.md}`
 - Incluir metadata: fecha, versión, aprobado_por
 
 ## 8. Actualizar Contexto del Proyecto

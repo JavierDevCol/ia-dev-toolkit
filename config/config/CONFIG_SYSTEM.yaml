@@ -16,7 +16,6 @@ rutas:
   config_folder: "{project-root}/.SAC/config"
   herramientas_folder: "{project-root}/.SAC/herramientas"
   agentes_folder: "{project-root}/.SAC/agentes"
-  plantillas_folder: "{project-root}/.SAC/plantillas"
 
 # ============================================
 # ARCHIVOS DEL SISTEMA
@@ -68,30 +67,6 @@ multi_proyecto:
   patron_contexto: "contexto_proyecto_{nombre}.md"
   patron_stack: "stack_proyecto_{nombre}.md"
   patron_hu_proyecto: "HU/{nombre_proyecto}/"
-
-# ============================================
-# PLANTILLAS DEL SISTEMA
-# ============================================
-plantillas:
-  backlog: "{project-root}/.SAC/plantillas/backlog_desarrollo_plantilla.md"
-  contexto: "{project-root}/.SAC/plantillas/contexto_proyecto_plantilla.md"
-  workspace: "{project-root}/.SAC/plantillas/workspace_plantilla.md"
-  # stack_proyecto: ELIMINADO - unificado con contexto_proyecto_plantilla.md
-  plan_implementacion: "{project-root}/.SAC/plantillas/plan_implementacion_plantilla.md"
-  refinamiento_hu: "{project-root}/.SAC/plantillas/refinamiento_hu_plantilla.md"
-  reglas_arquitectonicas: "{project-root}/.SAC/plantillas/reglas_arquitectonicas_plantilla.md"
-  # Plantillas HU (carpetas individuales)
-  hu:
-    hu: "{project-root}/.SAC/plantillas/hu/HU.md"
-    refinamiento: "{project-root}/.SAC/plantillas/hu/Refinamiento.md"
-    refinamiento_bug: "{project-root}/.SAC/plantillas/hu/RefinamientoBug.md"
-    plan: "{project-root}/.SAC/plantillas/hu/Plan.md"
-    tracking: "{project-root}/.SAC/plantillas/hu/Tracking.md"
-  # Plantillas de bugs y pendientes
-  bug: "{project-root}/.SAC/plantillas/bug_plantilla.md"
-  lecciones_aprendidas: "{project-root}/.SAC/plantillas/lecciones_aprendidas_plantilla.md"
-  pendientes: "{project-root}/.SAC/plantillas/pendientes_plantilla.md"
-  pendiente_detalle: "{project-root}/.SAC/plantillas/pendiente_detalle_plantilla.md"
 
 # ============================================
 # RUTAS DE REGLAS

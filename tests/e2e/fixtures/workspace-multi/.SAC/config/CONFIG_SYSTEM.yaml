@@ -1,0 +1,84 @@
+# ============================================
+# CONFIGURACIÓN DEL SISTEMA SAC
+# ============================================
+# ⚠️ NO MODIFICAR - Rutas internas del sistema
+# SAC - Sistema Agéntico COCHAS
+# ============================================
+
+version: "7.25.0"
+
+# ============================================
+# CARPETAS PRINCIPALES
+# ============================================
+rutas:
+  output_folder: "/home/javier-garcia/Documentos/squad-skills/tests/e2e/scripts/../fixtures/workspace-multi/.SAC"
+  artifacts_folder: "/home/javier-garcia/Documentos/squad-skills/tests/e2e/scripts/../fixtures/workspace-multi/artifacts"
+  config_folder: "/home/javier-garcia/Documentos/squad-skills/tests/e2e/scripts/../fixtures/workspace-multi/.SAC/config"
+  herramientas_folder: "/home/javier-garcia/Documentos/squad-skills/tests/e2e/scripts/../fixtures/workspace-multi/.SAC/herramientas"
+  agentes_folder: "/home/javier-garcia/Documentos/squad-skills/tests/e2e/scripts/../fixtures/workspace-multi/.SAC/agentes"
+
+# ============================================
+# ARCHIVOS DEL SISTEMA
+# ============================================
+archivos:
+  config_user: "/home/javier-garcia/Documentos/squad-skills/tests/e2e/scripts/../fixtures/workspace-multi/.SAC/config/CONFIG_USER.yaml" 
+  backlog: "/home/javier-garcia/Documentos/squad-skills/tests/e2e/scripts/../fixtures/workspace-multi/artifacts/backlog_desarrollo.md"
+  reglas_arquitectonicas: "/home/javier-garcia/Documentos/squad-skills/tests/e2e/scripts/../fixtures/workspace-multi/artifacts/reglas_arquitectonicas.md"
+  # Workspace unificado (mono y multi proyecto)
+  workspace: "/home/javier-garcia/Documentos/squad-skills/tests/e2e/scripts/../fixtures/workspace-multi/artifacts/workspace.md"
+
+# ============================================
+# SUBCARPETAS DE ARTIFACTS
+# ============================================
+artifacts:
+  # Historias de Usuario (carpetas individuales)
+  hu_folder: "/home/javier-garcia/Documentos/squad-skills/tests/e2e/scripts/../fixtures/workspace-multi/artifacts/HU"
+  # Arquitectura
+  adr_folder: "/home/javier-garcia/Documentos/squad-skills/tests/e2e/scripts/../fixtures/workspace-multi/artifacts/ADR"
+  # Code quality
+  code_smells_folder: "/home/javier-garcia/Documentos/squad-skills/tests/e2e/scripts/../fixtures/workspace-multi/artifacts/code_smells"
+  # Bugs y pendientes
+  bugs_folder: "/home/javier-garcia/Documentos/squad-skills/tests/e2e/scripts/../fixtures/workspace-multi/artifacts/bugs"  # DEPRECATED: nuevos bugs van en hu_folder/BUG-NNN/
+  lecciones_aprendidas: "/home/javier-garcia/Documentos/squad-skills/tests/e2e/scripts/../fixtures/workspace-multi/artifacts/lecciones_aprendidas.md"
+  pendientes: "/home/javier-garcia/Documentos/squad-skills/tests/e2e/scripts/../fixtures/workspace-multi/artifacts/pendientes.md"
+  pendientes_folder: "/home/javier-garcia/Documentos/squad-skills/tests/e2e/scripts/../fixtures/workspace-multi/artifacts/pendientes"
+  # Deuda técnica
+  deuda_tecnica_folder: "/home/javier-garcia/Documentos/squad-skills/tests/e2e/scripts/../fixtures/workspace-multi/artifacts/deuda_tecnica"
+  # Multi-proyecto
+  contextos_folder: "/home/javier-garcia/Documentos/squad-skills/tests/e2e/scripts/../fixtures/workspace-multi/artifacts/contextos"
+  # ELIMINADO: hu_refinamientos (archivos en carpeta de HU)
+  # ELIMINADO: hu_compartidas (usar tasks hijas)
+  # ELIMINADO: planes_folder (archivos en carpeta de HU)
+  # ELIMINADO: ejecuciones_folder (Tracking.md en carpeta de HU)
+
+# ============================================
+# CONFIGURACIÓN MULTI-PROYECTO
+# ============================================
+multi_proyecto:
+  # Patrones para detectar raíz de proyecto
+  marcadores_proyecto:
+    java: ["pom.xml", "build.gradle", "build.gradle.kts"]
+    javascript: ["package.json"]
+    python: ["pyproject.toml", "setup.py", "requirements.txt"]
+    dotnet: ["*.csproj", "*.sln"]
+    rust: ["Cargo.toml"]
+    go: ["go.mod"]
+  # Nomenclatura de archivos generados
+  patron_contexto: "contexto_proyecto_{nombre}.md"
+  patron_stack: "stack_proyecto_{nombre}.md"
+  patron_hu_proyecto: "HU/{nombre_proyecto}/"
+
+# ============================================
+# RUTAS DE REGLAS
+# ============================================
+rutas_reglas:
+  reglas_folder: "/home/javier-garcia/Documentos/squad-skills/tests/e2e/scripts/../fixtures/workspace-multi/.SAC/reglas"
+
+# ============================================
+# REGLAS DEL SISTEMA
+# ============================================
+reglas:
+  # Solo reglas con valor único (no conocimiento implícito del LLM)
+  mermaid: "/home/javier-garcia/Documentos/squad-skills/tests/e2e/scripts/../fixtures/workspace-multi/.SAC/reglas/mermaid.rules.md"
+  # ELIMINADOS - conocimiento implícito del LLM:
+  # - deteccion_stack, java, javascript, python, dotnet, go, patrones_diseno

@@ -1,0 +1,6 @@
+ESC-02: Flujo completo Bug
+Fecha: jue 27 ago 2026 16:24:50 -05
+Total: 9
+Pasados: 9
+Fallidos: 0
+Estado: PASS

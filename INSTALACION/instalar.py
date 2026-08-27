@@ -302,7 +302,6 @@ def install_sac_config(project_path, root_dir):
     print_info("Instalando configuración Team Dev SAC...")
 
     (sac_dest / "config").mkdir(parents=True, exist_ok=True)
-    (sac_dest / "plantillas").mkdir(parents=True, exist_ok=True)
     (sac_dest / "session").mkdir(exist_ok=True)
 
     config_source = root_dir / "config" / "config"
@@ -311,12 +310,8 @@ def install_sac_config(project_path, root_dir):
             shutil.copy2(config_file, sac_dest / "config" / config_file.name)
             print_success(f"config/{config_file.name}")
 
-    plantillas_source = root_dir / "config" / "plantillas"
-    if plantillas_source.exists():
-        if (sac_dest / "plantillas").exists():
-            shutil.rmtree(sac_dest / "plantillas")
-        shutil.copytree(plantillas_source, sac_dest / "plantillas")
-        print_success("plantillas/")
+    # Plantillas HU movidas a assets/ de cada skill (refinar-hu, planificar-hu, registrar-hallazgo, ejecutar-plan)
+    # No se copian plantillas desde config/plantillas/ (directorio eliminado)
 
     config_system = sac_dest / "config" / "CONFIG_SYSTEM.yaml"
     if config_system.exists():
@@ -654,7 +649,6 @@ def print_summary(project_path, skills, agents, sac_installed):
     if sac_installed:
         print("📁 Team Dev SAC instalado:")
         print(f"   ├── .SAC/config/")
-        print(f"   ├── .SAC/plantillas/")
         print(f"   └── .SAC/session/\n")
 
     if skills:

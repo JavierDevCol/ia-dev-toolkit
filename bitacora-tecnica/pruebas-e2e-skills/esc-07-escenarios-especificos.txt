@@ -1,0 +1,11 @@
+ESC-07: Escenarios específicos
+Fecha: jue 27 ago 2026 16:24:51 -05
+Total: 24
+Pasados: 24
+Fallidos: 0
+Estado: PASS
+
+Escenarios verificados:
+1. Plan en [E] En Ejecución: Plan.md (EN_PROGRESO) + Tracking.md
+2. Backlog desincronizado: Backlog [P] vs Filesystem [X]
+3. Planificar HU en [R]: Sin aprobación → rechazar

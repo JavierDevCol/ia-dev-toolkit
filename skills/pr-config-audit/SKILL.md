@@ -49,7 +49,7 @@ Analiza un PR/diff y clasifica variables, colas y secretos por ámbito (pipeline
 2. Nunca asumir origen de variables — preguntar con archivo+línea
 3. Nunca incluir secretos reales; alertar si hay secretos commiteados
 4. Si el usuario no sabe el origen → `⚠️ Pendiente de definir`
-5. Persistir `memory.output_base_path` en `skills/memory_skill.json` (sección `[pr-config-audit]`, ruta: `["pr-config-audit"]["memory"]["output_base_path"]`) tras cada ejecución
+5. Usar `output_folder` global de `memory_skill.json` como ruta de salida. Si es `null`, preguntar al usuario la carpeta donde guardar los reportes de auditoría.
 
 ## Quick Reference
 

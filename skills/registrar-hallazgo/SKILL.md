@@ -33,7 +33,7 @@ Captura incidencias (bugs, mejoras, deuda técnica) mediante análisis paralelo 
 5. **Comparar y clasificar** → cargar `assets/tabla-clasificacion.md`; cruzar respuestas del usuario vs análisis
 6. **Presentar sugerencia** → evidencia encontrada, clasificación, confianza, severidad; pedir confirmación
 7. **Crear artefacto** → si acepta:
-   - BUG: crear `{hu_folder}/BUG-NNN/`, copiar plantillas, agregar en backlog con estado [P]
+   - BUG: crear `{hu_folder}/BUG-NNN/`, copiar `{file:./assets/RefinamientoBug.md}` como `Refinamiento.md`, agregar en backlog con estado [P]
    - PENDIENTE: crear entrada en `{artifacts.pendientes}` con categoría y prioridad
 
 ## Quick Reference

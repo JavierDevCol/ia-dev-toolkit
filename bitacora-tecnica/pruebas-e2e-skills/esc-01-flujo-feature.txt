@@ -1,0 +1,6 @@
+ESC-01: Flujo completo Feature
+Fecha: jue 27 ago 2026 16:24:50 -05
+Total: 22
+Pasados: 22
+Fallidos: 0
+Estado: PASS

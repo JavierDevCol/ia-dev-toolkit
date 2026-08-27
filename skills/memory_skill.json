@@ -1,4 +1,5 @@
 {
+  "output_folder": null,
   "handoff-release": {
     "config": {
       "environments": {
@@ -11,12 +12,10 @@
         "deployer": "Equipo Ops"
       },
       "branch_format": "release/vX.Y.Z",
-      "tag_format": "vX.Y.Z-{env}",
-      "output_path": null
+      "tag_format": "vX.Y.Z-{env}"
     },
     "memory": {
-      "last_release": null,
-      "output_base_path": null
+      "last_release": null
     }
   },
   "ado": {
@@ -37,9 +36,7 @@
         "force_v_prefix": true
       }
     },
-    "memory": {
-      "output_base_path": null
-    }
+    "memory": {}
   },
   "git-doc-sync": {
     "config": {

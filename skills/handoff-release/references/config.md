@@ -4,6 +4,8 @@
 
 Buscar `memory_skill.json` con `glob **/memory_skill.json`. Si no existe, crear en `skills/memory_skill.json` (al mismo nivel que las carpetas de skills). Leer sección `[handoff-release]` del archivo. Si campos son `null`, usar los defaults indicados.
 
+**Ruta de artefactos:** usar `output_folder` global de `memory_skill.json`. Si es `null`, preguntar al usuario la carpeta donde guardar artefactos de releases.
+
 ## Configuración (`config`)
 
 | Campo | Default | Descripción |
@@ -15,14 +17,12 @@ Buscar `memory_skill.json` con `glob **/memory_skill.json`. Si no existe, crear 
 | `roles.deployer` | `Equipo Ops` | Quién despliega |
 | `branch_format` | `release/vX.Y.Z` | Formato ramas release |
 | `tag_format` | `vX.Y.Z-{env}` | Formato tags |
-| `output_path` | `null` | Ruta base para artefactos |
 
 ## Memoria (`memory`)
 
 | Campo | Default | Descripción |
 |-------|---------|-------------|
 | `last_release` | `null` | Última versión release |
-| `output_base_path` | `null` | Ruta base para guardar artefactos |
 
 ## Editar configuración
 

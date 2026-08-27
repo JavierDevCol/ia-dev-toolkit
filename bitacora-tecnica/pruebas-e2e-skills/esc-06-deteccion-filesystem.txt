@@ -1,0 +1,14 @@
+ESC-06: Detección de estado por filesystem
+Fecha: jue 27 ago 2026 16:24:51 -05
+Total: 22
+Pasados: 22
+Fallidos: 0
+Estado: PASS
+
+Detalle de estados verificados:
+- [R] Refinada: HU.md + Refinamiento.md (aprobación vacía)
+- [A] Aprobada: HU.md + Refinamiento.md (✅ Aprobada)
+- [P] Planificada: HU.md + Refinamiento.md + Plan.md (PENDIENTE)
+- [E] En Ejecución: Plan.md (EN_PROGRESO) + Tracking.md
+- [X] Completada: Plan.md (COMPLETADO)
+- Independencia del backlog: filesystem es fuente de verdad
