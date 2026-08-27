@@ -1,187 +1,81 @@
 ---
 name: ado-pipeline-analyzer
-description: >
-  Usa esta skill cuando necesites analizar un build o pipeline de Azure DevOps.
-  Sirve al revisar por qué falló un build, inspeccionar logs de pipeline, ver el
-  estado de una ejecución, revisar cambios incluidos en un build, Stages
-  (approvals, gates, deployment jobs), o cuando te pidan "analizar build",
-  "revisar pipeline", "ver logs del pipeline", "qué pasó en el build",
-  "build fallido", "check pipeline status", "revisar stage", "ver cambios del
-  build", "pipeline run details". Obtiene información del build, logs por etapa,
-  cambios asociados, estado de stages y genera un reporte estructurado.
-compatibility: Requires Azure DevOps MCP server configured
+description: >-
+  Use when the user asks to analyze, inspect, or debug an Azure DevOps build or pipeline run.
+  Triggers on requests like "analyze build", "why did the build fail", "check pipeline status",
+  "review logs", "pipeline run details", "what happened in the build", or pasting a pipeline URL.
 ---
 
 # ADO Pipeline Analyzer
 
-Analiza ejecuciones de pipeline en Azure DevOps y genera reporte con hallazgos.
+Analyzes Azure DevOps pipeline runs and produces a structured report with errors, warnings, and recommendations.
 
-## Contexto del perfil activo
+## When to Use
 
-Esta skill recibe del agente orquestador el contexto ya resuelto:
-- `project_name` — proyecto ADO resuelto desde `project_map.repos`
-- `base_reports_path` — ruta base de reportes
+- Build failed and user wants to know why
+- User asks to check pipeline status, stages, or specific jobs
+- User provides an ADO build URL and wants details
+- Reviewing which commits were included in a build
+- Inspecting stage approvals, gates, or deployment jobs
 
-La skill **no lee `config_consultas.json` directamente**. Todo el contexto es inyectado por el agente.
+**When NOT to use:**
 
-Si el contexto no fue pasado, solicita al usuario que re-invoque desde el agente principal.
+- Creating or editing pipelines (use pipeline YAML tools directly)
+- Comparing two builds side-by-side
+- Monitoring builds in real-time
 
-## Fase A — Identificar el build y alcance del análisis
+## Overview
 
-Preguntar al usuario si no se proporcionó explícitamente:
+Identifies the target build, fetches run metadata/changes/stages/logs, classifies findings, and writes a structured report.
 
-1. **Pipeline** — nombre o ID del pipeline
-2. **Build** — número de build, ID de ejecución, o "última ejecución"
-3. **Rama** (opcional) — filtrar por rama si aplica
+## Context Injection
 
-Luego preguntar:
+When used within an agent suite, receives `project_name` and `base_reports_path` from the orchestrator. Standalone: user must provide project context.
 
-> ¿Quieres un análisis **general** de todo el build o de algún **stage/job específico**?
+## Core Flow
 
-| Opción | Qué incluye |
-|--------|-------------|
-| **General** | Estado general, cambios, todos los stages, resumen de errores/warnings |
-| **Stage/job específico** | Detalle de un stage/job en particular, sus tareas, logs de esa etapa |
+### Phase A — Identify build and scope
 
-Si el usuario elige **específico**, preguntar qué stage/job (o permitir elegir de la lista una vez obtenidos los stages).
+Ask: **Pipeline** (name/ID), **Build** (run number/ID or "latest"), optional **branch** filter. General or specific stage/job analysis? Extract from ADO URLs if provided.
 
-Si el usuario proporciona un link de ADO, extraer project/pipeline/build desde la URL.
+### Phase B — Fetch build data
 
-## Fase B — Obtener datos del build
+| Step | Tool | Purpose |
+|------|------|---------|
+| B1 | `ado_pipelines_definition` (list) | Find pipeline `definitionId` |
+| B2 | `ado_pipelines_run` (list/get) | Get run metadata: state, result, dates, trigger |
+| B3 | `ado_pipelines_build` (get_changes) | Commits included, authors, messages |
+| B4 | `ado_pipelines_build` (get_status) | Stage/job/task states, errors, durations |
+| B5 | `ado_pipelines_build_log` (list/get_content) | Detailed logs — only on user request |
 
-Usar las tools de ADO según corresponda:
+Key fields from run metadata: `id`, `state`, `result`, `createdDate`, `finishedDate`, `triggerInfo`.
 
-### B1 — Buscar el pipeline
+### Phase C — Classify findings
 
-```bash
-# Listar pipelines disponibles si no se conoce el nombre
-ado/pipelines_get_build_definitions --project "$project_name"
-```
+| Category | Examples |
+|----------|----------|
+| Error | Failed tasks, non-zero exit codes, exceptions |
+| Warning | Failed tests, low coverage, deprecated deps |
+| Info | Included changes, duration, stages executed |
+| Success | Stages completed without issues |
 
-Extraer `definitionId` del pipeline a analizar.
+### Phase D — Generate report
 
-### B2 — Obtener la ejecución del build
+See [references/report-template.md](references/report-template.md) for the full report template structure. Report is saved as `PIPELINE-REPORT_{runId}.md`.
 
-```bash
-# Listar ejecuciones recientes si no se dio un build específico
-ado/pipelines_list_runs --project "$project_name" --pipeline-id "$definitionId" --top 5
+## Quick Reference
 
-# Obtener run específico si se conoce el runId
-ado/pipelines_get_run --project "$project_name" --pipeline-id "$definitionId" --run-id "$runId"
-```
+| Scenario | Action |
+|----------|--------|
+| Build not found | List recent runs for the pipeline, ask user to pick |
+| Build still running | Show partial status, note report is preliminary |
+| Logs truncated | Use `ado_pipelines_build_log` with specific `logId` per stage |
+| Multi-stage with pending gates | Note in findings — may be approval-related, not error |
+| 401/403 from tools | Inform user of insufficient permissions |
 
-Extraer del resultado:
-- `id` (runId)
-- `state` (inProgress, completed, canceled, failed)
-- `result` (succeeded, failed, canceled)
-- `createdDate`, `finishedDate`
-- `triggerInfo` (commit, PR)
-- `resources.repositories.self.version` (commit/ref)
+## Common Mistakes
 
-### B3 — Obtener cambios del build
-
-```bash
-ado/pipelines_get_build_changes --project "$project_name" --build-id "$runId"
-```
-
-Extraer: commits incluidos, autores, mensajes.
-
-### B4 — Obtener logs y estado de stages
-
-```bash
-# Obtener información del timeline/stages
-ado/pipelines_get_build_status --project "$project_name" --build-id "$runId"
-```
-
-Extraer por cada stage/job/task:
-- Nombre
-- Estado (pending, running, completed, skipped, failed)
-- Resultado (succeeded, failed, succeededWithIssues)
-- Errores y warnings
-- Start/finish time
-
-### B5 — Obtener logs detallados (opcional, bajo demanda)
-
-```bash
-# Log completo del build
-ado/pipelines_get_build_log --project "$project_name" --build-id "$runId"
-
-# Log por ID específico
-ado/pipelines_get_build_log_by_id --project "$project_name" --build-id "$runId" --log-id "$logId"
-```
-
-Solo si el usuario pide revisar logs específicos o hay errores que requieran inspección.
-
-## Fase C — Clasificar hallazgos
-
-Para cada elemento detectado, clasificar:
-
-| Categoría | Ejemplos |
-|-----------|----------|
-| ❌ Errores | Tareas fallidas, exit codes distintos de 0, excepciones |
-| ⚠️ Warnings | Tests fallidos, coverage baja, dependencias obsoletas |
-| ℹ️ Info | Cambios incluidos, duración, stages ejecutados |
-| ✅ Éxito | Stages completados sin errores |
-
-## Fase D — Generar reporte
-
-Generar `PIPELINE-REPORT_{runId}.md` en `{base_reports_path}/` con la siguiente estructura:
-
-```markdown
-# PIPELINE-REPORT_{runId} — {pipeline_name}
-
-> **Build:** #{runId}
-> **Estado:** {state} | **Resultado:** {result}
-> **Rama:** {branch} | **Commit:** {commitHash}
-> **Inicio:** {startTime} | **Fin:** {endTime} | **Duración:** {duration}
-> **Trigger:** {triggerType} {triggerDetail}
-> **URL:** {buildUrl}
-
-## 1. Resumen
-
-{Resultado general del build}
-
-## 2. Commits incluidos
-
-| Commit | Autor | Mensaje |
-|--------|-------|---------|
-| {hash} | {author} | {message} |
-
-## 3. Stages / Jobs
-
-| Stage | Estado | Resultado | Duración | Errores |
-|-------|--------|-----------|----------|---------|
-| {stageName} | {status} | {result} | {duration} | {errorCount} |
-
-## 4. Hallazgos
-
-### ❌ Errores
-{lista de errores detectados}
-
-### ⚠️ Warnings
-{lista de warnings}
-
-### ℹ️ Información adicional
-{detalles relevantes}
-
-## 5. Recomendaciones
-
-{acciones sugeridas según los hallazgos}
-```
-
-## Reglas
-
-1. Siempre preguntar qué build analizar si no se especificó
-2. No mostrar logs completos a menos que el usuario los pida explícitamente
-3. Si el build tiene stages con approvals/gates pendientes, indicarlo en hallazgos
-4. Si hay cambios sin autor aparente, indicar "cambio automático" en lugar de omitir
-5. El reporte se guarda en `{base_reports_path}/PIPELINE-REPORT_{runId}.md`
-
-## Gotchas
-
-- **Pipeline ID ≠ Build ID:** El pipeline tiene un `definitionId` fijo. Cada ejecución tiene un `runId` distinto. No confundirlos.
-- **Build en progreso:** Si el build aún está corriendo, solo se puede mostrar estado parcial. Indicar al usuario que el reporte es preliminar.
-- **Logs truncados:** `ado/pipelines_get_build_log` puede devolver logs truncados si el build es muy grande. Usar `ado/pipelines_get_build_log_by_id` para logs específicos de stage/job.
-- **Multi-stage pipelines:** Los stages pueden tener approve gates. Si un stage no se ejecutó, puede ser por gates no aprobados, no por error técnico.
-- **Cambios vacíos:** Algunos builds (ej. schedules, triggers automáticos) pueden no tener cambios asociados. Indicar "Sin cambios detectados".
-- **Permisos:** Si las tools devuelven 401/403, informar que el perfil no tiene permisos para ver ese pipeline/build.
+- **Confusing pipeline ID with build/run ID:** `definitionId` is fixed per pipeline; `runId` changes per execution.
+- **Showing full logs unprompted:** Only fetch detailed logs when user explicitly asks.
+- **Skipping empty changes:** Some builds (scheduled, auto-triggered) have no commits — report "No changes detected".
+- **Assuming in-progress builds are complete:** Always check `state` before reporting final results.
