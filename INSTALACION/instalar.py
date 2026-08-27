@@ -2,8 +2,9 @@
 # -*- coding: utf-8 -*-
 """
 ╔═══════════════════════════════════════════════════════════════╗
-║           INSTALADOR DE SKILLS — squad-skills                ║
-║   Instalador multiplataforma de skills y agentes IA          ║
+║           INSTALADOR MODULAR — squad-skills                  ║
+║   Instalador multiplataforma de skills, agentes, workflows   ║
+║   y tools para equipos de desarrollo IA                      ║
 ╚═══════════════════════════════════════════════════════════════╝
 
 Uso:
@@ -57,6 +58,120 @@ SAC_SKILLS = [
     "validar-hu"
 ]
 
+# Descripciones cortas de skills
+SKILL_DESCRIPTIONS = {
+    "ado-wi-comments": "Gestiona comentarios en Work Items de ADO",
+    "analizar-calidad-codigo": "Revisa código detectando code smells y violaciones",
+    "architecture-inception": "Transforma specs en Blueprint de Arquitectura",
+    "bitacora-tecnica": "Registra progreso de sesiones de trabajo",
+    "bmm-crear-hu-devops": "Crea HUs con tareas en Azure DevOps",
+    "bmm-manual-tecnico": "Genera Manual Técnico en Word (.docx)",
+    "crear-adr": "Registra decisiones de arquitectura (ADRs)",
+    "crear-estrategia": "Genera estrategias para chatbot WhatsApp",
+    "crear-skill": "Meta-skill para crear otras skills",
+    "crear-workflow": "Asistente para crear workflows canónicos",
+    "ejecutar-plan": "Implementa planes actualizando Plan.md",
+    "entrega-ambiente-banco": "Orquesta entrega de releases al banco",
+    "evaluar-skill": "Evalúa calidad de skills existentes",
+    "fix-develop": "Gestiona resolución de bugs en desarrollo",
+    "fix-release": "Gestiona fixes sobre releases entregados",
+    "git-branch-commit": "Crea ramas y gestiona commits Conventional",
+    "git-doc-sync": "Sube documentos a Git selectivamente",
+    "handoff-release": "Orquesta entregas con GitFlow y release notes",
+    "init-reglas-arquitectonicas": "Genera reglas arquitectónicas del proyecto",
+    "mermaid-diagram": "Genera diagramas Mermaid correctos",
+    "pdf-from-markdown": "Convierte Markdown a PDF con Mermaid",
+    "planificar-hu": "Genera plan técnico desde HU aprobada",
+    "pr-config-audit": "Analiza PR y clasifica variables/secretos",
+    "refinar-hu": "Refina HUs con criterios SMART y estimación",
+    "registrar-hallazgo": "Captura incidencias mediante análisis paralelo",
+    "sincronizar-backlog": "Corrige discrepancias entre backlog y disco",
+    "tomar-contexto": "Detecta tecnología, arquitectura y DevOps",
+    "validar-ca": "Verifica cumplimiento de criterios de aceptación",
+    "validar-hu": "Valida HU contra criterios SMART y arquitectura",
+    "vault-manager": "Gestiona operaciones HashiCorp Vault",
+    "ado/task-creator": "Crea tareas hijas en Azure DevOps",
+    "ado/pipeline-analyzer": "Analiza runs de pipelines ADO",
+    "ado/profile-setup": "Crea perfiles de usuario para ADO",
+    "ado/pr-reviewer": "Revisión estructurada de PRs en ADO",
+    "ado/pr-creator": "Creación guiada de PRs en ADO",
+    "ado/hu-publisher": "Publica HUs locales a Azure DevOps",
+}
+
+# Descripciones cortas de agentes
+AGENT_DESCRIPTIONS = {
+    "PO": "Product Owner — Transforma visión en backlog priorizado",
+    "ARQUITECTO-SOFTWARE": "Arquitecto de Software — Diseño, trade-offs y ADRs",
+    "ARQUITECTO-DEVOPS": "DevOps/SRE — Pipelines, IaC y observabilidad",
+    "DESARROLLADOR": "Desarrollador — Código limpio, TDD y patrones",
+}
+
+# Descripciones cortas de workflows
+WORKFLOW_DESCRIPTIONS = {
+    "definir-vision-producto": "Transforma idea de negocio en Visión de Producto",
+    "definir-arquitectura-solucion": "Diseña arquitectura integral con ADRs por fase",
+    "gestionar-backlog-roadmap": "Sincroniza backlog técnico/funcional con WSJF",
+}
+
+# Dependencias de workflows
+WORKFLOW_DEPENDENCIES = {
+    "definir-vision-producto": "ninguna",
+    "definir-arquitectura-solucion": "Visión de Producto",
+    "gestionar-backlog-roadmap": "ADRs + Visión + artefactos previos",
+}
+
+# Tools requeridos por workflows
+WORKFLOW_TOOLS = {
+    "definir-vision-producto": [],
+    "definir-arquitectura-solucion": [],
+    "gestionar-backlog-roadmap": [],
+}
+
+# Descripciones de tools
+TOOL_DESCRIPTIONS = {
+    "workflow-discover": "Lista workflows disponibles desde .SAC/workflows/",
+}
+
+# Dependencias de skills
+SKILL_DEPENDENCIES = {
+    "ado-wi-comments": "Azure DevOps MCP",
+    "analizar-calidad-codigo": ".SAC/config/",
+    "architecture-inception": "ninguna",
+    "bitacora-tecnica": "ninguna",
+    "bmm-crear-hu-devops": "Azure DevOps MCP",
+    "bmm-manual-tecnico": "Python 3, python-docx",
+    "crear-adr": "ninguna",
+    "crear-estrategia": "ms-banca-conversacion (Java/Spring)",
+    "crear-skill": "ninguna",
+    "crear-workflow": "ninguna",
+    "ejecutar-plan": ".SAC/config/",
+    "entrega-ambiente-banco": "ninguna",
+    "evaluar-skill": "ninguna",
+    "fix-develop": "ninguna",
+    "fix-release": "ninguna",
+    "git-branch-commit": "Git",
+    "git-doc-sync": "Python 3",
+    "handoff-release": "Git",
+    "init-reglas-arquitectonicas": ".SAC/config/",
+    "mermaid-diagram": "ninguna",
+    "pdf-from-markdown": "Node.js, md-to-pdf",
+    "planificar-hu": ".SAC/config/",
+    "pr-config-audit": "Git",
+    "refinar-hu": ".SAC/config/",
+    "registrar-hallazgo": ".SAC/config/",
+    "sincronizar-backlog": ".SAC/config/",
+    "tomar-contexto": ".SAC/config/",
+    "validar-ca": ".SAC/config/",
+    "validar-hu": ".SAC/config/",
+    "vault-manager": "Vault CLI",
+    "ado/task-creator": "Azure DevOps MCP",
+    "ado/pipeline-analyzer": "Azure DevOps MCP",
+    "ado/profile-setup": "Azure DevOps MCP",
+    "ado/pr-reviewer": "Azure DevOps MCP",
+    "ado/pr-creator": "Azure DevOps MCP",
+    "ado/hu-publisher": "Azure DevOps MCP",
+}
+
 REQUIREMENTS_MAP = {
     "git": {
         "check_cmd": ["git", "--version"],
@@ -90,8 +205,8 @@ def print_banner():
     print("""
 ╔═══════════════════════════════════════════════════════════════╗
 ║                                                               ║
-║   🛠️  INSTALADOR DE SKILLS — squad-skills                    ║
-║   Instalador multiplataforma de skills y agentes IA           ║
+║   🛠️  INSTALADOR MODULAR — squad-skills                      ║
+║   Skills · Agents · Workflows · Tools · Config                ║
 ║                                                               ║
 ╚═══════════════════════════════════════════════════════════════╝
     """)
@@ -220,6 +335,8 @@ def scan_skills(skills_dir):
 
         compatibility = parse_compatibility(skill_dir)
         is_sac = skill_name in SAC_SKILLS
+        description = SKILL_DESCRIPTIONS.get(skill_name, "Sin descripción")
+        dependencies = SKILL_DEPENDENCIES.get(skill_name, "ninguna")
 
         skills.append({
             "name": skill_name,
@@ -228,6 +345,8 @@ def scan_skills(skills_dir):
             "parent": str(rel_path.parent) if str(rel_path.parent) != "." else None,
             "compatibility": compatibility,
             "is_sac": is_sac,
+            "description": description,
+            "dependencies": dependencies,
             "tools_required": extract_required_tools(compatibility)
         })
     return skills
@@ -238,12 +357,74 @@ def scan_agents(agents_dir):
     if not agents_dir.exists():
         return agents
     for agent_file in sorted(agents_dir.glob("*.md")):
+        name = agent_file.stem
         agents.append({
-            "name": agent_file.stem,
+            "name": name,
             "path": agent_file,
-            "filename": agent_file.name
+            "filename": agent_file.name,
+            "description": AGENT_DESCRIPTIONS.get(name, "Agente de IA"),
+            "dependencies": "ninguna"
         })
     return agents
+
+
+def scan_workflows(workflows_dir):
+    workflows = []
+    if not workflows_dir.exists():
+        return workflows
+    for wf_dir in sorted(workflows_dir.iterdir()):
+        if not wf_dir.is_dir():
+            continue
+        wf_file = wf_dir / "workflow.md"
+        if not wf_file.exists():
+            continue
+        name = wf_dir.name
+        description = WORKFLOW_DESCRIPTIONS.get(name, "Workflow")
+        dependencies = WORKFLOW_DEPENDENCIES.get(name, "ninguna")
+        phases_dir = wf_dir / "fases"
+        templates_dir = wf_dir / "plantillas"
+        phase_count = len(list(phases_dir.glob("*.md"))) if phases_dir.exists() else 0
+        template_count = len(list(templates_dir.glob("*.md"))) if templates_dir.exists() else 0
+        workflows.append({
+            "name": name,
+            "path": wf_dir,
+            "description": description,
+            "dependencies": dependencies,
+            "phase_count": phase_count,
+            "template_count": template_count,
+            "tools_required": WORKFLOW_TOOLS.get(name, [])
+        })
+    return workflows
+
+
+def scan_tools(tools_dir):
+    tools = []
+    if not tools_dir.exists():
+        return tools
+    for item in sorted(tools_dir.iterdir()):
+        if item.is_dir() and item.name != "scripts":
+            continue
+        if item.is_file() and item.suffix in (".ts", ".js", ".py", ".sh"):
+            name = item.stem
+            tools.append({
+                "name": name,
+                "path": item,
+                "description": TOOL_DESCRIPTIONS.get(name, "Tool"),
+                "type": item.suffix,
+                "dependencies": "ninguna"
+            })
+        elif item.is_dir():
+            for script in sorted(item.glob("*")):
+                if script.is_file() and script.suffix in (".ts", ".js", ".py", ".sh"):
+                    name = script.stem
+                    tools.append({
+                        "name": name,
+                        "path": script,
+                        "description": TOOL_DESCRIPTIONS.get(name, "Tool"),
+                        "type": script.suffix,
+                        "dependencies": "ninguna"
+                    })
+    return tools
 
 
 # ============================================
@@ -296,6 +477,41 @@ def install_agent(agent_info, project_path):
         return False
 
 
+def install_workflow(workflow_info, project_path, root_dir):
+    wf_dest = project_path / ".SAC" / "workflows" / workflow_info["name"]
+    wf_src = workflow_info["path"]
+
+    try:
+        if wf_dest.exists():
+            shutil.rmtree(wf_dest)
+        shutil.copytree(wf_src, wf_dest)
+        print_success(f"{workflow_info['name']}")
+        return True
+    except Exception as e:
+        print_error(f"{workflow_info['name']} — Error: {e}")
+        return False
+
+
+def install_tool(tool_info, project_path):
+    tools_dest = project_path / ".opencode" / "tools"
+    tools_dest.mkdir(parents=True, exist_ok=True)
+
+    tool_src = tool_info["path"]
+    tool_dst = tools_dest / tool_src.name
+
+    try:
+        if tool_src.suffix == ".sh":
+            scripts_dest = tools_dest / "scripts"
+            scripts_dest.mkdir(exist_ok=True)
+            tool_dst = scripts_dest / tool_src.name
+        shutil.copy2(tool_src, tool_dst)
+        print_success(f"{tool_info['name']}")
+        return True
+    except Exception as e:
+        print_error(f"{tool_info['name']} — Error: {e}")
+        return False
+
+
 def install_sac_config(project_path, root_dir):
     sac_dest = project_path / ".SAC"
 
@@ -309,9 +525,6 @@ def install_sac_config(project_path, root_dir):
         for config_file in config_source.glob("*.yaml"):
             shutil.copy2(config_file, sac_dest / "config" / config_file.name)
             print_success(f"config/{config_file.name}")
-
-    # Plantillas HU movidas a assets/ de cada skill (refinar-hu, planificar-hu, registrar-hallazgo, ejecutar-plan)
-    # No se copian plantillas desde config/plantillas/ (directorio eliminado)
 
     config_system = sac_dest / "config" / "CONFIG_SYSTEM.yaml"
     if config_system.exists():
@@ -329,90 +542,103 @@ def install_sac_config(project_path, root_dir):
 
 
 # ============================================
+# FUNCIONES DE CHECKBOX INTERACTIVO
+# ============================================
+
+def show_checkbox_menu(items, item_type, show_deps=True):
+    """Muestra menú con checkboxes [ ]/[x] y permite selección interactiva."""
+    selected = {item["name"]: False for item in items}
+
+    while True:
+        print(f"\n{'═' * 70}")
+        print(f"  {item_type} DISPONIBLES")
+        print(f"{'═' * 70}")
+
+        for i, item in enumerate(items, 1):
+            check = "x" if selected[item["name"]] else " "
+            deps = f" | deps: {item['dependencies']}" if show_deps and item.get("dependencies", "ninguna") != "ninguna" else ""
+            desc = item.get("description", "")
+            print(f"  [{check}] {i:2}. {item['name']:<35} — {desc}{deps}")
+
+        print(f"\n{'─' * 70}")
+        print(f"  Comandos: [número] toggle | [T] Todas | [N] Ninguna | [V] Volver")
+        print(f"{'─' * 70}")
+
+        response = input("  Selección: ").strip().upper()
+
+        if response == "V":
+            return None
+        elif response == "T":
+            for name in selected:
+                selected[name] = True
+        elif response == "N":
+            for name in selected:
+                selected[name] = False
+        else:
+            try:
+                nums = [int(x) for x in response.split()]
+                for n in nums:
+                    if 1 <= n <= len(items):
+                        name = items[n - 1]["name"]
+                        selected[name] = not selected[name]
+            except (ValueError, IndexError):
+                print_error("Selección inválida")
+                continue
+
+        chosen = [item for item in items if selected[item["name"]]]
+        if chosen:
+            print(f"\n  Seleccionados: {', '.join(item['name'] for item in chosen)}")
+            confirm = input("  ¿Confirmar selección? (s/N): ").strip().lower()
+            if confirm == 's':
+                return chosen
+
+
+# ============================================
 # MENÚS
 # ============================================
 
 def show_main_menu():
     print("""
 ╔══════════════════════════════════════════════════════════╗
-║          INSTALADOR DE SKILLS — squad-skills            ║
+║          INSTALADOR MODULAR — squad-skills              ║
 ╚══════════════════════════════════════════════════════════╝
 
 ¿Qué deseas instalar?
 
   [1] Skills — Seleccionar skills específicas
   [2] Agents — Seleccionar agentes específicos
-  [3] Team Dev SAC — Skills SAC + Configuración
-  [4] Todo — Skills + Agents + Team Dev SAC
+  [3] Workflows — Seleccionar workflows (+ tools automáticos)
+  [4] Tools — Seleccionar tools individuales
+  [5] Team Dev SAC — Skills SAC + Configuración
+  [6] Kit Completo — Agents + Skills + Workflows + Tools + Config
   [Q] Salir
     """)
 
 
-def show_skills_menu(skills):
-    generic = [s for s in skills if not s["tools_required"] and not s["is_sac"]]
-    git_required = [s for s in skills if "git" in s["tools_required"] and not s["is_sac"]]
-    tools_required = [s for s in skills if s["tools_required"] and "git" not in s["tools_required"] and not s["is_sac"]]
-    sac_skills = [s for s in skills if s["is_sac"]]
-
-    idx = 1
-
-    if generic:
-        print(f"\n📦 GENÉRICAS (sin dependencias):")
-        for s in generic:
-            print(f"  [{idx}] {s['name']}")
-            idx += 1
-
-    if git_required:
-        print(f"\n🔧 REQUIEREN GIT:")
-        for s in git_required:
-            print(f"  [{idx}] {s['name']}")
-            idx += 1
-
-    if tools_required:
-        print(f"\n🛠️  REQUIEREN HERRAMIENTAS:")
-        for s in tools_required:
-            tools = [t for t in s["tools_required"] if t != "git"]
-            print(f"  [{idx}] {s['name']} — {', '.join(tools)}")
-            idx += 1
-
-    if sac_skills:
-        print(f"\n📋 TEAM DEV SAC (config + skills):")
-        for s in sac_skills:
-            print(f"  [{idx}] {s['name']} ⚡")
-            idx += 1
-
-    print(f"\n  [T] Instalar TODAS las skills")
-    print(f"  [G] Instalar solo genéricas")
-    print(f"  [S] Instalar solo Team Dev SAC")
-    print(f"  [V] Volver")
-
-    return idx
-
-
 def show_agents_menu(agents):
-    print(f"\n👤 AGENTES DISPONIBLES:")
-    for i, agent in enumerate(agents, 1):
-        print(f"  [A{i}] {agent['name']}")
-    print(f"\n  [T] Instalar TODOS los agentes")
-    print(f"  [V] Volver")
+    """Muestra menú de agentes con checkboxes."""
+    return show_checkbox_menu(agents, "👤 AGENTES", show_deps=False)
 
 
-def show_requirements_preview(skill_info):
+def show_workflows_menu(workflows):
+    """Muestra menú de workflows con checkboxes."""
+    return show_checkbox_menu(workflows, "📋 WORKFLOWS", show_deps=True)
+
+
+def show_tools_menu(tools):
+    """Muestra menú de tools con checkboxes."""
+    return show_checkbox_menu(tools, "🔧 TOOLS", show_deps=False)
+
+
+def show_requirements_preview(items, item_type):
     print(f"\n{'═' * 60}")
-    print(f" REQUISITOS — {skill_info['name']}")
+    print(f" REQUISITOS — {item_type}")
     print(f"{'═' * 60}")
-    print(f"\n  {skill_info['compatibility']}")
 
-    if skill_info['tools_required']:
-        print(f"\n  Herramientas detectadas:")
-        for tool in skill_info['tools_required']:
-            if tool in REQUIREMENTS_MAP:
-                status = "✅" if check_tool(tool) else "❌"
-                print(f"    {status} {tool}")
-            elif tool == "azure_devops":
-                print(f"    ⚠️  azure_devops — Requiere MCP server configurado")
-            elif tool == "sac_config":
-                print(f"    📦 sac_config — Se instala con Team Dev SAC")
+    for item in items:
+        deps = item.get("dependencies", "ninguna")
+        if deps != "ninguna":
+            print(f"\n  {item['name']}: {deps}")
 
     print(f"{'═' * 60}")
 
@@ -435,11 +661,15 @@ def main():
 
     skills_dir = root_dir / "skills"
     agents_dir = root_dir / "agents"
+    workflows_dir = root_dir / "workflows"
+    tools_dir = root_dir / "tools"
 
-    print_info("Escaneando skills y agentes...")
+    print_info("Escaneando componentes...")
     skills = scan_skills(skills_dir)
     agents = scan_agents(agents_dir)
-    print_success(f"Encontradas {len(skills)} skills y {len(agents)} agentes")
+    workflows = scan_workflows(workflows_dir)
+    tools = scan_tools(tools_dir)
+    print_success(f"Encontrados: {len(skills)} skills, {len(agents)} agentes, {len(workflows)} workflows, {len(tools)} tools")
 
     if len(sys.argv) > 1 and not sys.argv[1].startswith("--"):
         project_path = Path(sys.argv[1])
@@ -463,6 +693,8 @@ def main():
 
     installed_skills = []
     installed_agents = []
+    installed_workflows = []
+    installed_tools = []
     sac_config_installed = False
 
     while True:
@@ -472,32 +704,14 @@ def main():
         if choice == "Q":
             break
 
+        # ─── [1] SKILLS ───────────────────────────────────────
         elif choice == "1":
-            max_idx = show_skills_menu(skills)
-            response = input("\n  Selecciona skills (números separados por espacio): ").strip().upper()
-
-            if response == "Q":
-                break
-            elif response == "T":
-                selected = skills
-            elif response == "G":
-                selected = [s for s in skills if not s["tools_required"] and not s["is_sac"]]
-            elif response == "S":
-                selected = [s for s in skills if s["is_sac"]]
-            else:
-                try:
-                    indices = [int(x) for x in response.split()]
-                    selected = [skills[i-1] for i in indices if i <= len(skills)]
-                except (ValueError, IndexError):
-                    print_error("Selección inválida")
-                    continue
-
-            if not selected:
+            selected = show_checkbox_menu(skills, "📦 SKILLS")
+            if selected is None:
                 continue
 
             print(f"\n  Verificando requisitos...")
-            for s in selected:
-                show_requirements_preview(s)
+            show_requirements_preview(selected, "SKILLS")
 
             confirm = input("\n  ¿Continuar con la instalación? (s/N): ").strip().lower()
             if confirm != 's':
@@ -514,56 +728,77 @@ def main():
                 if install_skill(s, project_path, skills_target):
                     installed_skills.append(s["name"])
 
+        # ─── [2] AGENTS ───────────────────────────────────────
         elif choice == "2":
             if not agents:
                 print_warning("No se encontraron agentes")
                 continue
 
-            show_agents_menu(agents)
-            response = input("  Selecciona agentes (A1 A2... o T): ").strip().upper()
-
-            if response == "T":
-                selected_agents = agents
-            elif response == "V":
+            selected = show_agents_menu(agents)
+            if selected is None:
                 continue
-            else:
-                try:
-                    indices = [int(x.replace("A", "")) for x in response.split()]
-                    selected_agents = [agents[i-1] for i in indices if i <= len(agents)]
-                except (ValueError, IndexError):
-                    print_error("Selección inválida")
-                    continue
 
             print(f"\n  Instalando agentes...")
-            for a in selected_agents:
+            for a in selected:
                 if install_agent(a, project_path):
                     installed_agents.append(a["name"])
 
+        # ─── [3] WORKFLOWS ────────────────────────────────────
         elif choice == "3":
+            if not workflows:
+                print_warning("No se encontraron workflows")
+                continue
+
+            selected = show_workflows_menu(workflows)
+            if selected is None:
+                continue
+
+            # Verificar si se necesitan tools adicionales
+            all_wf_tools = set()
+            for wf in selected:
+                all_wf_tools.update(wf.get("tools_required", []))
+
+            if all_wf_tools:
+                print(f"\n  ⚠️  Tools requeridos por los workflows seleccionados:")
+                for tool_name in all_wf_tools:
+                    print(f"    → {tool_name}")
+
+            # Instalar tools automáticamente
+            print(f"\n  Instalando tools requeridos...")
+            for tool in tools:
+                if install_tool(tool, project_path):
+                    installed_tools.append(tool["name"])
+
+            print(f"\n  Instalando workflows...")
+            for wf in selected:
+                if install_workflow(wf, project_path, root_dir):
+                    installed_workflows.append(wf["name"])
+
+        # ─── [4] TOOLS ────────────────────────────────────────
+        elif choice == "4":
+            if not tools:
+                print_warning("No se encontraron tools")
+                continue
+
+            selected = show_tools_menu(tools)
+            if selected is None:
+                continue
+
+            print(f"\n  Instalando tools...")
+            for t in selected:
+                if install_tool(t, project_path):
+                    installed_tools.append(t["name"])
+
+        # ─── [5] TEAM DEV SAC ─────────────────────────────────
+        elif choice == "5":
             sac_skills_list = [s for s in skills if s["is_sac"]]
 
             print(f"\n╔══════════════════════════════════════════════════════════╗")
             print(f"║              TEAM DEV SAC — Skills + Config             ║")
             print(f"╚══════════════════════════════════════════════════════════╝")
 
-            print(f"\nSkills SAC disponibles:")
-            for i, s in enumerate(sac_skills_list, 1):
-                print(f"  [{i}] {s['name']}")
-
-            print(f"\n  [T] Instalar TODAS las skills SAC")
-
-            response = input("\n  Selecciona: ").strip().upper()
-
-            if response == "T":
-                selected_sac = sac_skills_list
-            else:
-                try:
-                    indices = [int(x) for x in response.split()]
-                    selected_sac = [sac_skills_list[i-1] for i in indices if i <= len(sac_skills_list)]
-                except (ValueError, IndexError):
-                    continue
-
-            if not selected_sac:
+            selected = show_checkbox_menu(sac_skills_list, "📋 SKILLS SAC")
+            if selected is None:
                 continue
 
             if not sac_config_installed:
@@ -572,29 +807,60 @@ def main():
                 sac_config_installed = True
 
             print(f"\n  Instalando skills SAC...")
-            for s in selected_sac:
+            for s in selected:
                 if install_skill(s, project_path, skills_target):
                     installed_skills.append(s["name"])
 
-        elif choice == "4":
-            print(f"\n  Instalando todo...")
+        # ─── [6] KIT COMPLETO ─────────────────────────────────
+        elif choice == "6":
+            print(f"\n╔══════════════════════════════════════════════════════════╗")
+            print(f"║              KIT COMPLETO — squad-skills                ║")
+            print(f"╚══════════════════════════════════════════════════════════╝")
 
+            print(f"\n  Se instalarán:")
+            print(f"    → {len(agents)} agentes")
+            print(f"    → {len(skills)} skills")
+            print(f"    → {len(workflows)} workflows")
+            print(f"    → {len(tools)} tools")
+            print(f"    → Configuración .SAC/")
+
+            confirm = input("\n  ¿Continuar con la instalación completa? (s/N): ").strip().lower()
+            if confirm != 's':
+                continue
+
+            # Instalar config SAC
             if not sac_config_installed:
                 install_sac_config(project_path, root_dir)
                 sac_config_installed = True
 
-            for s in skills:
-                if install_skill(s, project_path, skills_target):
-                    installed_skills.append(s["name"])
-
+            # Instalar agentes
+            print(f"\n  Instalando agentes...")
             for a in agents:
                 if install_agent(a, project_path):
                     installed_agents.append(a["name"])
 
+            # Instalar skills
+            print(f"\n  Instalando skills...")
+            for s in skills:
+                if install_skill(s, project_path, skills_target):
+                    installed_skills.append(s["name"])
+
+            # Instalar tools
+            print(f"\n  Instalando tools...")
+            for t in tools:
+                if install_tool(t, project_path):
+                    installed_tools.append(t["name"])
+
+            # Instalar workflows
+            print(f"\n  Instalando workflows...")
+            for wf in workflows:
+                if install_workflow(wf, project_path, root_dir):
+                    installed_workflows.append(wf["name"])
+
         else:
             print_error("Opción inválida")
 
-    print_summary(project_path, installed_skills, installed_agents, sac_config_installed)
+    print_summary(project_path, installed_skills, installed_agents, installed_workflows, installed_tools, sac_config_installed)
     return True
 
 
@@ -637,7 +903,7 @@ def ensure_repo_available():
         return None
 
 
-def print_summary(project_path, skills, agents, sac_installed):
+def print_summary(project_path, skills, agents, workflows, tools, sac_installed):
     print(f"""
 ╔═══════════════════════════════════════════════════════════════╗
 ║                  ✅ INSTALACIÓN COMPLETADA                    ║
@@ -663,10 +929,23 @@ def print_summary(project_path, skills, agents, sac_installed):
             print(f"   → {a}")
         print()
 
+    if workflows:
+        print(f"📋 Workflows instalados ({len(workflows)}):")
+        for w in workflows:
+            print(f"   → {w}")
+        print()
+
+    if tools:
+        print(f"🔧 Tools instalados ({len(tools)}):")
+        for t in tools:
+            print(f"   → {t}")
+        print()
+
     print("🚀 Cómo usar:")
     print("   1. Abre tu IDE (VS Code, Cursor, etc.)")
     print("   2. Activa las skills según la documentación")
-    print("   3. Usa los agentes en tu chat de IA\n")
+    print("   3. Usa los agentes en tu chat de IA")
+    print("   4. Ejecuta workflows desde .SAC/workflows/\n")
 
 
 def print_help():
@@ -679,6 +958,14 @@ def print_help():
 📍 EJEMPLOS:
     python instalar.py "C:/mi-proyecto"
     python instalar.py "/home/usuario/mi-proyecto"
+
+📦 OPCIONES DE INSTALACIÓN:
+    [1] Skills — Seleccionar skills específicas con checkboxes
+    [2] Agents — Seleccionar agentes específicos con checkboxes
+    [3] Workflows — Seleccionar workflows (+ tools automáticos)
+    [4] Tools — Seleccionar tools individuales
+    [5] Team Dev SAC — Skills SAC + Configuración
+    [6] Kit Completo — Agents + Skills + Workflows + Tools + Config
     """)
 
 

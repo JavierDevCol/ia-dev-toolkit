@@ -1,6 +1,6 @@
-# Instalador de squad-skills
+# Instalador Modular de squad-skills
 
-> Instalador multiplataforma de skills y agentes IA
+> Instalador multiplataforma de skills, agentes, workflows y tools para equipos de desarrollo IA
 
 ---
 
@@ -36,50 +36,121 @@ python instalar.py "C:/mi-proyecto"
 
 ## Uso del Instalador
 
-El instalador ofrece 4 opciones:
+El instalador ofrece 6 opciones modulares:
 
 ```
-[1] Skills       — Seleccionar skills específicas
-[2] Agents       — Seleccionar agentes específicos
-[3] Team Dev SAC — Skills SAC + Configuración
-[4] Todo         — Skills + Agents + Team Dev SAC
+╔══════════════════════════════════════════════════════════╗
+║          INSTALADOR MODULAR — squad-skills              ║
+╚══════════════════════════════════════════════════════════╝
+
+¿Qué deseas instalar?
+
+  [1] Skills — Seleccionar skills específicas
+  [2] Agents — Seleccionar agentes específicos
+  [3] Workflows — Seleccionar workflows (+ tools automáticos)
+  [4] Tools — Seleccionar tools individuales
+  [5] Team Dev SAC — Skills SAC + Configuración
+  [6] Kit Completo — Agents + Skills + Workflows + Tools + Config
+  [Q] Salir
 ```
 
-### Instalar Skills
+### Formato de Selección con Checkboxes
 
-El instalador categoriza las skills automáticamente:
+Cada componente muestra:
+- **Checkbox** `[x]` seleccionado / `[ ]` no seleccionado
+- **Descripción** corta del componente
+- **Dependencias** requeridas (si aplica)
 
-- **Genéricas** — Sin dependencias especiales
-- **Requieren Git** — Necesitan git instalado
-- **Requieren Herramientas** — Vault, kubectl, Node.js, etc.
-- **Team Dev SAC** — Skills que requieren configuración SAC
+```
+══════════════════════════════════════════════════════════════════════
+  📦 SKILLS DISPONIBLES
+══════════════════════════════════════════════════════════════════════
+  [ ]  1. bitacora-tecnica                 — Registra progreso de sesiones
+  [x]  2. git-branch-commit                — Gestiona ramas y commits | deps: Git
+  [ ]  3. vault-manager                    — Gestiona secretos Vault | deps: Vault CLI
+  [x]  4. ado-wi-comments                  — Comentarios en Work Items | deps: Azure DevOps MCP
 
-### Team Dev SAC
+──────────────────────────────────────────────────────────────────────
+  Comandos: [número] toggle | [T] Todas | [N] Ninguna | [V] Volver
+──────────────────────────────────────────────────────────────────────
+```
 
-Al instalar cualquier skill SAC, se instala automáticamente:
+---
+
+## Opciones de Instalación
+
+### [1] Skills — Seleccionar skills específicas
+
+Muestra todas las skills disponibles con checkboxes. Puedes:
+- Toggle individual con número
+- Seleccionar todas con `[T]`
+- Deseleccionar todas con `[N]`
+
+Al instalar skills SAC, se instala automáticamente la configuración `.SAC/`.
+
+### [2] Agents — Seleccionar agentes específicos
+
+Agentes disponibles:
+
+| Agente | Descripción |
+|--------|-------------|
+| PO | Product Owner — Transforma visión en backlog priorizado |
+| ARQUITECTO-SOFTWARE | Arquitecto de Software — Diseño, trade-offs y ADRs |
+| ARQUITECTO-DEVOPS | DevOps/SRE — Pipelines, IaC y observabilidad |
+| DESARROLLADOR | Desarrollador — Código limpio, TDD y patrones |
+
+### [3] Workflows — Seleccionar workflows (+ tools automáticos)
+
+Workflows disponibles:
+
+| Workflow | Descripción | Dependencias |
+|----------|-------------|--------------|
+| definir-vision-producto | Transforma idea de negocio en Visión | ninguna |
+| definir-arquitectura-solucion | Diseña arquitectura con ADRs por fase | Visión de Producto |
+| gestionar-backlog-roadmap | Sincroniza backlog con WSJF | ADRs + Visión |
+
+**Importante:** Al instalar workflows, se instalan automáticamente los tools requeridos.
+
+### [4] Tools — Seleccionar tools individuales
+
+Tools disponibles:
+
+| Tool | Descripción |
+|------|-------------|
+| workflow-discover | Lista workflows disponibles desde .SAC/workflows/ |
+
+### [5] Team Dev SAC — Skills SAC + Configuración
+
+Instala las 10 skills del pipeline SAC más la configuración:
 
 ```
 .SAC/
 ├── config/
 │   ├── CONFIG_SYSTEM.yaml
 │   └── CONFIG_USER.yaml
-├── plantillas/
-│   ├── ADR (3 formatos)
-│   ├── HU, Bug, Plan
-│   └── ... (16 templates)
 └── session/
 ```
 
-### Instalar Agents
+Skills SAC:
+- analizar-calidad-codigo
+- ejecutar-plan
+- init-reglas-arquitectonicas
+- planificar-hu
+- refinar-hu
+- registrar-hallazgo
+- sincronizar-backlog
+- tomar-contexto
+- validar-ca
+- validar-hu
 
-Agentes disponibles:
+### [6] Kit Completo — Agents + Skills + Workflows + Tools + Config
 
-| Agente | Descripción |
-|--------|-------------|
-| ARQUITECTO-DEVOPS | Arquitecto DevOps y SRE |
-| ARQUITECTO-SOFTWARE | Arquitecto de Software |
-| DESARROLLADOR | Desarrollador de software |
-| PO | Product Owner |
+Instala todo el ecosistema:
+- 4 agentes
+- 34+ skills
+- 3 workflows
+- Tools requeridos
+- Configuración `.SAC/`
 
 ---
 
@@ -103,19 +174,17 @@ INSTALACION/
 - **Python 3.8+**
 - **Git** (para clonar desde GitHub)
 
-### Requisitos por Skill
+### Requisitos por Componente
 
-| Skill | Requisitos |
-|-------|------------|
-| architecture-inception | Ninguno |
-| bitacora-tecnica | Git |
+| Componente | Requisitos |
+|------------|------------|
+| Skills genéricas | Ninguno |
 | git-branch-commit | Git |
-| handoff-release | Git |
-| mermaid-diagram | Ninguno |
-| vault-manager | Vault CLI, kubectl |
-| pr-config-audit | Git. Opcional: Vault, RabbitMQ |
-| ado/* | Azure DevOps MCP server |
+| vault-manager | Vault CLI |
+| ado/* skills | Azure DevOps MCP server |
 | SAC skills | .SAC/config/CONFIG_SYSTEM.yaml |
+| Workflows | Ninguno (instalan tools automáticamente) |
+| Agentes | Ninguno |
 
 ---
 
