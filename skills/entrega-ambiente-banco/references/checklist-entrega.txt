@@ -1,0 +1,19 @@
+CHECKLIST DE ENTREGA — Handoff vX.Y.Z
+
+[✓] Release branch creado o actualizado desde develop
+[✓] develop y release/vX.Y.Z apuntan al mismo commit
+[ ] Versión actualizada en artefactos
+[✓] Release notes generados
+[⚠] Pruebas unitarias ejecutadas (100% OK)
+     → Ejecuta /ado-pipeline-analyzer para verificar
+[⚠] Cobertura ≥ 80% verificada
+     → Ejecuta /ado-pipeline-analyzer para verificar
+[⚠] DAST ejecutado (0 High/Critical)
+     → Ejecuta /ado-pipeline-analyzer para verificar
+[⚠] SonarQube Quality Gate passed
+     → Ejecuta /ado-pipeline-analyzer para verificar
+[⚠] CONFIG_ENTORNO_PR generado
+     → Ejecuta /pr-config-audit sobre diff develop..release/vX.Y.Z
+[ ] Artefactos listos para entregar al banco
+
+NOTA: Las skills ´pr-config-audit´ y ´ado-pipeline-analyzer´, se recomienda ejecutar en el mismo chat.

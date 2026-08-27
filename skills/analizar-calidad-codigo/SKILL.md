@@ -1,196 +1,60 @@
 ---
 name: analizar-calidad-codigo
-description: >
-  Usa esta skill después de implementar para validar calidad de código,
-  o antes de un release para auditoría completa.
-compatibility: Requires .SAC/config/CONFIG_SYSTEM.yaml
+description: Usa esta skill cuando el usuario solicite revisar código tras implementar una task/HU, o antes de liberar un release para verificar cumplimiento.
 ---
 
-## Parámetros
+# Analizar Calidad de Código
 
-| Parámetro | Tipo | Default | Valores posibles | Descripción |
-|-----------|------|---------|------------------|-------------|
-| `--scope` | option | `commits` | `commits`, `project`, `archivo` | Qué archivos analizar |
-| `--archivo` | string | — | Ej: `src/auth/AuthService.java` | Ruta específica (requerido si scope=archivo) |
-| `--modo` | option | `todos` | `smells`, `arquitectura`, `todos` | Qué análisis ejecutar |
+## Overview
+Revisa código mediante sub-agentes en paralelo para detectar code smells y violaciones de reglas arquitectónicas, consolidando hallazgos por severidad con un reporte accionable.
 
-### Scope — Qué archivos analizar
+## When to Use
+- Tras implementar una task/HU (scope `commits`) para revisar solo los cambios de rama.
+- Antes de un release (scope `project`) para revisión de cumplimiento completa.
+- Para revisar un archivo concreto (scope `archivo`).
 
-| Scope | Qué analiza | Cuándo usar |
-|-------|-------------|-------------|
-| `commits` | Solo archivos cambiados en la rama actual (desde su creación) | Después de implementar una task/HU |
-| `project` | Todos los archivos del proyecto | Auditoría completa pre-release |
-| `archivo` | Un archivo específico | Revisar un archivo concreto |
+**Cuándo NO usar:** si el usuario solo quiere ejecutar tests; si no hay reglas y se prefiere configurarlas primero con `>init-reglas-arquitectonicas`.
 
-### Modo — Qué análisis ejecutar
+## Implementation
+1. **Cargar configuración:** leer `.SAC/config/CONFIG_SYSTEM.yaml` (`archivos.reglas_arquitectonicas`) y `CONFIG_USER.yaml`. Mostrar scope/modo/archivos/reglas al usuario.
+2. **Determinar archivos:**
+   - `commits`: `git diff main..HEAD --name-only` (solo cambiados en rama).
+   - `project`: escanear todo, excluyendo node_modules, .git, .SAC, build, dist, vendor.
+   - `archivo`: verificar existencia.
+3. **Ejecutar análisis (sub-agentes en paralelo):**
+   - Modo `smells`: prompt `assets/prompt-analisis-smells.md` + catálogo `assets/catalogo-smells.md`.
+   - Modo `arquitectura`: prompt `assets/prompt-analisis-arquitectura.md` + `{archivos.reglas_arquitectonicas}`.
+   - `todos`: ambos en paralelo.
+4. **Consolidar:** unificar, eliminar duplicados, ordenar por severidad (Crítica→Alta→Media→Baja).
+5. **Presentar reporte:** ver plantilla unificada en Quick Reference.
+6. **Ofrecer corrección:** [S] todas, [P] seleccionar, [N] solo análisis. Si S/P → sub-agente con herramientas de edición.
 
-| Modo | Qué verifica | Sub-agente |
-|------|--------------|------------|
-| `smells` | Code smells clásicos: Long Method, God Object, Feature Envy, Duplicate Code, etc. | `assets/prompt-analisis-smells.md` + `assets/catalogo-smells.md` |
-| `arquitectura` | Cumplimiento de reglas: nomenclatura, patrones, SOLID, estructura de carpetas | `assets/prompt-analisis-arquitectura.md` + reglas del proyecto |
-| `todos` | Ambos análisis en paralelo | Ambos prompts |
+## Quick Reference
+| Scope | Analiza | Cuándo |
+|-------|---------|--------|
+| `commits` | Archivos cambiados en rama | Tras implementar |
+| `project` | Todo el proyecto | Pre-release |
+| `archivo` | Un archivo | Revisión concreta |
 
-### Combinaciones
+| Modo | Verifica | Sub-agente |
+|------|----------|------------|
+| `smells` | Code smells (catálogo en `assets/catalogo-smells.md`) | prompt-smells + catalogo |
+| `arquitectura` | Reglas (nomenclatura, SOLID, estructura) | prompt-arquitectura + reglas |
+| `todos` | Ambos | Ambos en paralelo |
 
-| Comando | Scope | Modo | Resultado |
-|---------|-------|------|-----------|
-| `>analizar-calidad-codigo` | commits | todos | Ambos análisis en cambios de rama |
-| `>analizar-calidad-codigo --scope project` | project | todos | Ambos análisis en proyecto completo |
-| `>analizar-calidad-codigo --scope commits --modo smells` | commits | smells | Solo code smells en cambios |
-| `>analizar-calidad-codigo --scope archivo X --modo arquitectura` | archivo | arquitectura | Solo reglas en un archivo |
-
-## Instrucciones
-
-### 1. Cargar Configuración
-
-- Leer `.SAC/config/CONFIG_SYSTEM.yaml` → obtener `archivos.reglas_arquitectonicas`
-- Leer `.SAC/config/CONFIG_USER.yaml` (si existe)
-
-**Mostrar configuración al usuario:**
-```
-⚙️ Configuración del análisis:
-- Scope: [commits/project/archivo]
-- Modo: [smells/arquitectura/todos]
-- Archivos a analizar: [lista o "todos"]
-- Reglas arquitectónicas: [configuradas / no configuradas]
-```
-
-### 2. Determinar Archivos a Analizar
-
-**Si scope=commits:**
-- Ejecutar `git log --oneline main..HEAD` para obtener commits
-- Ejecutar `git diff main..HEAD --name-only` para obtener archivos cambiados
-- Analizar SOLO esos archivos
-
-**Si scope=project:**
-- Escanear todos los archivos del proyecto
-- Excluir: node_modules, .git, .SAC, build, dist, vendor
-
-**Si scope=archivo:**
-- Verificar que el archivo existe
-- Analizar solo ese archivo
-
-### 3. Ejecutar Análisis (Sub-agentes en paralelo)
-
-**Si modo INCLUYE smells:**
-- Cargar prompt desde `assets/prompt-analisis-smells.md`
-- Cargar catálogo desde `assets/catalogo-smells.md`
-- Pasar ambos al sub-agente junto con los archivos a analizar
-- Sub-agente analiza código contra catálogo
-- Retorna: JSON con lista de smells
-
-**Si modo INCLUYE arquitectura:**
-- Cargar prompt desde `assets/prompt-analisis-arquitectura.md`
-- Cargar reglas desde `{archivos.reglas_arquitectonicas}`
-- Pasar ambos al sub-agente junto con los archivos a analizar
-- Sub-agente verifica código contra reglas
-- Retorna: JSON con lista de violaciones
-
-### 4. Consolidar Resultados
-
-- Unificar hallazgos de ambos análisis
-- Eliminar duplicados
-- Ordenar por severidad: Crítica → Alta → Media → Baja
-
-### 5. Presentar Reporte
-
-**Reporte compacto:**
+**Reporte unificado:**
 ```
 📊 ANÁLISIS DE CALIDAD: [scope]
-📁 Archivos analizados: [N]
-🔍 Hallazgos: [X] Críticos | [Y] Altos | [Z] Medios | [W] Bajos
-
-🐛 Code Smells:
-| # | Tipo | Archivo | Línea | Severidad | Solución |
-|---|------|---------|-------|-----------|----------|
-| 1 | Long Method | AuthService.java | 45 | Alta | Extract Method |
-
-📐 Arquitectura:
-| # | Regla | Archivo | Línea | Violación |
-|---|-------|---------|-------|-----------|
-| 1 | nom_01 PascalCase | usuario_service.py | 12 | Nombre en snake_case |
-
-💡 Top 3 recomendaciones:
-1. [recomendación más impactante]
-2. [segunda más impactante]
-3. [tercera más impactante]
+📁 Archivos: [N] | 🔍 Hallazgos: [X] Críticos | [Y] Altos | [Z] Medios | [W] Bajos
+🐛 Code Smells: | # | Tipo | Archivo | Línea | Severidad | Solución |
+📐 Arquitectura: | # | Regla | Archivo | Línea | Violación |
+💡 Top 3 recomendaciones: 1… 2… 3…
 ```
+Sin hallazgos: `✅ Sin hallazgos — código cumple estándares`.
 
-### 6. Ofrecer Corrección
-
-> ¿Deseas que corrija estos hallazgos?
-> - [S] Sí, corregir todos
-> - [P] Seleccionar cuáles corregir
-> - [N] No, solo era análisis
-
-Si SÍ o P → Ejecutar correcciones (sub-agente con herramientas de edición)
-
-## Code Smells (Catálogo)
-
-| Categoría | Smell | Indicador | Solución |
-|-----------|-------|-----------|----------|
-| Bloaters | Long Method | >20 líneas | Extract Method |
-| Bloaters | Large Class | >300 líneas o >10 métodos | Extract Class |
-| Bloaters | Long Parameter List | >3 parámetros | Parameter Object |
-| Bloaters | Data Clumps | Datos que aparecen juntos | Extract Class |
-| OO Abusers | Feature Envy | Usa más datos de otra clase | Move Method |
-| OO Abusers | Inappropriate Intimacy | Accede a internals de otras | Move Method/Field |
-| Change Preventers | Divergent Change | Clase cambia por múltiples razones | Extract Class (SRP) |
-| Change Preventers | Shotgun Surgery | Un cambio afecta múltiples clases | Move Method/Field |
-| Dispensables | Dead Code | Código no ejecutado | Remove |
-| Dispensables | Speculative Generality | Abstracciones no usadas | Collapse Hierarchy |
-| Dispensables | Duplicate Code | Código repetido | Extract Method |
-| Couplers | Message Chains | a.getB().getC().getD() | Hide Delegate |
-| Couplers | Middle Man | Clase solo delega | Remove Middle Man |
-
-## Reglas Arquitectónicas
-
-Se cargan desde `{archivos.reglas_arquitectonicas}` si existen:
-
-| Sección | Qué verifica |
-|---------|--------------|
-| nomenclatura.* | Convenciones de nombres (clases, métodos, variables) |
-| arquitectura.estructura | Estructura de carpetas |
-| patrones.obligatorios | Patrones que deben usarse |
-| patrones.prohibidos | Patrones que NO deben usarse |
-| principios.* | SOLID, inmutabilidad, nulls |
-| calidad.* | Límites de código (líneas, parámetros) |
-
-## Restricciones
-
-- **NO** analizar archivos de configuración (.json, .yaml, .xml)
-- **NO** analizar archivos generados (build, dist, node_modules)
-- **Priorizar** hallazgos por severidad
-- **Ofrecer** corrección siempre al final
-- **Delegar** análisis a sub-agentes
-
-## Formato de salida
-
-**Análisis sin hallazgos:**
-```
-✅ ANÁLISIS DE CALIDAD COMPLETADO
-📁 Archivos analizados: [N]
-🎉 Sin hallazgos — código cumple estándares
-```
-
-**Análisis con hallazgos:**
-```
-⚠️ ANÁLISIS DE CALIDAD COMPLETADO
-📁 Archivos analizados: [N]
-🔍 Hallazgos: [X] Críticos | [Y] Altos | [Z] Medios | [W] Bajos
-
-[reporte detallado]
-```
-
-## Errores comunes
-
+## Common Mistakes
 | Error | Causa | Solución |
 |-------|-------|----------|
-| No hay commits en la rama | Rama sin cambios | Usar scope project o archivo |
-| Archivo no encontrado | Ruta incorrecta | Verificar ruta del archivo |
-| Sin reglas arquitectónicas | No configuradas | Ejecutar >init_reglas_arquitectonicas |
-
-## Después de ejecutar
-
-- `>ejecutar-plan [ID-HU]` — Corregir hallazgos durante implementación
-- `>init-reglas-arquitectonicas` — Configurar reglas si no existen
+| Sin commits en rama | Rama sin cambios | Usar scope `project` o `archivo` |
+| Archivo no encontrado | Ruta incorrecta | Verificar ruta |
+| Sin reglas arquitectónicas | No configuradas | Ejecutar `>init-reglas-arquitectonicas` |

@@ -1,92 +1,50 @@
 ---
 name: git-doc-sync
-description: >
-  Usa esta skill cuando el usuario quiera subir documentos a Git de forma
-  selectiva, sincronizar documentación con repos, hacer push parcial de
-  archivos, revisar el estado de un repo de documentación o gestionar qué
-  archivos commitear.
-compatibility: Requires git, Python 3
+description: Use when the user wants to selectively push documents to git, sync documentation with repos, do a partial file push, review a documentation repo status, or choose which files to commit.
 ---
 
 # Git Documentation Synchronizer
 
-Facilita la subida parcial de documentos (HU, Contextos, Diagramas) permitiendo al usuario separar el "Trabajo en Progreso" de lo "Completado".
+## Overview
+Sube documentos (HU, Contextos, Diagramas) a Git de forma selectiva, separando "Trabajo en Progreso" de "Completado" mediante scripts Python.
 
-## Resolución de rutas
+## When to Use
+- Subida parcial de documentos, push selectivo de archivos, revisar estado de un repo de documentación.
+- Gestionar qué archivos commitear (selección humana explícita).
 
-Todos los paths a scripts e `inventory.json` son **relativos al directorio de esta skill**.
-Antes de ejecutar cualquier comando, resuelve `SKILL_DIR` — el directorio donde se encuentra este `SKILL.md`.
-Usa `SKILL_DIR` como prefijo en todos los comandos:
+**Cuándo NO usar:** commits de código normales (usar `git-branch-commit`); sincronización automática sin confirmación.
+
+## Implementation
+
+Todos los paths a scripts e `inventory.json` son relativos al directorio de esta skill. Antes de ejecutar, resuelve `SKILL_DIR` (donde vive este `SKILL.md`) y úsalo como prefijo:
 
 ```bash
-# Ejemplo: si la skill está en .github/agents/skills/git-doc-sync/
 SKILL_DIR=".github/agents/skills/git-doc-sync"
 python3 "$SKILL_DIR/scripts/sync_logic.py" inventory --file "$SKILL_DIR/inventory.json"
 ```
 
-## Scripts disponibles
+**Secuencia:**
+1. **Ruta del repo — fuente primaria `config.yaml`:** lee `metodoceiba-vfs:/.ceiba-metodo/metodo-ceiba/config.yaml` → campo `output_folder`. Si lo obtiene, extrae el nombre del último segmento, actualiza `inventory.json` (name/path) y pregunta solo por `required_branches` si está vacío. Si falla, cae al flujo fallback con `inventory.json`.
+2. **Fallback `inventory.json`:** lista repos con `inventory`; si vacío/incompleto, pregunta nombre, ruta absoluta y ramas. **NO busques ni asumas rutas.**
+3. **Selección de repo:** si hay varios, elige el usuario; si uno, úsalo.
+4. **Validación de rama:** `status --path <repo> --branches main,develop`; si la rama actual no está permitida, detente y notifica.
+5. **Análisis de status:** JSON con `NEW`/`MODIFIED`/`DELETED`; presenta lista numerada.
+6. **Selección humana:** el usuario indica qué archivos (ej. "1, 3"). No asumas.
+7. **Sync:** `sync --path <repo> --files "a.md,b.md" --message "docs: actualización parcial"`; **confirma con el usuario antes del push**.
 
-- **`scripts/sync_logic.py status`** — Muestra archivos modificados/nuevos/eliminados en formato JSON.
-- **`scripts/sync_logic.py sync`** — Ejecuta git add + commit + push para los archivos seleccionados.
-- **`scripts/sync_logic.py inventory`** — Lista los repositorios registrados en el inventario.
+Scripts: `sync_logic.py status` (JSON de cambios), `sync_logic.py sync` (add+commit+push selectivo), `sync_logic.py inventory` (repos registrados).
 
-## Flujo de trabajo
+## Quick Reference
 
-1. **Obtención de ruta del repo — Fuente primaria: `config.yaml`**
+| Paso | Comando |
+|------|---------|
+| Inventario | `python3 "$SKILL_DIR/scripts/sync_logic.py" inventory --file "$SKILL_DIR/inventory.json"` |
+| Validar rama/status | `python3 "$SKILL_DIR/scripts/sync_logic.py" status --path <repo> --branches main,develop` |
+| Push selectivo | `python3 "$SKILL_DIR/scripts/sync_logic.py" sync --path <repo> --files "a.md" --message "docs: ..."` |
 
-   **Primero** intenta leer la ruta desde la configuración central:
-   ```
-   metodoceiba-vfs:/.ceiba-metodo/metodo-ceiba/config.yaml → campo output_folder
-   ```
-
-   **Si `output_folder` se obtiene correctamente:**
-   - Extrae el nombre del último segmento de la ruta (ej: `/ruta/a/Doc_BancaPorWhatsapp` → `Doc_BancaPorWhatsapp`).
-   - Actualiza `inventory.json` automáticamente con `name` y `path` obtenidos.
-   - **Solo pregunta al usuario por las ramas permitidas** si `settings.required_branches` está vacío:
-     > "Obtuve la ruta del repo de documentación desde config.yaml: `[output_folder]`. ¿En qué ramas se permite hacer push? (ej: main, develop)"
-   - Si las ramas ya están configuradas en `inventory.json`, no preguntes nada — continúa al paso 2.
-
-   **Si NO se puede obtener `output_folder`** (archivo no existe, campo vacío, o error de lectura):
-   - Cae al **flujo fallback con `inventory.json`**:
-     ```bash
-     python3 "$SKILL_DIR/scripts/sync_logic.py" inventory --file "$SKILL_DIR/inventory.json"
-     ```
-     - Si el inventario tiene repos configurados (con `name`, `path` y `required_branches` válidos), úsalos.
-     - Si el inventario está vacío o incompleto, pregunta al usuario CADA campo:
-       1. "¿Cuál es el **nombre** del repositorio?"
-       2. "¿Cuál es la **ruta absoluta** en tu sistema?"
-       3. "¿En qué **ramas** se permite hacer push?"
-     - **NO busques repos por tu cuenta. NO asumas rutas.** Espera las respuestas del usuario.
-
-2. **Selección de repo:** Si hay múltiples repos en el inventario, muestra la lista y solicita que elija uno. Si solo hay uno, úsalo directamente.
-
-3. **Validación de rama:** Verifica que la rama actual esté en `settings.required_branches`:
-   ```bash
-   python3 "$SKILL_DIR/scripts/sync_logic.py" status --path /ruta/al/repo --branches main,develop
-   ```
-   Si la rama no está permitida, **detente y notifica al usuario**. No continúes.
-
-4. **Análisis de status:** El comando `status` devuelve JSON con los archivos categorizados:
-   - `NEW` — archivos untracked
-   - `MODIFIED` — archivos modificados
-   - `DELETED` — archivos borrados
-
-   Presenta la lista numerada al usuario.
-
-5. **Selección humana:** El usuario indica qué archivos subir (ej: "1, 3"). **No asumas archivos; espera la selección explícita.**
-
-6. **Sincronización:** Ejecuta el push selectivo:
-   ```bash
-   python3 "$SKILL_DIR/scripts/sync_logic.py" sync --path /ruta/al/repo --files "archivo1.md,archivo2.md" --message "docs: actualización parcial"
-   ```
-   **Confirma con el usuario antes de ejecutar el push.** Muestra el resumen de lo que se va a subir.
-
-## Gotchas
-
-- **Fuente primaria de rutas es `config.yaml`, no `inventory.json`.** Siempre intenta `config.yaml` primero. Solo usa el flujo manual de `inventory.json` como fallback. Cuando `config.yaml` provee la ruta, actualiza `inventory.json` automáticamente — pero nunca inventes ni busques rutas por tu cuenta.
-- **Rutas de scripts:** Los scripts están dentro del directorio de esta skill, NO en la raíz del workspace. Siempre usa la ruta completa relativa al workspace (ej: `.github/agents/skills/git-doc-sync/scripts/sync_logic.py`). Si el comando falla con "No such file", verifica el `SKILL_DIR`.
-- La rama actual **debe** estar en `settings.required_branches` del `inventory.json`. Si no lo está, el push fallará. Siempre valida antes del paso 6.
-- `inventory.json` contiene rutas absolutas del sistema. Nunca asumas la ruta; léela del inventario.
-- El script requiere que el directorio del repo exista y tenga un `.git` inicializado. Si `status` falla con "not a git repository", informa al usuario.
-- El push va siempre a `origin`. Si el usuario necesita otro remote, debe indicarlo explícitamente.
-- No ejecutes `sync` sin que el usuario haya seleccionado archivos. El staging parcial es el valor central de esta skill.
+## Common Mistakes
+- Fuente primaria de rutas es `config.yaml`, no `inventory.json`; úsalo primero, `inventory.json` solo como fallback.
+- Rutas de scripts dentro de la skill: usa siempre `SKILL_DIR`; si falla "No such file", verifica `SKILL_DIR`.
+- No ejecutes `sync` sin selección explícita de archivos ni sin confirmar el push.
+- El repo debe existir y tener `.git`; si `status` da "not a git repository", infórmalo.
+- Push siempre a `origin`; otro remote debe indicarlo el usuario.

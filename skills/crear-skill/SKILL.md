@@ -3,52 +3,42 @@ name: crear-skill
 description: >
   Usa esta skill cuando el usuario pida crear una nueva skill, mejorar
   una skill existente o configurar testing para skills.
-compatibility: No special requirements
-metadata:
-  author: CEIBA DevOps
-  version: 1.0.0
 ---
 
-# Skill: Crear Skill
+# Crear Skill
+
+## Overview
 
 Meta-skill para crear otras skills siguiendo la especificación de agentskills.io.
 
----
+## When to Use
 
-## Flujo de Creación
+- Crear una skill desde cero
+- Mejorar o reestructurar una skill existente
+- Configurar testing o eval queries para skills
 
-Seguir estos 8 pasos en orden:
+### Cuándo NO usar
 
-### 1. Definir Propuesto
+- Para crear componentes de aplicación o código de producción
+- Para configurar opencode o MCP servers (usar customize-opencode)
+- Para documentación de proyecto no relacionada con skills
 
-Preguntar:
+## Implementation
+
+### Flujo de Creación (8 pasos)
+
+**1. Definir propósito**
 - "¿Qué hace esta skill?" (propósito claro)
 - "¿Cuándo se activa?" (triggers)
 - "¿Qué NO hace?" (límites)
 
-### 2. Diseñar Description
+**2. Diseñar description**
+- Imperativo: "Usa esta skill cuando..." no "Esta skill hace..."
+- Pushy: incluir contextos donde aplica, incluso si no se nombra explícitamente
+- Concisa: 1-3 oraciones, <1024 caracteres
+- Específica: palabras clave que el usuario usaría
 
-La description es el mecanismo de triggering. Debe ser:
-- **Imperativo:** "Usa esta skill cuando..." no "Esta skill hace..."
-- **Pushy:** Incluir contextos donde aplica, incluso si no se nombra explícitamente
-- **Concisa:** 1-3 oraciones, <1024 caracteres
-- **Específica:** Palabras clave que el usuario usaría
-
-**Ejemplo bueno:**
-```yaml
-description: >
-  Analiza archivos CSV y tabulares — calcula estadísticas, agrega
-  columnas derivadas, genera gráficos y limpia datos. Úsala cuando
-  el usuario tenga un CSV, TSV o Excel y quiera explorar, transformar
-  o visualizar datos, incluso si no menciona "CSV" explícitamente.
-```
-
-**Ejemplo malo:**
-```yaml
-description: Ayuda con archivos CSV.
-```
-
-### 3. Crear Estructura
+**3. Crear estructura**
 
 ```
 skills/<nombre-kebab>/
@@ -58,9 +48,9 @@ skills/<nombre-kebab>/
 └── assets/           # Opcional: templates, recursos
 ```
 
-### 4. Escribir SKILL.md
+**4. Escribir SKILL.md**
 
-**Frontmatter requerido:**
+Frontmatter mínimo:
 ```yaml
 ---
 name: <nombre-kebab>     # Debe coincidir con directorio
@@ -68,120 +58,49 @@ description: <descripción>  # <1024 caracteres
 ---
 ```
 
-**Frontmatter opcional:**
-```yaml
----
-license: <licencia>
-compatibility: <requisitos>
-metadata:
-  author: <autor>
-  version: <versión>
-allowed-tools: <herramientas>
----
-```
+Body: instrucciones paso a paso, ejemplos de input/output, edge cases. <500 líneas, <5000 tokens.
 
-**Body:**
-- Instrucciones paso a paso
-- Ejemplos de input/output
-- Edge cases comunes
-- <500 líneas, <5000 tokens
+**5-7. Agregar references, assets y scripts (si necesario)**
 
-### 5. Agregar References (si es necesario)
+- `references/` — documentación técnica que el agente carga bajo demanda. Decir **cuándo** cargar cada archivo.
+- `assets/` — templates y recursos estáticos
+- `scripts/` — lógica reutilizable: sin prompts interactivos, con `--help`, errores claros, output estructurado
 
-Para contenido detallado que el agente carga bajo demanda:
-- `references/REFERENCE.md` — Referencia técnica
-- `references/API.md` — Documentación de API
-- `references/GOTCHAS.md` — Errores comunes
+**8. Diseñar eval queries**
 
-**Regla:** Decir al agente **cuándo** cargar cada archivo.
+Crear `evals/evals.json` con ~20 queries (8-10 que activan, 8-10 que no).
 
-### 6. Agregar Assets (si es necesario)
+### Progressive Disclosure
 
-Para templates y recursos estáticos:
-- `assets/template.md` — Plantillas de output
-- `assets/schema.json` — Esquemas de datos
-- `assets/examples/` — Ejemplos
-
-### 7. Agregar Scripts (si es necesario)
-
-Para lógica reutilizable:
-- `scripts/validate.py` — Validación
-- `scripts/process.py` — Procesamiento
-- `scripts/generate.sh` — Generación
-
-**Reglas para scripts:**
-- Sin prompts interactivos
-- Documentar con `--help`
-- Errores claros y accionables
-- Output estructurado (JSON/CSV)
-
-### 8. Diseñar Eval Queries
-
-Crear `evals/evals.json` para testing:
-
-```json
-{
-  "skill_name": "<nombre>",
-  "evals": [
-    {
-      "id": 1,
-      "prompt": "Prompt realista del usuario",
-      "expected_output": "Qué se espera",
-      "assertions": ["Verificación específica"]
-    }
-  ]
-}
-```
-
-**Quantity:** 20 queries (8-10 should trigger, 8-10 shouldn't)
-
----
-
-## Progressive Disclosure
-
-Cargar en este orden:
 1. **Metadata** (~100 tokens): `name` + `description`
-2. **Instructions** (<5000 tokens): Full `SKILL.md` body
+2. **Instructions** (<5000 tokens): body de SKILL.md
 3. **Resources** (as needed): `scripts/`, `references/`, `assets/`
 
----
+## Quick Reference
 
-## Gotchas
+| Elemento | Requisito |
+|----------|-----------|
+| Frontmatter `name` | Solo letras, números, guiones |
+| Frontmatter `description` | <1024 chars, "Usa esta skill cuando...", tercera persona |
+| Body SKILL.md | <500 líneas, <5000 tokens |
+| Eval queries | ~20 queries (trigger + no-trigger balanceado) |
+| Referencias | Decir cuándo cargar cada archivo |
+| Scripts | Sin prompts interactivos, con `--help` |
 
-Incluir en `SKILL.md` los errores comunes que el agente cometería sin la skill:
+## Common Mistakes
 
-```markdown
-## Gotchas
-
-- La tabla `users` usa soft deletes. Las queries deben incluir
-  `WHERE deleted_at IS NULL`.
-- El ID es `user_id` en la DB, `uid` en auth, `accountId` en billing.
-- El endpoint `/health` retorna 200 aunque la DB esté caída.
-  Usa `/ready` para verificar salud completa.
-```
-
----
-
-## Validación
-
-Al terminar, verificar:
-
-- [ ] Frontmatter tiene `name` y `description`
-- [ ] `name` coincide con el directorio
-- [ ] `description` < 1024 caracteres
-- [ ] SKILL.md < 500 líneas
-- [ ] Incluye instrucciones paso a paso
-- [ ] Incluye ejemplos
-- [ ] Incluye gotchas si aplica
-- [ ] References dicen cuándo cargarlos
-- [ ] Scripts tienen `--help`
-- [ ] Eval queries diseñadas (20 queries)
-
----
+- **No testear antes de deploy:** Siempre diseñar eval queries y validar con subagentes antes de usar
+- **Description que resume workflow:** La description solo debe describir condiciones de activación, nunca el proceso que ejecuta la skill
+- **Frontmatter incompleto:** Siempre incluir `name` y `description`; no agregar campos no estándar (`compatibility`, `metadata`, etc.)
+- **Description vaga:** "Ayuda con X" es insuficiente; usar triggers concretos y síntomas
+- **Sin preview de output:** Mostrar al usuario el resultado antes de publicar/crear
+- **Olvidar decir cuándo cargar references:** Cada archivo en `references/` debe tener instrucción explícita de cuándo usarlo
+- **Scripts con prompts interactivos:** Los scripts deben ser ejecutables sin intervención manual
 
 ## Referencias
 
-Para especificación completa, ver `references/specification.md`
-Para buenas prácticas, ver `references/best-practices.md`
-Para optimizar descriptions, ver `references/optimizing-descriptions.md`
-Para esqueleto, ver `assets/skill-skeleton.md`
+- especificación completa: `{file:./references/specification.md}`
+- buenas prácticas: `{file:./references/best-practices.md}`
+- optimizar descriptions: `{file:./references/optimizing-descriptions.md}`
+- esqueleto de skill: `{file:./assets/skill-skeleton.md}`
+- template de evals: `{file:./assets/eval-queries-template.json}`

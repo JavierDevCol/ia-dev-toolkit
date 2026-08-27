@@ -4,46 +4,53 @@ description: >
   Usa esta skill cuando necesites agregar un comentario estructurado a un
   Work Item de Azure DevOps, incluyendo comentarios de entrega (RELEASE,
   FEATURE, FIX, HOTFIX), comentarios técnicos, menciones a colaboradores
-  o reasignación. No la uses para crear o modificar campos del WI
-  (usar bmm-crear-hu-devops).
-compatibility: Requires Azure DevOps MCP server configured
-metadata:
-  author: CEIBA DevOps
-  version: 1.0.0
+  o reasignación. No la uses para crear o modificar campos del WI.
 ---
 
-# Skill: ADO WI Comments
+# ADO WI Comments
 
-Gestiona comentarios y menciones en Work Items de Azure DevOps.
+## Overview
 
-## Referencias
+Gestiona comentarios y menciones en Work Items de Azure DevOps con formato Markdown limpio yFlujo de aprobación obligatorio.
+
+## When to Use
+
+- Comentario de entrega formal (RELEASE, FEATURE, FIX, HOTFIX)
+- Comentario técnico o actualización de estado en un WI
+- Necesidad de mencionar colaboradores con formato nativo ADO (`@<GUID>`)
+- Reasignación de WI al mencionar a Alexander
+
+### Cuándo NO usar
+
+- Para crear o modificar campos del WI (usar la skill de creación de WI)
+- Para queries WIQL o búsqueda de WIs
+- Para gestionar PRs o builds
+
+## Implementation
+
+### Plantilla
 
 - Plantilla de entrega: `{file:./assets/plantilla-entrega.md}`
 
----
+### Reglas Universales
 
-## Reglas Universales (aplican a todo comentario)
+**Formato:** Markdown plano, sin bloques de código contenedores. La plataforma interpreta estilos nativamente.
 
-### Formato
-- Todo comentario debe usar sintaxis limpia de Markdown.
-- Enviar siempre el texto final como **texto plano Markdown directo** (sin envolver en bloques de código contenedores).
-- La plataforma interpreta los estilos de forma nativa.
+**Menciones ADO [OBLIGATORIO]**
 
-### Menciones ADO [OBLIGATORIO]
+Antes de publicar **cualquier comentario**, preguntar:
 
-Antes de publicar **cualquier comentario**, preguntar siempre:
-
-> **¿Deseas etiquetar a alguno de estos colaboradores en el comentario?**
+> **¿Deseas etiquetar a alguno de estos colaboradores?**
 > - **[A]** Edgar Alexander Torres Erazo → `@<96517b2d-3823-62fd-ae74-0872c1c9c3a9>`
 > - **[L]** Lady Marcela Suarez Agudelo → `@<7c277620-4b79-652b-a18d-5d93dd85fff6>`
 > - **[AL]** Ambos
 > - **[N]** Ninguno
 
-Insertar las menciones seleccionadas **al inicio del comentario**, antes del cuerpo principal. Usar siempre el formato de ID de ADO `@<GUID>` para que la plataforma resuelva la mención nativa correctamente.
+Insertar menciones seleccionadas **al inicio del comentario**, antes del cuerpo principal. Usar siempre formato `@<GUID>`.
 
-### Reasignación Automática [OBLIGATORIO]
+**Reasignación Automática [OBLIGATORIO]**
 
-Si el usuario selecciona etiquetar a **Alexander** (`[A]` o `[AL]`), inmediatamente después de publicar el comentario, **reasignar el WI** a Edgar Alexander Torres Erazo:
+Si se menciona a Alexander (`[A]` o `[AL]`), reasignar el WI inmediatamente tras publicar:
 
 ```
 wit_update_work_item:
@@ -53,113 +60,43 @@ wit_update_work_item:
       value: "ettorres@bmm.com.co"
 ```
 
-Notificar al usuario: "Responsable actualizado a Edgar Alexander Torres Erazo."
-
----
-
-## Caso A: Comentarios de Entrega Formal
-
-Aplica cuando el usuario solicite un comentario de entrega (`RELEASE`, `FEATURE`, `FIX`, `HOTFIX`).
-
-### Configuración Dinámica
+### Caso A: Comentarios de Entrega Formal
 
 | Campo | Regla |
 |-------|-------|
-| Emoji | `🔧` para FIX · `🚨` para HOTFIX · `🚀` para RELEASE/FEATURE |
-| Rama | Si no hay `{rama_origen}`, eliminar su línea de la plantilla |
-| Fecha | Insertar automáticamente la fecha actual `{YYYY-MM-DD}` |
+| Emoji | `🔧` FIX · `🚨` HOTFIX · `🚀` RELEASE/FEATURE |
+| Rama | Si no hay `{rama_origen}`, eliminar línea de la plantilla |
+| Fecha | Insertar automáticamente `{YYYY-MM-DD}` |
 
-### Flujo
+**Flujo:**
 
-#### Paso 1 — Recopilar datos
+1. **Recopilar datos:** tipo de entrega, versión, repo, rama (opc), cambios, ruta artefactos, notas (opc)
+2. **Generar plantilla:** usar `{file:./assets/plantilla-entrega.md}`
+3. **Preview y aprobación:** mostrar en bloque `` ```markdown ``, solicitar confirmación `[C]`/`[E]`
+4. **Menciones:** aplicar flujo de Reglas Universales §Menciones ADO
+5. **Publicar:** `wit_work_item_comment_write` → `action: add`, `format: Markdown`
 
-Solicitar al usuario:
-1. Tipo de entrega (RELEASE, FEATURE, FIX, HOTFIX)
-2. Versión (ej: v2.2.3)
-3. Nombre del repo
-4. Rama origen (opcional)
-5. Breve descripción de los cambios
-6. Lista de cambios (feat, fix, chore, etc.)
-7. Ruta de entrega de artefactos
-8. Notas adicionales (opcional)
+### Caso B: Comentarios Generales y Técnicos
 
-#### Paso 2 — Generar plantilla
+1. **Diseñar mensaje:** títulos, negritas o viñetas según amerite
+2. **Preview obligatorio:** mostrar en bloque `` ```markdown ``, solicitar `[C]`/`[E]`
+3. **Menciones:** aplicar flujo de Reglas Universales §Menciones ADO
+4. **Publicar:** `wit_work_item_comment_write` → `action: add`, `format: Markdown`
 
-Usar la plantilla de `{file:./assets/plantilla-entrega.md}` con los datos recopilados.
+## Quick Reference
 
-#### Paso 3 — Preview y Aprobación
+| Operación | Herramienta | Parámetros clave |
+|-----------|-------------|-------------------|
+| Publicar comentario | `wit_work_item_comment_write` | `action: add`, `workItemId`, `text`, `format: Markdown` |
+| Reasignar WI | `wit_update_work_item` | `id`, `updates[0].path: /fields/System.AssignedTo` |
+| Mención Alexander | `@<96517b2d-3823-62fd-ae74-0872c1c9c3a9>` | Insertar al inicio del comentario |
+| Mención Lady | `@<7c277620-4b79-652b-a18d-5d93dd85fff6>` | Insertar al inicio del comentario |
 
-Mostrar el código crudo en un bloque `` ```markdown `` y solicitar confirmación:
+## Common Mistakes
 
-> **¿El formato Markdown del comentario de entrega es correcto?**
-> - **[C]** Confirmar y continuar
-> - **[E]** Editar datos
-
-#### Paso 4 — Mención posterior
-
-Tras confirmar con `[C]`, aplicar el flujo de menciones definido en **Reglas Universales §Menciones ADO**.
-
-#### Paso 5 — Publicar comentario
-
-Usar `wit_work_item_comment_write`:
-```
-action: add
-workItemId: [WI_ID]
-text: [contenido Markdown generado]
-format: Markdown
-```
-
----
-
-## Caso B: Comentarios Generales y Técnicos
-
-Aplica para cualquier anotación, duda, tarea o actualización en el WI que no sea entrega formal.
-
-### Flujo
-
-#### Paso 1 — Diseñar mensaje
-
-Estructurar el mensaje usando títulos, negritas o viñetas según amerite el texto.
-
-#### Paso 2 — Preview Obligatorio
-
-Mostrar el texto final crudo dentro de un bloque `` ```markdown `` y solicitar validación:
-
-> **¿El formato de este comentario es correcto antes de publicarlo?**
-> - **[C]** Confirmar e insertar comentario
-> - **[E]** Editar el contenido
-
-#### Paso 3 — Mención posterior
-
-Tras confirmar con `[C]`, aplicar el flujo de menciones definido en **Reglas Universales §Menciones ADO**.
-
-#### Paso 4 — Publicar comentario
-
-Usar `wit_work_item_comment_write`:
-```
-action: add
-workItemId: [WI_ID]
-text: [contenido Markdown generado]
-format: Markdown
-```
-
----
-
-## Reglas obligatorias
-
-1. **Mención siempre.** Preguntar por Alexander y/o Lady antes de cada comentario.
-2. **Reasignar si Alexander.** Si se menciona a Alexander, reasignar el WI inmediatamente.
-3. **Preview antes de publicar.** Nunca publicar sin aprobación del usuario.
-4. **Markdown plano.** No envolver en bloques de código contenedores.
-5. **Fecha automática.** Insertar fecha actual en comentarios de entrega.
-
----
-
-## Gotchas
-
-- **Mención no resuelta:** Si el GUID de ADO no resuelve, usar el formato `@nombre@dominio.com` como fallback.
-- **Comentario muy largo:** Si el comentario excede 4000 caracteres, dividir en múltiples comentarios.
-- **WI cerrado:** No se pueden agregar comentarios a WIs cerrados. Informar al usuario.
-- **Reasignación fallida:** Si la reasignación falla (permisos), notificar pero no bloquear la publicación del comentario.
-
----
+- **Mención no resuelta:** Si el GUID no resuelve, usar fallback `@nombre@dominio.com`
+- **Comentario >4000 chars:** Dividir en múltiples comentarios
+- **WI cerrado:** No se pueden agregar comentarios; informar al usuario
+- **Reasignación fallida:** Si falla por permisos, notificar pero no bloquear publicación
+- **Publicar sin preview:** Siempre mostrar al usuario antes de confirmar
+- **Olvidar menciones:** Preguntar SIEMPRE por Alexander/Lady antes de cada comentario

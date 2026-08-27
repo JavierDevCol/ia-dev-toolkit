@@ -4,16 +4,28 @@ description: >
   Usa esta skill cuando el usuario pida crear una nueva estrategia de
   interacción, agregar una etapa al FSM o implementar un nuevo flujo
   conversacional en ms-banca-conversacion.
-compatibility: Requires specific codebase structure (ms-banca-conversacion)
 ---
 
 # Crear Estrategia — ms-banca-conversacion
 
-Genera estrategias de interacción para la máquina de estados finita (FSM) del chatbot de WhatsApp.
+Genera estrategias de interacción para la FSM del chatbot de WhatsApp.
 
-## Contexto
+## Overview
 
-Cada estrategia es un nodo de la FSM identificado por el par `(EtapaInteraccion, DisparadorDeEstrategia)`. Todas extienden `EstrategiaBase` (Template Method) que orquesta auditoría, reintentos, desborde a agente humano y envío de mensajes WhatsApp.
+Cada estrategia es un nodo de la FSM identificado por el par `(EtapaInteraccion, DisparadorDeEstrategia)`. Extienden `EstrategiaBase` (Template Method) que orquesta auditoría, reintentos, desborde a agente humano y envío de mensajes WhatsApp.
+
+## When to Use
+
+- El usuario pide crear un nuevo flujo conversacional (ej: "tarjeta de crédito", "seguros vida")
+- Se necesita agregar una etapa al FSM existente
+- Se requiere un nuevo menú con opciones fijas
+- Hay un nuevo evento de otro microservicio que debe reaccionar
+
+### Cuándo NO usar
+
+- Para modificar la lógica de una estrategia existente (editar directamente el archivo)
+- Para cambios en la configuración de plantillas WhatsApp (no es cambio de estrategia)
+- Para bugs en la FSM existente (usar systematic-debugging)
 
 ## Rutas del proyecto
 
@@ -36,34 +48,30 @@ TESTS    = ms-banca-conversacion/microservicio/dominio/src/test/java/co/com/bmm
 | MotorFsmConfiguration | `{INFRA}/configuracion/MotorFsmConfiguration.java` |
 | Estrategias existentes | `{DOMINIO}/maquina_estados/estrategias/` (subcarpetas temáticas) |
 
-## Flujo de trabajo
+## Implementation
 
-### Paso 1 — Recolectar información
+### Fase 1 — Recopilar información
 
-Pregunta al usuario lo siguiente (usa el formato de opciones de respuesta rápida):
+Preguntar al usuario (formato opciones de respuesta rápida):
 
-1. **Nombre del flujo/funcionalidad** — Ejemplo: "tarjeta de crédito", "seguros vida"
-2. **Subflujo padre** — ¿Dentro de qué carpeta? (`productos/`, `retiros/`, `creditos/`, `referidos/`, o una nueva)
-3. **Etapas del flujo** — Lista de etapas con:
-   - Nombre descriptivo (se convertirá a SCREAMING_SNAKE_CASE para el enum)
-   - Descripción breve de qué hace
-   - Transición: ¿a qué etapa siguiente va?
-4. **Disparador por etapa** — En la mayoría de casos es `EVENTO_MENSAJE_WHATSAPP`. Preguntar solo si hay etapas que reaccionen a eventos de otros microservicios.
-5. **¿Permite desborde a agente humano?** — ¿Las etapas permiten transferir al usuario a un agente si supera reintentos?
-6. **¿Captura flujo de navegación?** — ¿Alguna etapa necesita registrar la ruta de navegación del usuario?
-7. **Opciones de menú** — Si hay menús con opciones fijas, listar las opciones (se creará un enum `OpcionMenu{Nombre}`).
-8. **Dependencias adicionales** — ¿Necesita servicios más allá de `DependenciasEstrategiaBase`? (ej: `ServicioGestionFlujos`, `@Value` de properties, puertos específicos)
-9. **Plantillas de mensaje** — Nombres de las plantillas de WhatsApp que se enviarán (se verificará que existan en `PlantillaMensajeId` o se agregarán).
+1. **Nombre del flujo/funcionalidad** — Ej: "tarjeta de crédito", "seguros vida"
+2. **Subflujo padre** — Carpeta (`productos/`, `retiros/`, `creditos/`, `referidos/`, o nueva)
+3. **Etapas del flujo** — Lista con: nombre (→ SCREAMING_SNAKE_CASE), descripción, transición
+4. **Disparador por etapa** — Por defecto `EVENTO_MENSAJE_WHATSAPP`. Preguntar solo si hay etapas que reaccionen a otros microservicios
+5. **¿Permite desborde a agente humano?**
+6. **¿Captura flujo de navegación?**
+7. **Opciones de menú** — Si hay menús con opciones fijas (se crea enum `OpcionMenu{Nombre}`)
+8. **Dependencias adicionales** — Más allá de `DependenciasEstrategiaBase` (ej: `ServicioGestionFlujos`, `@Value`, puertos)
+9. **Plantillas de mensaje** — Nombres en `PlantillaMensajeId` (verificar existencia o agregar)
 
-### Paso 2 — Agregar etapas al enum `EtapaInteraccion`
+### Fase 2 — Agregar etapas al enum `EtapaInteraccion`
 
-Abrir `{DOMINIO}/modelo/EtapaInteraccion.java` y agregar las nuevas etapas **antes de `FINAL_INTERACCION`**, agrupadas con un comentario de sección.
+Abrir `{DOMINIO}/modelo/EtapaInteraccion.java` y agregar antes de `FINAL_INTERACCION`, agrupadas con comentario de sección.
 
 **Convenciones:**
-- Usar SCREAMING_SNAKE_CASE
+- SCREAMING_SNAKE_CASE
 - Constructor `(boolean capturaFlujoNavegacion)` si NO permite desborde
 - Constructor `(boolean capturaFlujoNavegacion, boolean permiteDesborde)` si SÍ permite desborde
-- Agregar Javadoc para etapas complejas
 
 ```java
 // ═══ Etapas Flujo {NOMBRE_FLUJO} ═══
@@ -72,9 +80,9 @@ Abrir `{DOMINIO}/modelo/EtapaInteraccion.java` y agregar las nuevas etapas **ant
 {NOMBRE_ETAPA_2}(true),          // capturaFlujo=true, SIN desborde
 ```
 
-### Paso 3 — Agregar disparadores (si se necesitan nuevos)
+### Fase 3 — Agregar disparadores (si nuevos)
 
-Solo si el flujo necesita un disparador que NO exista en `DisparadorDeEstrategia`. Los disparadores existentes más comunes:
+Solo si el flujo necesita un disparador que NO exista en `DisparadorDeEstrategia`:
 
 | Disparador | Uso |
 |------------|-----|
@@ -84,128 +92,31 @@ Solo si el flujo necesita un disparador que NO exista en `DisparadorDeEstrategia
 | `VALIDACION_EXITOSA` | Validación interna exitosa |
 | `EVENTO_RESPUESTA_OTP_INFOBIT` | Respuesta del servicio OTP |
 
-### Paso 4 — Crear enum de opciones de menú (si aplica)
+### Fase 4 — Crear enum de opciones de menú (si aplica)
 
-Si el flujo tiene un menú con opciones fijas, crear en `{DOMINIO}/modelo/`:
+Si el flujo tiene menú con opciones fijas, crear en `{DOMINIO}/modelo/`.
 
-```java
-package co.com.bmm.modelo;
+Ver plantilla completa: `references/plantilla-enum.java`
 
-import java.util.Arrays;
-import java.util.Optional;
+### Fase 5 — Crear la(s) clase(s) de estrategia
 
-public enum OpcionMenu{NombreFlujo} {
-    {OPCION_1}("{id_1}"),
-    {OPCION_2}("{id_2}"),
-    VOLVER("VOLVER");
+Crear en `{DOMINIO}/maquina_estados/estrategias/{subflujo}/{nombre_flujo}/`.
 
-    private final String id;
+Ver plantilla completa: `references/plantilla-estrategia.java`
 
-    OpcionMenu{NombreFlujo}(String id) {
-        this.id = id;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public static Optional<OpcionMenu{NombreFlujo}> fromId(String id) {
-        return Arrays.stream(values())
-                .filter(opcion -> opcion.id.equalsIgnoreCase(id))
-                .findFirst();
-    }
-}
-```
-
-### Paso 5 — Crear la(s) clase(s) de estrategia
-
-Crear en `{DOMINIO}/maquina_estados/estrategias/{subflujo}/{nombre_flujo}/`:
-
-```java
-package co.com.bmm.maquina_estados.estrategias.{subflujo}.{nombre_flujo};
-
-import co.com.bmm.dto.ResultadoEstrategia;
-import co.com.bmm.maquina_estados.estrategias.DependenciasEstrategiaBase;
-import co.com.bmm.maquina_estados.estrategias.EstrategiaBase;
-import co.com.bmm.modelo.ContextoEstrategia;
-import co.com.bmm.modelo.DisparadorDeEstrategia;
-import co.com.bmm.modelo.EtapaInteraccion;
-import co.com.bmm.modelo.PlantillaMensajeId;
-
-import java.util.List;
-
-public class Estrategia{NombreEstrategia} extends EstrategiaBase {
-
-    // Si necesita dependencias adicionales, declararlas como campos finales
-    // private final ServicioGestionFlujos servicioGestionFlujos;
-
-    public Estrategia{NombreEstrategia}(DependenciasEstrategiaBase dependencias) {
-        super(dependencias);
-    }
-
-    @Override
-    protected ResultadoEstrategia logicaEspecificaDeEtapa(ContextoEstrategia contextoEstrategia) {
-        // Lógica de negocio de esta etapa
-        // Retornar ResultadoEstrategia con:
-        //   - siguienteEtapa: EtapaInteraccion.XXX
-        //   - mensajeParaServicio: null (o MensajeParaServicio si publica a RabbitMQ)
-        //   - nombrePlantillas: List.of(PlantillaMensajeId.XXX)
-        //   - args: dependencias.LISTA_ARGS_VACIA (o List.of("arg1", "arg2"))
-        return new ResultadoEstrategia(
-                EtapaInteraccion.{SIGUIENTE_ETAPA},
-                null,
-                List.of(PlantillaMensajeId.{PLANTILLA}),
-                dependencias.LISTA_ARGS_VACIA
-        );
-    }
-
-    @Override
-    protected boolean respuestaValidada(String respuesta) {
-        // Validar si el mensaje del usuario es procesable
-        // Ejemplos:
-        //   - OpcionMenu{Nombre}.fromId(respuesta).isPresent()  → menú con opciones
-        //   - respuesta != null && !respuesta.isBlank()          → texto libre
-        //   - true                                                → siempre válido (ej: respuesta de servicio)
-        return true;
-    }
-
-    @Override
-    protected ResultadoEstrategia manejarRespuestaInvalida(ContextoEstrategia contexto) {
-        // Qué hacer cuando respuestaValidada() retorna false
-        // Patrón común: repetir el menú con mensaje de error
-        return new ResultadoEstrategia(
-                getEtapa(),  // Quedarse en la misma etapa
-                null,
-                List.of(PlantillaMensajeId.ERROR_RESPUESTA_INVALIDA, PlantillaMensajeId.{PLANTILLA_MENU}),
-                dependencias.LISTA_ARGS_VACIA
-        );
-    }
-
-    @Override
-    public EtapaInteraccion getEtapa() {
-        return EtapaInteraccion.{ETAPA};
-    }
-
-    @Override
-    public DisparadorDeEstrategia getDisparador() {
-        return DisparadorDeEstrategia.{DISPARADOR};
-    }
-}
-```
-
-**Hooks opcionales que se pueden sobreescribir:**
+**Hooks opcionales sobreescribibles:**
 
 | Método | Cuándo usarlo |
 |--------|---------------|
-| `respuestaValidadaConContexto(ContextoEstrategia)` | Si la validación necesita más que solo el texto del mensaje |
-| `capturarFlujoNavegacion(ContextoEstrategia, ResultadoEstrategia)` | Si `getEtapa().capturaFlujoNavegacion() == true` |
-| `getPlantillaPreguntaEtapa()` | Para definir la plantilla que se muestra al volver de desborde a agente |
-| `getFlowInfoDesborde()` | Si la etapa usa WhatsApp Flows y necesita restaurar al volver de agente |
-| `getCampoActual()` | Para identificar qué campo se captura (conteo de errores) |
+| `respuestaValidadaConContexto(ContextoEstrategia)` | Validación necesita más que solo el texto |
+| `capturarFlujoNavegacion(ContextoEstrategia, ResultadoEstrategia)` | `getEtapa().capturaFlujoNavegacion() == true` |
+| `getPlantillaPreguntaEtapa()` | Plantilla al volver de desborde a agente |
+| `getFlowInfoDesborde()` | WhatsApp Flows + restaurar al volver de agente |
+| `getCampoActual()` | Identificar campo capturado (conteo de errores) |
 
-### Paso 6 — Registrar beans en `MotorFsmConfiguration`
+### Fase 6 — Registrar beans en `MotorFsmConfiguration`
 
-Abrir `{INFRA}/configuracion/MotorFsmConfiguration.java` y agregar un `@Bean` por cada estrategia nueva:
+Abrir `{INFRA}/configuracion/MotorFsmConfiguration.java` y agregar `@Bean` por cada estrategia:
 
 ```java
 // ═══════════════════════════════════════════════════════════════
@@ -219,7 +130,7 @@ public Estrategia{NombreEstrategia} estrategia{NombreEstrategia}(
 }
 ```
 
-**Si la estrategia tiene dependencias adicionales:**
+Con dependencias adicionales o `@Value`:
 
 ```java
 @Bean
@@ -228,11 +139,7 @@ public Estrategia{NombreEstrategia} estrategia{NombreEstrategia}(
         ServicioGestionFlujos servicioGestionFlujos) {
     return new Estrategia{NombreEstrategia}(dependencias, servicioGestionFlujos);
 }
-```
 
-**Si usa @Value de properties:**
-
-```java
 @Bean
 public Estrategia{NombreEstrategia} estrategia{NombreEstrategia}(
         DependenciasEstrategiaBase dependencias,
@@ -241,141 +148,42 @@ public Estrategia{NombreEstrategia} estrategia{NombreEstrategia}(
 }
 ```
 
-> **IMPORTANTE:** No usar `@Component` ni `@Service` en las clases de estrategia. El registro es explícito vía `@Bean` en `MotorFsmConfiguration` para mantener Clean Architecture (dominio libre de anotaciones Spring).
+> **IMPORTANTE:** No usar `@Component` ni `@Service` en clases de estrategia. Registro explícito vía `@Bean` en `MotorFsmConfiguration` para mantener Clean Architecture.
 
-### Paso 7 — Crear tests unitarios
+### Fase 7 — Crear tests unitarios
 
-Crear en `{TESTS}/maquina_estados/estrategias/{subflujo}/{nombre_flujo}/`:
+Crear en `{TESTS}/maquina_estados/estrategias/{subflujo}/{nombre_flujo}/`.
 
-```java
-package co.com.bmm.maquina_estados.estrategias.{subflujo}.{nombre_flujo};
+Ver plantilla completa: `references/plantilla-test.java`
 
-import co.com.bmm.FabricaInteraccion;
-import co.com.bmm.dto.ResultadoEstrategia;
-import co.com.bmm.maquina_estados.estrategias.DependenciasEstrategiaBase;
-import co.com.bmm.modelo.ContextoEstrategia;
-import co.com.bmm.modelo.EtapaInteraccion;
-import co.com.bmm.modelo.PlantillaMensajeId;
-import co.com.bmm.modelo.dto.InteraccionDTO;
-import co.com.bmm.puerto.PuertoGuardarInteraccion;
-import co.com.bmm.puerto.PuertoServicioDeMensajeria;
-import co.com.bmm.puerto.ServicioAuditoria;
-import co.com.bmm.puerto.ServicioEventos;
-import co.com.bmm.puerto.ServicioRespuestaBot;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+### Fase 8 — Agregar PlantillaMensajeId (si nuevas)
 
-import static org.junit.jupiter.api.Assertions.*;
+Si las plantillas no existen en `PlantillaMensajeId`, agregarlas al enum con nombre SCREAMING_SNAKE_CASE.
 
-@ExtendWith(MockitoExtension.class)
-class Estrategia{NombreEstrategia}Test {
-
-    @Mock private FabricaInteraccion fabricaInteraccion;
-    @Mock private PuertoGuardarInteraccion puertoGuardarInteraccion;
-    @Mock private PuertoServicioDeMensajeria servicioDeMensajeria;
-    @Mock private ServicioRespuestaBot servicioRespuestaBot;
-    @Mock private ServicioAuditoria servicioAuditoria;
-    @Mock private ServicioEventos servicioEventos;
-
-    private DependenciasEstrategiaBase dependencias;
-    private Estrategia{NombreEstrategia} estrategia;
-
-    @BeforeEach
-    void setUp() {
-        dependencias = new DependenciasEstrategiaBase(
-                fabricaInteraccion, puertoGuardarInteraccion, servicioDeMensajeria,
-                servicioRespuestaBot, servicioAuditoria, servicioEventos);
-        estrategia = new Estrategia{NombreEstrategia}(dependencias);
-    }
-
-    @Test
-    void debeRetornarEtapaCorrecta() {
-        assertEquals(EtapaInteraccion.{ETAPA}, estrategia.getEtapa());
-    }
-
-    @Test
-    void debeRetornarDisparadorCorrecto() {
-        assertEquals(DisparadorDeEstrategia.{DISPARADOR}, estrategia.getDisparador());
-    }
-
-    @Test
-    void debeEjecutarLogicaEspecifica_conRespuestaValida() {
-        InteraccionDTO interaccion = new InteraccionDTO(
-                0, "id-test", "Usuario Test", "123456789", "CC", "573001234567",
-                EtapaInteraccion.{ETAPA}, true, false, null);
-        ContextoEstrategia contexto = new ContextoEstrategia(interaccion, "{MENSAJE_VALIDO}");
-
-        ResultadoEstrategia resultado = estrategia.logicaEspecificaDeEtapa(contexto);
-
-        assertNotNull(resultado);
-        assertEquals(EtapaInteraccion.{SIGUIENTE_ETAPA}, resultado.siguienteEtapa());
-        // Verificar plantillas, args, etc.
-    }
-
-    @Test
-    void debeValidarRespuesta_valida() {
-        assertTrue(estrategia.respuestaValidada("{RESPUESTA_VALIDA}"));
-    }
-
-    @Test
-    void debeValidarRespuesta_invalida() {
-        assertFalse(estrategia.respuestaValidada("{RESPUESTA_INVALIDA}"));
-    }
-
-    @Test
-    void debeManejarRespuestaInvalida() {
-        InteraccionDTO interaccion = new InteraccionDTO(
-                0, "id-test", "Usuario Test", "123456789", "CC", "573001234567",
-                EtapaInteraccion.{ETAPA}, true, false, null);
-        ContextoEstrategia contexto = new ContextoEstrategia(interaccion, "respuesta_invalida");
-
-        ResultadoEstrategia resultado = estrategia.manejarRespuestaInvalida(contexto);
-
-        assertNotNull(resultado);
-        assertEquals(EtapaInteraccion.{ETAPA}, resultado.siguienteEtapa());
-        assertTrue(resultado.nombrePlantillas().contains(PlantillaMensajeId.ERROR_RESPUESTA_INVALIDA));
-    }
-}
-```
-
-### Paso 8 — Agregar PlantillaMensajeId (si se necesitan nuevas)
-
-Si las plantillas de WhatsApp no existen en `PlantillaMensajeId`, agregarlas al enum con un nombre en SCREAMING_SNAKE_CASE descriptivo.
-
-### Paso 9 — Validaciones finales
-
-Antes de dar por terminado, verificar:
+### Fase 9 — Validaciones finales
 
 - [ ] No hay etapas duplicadas en `EtapaInteraccion`
-- [ ] No hay pares `(Etapa, Disparador)` duplicados (el `MotorDeInteraccion` lanza excepción si detecta duplicados)
-- [ ] Las transiciones forman un flujo coherente (sin etapas huérfanas ni ciclos infinitos no intencionales)
-- [ ] Cada estrategia tiene su `@Bean` en `MotorFsmConfiguration`
-- [ ] Cada estrategia tiene su test unitario
-- [ ] Los imports son correctos y usan los packages del dominio
-- [ ] Las clases de estrategia NO tienen anotaciones Spring (`@Component`, `@Service`, etc.)
-- [ ] Compilar el proyecto para verificar que no hay errores
+- [ ] No hay pares `(Etapa, Disparador)` duplicados
+- [ ] Transiciones forman flujo coherente (sin huérfanas ni ciclos infinitos)
+- [ ] Cada estrategia tiene `@Bean` en `MotorFsmConfiguration`
+- [ ] Cada estrategia tiene test unitario
+- [ ] Imports correctos con packages del dominio
+- [ ] Clases sin anotaciones Spring (`@Component`, `@Service`)
+- [ ] Compilación exitosa: `cd ms-banca-conversacion && ./gradlew compileJava compileTestJava`
 
-**Comando de compilación:**
-```bash
-cd ms-banca-conversacion && ./gradlew compileJava compileTestJava
-```
+## Quick Reference
 
-## Patrones de ResultadoEstrategia
-
-Los factory methods disponibles en `ResultadoEstrategia`:
+### Patrones de ResultadoEstrategia
 
 | Patrón | Uso |
 |--------|-----|
 | `new ResultadoEstrategia(etapa, null, plantillas, args)` | Transición simple con mensajes |
-| `ResultadoEstrategia.sinEvento(etapa, plantillas, args)` | Equivalente al anterior (sin evento RabbitMQ) |
+| `ResultadoEstrategia.sinEvento(etapa, plantillas, args)` | Sin evento RabbitMQ |
 | `ResultadoEstrategia.conEstadoFinal(etapa, null, plantillas, args, estadoFinal)` | Finalizar interacción |
 | `ResultadoEstrategia.conFlow(etapa, null, plantillas, args, flowInfo)` | Enviar WhatsApp Flow |
 | `ResultadoEstrategia.conMensajesPreviosYFlow(...)` | Mensajes previos + WhatsApp Flow |
 
-## Ejemplo rápido: Estrategia con switch de opciones de menú
+### Ejemplo: switch de opciones de menú
 
 ```java
 @Override
@@ -403,7 +211,7 @@ protected boolean respuestaValidada(String respuesta) {
 }
 ```
 
-## Ejemplo rápido: Estrategia que espera respuesta de servicio externo
+### Ejemplo: respuesta de servicio externo
 
 ```java
 @Override
@@ -413,13 +221,11 @@ public DisparadorDeEstrategia getDisparador() {
 
 @Override
 protected boolean respuestaValidada(String respuesta) {
-    return true; // Las respuestas de servicios siempre son válidas
+    return true;
 }
 
 @Override
 protected ResultadoEstrategia logicaEspecificaDeEtapa(ContextoEstrategia ctx) {
-    // Parsear la respuesta del servicio externo
-    // Determinar siguiente etapa según resultado
     return new ResultadoEstrategia(
             EtapaInteraccion.{SIGUIENTE_ETAPA}, null,
             List.of(PlantillaMensajeId.{PLANTILLA_RESULTADO}),
@@ -427,7 +233,7 @@ protected ResultadoEstrategia logicaEspecificaDeEtapa(ContextoEstrategia ctx) {
 }
 ```
 
-## Ejemplo rápido: Estrategia con WhatsApp Flow
+### Ejemplo: WhatsApp Flow
 
 ```java
 public class EstrategiaMiFlujoInicioFormulario extends EstrategiaBase {
@@ -449,13 +255,20 @@ public class EstrategiaMiFlujoInicioFormulario extends EstrategiaBase {
     }
 
     @Override
-    protected boolean respuestaValidada(String respuesta) {
-        return true;
-    }
+    protected boolean respuestaValidada(String respuesta) { return true; }
 
     @Override
-    protected ResultadoEstrategia manejarRespuestaInvalida(ContextoEstrategia contexto) {
-        return null; // No aplica
-    }
+    protected ResultadoEstrategia manejarRespuestaInvalida(ContextoEstrategia contexto) { return null; }
 }
 ```
+
+## Common Mistakes
+
+| Error | Solución |
+|-------|----------|
+| Duplicar `(Etapa, Disparador)` — `MotorDeInteraccion` lanza excepción | Verificar unicidad antes de crear la estrategia |
+| Usar `@Component` / `@Service` en clases de estrategia | Registrar vía `@Bean` en `MotorFsmConfiguration` (Clean Architecture) |
+| Agregar etapa sin constructor correcto | Si permite desborde → `(boolean, boolean)`. Si no → `(boolean)` |
+| Olvidar agregar `@Bean` en configuración | La estrategia no se registra y la FSM falla |
+| No crear test unitario | Cada estrategia requiere su test |
+| Crear enum `EtapaInteraccion` duplicado | Buscar etapas existentes antes de agregar |

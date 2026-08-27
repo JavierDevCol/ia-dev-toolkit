@@ -1,0 +1,33 @@
+╔══════════════════════════════════════════════════════════╗
+║          HANDOFF CEIBA → BANCO                          ║
+║                                                        ║
+║  ¿Qué tipo de entrega necesitas preparar?               ║
+║                                                        ║
+║  [1] Entregar release desde DEVELOP                     ║
+║      → La feature ya está integrada en develop via PR   ║
+║      → Crea release/vX.Y.Z desde develop                ║
+║                                                        ║
+║  [2] Entregar release desde feature/fix/hotfix          ║
+║      → El código NO está en develop o ya hay release    ║
+║      → El agente determina el flujo según el caso       ║
+║      → Incluye hotfix y ajustes RC en DES              ║
+║                                                        ║
+╚══════════════════════════════════════════════════════════╝
+
+---
+
+╔══════════════════════════════════════════════════════════╗
+║  ¿Cuál es el origen del cambio?                          ║
+║                                                        ║
+║  [a] feature/fix → No está en develop                   ║
+║      Crea PR feature → develop                          ║
+║      Al aprobarse, usar Opción 1                        ║
+║                                                        ║
+║  [b] hotfix → Bug en PRU/PREPRO/PRO                     ║
+║      Merge a develop primero → nuevo release            ║
+║      Flujo completo por todos los ambientes             ║
+║                                                        ║
+║  [c] ajuste RC → Banco pidió cambios en DES             ║
+║      Fix sobre release vivo → RC efímera → PR a des     ║
+║                                                        ║
+╚══════════════════════════════════════════════════════════╝

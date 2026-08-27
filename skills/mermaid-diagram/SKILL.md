@@ -1,22 +1,43 @@
 ---
 name: mermaid-diagram
-description: Usa esta skill cuando necesites crear, validar o corregir diagramas Mermaid (sequence, flowchart, state, C4), o el usuario pida diagramas, flujos, arquitecturas visuales o documentación gráfica de sistemas.
-compatibility: No special requirements
+description: >
+  Usa esta skill cuando necesites crear, validar o corregir diagramas
+  Mermaid (sequence, flowchart, state, C4).
 ---
 
-# Mermaid Diagram Skill
+# Mermaid Diagram
 
-Genera diagramas Mermaid correctos y consistentes aplicando estándares técnicos validados.
+## Overview
 
-## Proceso de Generación
+Genera diagramas Mermaid correctos y consistentes aplicando estándares técnicos validados. Formato de color, transparencia y validación pre-renderizado incluidos.
 
-1. **Identificar tipo** → ¿Qué comunica el diagrama? (ver tabla de tipos)
-2. **Seleccionar plantilla** → Cargar desde `assets/` según tipo
-3. **Aplicar colores** → Formato obligatorio según tipo de diagrama
-4. **Validar** → Ejecutar checklist pre-renderizado
-5. **Entregar** → Bloque ` ```mermaid ` listo para copiar
+## When to Use
 
-## Tipos de Diagrama — Cuándo Usar Cada Uno
+**Activar cuando:**
+- Se necesita crear un diagrama Mermaid nuevo
+- Se debe validar o corregir un diagrama existente
+- El usuario solicita documentación gráfica: flujos, secuencias, estados o arquitectura C4
+
+**NO activar cuando:**
+- El usuario solo quiere describir un proceso en texto
+- No se requiere renderizado visual (usar markdown con listas)
+
+## Implementation
+
+**Proceso:**
+1. Identificar tipo → qué comunica el diagrama (ver tabla de tipos)
+2. Seleccionar plantilla desde `assets/` según tipo
+3. Aplicar colores según formato obligatorio (HEX vs RGBA)
+4. Validar checklist pre-renderizado
+5. Entregar bloque ` ```mermaid ` listo para copiar
+
+**Regla crítica:** NUNCA usar HTML (`<span>`, `<b>`, `<div>`). Usar Markdown: `**texto**` para negritas.
+
+**Subgraphs anidados:** Usar técnica Nodo Fantasma para evitar superposición de títulos. Ver `references/rules.md` para ejemplos.
+
+## Quick Reference
+
+### Tipos de Diagrama
 
 | Tipo | Declaración | Usa cuando... |
 |------|-------------|---------------|
@@ -25,22 +46,7 @@ Genera diagramas Mermaid correctos y consistentes aplicando estándares técnico
 | State | `stateDiagram-v2` | Estados y transiciones del sistema |
 | C4 | `C4Component` | Arquitectura de componentes estilo C4 |
 
-## Reglas Críticas (Anti-Errores)
-
-### 🚫 HTML Prohibido
-NUNCA usar `<span>`, `<b>`, `<div>`, `<br>`. Usar Markdown: `**texto**` para negritas.
-
-### 🎨 Formato de Color por Tipo
-- **Flowchart/State → HEX con Alpha:** `style Nodo fill:#0096FF26,stroke:#0096FF,color:#fff`
-- **Sequence → RGBA:** `rect rgba(0, 150, 255, 0.15)`
-
-### 🌓 Transparencia 0.15
-SIEMPRE usar transparencia 0.15 en fondos para compatibilidad dark/light mode.
-
-### ✏️ Color de Texto
-SIEMPRE incluir `color:#fff` en estilos de flowchart para legibilidad.
-
-## Paleta de Colores Estándar
+### Formato de Color
 
 | Color | Uso | HEX (Flowchart) | RGBA (Sequence) |
 |-------|-----|-----------------|-----------------|
@@ -50,39 +56,18 @@ SIEMPRE incluir `color:#fff` en estilos de flowchart para legibilidad.
 | Rosa | Sec/Auth/Seguridad | `#FF69B426` | `rgba(255, 105, 180, 0.15)` |
 | Rojo | Error/Crítico | `#FF000026` | `rgba(255, 0, 0, 0.15)` |
 
-## Subgraphs Anidados — Técnica Nodo Fantasma
+### Checklist Pre-Renderizado
 
-Cuando hay subgraphs dentro de subgraphs, aplicar esta técnica para evitar superposición de títulos:
-
-```mermaid
-graph TD
-    classDef spacer fill:none,stroke:none,height:0px;
-    subgraph Padre["Contenedor"]
-        sep[ ]:::spacer
-        sep ~~~ HijoA
-        subgraph Hijo["Subcontenedor"]
-            HijoA[Nodo A] --> HijoB[Nodo B]
-        end
-    end
-```
-
-## Validación Pre-Renderizado
-
-Antes de entregar el diagrama, verificar:
 - [ ] No contiene etiquetas HTML
 - [ ] Formato de color correcto según tipo (HEX vs RGBA)
 - [ ] Transparencia 0.15 en todos los fondos
 - [ ] `color:#fff` en estilos de flowchart
 - [ ] Si hay subgraphs anidados → Técnica Nodo Fantasma aplicada
 
-## Gotchas
+**Reglas de color:** Flowchart/State → HEX con Alpha (`#RRGGBBAA`). Sequence → RGBA (`rect rgba(...)`). `rgba()` ROMPE flowcharts.
 
-- `rgba()` **ROMPE** flowcharts — siempre usar HEX con alpha (`#RRGGBBAA`)
-- Los bloques `rect` en sequence diagrams SÍ soportan `rgba()`
-- Sin `color:#fff` el texto desaparece sobre fondos de color
-- GitHub, GitLab, Azure DevOps y Notion soportan Mermaid nativamente
-- VS Code requiere extensión para preview
+## Common Mistakes
 
-## Referencias Detalladas
-
-Para reglas completas, ejemplos extendidos y validaciones post-renderizado, consultar `references/rules.md`.
+- `rgba()` en flowcharts → usar HEX con alpha en su lugar
+- Sin `color:#fff` → texto desaparece sobre fondos de color
+- VS Code requiere extensión para preview (GitHub/GitLab/Azure DevOps/Notion soportan nativamente)

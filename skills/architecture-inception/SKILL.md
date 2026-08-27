@@ -1,76 +1,50 @@
 ---
 name: architecture-inception
 description: >
-  Usa esta skill cuando el usuario inicie un proyecto desde cero, pase
-  especificaciones técnicas iniciales o solicite la blueprint arquitectónica.
-license: MIT
-compatibility: No special requirements
+  Usa esta skill cuando el usuario inicie un proyecto desde cero, pida
+  especificar una blueprint arquitectónica o solicite definir estilos,
+  estructura de directorios, ADRs y estándares Git iniciales.
 ---
 
-# Architecture Inception & Blueprint Skill
+# Architecture Inception & Blueprint
 
-## Objetivo
-Transformar especificaciones de negocio, requerimientos o documentos de visión iniciales en un **Blueprint de Arquitectura** completo, modular y listo para producción sin escribir código de implementación final.
+## Overview
+Transforma especificaciones de negocio o documentos de visión en un Blueprint de Arquitectura completo, modular y listo para producción sin escribir código final.
 
----
+## When to Use
+- El usuario inicia un proyecto nuevo y necesita definir la arquitectura.
+- Se pide una blueprint arquitectónica, ADRs o estructura de directorios.
+- Se solicitan estándares Git y de commits para un proyecto en arranque.
 
-## Flujo de Trabajo Imperativo
+**Cuándo NO usar:**
+- El proyecto ya tiene arquitectura definida y solo se busca refactorizar.
+- La solicitud es sobre cambios puntuales de código o bugs.
 
-Cuando se active esta skill, sigue **estrictamente** estos 5 pasos en orden:
+## Implementation
+Sigue estos 5 pasos en orden estricto:
 
-### 1. Extraer Atributos de Calidad (NFRs)
-Analiza la documentación del usuario e identifica:
-- Escalabilidad esperada (tráfico, usuarios concurrentes).
-- Mantenibilidad y tamaño del equipo.
-- Complejidad de la lógica de negocio (CRUD simple vs. Dominio complejo).
+1. **Extraer atributos de calidad (NFRs):** Analiza la documentación del usuario e identifica escalabilidad, mantenibilidad y complejidad de negocio.
+2. **Seleccionar y justificar el estilo arquitectónico:** Aplica las reglas de decisión de `references/architectural-styles.md` (Clean/Hexagonal, Monolito Modular, Event-Driven/Microservicios, Layered/MVC).
+3. **Diseñar la estructura de directorios:** Genera un árbol de directorios concreto adaptado al lenguaje/framework objetivo.
+4. **Definir estándares de trabajo:** Establece estrategia de ramas (Trunk-Based o GitFlow), Conventional Commits y Semantic Versioning.
+5. **Documentar ADRs:** Lista entre 2 y 4 Architecture Decision Records críticos para formalizar las decisiones clave.
 
-### 2. Seleccionar y Justificar el Estilo Arquitectónico
-Aplica las reglas de decisión de `references/architectural-styles.md` para seleccionar una de las siguientes opciones:
-- **Clean / Hexagonal Architecture:** Dominio complejo, alta necesidad de aislar la infraestructura.
-- **Monolito Modular:** Proyecto inicial con equipo pequeño pero que busca evitar acoplamiento.
-- **Event-Driven / Microservicios:** Requerimientos explícitos de desacoplamiento asíncrono y alta concurrencia distribuida.
-- **Layered / MVC:** CRUDs directos sin lógica de negocio pesada.
+### Formato del entregable
+Debes responder siempre con esta estructura: Resumen Ejecutivo y NFRs → Estilo Arquitectónico elegido (con justificación y trade-offs) → Diagrama Mermaid → Layout de directorios → Convenciones Git → ADRs iniciales.
 
-### 3. Diseñar la Estructura de Directorios
-Genera un árbol de directorios concreto adaptado al lenguaje/framework objetivo (ejemplo: `/domain`, `/application`, `/infrastructure`, `/adapters`).
+## Quick Reference
 
-### 4. Definir Estándares de Trabajo (Git & Commits)
-Establece las reglas operativas iniciales:
-- **Estrategia de Ramas:** Trunk-Based Development (para CI/CD ágil) o GitFlow (para releases planificados).
-- **Conventional Commits:** Exigir prefijos `feat:`, `fix:`, `docs:`, `refactor:`, `chore:`.
-- **Versionado:** Semantic Versioning (`MAJOR.MINOR.PATCH`).
+| Paso | Acción | Herramienta / Referencia |
+|------|--------|--------------------------|
+| 1 | Extraer NFRs | Análisis de documentación del usuario |
+| 2 | Seleccionar estilo arquitectónico | `references/architectural-styles.md` |
+| 3 | Generar estructura de directorios | Adaptar a stack del proyecto |
+| 4 | Definir estándares Git y commits | Trunk-Based o GitFlow + Conventional Commits |
+| 5 | Listar ADRs iniciales (2-4) | Formato estándar ADR |
 
-### 5. Documentar Puntos de Decisión (ADRs)
-Lista entre 2 y 4 **Architecture Decision Records (ADRs)** críticos que deben crearse para formalizar la elección de arquitectura, base de datos y comunicación.
-
----
-
-## Formato del Entregable Mandatorio
-
-Debes responder siempre utilizando la siguiente estructura Markdown:
-
-### 1. Resumen Ejecutivo y NFRs Clave
-- **Tipo de Sistema Identificado:** [Ej: Event-Driven Microservices / Monolito Modular]
-- **Atributos Priorizados:** [Ej: Mantenibilidad > Latencia]
-
-### 2. Estilo Arquitectónico Elegido
-- **Arquitectura:** [Nombre]
-- **Justificación:** [¿Por qué resuelve el problema?]
-- **Trade-offs:** [¿Qué se sacrifica o qué complejidad añade?]
-
-### 3. Diagrama de Comunicación (Mermaid)
-```mermaid
-graph TD
-    %% Incluir diagrama de componentes de alto nivel aquí
-```
-
-### 4. Layout Propuesto de Directorios
-[Insertar árbol de directorios del proyecto]
-
-### 5. Convenciones de Ingeniería (Git Workflow)
-- **Estrategia de Ramas:** [Trunk-Based / GitFlow]
-- **Estructura de Commits:** [Ejemplos de Conventional Commits]
-
-### 6. ADRs Iniciales Sugeridos
-- **ADR-001:** [Título de la decisión de arquitectura]
-- **ADR-002:** [Título de la decisión de persistencia o comunicación]
+## Common Mistakes
+- Saltarse la extracción de NFRs y saltar directamente a elegir arquitectura.
+- No justificar el estilo arquitectónico ni documentar trade-offs.
+- Generar estructura de directorios genérica sin adaptar al stack tecnológico.
+- Olvidar los ADRs o generar demasiados.
+- Incluir código de implementación final (esta skill solo genera blueprint).

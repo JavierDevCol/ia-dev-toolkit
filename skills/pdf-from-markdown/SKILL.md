@@ -4,105 +4,64 @@ description: >
   Usa esta skill cuando el usuario mencione convertir markdown a PDF,
   exportar documento como PDF, generar PDF desde Mermaid o renderizar
   diagramas a PDF.
-compatibility: Requires Node.js, @mermaid-js/mermaid-cli
-metadata:
-  author: javier.garcia
-  version: "2.0"
 ---
 
 # PDF from Markdown
 
-## Available Scripts
+## Overview
 
-- **`scripts/generate_pdf.sh`** — Renders a single `.mmd` file to PDF via Mermaid CLI. Run with `--help` for usage.
+Convierte archivos Markdown a PDF, pre-renderizando bloques Mermaid como imágenes. Soporta exportación de documento completo o diagramas individuales.
 
-## Decide Which Mode to Use
+## When to Use
 
-| User intent | Mode |
+**Activar cuando:**
+- El usuario quiere convertir un archivo `.md` a PDF
+- Se necesita exportar un documento con diagramas Mermaid a PDF
+- Se solicita generar PDFs individuales por diagrama
+
+**NO activar cuando:**
+- El usuario solo quiere visualizar el Markdown sin exportar (usar preview del editor)
+- No está instalado Node.js ni `@mermaid-js/mermaid-cli` (verificar antes de ejecutar)
+
+## Implementation
+
+**Script principal:** `scripts/generate_pdf.sh` — Renderiza un archivo `.mmd` a PDF via Mermaid CLI. Ejecutar con `--help` para uso.
+
+**Modos disponibles:**
+
+| User intent | Modo |
 |---|---|
-| "Convert this markdown to PDF" / "Export document as PDF" | **A — Full Document** |
-| "Generate PDFs of the diagrams" / "Extract diagrams as PDF" | **B — Diagram-Only** |
-| Ambiguous | Default to **A** (full document). |
+| "Convertir markdown a PDF" / "Exportar documento como PDF" | **A — Full Document** |
+| "Generar PDFs de los diagramas" / "Extraer diagramas como PDF" | **B — Diagram-Only** |
+| Ambiguo | Default **A** (full document) |
 
----
+### Modo A — Documento Completo
 
-## Mode A — Full Document to PDF
+1. Leer Markdown original → crear `temp_build.md`
+2. Extraer cada bloque ` ```mermaid ``` ` → renderizar a PNG con `bash scripts/generate_pdf.sh temp_diag_<index>.mmd temp_diag_<index>.png`
+3. Reemplazar bloques mermaid con `![Diagram](./temp_diag_<index>.png)`
+4. Compilar: `npx md-to-pdf temp_build.md`
+5. Renombrar output → limpiar temporales
 
-Converts the entire Markdown file into a single PDF, pre-rendering any Mermaid blocks as PNG images so they appear correctly in the output.
+### Modo B — Diagramas Individuales
 
-### Steps
+1. Escanear bloques ` ```mermaid ``` ` en el Markdown
+2. Nombrar cada output con heading precedente (snake_case)
+3. Renderizar cada diagrama con `bash scripts/generate_pdf.sh temp_diagram_<index>.mmd <output_name>.pdf`
+4. Insertar enlace `[📄 Ver diagrama en PDF](./<output_name>.pdf)` después de cada bloque
+5. Limpiar temporales
 
-1. **Read** the original Markdown file.
-2. **Create working copy** named `temp_build.md` in the same directory.
-3. **Extract and render diagrams** — for each ` ```mermaid ``` ` block:
-   - Save the code to `temp_diag_<index>.mmd`.
-   - Render to PNG:
-     ```bash
-     bash scripts/generate_pdf.sh temp_diag_<index>.mmd temp_diag_<index>.png
-     ```
-     > If the output extension is `.png`, mmdc produces a PNG automatically.
-4. **Embed images** — replace each mermaid block in `temp_build.md` with:
-   ```
-   ![Diagram](./temp_diag_<index>.png)
-   ```
-5. **Compile PDF**:
-   ```bash
-   npx md-to-pdf temp_build.md
-   ```
-   This produces `temp_build.pdf`.
-6. **Rename** `temp_build.pdf` → `<original-name>.pdf`.
-7. **Clean up** — delete `temp_build.md`, all `.mmd` and `.png` temp files.
-8. **Notify** the user with the path of the final PDF.
+## Quick Reference
 
----
+| Comando | Descripción |
+|---------|-------------|
+| `bash scripts/generate_pdf.sh input.mmd output.pdf` | Renderiza un diagrama a PDF |
+| `bash scripts/generate_pdf.sh input.mmd output.png` | Renderiza un diagrama a PNG |
+| `npx md-to-pdf temp_build.md` | Compila Markdown completo a PDF |
 
-## Mode B — Individual Diagram PDFs
+## Common Mistakes
 
-Extracts each Mermaid diagram from a Markdown file, generates one PDF per diagram, and inserts a link in the source file.
-
-### Steps
-
-1. **Scan** the Markdown file for all ` ```mermaid ``` ` blocks.
-2. **Name each output** based on the nearest preceding heading (snake_case). Example: heading "1. Vista General" → `vista_general.pdf`.
-3. **Process each diagram**:
-   - Save to `temp_diagram_<index>.mmd`.
-   - Run:
-     ```bash
-     bash scripts/generate_pdf.sh temp_diagram_<index>.mmd <output_name>.pdf
-     ```
-4. **Insert link** — immediately after the closing ` ``` ` of each mermaid block, add:
-   ```
-   [📄 Ver diagrama en PDF](./<output_name>.pdf)
-   ```
-5. **Clean up** — delete all `temp_diagram_*.mmd` files.
-6. **Notify** the user that the Markdown was updated with PDF links.
-
-### Example
-
-**Before:**
-```markdown
-### 1. Arquitectura Base
-` ``mermaid
-graph TD;
-    A-->B;
-` ``
-```
-
-**After:**
-```markdown
-### 1. Arquitectura Base
-` ``mermaid
-graph TD;
-    A-->B;
-` ``
-[📄 Ver diagrama en PDF](./arquitectura_base.pdf)
-```
-
----
-
-## Gotchas
-
-- **mmdc produce PNG por defecto con extensión .png** — no forzar `-e png`, basta con nombrar el archivo de salida con `.png`.
-- **`npx md-to-pdf` descarga la dependencia al vuelo** si no está instalada globalmente — no requiere `npm install` previo.
-- **No uses `npx mmdc` a secas** — el paquete correcto es `@mermaid-js/mermaid-cli`. El script bundled ya maneja esto.
-- **Limpia siempre los temporales** — los archivos `.mmd` y `.png` intermedios no deben quedar en el workspace del usuario.
+- `mmdc` produce PNG por defecto con extensión `.png` — no forzar `-e png`, basta con nombrar el archivo de salida con `.png`
+- `npx md-to-pdf` descarga la dependencia al vuelo — no requiere `npm install` previo
+- No usar `npx mmdc` a secas — el paquete correcto es `@mermaid-js/mermaid-cli` (el script bundled ya maneja esto)
+- Siempre limpiar archivos temporales `.mmd` y `.png` intermedios

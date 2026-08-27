@@ -1,33 +1,40 @@
 ---
 name: evaluar-skill
 description: >
-  Usa esta skill cuando quieras mejorar una skill existente, verificar
-  si funciona correctamente, comparar versiones o identificar gaps en
-  las instrucciones.
-compatibility: No special requirements
-metadata:
-  author: CEIBA DevOps
-  version: 1.0.0
+  Usa esta skill cuando necesites evaluar la calidad de una skill existente
+  usando metodología de evaluación sistemática con test cases, baseline
+  y benchmark cuantitativo.
 ---
 
-# Skill: Evaluar Skill
+# Evaluar Skill
 
-Evalúa la calidad de skills existentes usando metodología de evaluación sistemática.
+Evalúa la calidad de skills existentes con evaluación sistemática reproducible.
 
----
+## Overview
 
-## Flujo de Evaluación
+Compara el rendimiento de una skill con y sin ella (baseline), usando test cases, assertions verificables y métricas cuantitativas para determinar su valor real.
 
-Seguir estos 6 pasos en orden:
+## When to Use
 
-### 1. Seleccionar Skill
+- Se creó o modificó una skill y se necesita validar que funciona correctamente
+- Se quiere comparar dos versiones de una skill
+- Se detectan comportamientos inesperados al usar una skill
+- Se necesita un benchmark para justificar el valor de una skill
 
-Preguntar: "¿Qué skill quieres evaluar?"
-- Leer `SKILL.md` de la skill objetivo
-- Identificar su `description` y propósito
-- Entender qué debe hacer
+### Cuándo NO usar
 
-### 2. Diseñar Test Cases
+- Skills triviales sin complejidad procesal (no justifican evaluación formal)
+- Cuando no existe una baseline previa sin la skill
+- Para bugs puntuales (usar systematic-debugging)
+- Para skills recién escritas sin iteración previa
+
+## Implementation
+
+### Paso 1 — Seleccionar Skill
+
+Leer `SKILL.md` de la skill objetivo. Identificar su `description` y propósito.
+
+### Paso 2 — Diseñar Test Cases
 
 Crear 2-3 test cases iniciales en `evals/evals.json`:
 
@@ -37,51 +44,32 @@ Crear 2-3 test cases iniciales en `evals/evals.json`:
   "evals": [
     {
       "id": 1,
-      "prompt": "Mensaje realista del usuario",
+      "prompt": "Mensaje realista del usuario (con paths, nombres, contexto real)",
       "expected_output": "Descripción del éxito",
       "assertions": [
-        "Verificación específica 1",
-        "Verificación específica 2"
+        "Verificación específica y observable 1",
+        "Verificación específica y observable 2"
       ]
     }
   ]
 }
 ```
 
-**Consejos para prompts:**
-- Usar lenguaje real (con paths, nombres, contexto)
-- Variar formalidad (casual vs preciso)
-- Incluir casos borde
-- Mezclar 8-10 should-trigger y 8-10 shouldn't-trigger
+**Consejos para prompts:** usar lenguaje real, variar formalidad, incluir casos borde, mezclar 8-10 should-trigger y 8-10 shouldn't-trigger.
 
-### 3. Ejecutar Evaluación
+### Paso 3 — Ejecutar Evaluación
 
 Para cada test case, ejecutar 2 veces:
 
-**Con skill:**
-```
-Skill path: skills/<nombre-skill>
-Task: <prompt del test case>
-Save outputs to: <workspace>/iteration-1/eval-<id>/with_skill/outputs/
-```
-
-**Sin skill (baseline):**
-```
-Task: <prompt del test case>
-Save outputs to: <workspace>/iteration-1/eval-<id>/without_skill/outputs/
-```
+- **Con skill:** `Skill path: skills/<nombre-skill>` → outputs en `iteration-1/eval-<id>/with_skill/outputs/`
+- **Sin skill (baseline):** Solo el task → outputs en `iteration-1/eval-<id>/without_skill/outputs/`
 
 Capturar en `timing.json`:
 ```json
-{
-  "total_tokens": 84852,
-  "duration_ms": 23332
-}
+{ "total_tokens": 84852, "duration_ms": 23332 }
 ```
 
-### 4. Escribir Assertions
-
-Agregar assertions verificables a cada test case:
+### Paso 4 — Escribir Assertions
 
 ```json
 "assertions": [
@@ -91,45 +79,35 @@ Agregar assertions verificables a cada test case:
 ]
 ```
 
-**Buenas assertions:**
-- Verificables programáticamente
-- Específicas y observables
-- Contables
+Assertions deben ser verificables programáticamente, específicas y observables.
 
-**Malas assertions:**
-- "El output es bueno" (vago)
-- "Usa exactamente la frase X" (muy frágil)
+### Paso 5 — Calificar Outputs
 
-### 5. Calificar Outputs
+Para cada assertion, evaluar PASS/FAIL con evidencia concreta. Requerir evidencia. No dar beneficio de la duda.
 
-Para cada assertion, evaluar PASS/FAIL con evidencia:
+### Paso 6 — Generar Benchmark
 
-```json
-{
-  "assertion_results": [
-    {
-      "text": "El output incluye un archivo de gráfico",
-      "passed": true,
-      "evidence": "Encontrado chart.png (45KB) en outputs/"
-    }
-  ],
-  "summary": {
-    "passed": 3,
-    "failed": 1,
-    "total": 4,
-    "pass_rate": 0.75
-  }
-}
-```
+Calcular métricas agregadas en `benchmark.json` (ver Quick Reference para estructura).
 
-**Reglas de grading:**
-- Requerir evidencia concreta para PASS
-- No dar beneficio de la duda
-- Revisar assertions que siempre pasan/fallan
+### Paso 7 — Iterar
 
-### 6. Generar Benchmark
+1. Identificar fallos en train set
+2. Proponer mejoras a la skill
+3. Re-ejecutar en nueva iteración
+4. Comparar con iteración anterior
+5. Repetir hasta converger
 
-Calcular métricas agregadas en `benchmark.json`:
+## Quick Reference
+
+### Métricas de éxito
+
+| Métrica | Umbral | Interpretación |
+|---------|--------|----------------|
+| Pass rate delta | > 0.3 | Skill valioso |
+| Tokens delta | < 2x | Costo aceptable |
+| Duration delta | < 3x | Performance aceptable |
+
+### Estructura de benchmark.json
 
 ```json
 {
@@ -153,36 +131,27 @@ Calcular métricas agregadas en `benchmark.json`:
 }
 ```
 
----
+### Patrones de análisis
 
-## Análisis de Resultados
+| Patrón | Significado |
+|--------|-------------|
+| Assertions que siempre pasan en ambos | Eliminar (no aportan valor) |
+| Assertions que siempre fallan en ambos | Revisar si son válidas |
+| Assertions que pasan con skill pero fallan sin | Skill aporta valor |
+| Alta varianza en pass_rate | Instrucciones ambiguas |
 
-### Patrones a buscar
+## Common Mistakes
 
-1. **Assertions que siempre pasan en ambos:** Eliminar (no aportan valor)
-2. **Assertions que siempre fallan en ambos:** Revisar si son válidas
-3. **Assertions que pasan con skill pero fallan sin:** El skill aporta valor
-4. **Alta varianza en pass_rate:** Instrucciones ambiguas
-
-### Métricas de éxito
-
-- **Pass rate delta > 0.3:** Skill valioso
-- **Tokens delta < 2x:** Costo aceptable
-- **Duration delta < 3x:** Performance aceptable
-
----
-
-## Iteración
-
-1. Identificar fallos en train set
-2. Proponer mejoras a la skill
-3. Re-ejecutar en nueva iteración
-4. Comparar con iteración anterior
-5. Repetir hasta converger
-
----
+| Error | Solución |
+|-------|----------|
+| Assertions vagas ("el output es bueno") | Usar assertions verificables y observables |
+| No ejecutar baseline sin skill | Siempre comparar con y sin skill para medir delta real |
+| No guardar timing.json | Sin datos de tokens/duración no hay benchmark completo |
+| Assertions demasiado frágiles ("usa exactamente la frase X") | Assertions que verifiquen comportamiento, no forma exacta |
+| Ejecutar solo 1 vez por variación | Ejecutar 2+ veces para detectar varianza |
+| Assertions que siempre pasan/fallan en ambos entornos | Eliminarlas — no discriminan valor de la skill |
 
 ## Referencias
 
-Para metodología detallada, ver `references/eval-methodology.md`
-Para templates de test cases, ver `assets/eval-templates.json`
+- Metodología detallada: `references/eval-methodology.md`
+- Templates de test cases: `assets/eval-templates.json`

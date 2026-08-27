@@ -1,139 +1,81 @@
 ---
 name: validar-ca
 description: >
-  Usa esta skill para verificar que el código implementado cumple los
-  criterios de aceptación del refinamiento.
-compatibility: Requires .SAC/config/CONFIG_SYSTEM.yaml
+  Valida criterios de aceptación contra código implementado. Usa esta skill cuando se necesite verificar que el código cumplidos los CAs de una HU tras ejecutar tareas de desarrollo.
 ---
 
-## Parámetros
+# Validar Criterios de Aceptación
 
-| Parámetro | Tipo | Default | Valores posibles | Descripción |
-|-----------|------|---------|------------------|-------------|
-| `id_hu` | string | — | Ej: `HU-001`, `HU-012` | Identificador de la HU a validar |
-| `--task_id` | string | null | Ej: `HU-001-TASK-1`, `HU-012-TASK-3` | ID de task funcional (requerido para scope=granulares) |
-| `--scope` | option | `todos` | `granulares`, `integracion`, `todos` | Qué CAs validar |
+## Overview
 
-## Scopes de Validación
+Verifica que el código cumple los criterios de aceptación del refinamiento. Fuente de verdad: CAs del refinamiento, nunca del plan.
 
-| Scope | Descripción | Requisito |
-|-------|-------------|-----------|
-| `granulares` | CAs granulares de una task específica | Requiere `--task_id` |
+## When to Use
+
+- Se completó ejecución de tasks de una HU
+- Se necesita verificar si un CA está CUMPLIDO, PARCIAL o NO CUMPLIDO
+
+**Cuándo NO usar:**
+- HU no refinada o no planificada
+- HU en modo Plano con task_id (error: HU plana no tiene tasks)
+- Antes de ejecutar el plan (no hay código que validar)
+
+## Implementation
+
+1. **Cargar config** → leer `.SAC/config/CONFIG_SYSTEM.yaml` para rutas
+2. **Cargar fuentes** → Refinamiento.md (CAs), Plan.md (estado), HU.md (modo)
+3. **Determinar CAs** → Plano: todos; Particionada: granulares/integración/todos
+4. **Delegar a sub-agente** → valida cada CA contra código y tests; retorna PASS/FAIL con evidencia
+5. **Detener al primer FAIL** → no continuar si algún CA no cumple
+6. **Actualizar Plan.md** → marcar checkbox según modo y scope
+7. **Actualizar Refinamiento.md** → marcar `[X]` en CAs validados
+8. **Emitir reporte** con resultado por CA
+
+**Propagación:** TASK-N completa → CA integración `[~]` candidato → `--scope integracion` confirma `[X]` → HU completada
+
+## Quick Reference
+
+### Parámetros
+
+| Parámetro | Tipo | Default | Descripción |
+|-----------|------|---------|-------------|
+| `id_hu` | string | — | ID de la HU a validar |
+| `--task_id` | string | null | ID de task funcional (requerido para scope=granulares) |
+| `--scope` | option | `todos` | `granulares`, `integracion`, `todos` |
+
+### Scopes
+
+| Scope | CAs a validar | Requisito |
+|-------|---------------|-----------|
+| `granulares` | CAs de una task específica | Requiere `--task_id` |
 | `integracion` | CAs de integración (padre) | Todas las tasks en [EJECUTADA] |
-| `todos` | Granulares de todas las tasks + integración | — |
+| `todos` | Granulares de todas + integración | — |
 
-## Instrucciones
-
-### 1. Cargar Configuración
-
-- Leer `.SAC/config/CONFIG_SYSTEM.yaml` → obtener `archivos.backlog`, `artifacts.hu_folder`
-
-### 2. Cargar Fuentes de Datos
-
-- Verificar que existe `{hu_folder}/[ID-HU]/`
-- Cargar `{hu_folder}/[ID-HU]/Refinamiento.md` (fuente de verdad de CAs)
-- Cargar `{hu_folder}/[ID-HU]/Plan.md` (estado de verificación)
-- Cargar `{hu_folder}/[ID-HU]/HU.md`
-- Extraer campo 'Modo' del plan: [Plano | Particionada]
-- **Si Modo = Plano Y task_id != null** → ⛔ Error: HU plana no tiene tasks
-
-### 3. Determinar CAs a Validar
-
-**Modo Plano:**
-- Extraer CAs de '## 2. Criterios de Aceptación' del refinamiento
-- `cas_a_validar = todos los CAs`
-
-**Modo Particionada:**
-
-| Scope | CAs a validar | Prerequisito |
-|-------|---------------|--------------|
-| `granulares` | CAs granulares de la task indicada | Requiere task_id |
-| `integracion` | CAs de integración (padre) | Todas las tasks [EJECUTADA] |
-| `todos` | Granulares de TODAS + integración | Tasks completadas para integración |
-
-### 4. Validar Cada CA contra Código y Tests
-
-**Delegar a sub-agente validador-calidad:**
-
-Para cada CA:
-1. Sub-agente recibe: CA + rutas de archivos + rutas de tests
-2. Sub-agente valida contra código real en filesystem
-3. Sub-agente retorna: PASS/FAIL + evidencia
-
-**Veredictos:**
-- ✅ **CUMPLIDO:** PASS
-- ⚠️ **PARCIAL:** PASS con observaciones
-- ❌ **NO CUMPLIDO:** FAIL
-
-**⛔ DETENER al primer CA con veredicto ❌**
-
-### 5. Actualizar Estado en Plan
-
-**EDITAR Plan.md:**
+### Actualización de Plan.md
 
 | Modo | Scope | Acción |
 |------|-------|--------|
-| Plano | — | `[ ]` → `[X]` en 'Fase Final: Validar CAs' |
-| Particionada | granulares | `[ ]` → `[X]` en '### Validar CAs de TASK-N' |
-| Particionada | integracion | `[~]` → `[X]` en 'Fase Final: Validar CAs de Integración' |
+| Plano | — | `[ ]` → `[X]` en Fase Final |
+| Particionada | granulares | `[ ]` → `[X]` en Validar CAs de TASK-N |
+| Particionada | integracion | `[~]` → `[X]` en Fase Final: CAs de Integración |
 
-**Propagación ascendente:**
-```
-CAs granulares TASK-N todos [X]
-    ↓
-CA de integración padre → [~] candidato
-    ↓
->validar_ca --scope integracion confirma [~] → [X]
-    ↓
-Todos los CAs padre en [X]
-    ↓
-HU completada [X]
-```
+### Veredictos
 
-**EDITAR Refinamiento.md:** Marcar `[ ]` → `[X]` en CAs validados
+| Símbolo | Estado | Significado |
+|---------|--------|-------------|
+| ✅ | CUMPLIDO | PASS |
+| ⚠️ | PARCIAL | PASS con observaciones |
+| ❌ | NO CUMPLIDO | FAIL (detiene ejecución) |
 
-### 6. Emitir Reporte
-
-Generar reporte compacto con resultado por CA.
-
-## Restricciones
-
-- Leer CAs **SIEMPRE** desde el refinamiento (fuente de verdad), NUNCA del plan
-- Verificar cada CA contra el código real en el filesystem y tests
-- Marcar estado en el plan (checkboxes), NO en el refinamiento
-- **DETENER** ante el primer CA no cumplido
-- Distinguir CAs granulares de CAs de integración
-- Delegar validación a sub-agente
-
-## Formato de salida
-
-**Validación completa:**
-```
-✅ VALIDACIÓN DE CAs COMPLETADA: [ID-HU] [scope]
-📊 CAs validados: [X/Y] ✅ | Parciales: [P] ⚠️ | No cumplidos: [F] ❌
-
-| CA | Veredicto | Evidencia |
-|----|-----------|-----------|
-| CA-01 | ✅ | test_auth.py::test_register |
-| CA-02 | ⚠️ | api/register.py (falta validación email) |
-```
-
-**Validación parcial (task_especifica):**
-```
-⚠️ VALIDACIÓN PARCIAL: [ID-HU] Task [task_id]
-📊 CAs granulares: [X/Y] ✅
-📈 Pendientes CAs integración: ejecutar >validar_ca --scope integracion cuando todas las tasks estén completas
-```
-
-## Errores comunes
+## Common Mistakes
 
 | Error | Causa | Solución |
 |-------|-------|----------|
-| Refinamiento no encontrado | No refinada | Verificar que la HU fue refinada |
-| Plan no encontrado | No planificada | Ejecutar >planificar_hu primero |
-| No hay código implementado | No ejecutada | Ejecutar >ejecutar_plan primero |
+| Refinamiento no encontrado | HU no refinada | Verificar que la HU fue refinada |
+| Plan no encontrado | HU no planificada | Ejecutar >planificar_hu primero |
+| No hay código implementado | Tasks no ejecutadas | Ejecutar >ejecutar_plan primero |
 | Tasks pendientes para integración | Tasks incompletas | Completar todas las tasks primero |
 
 ## Después de ejecutar
 
-- `>ejecutar_plan [ID-HU] --modo_ejecucion task_especifica --task_id [siguiente]` — Continuar con siguiente task
+- `>ejecutar_plan [ID-HU] --task_id [siguiente]` → continuar con siguiente task

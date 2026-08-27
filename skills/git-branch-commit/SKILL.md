@@ -1,176 +1,54 @@
 ---
 name: git-branch-commit
-description: >
-  Usa esta skill cuando el usuario pida crear una rama, hacer commit
-  o verificar el formato de mensajes de commit. No la uses para entregas
-  formales (usar entrega-ambiente-banco) ni para fixes post-entrega
-  (usar fix-release).
-compatibility: Requires git
-metadata:
-  author: CEIBA DevOps
-  version: 2.0.0
+description: Use when the user asks to create a git branch, make a commit, or verify commit message format (Conventional Commits) on a feature or work branch.
 ---
 
-# Skill: Git Branch & Commit
+# Git Branch & Commit
 
-Crea ramas y gestiona commits de forma directa según la solicitud del usuario.
+## Overview
+Crea ramas y gestiona commits de forma directa con Conventional Commits y preview obligatorio antes de push.
 
----
+## When to Use
+- "Crear rama para HU 131735", "nueva rama feature X" → Crear rama.
+- "Hacer commit", "guardar cambios", "¿cómo se llama esta rama?" → Commit/rama.
+- Verificar o corregir el formato de mensajes de commit.
 
-## Detección Automática
+**Cuándo NO usar:** entregas formales a ambiente banco (usar `entrega-ambiente-banco`); fixes post-entrega (usar `fix-release`).
 
-La skill detecta qué necesita el usuario:
+## Implementation
 
-| Solicitud del usuario | Acción |
-|-----------------------|--------|
-| "Crear rama para HU 131735" | → **Crear rama** |
-| "Nueva rama feature X" | → **Crear rama** |
-| "Hacer commit" / "Commitear" | → **Commit** |
-| "Guardar cambios" | → **Commit** |
-| "¿Cómo se llama esta rama?" | → **Crear rama** |
+**Crear rama:**
+1. `git fetch origin`; pregunta rama base (main, develop, release/vX.Y.Z); default `develop`. Validar existencia o detener.
+2. Nombre: si es HU → `hu-[ID]-[desc-kebab]` (ej. `hu-131735-consultar-saldo`); si no → `[tipo]-[desc-kebab]` (tipos: `feature`, `hotfix`, `chore`, `refactor`, `docs`).
+3. `git checkout -b [rama] [origen] && git push -u origin [rama]`.
+4. Commit inicial vacío: `git commit --allow-empty -m "chore: iniciar [descripción]"` (HU: `chore: iniciar desarrollo de HU [ID]`).
 
----
+**Hacer commit:**
+1. `git status && git diff --staged && git diff`.
+2. Archivos: [T] todos, [E] específicos, [S] solo staged.
+3. Tipo: feat / fix / refactor / docs / chore / BREAKING (ver tabla).
+4. Scope opcional: `tipo(ámbito): descripción`.
+5. Mensaje: inglés, imperativo, sin punto, ≤72 chars primera línea; BREAKING → `BREAKING CHANGE:` en cuerpo.
+6. Preview y aprobación — **NUNCA** ejecutar sin confirmación.
+7. `git commit -m "[mensaje]" && git push origin [rama_actual]`.
 
-## Crear Rama
+**Reglas:** commit inicial siempre vacío; Conventional Commits estricto; preview obligatorio; push automático tras commit; kebab-case en nombres de rama.
 
-### 1. Validar origen
+## Quick Reference
 
-```bash
-git fetch origin
-```
+| Tipo | Uso |
+|------|-----|
+| `feat` | Nueva funcionalidad |
+| `fix` | Corrección de errores |
+| `refactor` | Optimización sin cambio funcional |
+| `docs` | Solo documentación |
+| `chore` | Mantenimiento/configuración |
+| `BREAKING` | Rompe compatibilidad (cuerpo `BREAKING CHANGE:`) |
 
-Preguntar: "¿Desde qué rama base?" (main, develop, release/vX.Y.Z)
-- Si no responde, usar `develop` como defecto.
-- Validar que existe: `git branch -a | grep "rama_origen"`
-- Si no existe → error. Detener.
+Formato rama HU: `hu-[ID]-[desc]` · General: `[tipo]-[desc]`.
 
-### 2. Generar nombre
-
-**Si es HU** (el usuario menciona ID de historia):
-- Formato: `hu-[ID]-[descripcion-kebab-case]`
-- Ejemplo: `hu-131735-consultar-saldo-tarjeta`
-
-**Si es caso general:**
-- Formato: `[tipo]-[descripcion-kebab-case]`
-- Tipos: `feature`, `hotfix`, `chore`, `refactor`, `docs`
-- Ejemplo: `feature-agregar-filtro-fechas`
-
-### 3. Crear y pushear
-
-```bash
-git checkout -b [nombre_rama] [rama_origen]
-git push -u origin [nombre_rama]
-```
-
-### 4. Commit inicial obligatorio
-
-```bash
-git commit --allow-empty -m "chore: iniciar [descripción]"
-```
-
-**Formato:**
-- Si es HU: `chore: iniciar desarrollo de HU [ID]`
-- Si es general: `chore: iniciar cambios en [descripcion]`
-
-### 5. Resumen
-
-```
-✅ Rama creada.
-  • Nombre: [nombre_rama]
-  • Origen: [rama_origen]
-  • Commit: chore: iniciar [descripción]
-```
-
----
-
-## Hacer Commit
-
-### 1. Verificar estado
-
-```bash
-git status
-git diff --staged
-git diff
-```
-
-### 2. Agregar archivos
-
-Preguntar: "¿Archivos a commitear?"
-- **[T]** Todos (`git add .`)
-- **[E]** Elegir específicos
-- **[S]** Solo staged
-
-### 3. Tipo de commit
-
-```
-¿Qué tipo de cambio es?
-
-  [f] feat:      Nueva funcionalidad
-  [x] fix:       Corrección de errores
-  [r] refactor:  Optimización sin cambio funcional
-  [d] docs:      Solo documentación
-  [c] chore:     Mantenimiento o configuración
-  [b] BREAKING:  Rompe compatibilidad anterior
-```
-
-### 4. Scope (opcional)
-
-Preguntar: "¿Aplica algún ámbito?" (api, ui, auth, etc.)
-- Si aplica: `tipo(ámbito): descripción`
-- Si no: `tipo: descripción`
-
-### 5. Generar mensaje
-
-Reglas:
-- Descripción en inglés, imperativo, sin punto final
-- Máximo 72 caracteres en primera línea
-- Si es BREAKING CHANGE, agregar `BREAKING CHANGE:` en el cuerpo
-
-### 6. Preview y Aprobación
-
-**NUNCA** ejecutar sin aprobación:
-
-```
-PREVIEW DEL COMMIT
-
-  Título: [tipo(ámbito): descripción]
-  Archivos: [lista]
-
-  [S] Confirmar y push
-  [E] Editar mensaje
-  [N] Cancelar
-```
-
-### 7. Ejecutar
-
-```bash
-git commit -m "[tipo(ámbito): descripción]"
-git push origin [rama_actual]
-```
-
-### 8. Resumen
-
-```
-✅ Commit realizado.
-  • Hash: [hash_corto]
-  • Mensaje: [tipo(ámbito): descripción]
-  • Rama: [nombre_rama]
-```
-
----
-
-## Reglas
-
-1. **Commit inicial siempre.** Toda rama nueva empieza con commit vacío.
-2. **Conventional Commits estricto.** Tipo + descripción en imperativo.
-3. **Preview obligatorio.** Nunca ejecutar sin aprobación.
-4. **Push automático.** Después del commit, hacer push.
-5. **Kebab-case.** Minúsculas, guiones, sin espacios.
-
----
-
-## Gotchas
-
-- **Rama ya existe:** Preguntar si usar la existente o crear otra.
-- **develop protegida:** Crear PR en lugar de push directo.
-- **Commit vacío rechazado:** Usar `.gitkeep` temporal.
+## Common Mistakes
+- Rama ya existe: preguntar si reusar o crear otra.
+- `develop` protegida: crear PR en vez de push directo.
+- Commit vacío rechazado: usar `.gitkeep` temporal.
+- Ejecutar commit/push sin preview y aprobación del usuario.
