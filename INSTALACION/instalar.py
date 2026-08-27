@@ -512,7 +512,47 @@ def install_tool(tool_info, project_path):
         return False
 
 
-def install_sac_config(project_path, root_dir):
+def ask_project_config(project_path):
+    """Solicita datos del proyecto al usuario para autocompletar CONFIG_USER.yaml."""
+    print(f"\n{'═' * 60}")
+    print(f"  📝 CONFIGURACIÓN DEL PROYECTO")
+    print(f"{'═' * 60}")
+    print(f"  (Presiona Enter para usar el valor por defecto)\n")
+
+    # Nombre del usuario
+    default_user = os.environ.get("USER", os.environ.get("USERNAME", "Usuario"))
+    user_name = input(f"  Tu nombre [{default_user}]: ").strip()
+    if not user_name:
+        user_name = default_user
+
+    # Nombre del proyecto
+    default_project = project_path.name
+    project_name = input(f"  Nombre del proyecto [{default_project}]: ").strip()
+    if not project_name:
+        project_name = default_project
+
+    # Idioma
+    print(f"\n  Idioma para documentación:")
+    print(f"    [1] Español (es)")
+    print(f"    [2] English (en)")
+    print(f"    [3] Português (pt)")
+    lang_choice = input(f"  Selección [1]: ").strip()
+    lang_map = {"1": "es", "2": "en", "3": "pt"}
+    lang = lang_map.get(lang_choice, "es")
+
+    print(f"\n  Resumen:")
+    print(f"    Usuario:   {user_name}")
+    print(f"    Proyecto:  {project_name}")
+    print(f"    Idioma:    {lang}")
+
+    return {
+        "user_name": user_name,
+        "project_name": project_name,
+        "lang": lang
+    }
+
+
+def install_sac_config(project_path, root_dir, project_config=None):
     sac_dest = project_path / ".SAC"
 
     print_info("Instalando configuración Team Dev SAC...")
@@ -526,6 +566,7 @@ def install_sac_config(project_path, root_dir):
             shutil.copy2(config_file, sac_dest / "config" / config_file.name)
             print_success(f"config/{config_file.name}")
 
+    # Autocompletar CONFIG_SYSTEM.yaml con rutas
     config_system = sac_dest / "config" / "CONFIG_SYSTEM.yaml"
     if config_system.exists():
         try:
@@ -537,6 +578,36 @@ def install_sac_config(project_path, root_dir):
                 print_success("CONFIG_SYSTEM.yaml actualizado con ruta del proyecto")
         except Exception as e:
             print_warning(f"No se pudo actualizar CONFIG_SYSTEM.yaml: {e}")
+
+    # Autocompletar CONFIG_USER.yaml con datos del proyecto
+    if project_config:
+        config_user = sac_dest / "config" / "CONFIG_USER.yaml"
+        if config_user.exists():
+            try:
+                content = config_user.read_text(encoding="utf-8")
+                # Reemplazar nombre de usuario
+                content = content.replace(
+                    'nombre: "Javier Garcia"',
+                    f'nombre: "{project_config["user_name"]}"'
+                )
+                # Reemplazar nombre de proyecto
+                content = content.replace(
+                    'nombre: "app-barber"',
+                    f'nombre: "{project_config["project_name"]}"'
+                )
+                # Reemplazar idiomas
+                content = content.replace(
+                    'documentacion: "es"',
+                    f'documentacion: "{project_config["lang"]}"'
+                )
+                content = content.replace(
+                    'comunicacion: "es"',
+                    f'comunicacion: "{project_config["lang"]}"'
+                )
+                config_user.write_text(content, encoding="utf-8")
+                print_success("CONFIG_USER.yaml actualizado con datos del proyecto")
+            except Exception as e:
+                print_warning(f"No se pudo actualizar CONFIG_USER.yaml: {e}")
 
     return True
 
@@ -721,7 +792,8 @@ def main():
             has_sac = any(s["is_sac"] for s in selected)
 
             if has_sac and not sac_config_installed:
-                install_sac_config(project_path, root_dir)
+                project_config = ask_project_config(project_path)
+                install_sac_config(project_path, root_dir, project_config)
                 sac_config_installed = True
 
             for s in selected:
@@ -802,8 +874,9 @@ def main():
                 continue
 
             if not sac_config_installed:
+                project_config = ask_project_config(project_path)
                 print(f"\n  Instalando configuración Team Dev SAC...")
-                install_sac_config(project_path, root_dir)
+                install_sac_config(project_path, root_dir, project_config)
                 sac_config_installed = True
 
             print(f"\n  Instalando skills SAC...")
@@ -830,7 +903,8 @@ def main():
 
             # Instalar config SAC
             if not sac_config_installed:
-                install_sac_config(project_path, root_dir)
+                project_config = ask_project_config(project_path)
+                install_sac_config(project_path, root_dir, project_config)
                 sac_config_installed = True
 
             # Instalar agentes
