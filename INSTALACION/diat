@@ -1,0 +1,378 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+╔═══════════════════════════════════════════════════════════════╗
+║                    diat — IA Dev Toolkit CLI                  ║
+║   Comando principal para gestionar skills, agents, workflows  ║
+╚═══════════════════════════════════════════════════════════════╝
+
+Uso:
+    diat                          # Modo interactivo (instalar)
+    diat "/ruta/proyecto"         # Instalar en proyecto específico
+    diat --help                   # Mostrar ayuda
+    diat --list                   # Listar componentes disponibles
+    diat --version                # Mostrar versión actual
+    diat --update                 # Actualizar toolkit
+    diat --check                  # Verificar requisitos del sistema
+    diat --status "/ruta"         # Mostrar estado de instalación
+"""
+
+import os
+import sys
+import subprocess
+import platform
+from pathlib import Path
+
+# ============================================
+# CONFIGURACIÓN
+# ============================================
+VERSION = "0.2.1"
+TOOLKIT_NAME = "ia-dev-toolkit"
+
+# ============================================
+# FUNCIONES DE UTILIDAD
+# ============================================
+
+def print_banner():
+    print(f"""
+╔═══════════════════════════════════════════════════════════════╗
+║                                                               ║
+║   🛠️  diat — IA Dev Toolkit CLI v{VERSION}                    ║
+║   Skills · Agents · Workflows · Tools · Config                ║
+║                                                               ║
+╚═══════════════════════════════════════════════════════════════╝
+    """)
+
+
+def print_help():
+    print(f"""
+📖 USO:
+    diat [RUTA]              Instalar en proyecto específico
+    diat                     Modo interactivo
+    diat --help              Mostrar esta ayuda
+    diat --list              Listar componentes disponibles
+    diat --version           Mostrar versión actual
+    diat --update            Actualizar toolkit
+    diat --check             Verificar requisitos del sistema
+    diat --status [RUTA]     Mostrar estado de instalación
+
+📍 EJEMPLOS:
+    diat "/home/usuario/proyecto"
+    diat --list
+    diat --status "/home/usuario/proyecto"
+
+📦 COMPONENTES:
+    Skills      — Capacidades de IA para tareas específicas
+    Agents      — Agentes especializados (PO, Arquitecto, Dev)
+    Workflows   — Flujos de trabajo estructurados
+    Tools       — Herramientas auxiliares
+    Config      — Configuración SAC del proyecto
+    """)
+
+
+def print_version():
+    print(f"diat v{VERSION} ({TOOLKIT_NAME})")
+
+
+def get_script_directory():
+    return Path(__file__).parent.absolute()
+
+
+def get_root_directory():
+    return get_script_directory().parent
+
+
+def get_temp_repo_path():
+    if platform.system() == "Windows":
+        local_app_data = os.environ.get("LOCALAPPDATA")
+        if local_app_data:
+            return Path(local_app_data) / TOOLKIT_NAME / "repo"
+        return Path.home() / "AppData" / "Local" / TOOLKIT_NAME / "repo"
+    return Path.home() / ".local" / "share" / TOOLKIT_NAME / "repo"
+
+
+# ============================================
+# COMANDOS
+# ============================================
+
+def cmd_list():
+    """Listar todos los componentes disponibles."""
+    root_dir = get_root_directory()
+
+    # Si no hay repo local, usar cache
+    if not (root_dir / "skills").exists():
+        root_dir = get_temp_repo_path()
+        if not root_dir.exists():
+            print("❌ No se encontró el toolkit. Ejecuta `diat --update` primero.")
+            return
+
+    print(f"\n{'═' * 70}")
+    print(f"  📦 COMPONENTES DISPONIBLES")
+    print(f"{'═' * 70}")
+
+    # Skills
+    skills_dir = root_dir / "skills"
+    if skills_dir.exists():
+        skills = [d.name for d in skills_dir.iterdir() if d.is_dir() and (d / "SKILL.md").exists()]
+        print(f"\n  🔧 SKILLS ({len(skills)}):")
+        for s in sorted(skills):
+            print(f"     → {s}")
+
+    # Agents
+    agents_dir = root_dir / "agents"
+    if agents_dir.exists():
+        agents = [f.stem for f in agents_dir.glob("*.md")]
+        print(f"\n  👤 AGENTES ({len(agents)}):")
+        for a in sorted(agents):
+            print(f"     → {a}")
+
+    # Workflows
+    workflows_dir = root_dir / "workflows"
+    if workflows_dir.exists():
+        workflows = [d.name for d in workflows_dir.iterdir() if d.is_dir() and (d / "workflow.md").exists()]
+        print(f"\n  📋 WORKFLOWS ({len(workflows)}):")
+        for w in sorted(workflows):
+            print(f"     → {w}")
+
+    # Tools
+    tools_dir = root_dir / "tools"
+    if tools_dir.exists():
+        tools = []
+        for item in tools_dir.iterdir():
+            if item.is_file() and item.suffix in (".ts", ".js", ".py", ".sh"):
+                tools.append(item.stem)
+            elif item.is_dir():
+                for script in item.glob("*"):
+                    if script.is_file() and script.suffix in (".ts", ".js", ".py", ".sh"):
+                        tools.append(script.stem)
+        print(f"\n  🛠️  TOOLS ({len(tools)}):")
+        for t in sorted(set(tools)):
+            print(f"     → {t}")
+
+    print(f"\n{'═' * 70}")
+
+
+def cmd_check():
+    """Verificar requisitos del sistema."""
+    print(f"\n{'═' * 70}")
+    print(f"  🔍 VERIFICACIÓN DE REQUISITOS")
+    print(f"{'═' * 70}\n")
+
+    checks = [
+        ("Python 3", ["python3", "--version"], ["python", "--version"]),
+        ("Git", ["git", "--version"], None),
+        ("Node.js", ["node", "--version"], None),
+    ]
+
+    all_ok = True
+    for name, cmd, alt_cmd in checks:
+        try:
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
+            if result.returncode == 0:
+                version = result.stdout.strip().split("\n")[0]
+                print(f"  ✅ {name}: {version}")
+            elif alt_cmd:
+                result = subprocess.run(alt_cmd, capture_output=True, text=True, timeout=10)
+                if result.returncode == 0:
+                    version = result.stdout.strip().split("\n")[0]
+                    print(f"  ✅ {name}: {version}")
+                else:
+                    print(f"  ❌ {name}: No encontrado")
+                    all_ok = False
+            else:
+                print(f"  ❌ {name}: No encontrado")
+                all_ok = False
+        except (subprocess.SubprocessError, FileNotFoundError):
+            print(f"  ❌ {name}: No encontrado")
+            all_ok = False
+
+    # Verificar espacio en disco
+    try:
+        import shutil
+        total, used, free = shutil.disk_usage("/")
+        free_mb = free // (1024 * 1024)
+        if free_mb > 100:
+            print(f"  ✅ Espacio libre: {free_mb} MB")
+        else:
+            print(f"  ⚠️  Espacio libre: {free_mb} MB (recomendado: >100MB)")
+    except Exception:
+        print(f"  ℹ️  Espacio en disco: No verificable")
+
+    print(f"\n{'═' * 70}")
+    if all_ok:
+        print(f"  ✅ Todos los requisitos básicos están cumplidos")
+    else:
+        print(f"  ⚠️  Algunos requisitos no están cumplidos")
+    print(f"{'═' * 70}\n")
+
+
+def cmd_status(project_path=None):
+    """Mostrar estado de instalación en un proyecto."""
+    if not project_path:
+        if len(sys.argv) > 2:
+            project_path = Path(sys.argv[2])
+        else:
+            print("❌ Especifica la ruta del proyecto: diat --status /ruta/proyecto")
+            return
+
+    project_path = Path(project_path)
+    if not project_path.exists():
+        print(f"❌ La ruta no existe: {project_path}")
+        return
+
+    print(f"\n{'═' * 70}")
+    print(f"  📊 ESTADO DE INSTALACIÓN")
+    print(f"  📍 {project_path}")
+    print(f"{'═' * 70}\n")
+
+    # Detectar plataforma
+    platform_dir = None
+    for pdir in [".opencode", ".claude", ".agent"]:
+        if (project_path / pdir).exists():
+            platform_dir = pdir
+            break
+
+    if platform_dir:
+        print(f"  ✅ Plataforma: {platform_dir}")
+
+        # Skills
+        skills_path = project_path / platform_dir / "skills"
+        if skills_path.exists():
+            skills = [d.name for d in skills_path.iterdir() if d.is_symlink() or d.is_dir()]
+            print(f"\n  📦 Skills instaladas ({len(skills)}):")
+            for s in sorted(skills):
+                link = "→" if (skills_path / s).is_symlink() else " "
+                print(f"     {link} {s}")
+        else:
+            print(f"\n  📦 Skills: No instaladas")
+
+        # Agents
+        agents_path = project_path / platform_dir / "agents"
+        if agents_path.exists():
+            agents = [f.stem for f in agents_path.glob("*.md")]
+            print(f"\n  👤 Agentes instalados ({len(agents)}):")
+            for a in sorted(agents):
+                print(f"     → {a}")
+        else:
+            print(f"\n  👤 Agentes: No instalados")
+
+        # Tools
+        tools_path = project_path / platform_dir / "tools"
+        if tools_path.exists():
+            tools = [f.stem for f in tools_path.glob("*") if f.is_file()]
+            print(f"\n  🛠️  Tools instalados ({len(tools)}):")
+            for t in sorted(tools):
+                print(f"     → {t}")
+        else:
+            print(f"\n  🛠️  Tools: No instalados")
+    else:
+        print(f"  ⚠️  No se detectó plataforma (.opencode/.claude/.agent)")
+
+    # SAC Config
+    sac_path = project_path / ".SAC"
+    if sac_path.exists():
+        print(f"\n  ✅ Configuración SAC: Instalada")
+        config_files = list((sac_path / "config").glob("*.yaml")) if (sac_path / "config").exists() else []
+        print(f"     → {len(config_files)} archivos de configuración")
+
+        # Workflows
+        workflows_path = sac_path / "workflows"
+        if workflows_path.exists():
+            workflows = [d.name for d in workflows_path.iterdir() if d.is_dir()]
+            print(f"\n  📋 Workflows instalados ({len(workflows)}):")
+            for w in sorted(workflows):
+                print(f"     → {w}")
+        else:
+            print(f"\n  📋 Workflows: No instalados")
+    else:
+        print(f"\n  ⚠️  Configuración SAC: No instalada")
+
+    print(f"\n{'═' * 70}\n")
+
+
+def cmd_update():
+    """Actualizar el toolkit desde GitHub."""
+    print(f"\n{'═' * 70}")
+    print(f"  🔄 ACTUALIZANDO IA DEV TOOLKIT")
+    print(f"{'═' * 70}\n")
+
+    temp_repo_path = get_temp_repo_path()
+
+    # Eliminar cache anterior
+    if temp_repo_path.exists():
+        import shutil
+        print(f"  🗑️  Eliminando cache anterior...")
+        shutil.rmtree(temp_repo_path)
+
+    # Importar y ejecutar descarga
+    sys.path.insert(0, str(get_script_directory()))
+    try:
+        from instalar import download_from_github
+        result = download_from_github(temp_repo_path)
+        if result:
+            print(f"\n  ✅ Toolkit actualizado en: {temp_repo_path}")
+        else:
+            print(f"\n  ❌ Error al actualizar")
+    except Exception as e:
+        print(f"\n  ❌ Error: {e}")
+
+    print(f"\n{'═' * 70}\n")
+
+
+# ============================================
+# MAIN
+# ============================================
+
+def main():
+    # Sin argumentos → modo interactivo (instalar)
+    if len(sys.argv) == 1:
+        sys.path.insert(0, str(get_script_directory()))
+        from instalar import main as install_main
+        install_main()
+        return
+
+    # Procesar argumentos
+    arg = sys.argv[1]
+
+    if arg in ("--help", "-h"):
+        print_banner()
+        print_help()
+
+    elif arg in ("--version", "-v"):
+        print_version()
+
+    elif arg in ("--list", "-l"):
+        print_banner()
+        cmd_list()
+
+    elif arg in ("--check", "-c"):
+        print_banner()
+        cmd_check()
+
+    elif arg in ("--update", "-u"):
+        print_banner()
+        cmd_update()
+
+    elif arg in ("--status", "-s"):
+        print_banner()
+        cmd_status()
+
+    elif arg.startswith("-"):
+        print(f"❌ Opción desconocida: {arg}")
+        print(f"   Usa `diat --help` para ver las opciones disponibles")
+        sys.exit(1)
+
+    else:
+        # Asumir que es una ruta → instalar
+        sys.path.insert(0, str(get_script_directory()))
+        from instalar import main as install_main
+        sys.argv = [sys.argv[0]] + sys.argv[1:]  # Pasar ruta como argumento
+        install_main()
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except KeyboardInterrupt:
+        print("\n\n  Operación cancelada por el usuario.")
+        sys.exit(0)
