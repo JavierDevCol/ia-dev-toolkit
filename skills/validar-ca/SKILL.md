@@ -1,6 +1,8 @@
 ---
 name: validar-ca
-description: Valida criterios de aceptación contra código implementado y tests. Soporta validación granular por task, integración y todos. Actualiza estado en Plan.md y Refinamiento.md. Ejecuta esta skill para verificar que el código cumple los CAs del refinamiento.
+description: >
+  Usa esta skill para verificar que el código implementado cumple los
+  criterios de aceptación del refinamiento.
 compatibility: Requires .SAC/config/CONFIG_SYSTEM.yaml
 ---
 

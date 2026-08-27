@@ -1,10 +1,8 @@
 ---
 name: crear-skill
 description: >
-  Crea skills siguiendo la especificación y buenas prácticas de
-  agentskills.io. Guía el proceso desde el diseño hasta el testing.
-  Úsala cuando el usuario pida crear una nueva skill, mejorar una
-  skill existente, o configurar testing para skills.
+  Usa esta skill cuando el usuario pida crear una nueva skill, mejorar
+  una skill existente o configurar testing para skills.
 compatibility: No special requirements
 metadata:
   author: CEIBA DevOps

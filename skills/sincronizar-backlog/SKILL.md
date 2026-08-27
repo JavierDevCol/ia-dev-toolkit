@@ -1,6 +1,8 @@
 ---
 name: sincronizar-backlog
-description: Sincroniza el backlog con el estado real de los artefactos en disco. Deduce estados desde archivos existentes y corrige discrepancias. Ejecuta esta skill cuando se necesite verificar o corregir el estado de las HUs en el backlog.
+description: >
+  Usa esta skill cuando se necesite verificar o corregir el estado de
+  las HUs en el backlog.
 compatibility: Requires .SAC/config/CONFIG_SYSTEM.yaml
 ---
 

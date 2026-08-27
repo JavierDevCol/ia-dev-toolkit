@@ -1,11 +1,9 @@
 ---
 name: handoff-release
 description: >
-  Prepara y ejecuta releases para cualquier proyecto. Úsala cuando necesites
-  crear release branches, generar release notes, hacer handoff entre equipos,
-  gestionar hotfixes o ajustes RC. Soporta 3 ambientes configurables
-  (DEV → STAGING → PROD por defecto). Genérica — no depende de un
-  proyecto específico.
+  Usa esta skill cuando necesites crear release branches, generar release
+  notes, hacer handoff entre equipos, gestionar hotfixes o ajustes RC
+  para cualquier proyecto.
 compatibility: Requires git
 metadata:
   author: CEIBA DevOps

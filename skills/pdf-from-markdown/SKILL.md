@@ -1,15 +1,9 @@
 ---
 name: pdf-from-markdown
 description: >
-  Convert Markdown documents and Mermaid diagrams to PDF. Two modes:
-  (A) Full-document export — compiles an entire Markdown file (with embedded
-  Mermaid diagrams rendered as images) into a single PDF.
-  (B) Diagram-only export — extracts each Mermaid diagram from a Markdown file,
-  generates an individual PDF per diagram, and inserts download links back into
-  the source file.
-  Use this skill when the user mentions: convert markdown to PDF, export document
-  as PDF, generate PDF from Mermaid, render diagrams to PDF, or any combination
-  of Markdown/Mermaid and PDF output.
+  Usa esta skill cuando el usuario mencione convertir markdown a PDF,
+  exportar documento como PDF, generar PDF desde Mermaid o renderizar
+  diagramas a PDF.
 compatibility: Requires Node.js, @mermaid-js/mermaid-cli
 metadata:
   author: javier.garcia

@@ -1,13 +1,11 @@
 ---
 name: bitacora-tecnica
 description: >
-  Registra y gestiona bitácoras de sesiones de trabajo para poder retomar
-  el progreso más adelante. Úsala cuando necesites: (1) crear un registro
-  de lo realizado en una sesión, (2) retomar/iniciar/implementar una solución
-  y quieras contexto previo, (3) documentar decisiones técnicas, cambios
-  de código, evidencias de debugging, o el estado actual de una tarea.
-  Ejecuta esta skill cada que se solicite crear una bitácora o cuando
-  se quiera retomar/iniciar/implementar alguna solución.
+  Usa esta skill cuando necesites retomar el contexto de una sesión de
+  trabajo previa, documentar decisiones técnicas o el estado actual de
+  una tarea. También se activa cuando se solicita crear una bitácora
+  de sesión o cuando se va a iniciar/implementar una solución y se
+  necesita contexto de trabajo anterior.
 compatibility: Requires git
 metadata:
   author: CEIBA DevOps

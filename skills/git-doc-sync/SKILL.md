@@ -1,12 +1,10 @@
 ---
 name: git-doc-sync
 description: >
-  Sincronización selectiva de documentación en repositorios Git. Permite elegir
-  qué archivos subir (commit/push parcial) desde un inventario de repos, validando
-  ramas protegidas. Usa esta skill cuando el usuario quiera subir documentos,
-  sincronizar docs con Git, hacer push selectivo, revisar git status de un repo
-  de documentación, o gestionar qué archivos commitear. Also triggers on: push
-  selected files, sync documentation, selective git commit, upload docs to repo.
+  Usa esta skill cuando el usuario quiera subir documentos a Git de forma
+  selectiva, sincronizar documentación con repos, hacer push parcial de
+  archivos, revisar el estado de un repo de documentación o gestionar qué
+  archivos commitear.
 compatibility: Requires git, Python 3
 ---
 

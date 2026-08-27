@@ -1,6 +1,8 @@
 ---
 name: analizar-calidad-codigo
-description: Analiza calidad de código: detecta code smells clásicos y verifica cumplimiento de reglas arquitectónicas del proyecto. Soporta scopes commits, project y archivo. Ejecuta esta skill después de implementar para validar calidad o antes de un release para auditoría completa.
+description: >
+  Usa esta skill después de implementar para validar calidad de código,
+  o antes de un release para auditoría completa.
 compatibility: Requires .SAC/config/CONFIG_SYSTEM.yaml
 ---
 

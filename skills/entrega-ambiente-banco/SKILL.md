@@ -1,12 +1,9 @@
 ---
 name: entrega-ambiente-banco
 description: >
-  Prepara y ejecuta la entrega de releases al banco para el proyecto
-  Banca por WhatsApp. Úsala cuando necesites preparar una entrega formal
-  al banco, crear un release branch, generar release notes, CONFIG_ENTORNO_PR,
-  feature lista para release, ajustar release (RC), hotfix release.
-  NOTA: No debes activarte para desarrollo normal de features, solo
-  para preparación de entregas formales al banco.
+  Usa esta skill cuando necesites preparar una entrega formal al banco
+  para el proyecto Banca por WhatsApp. No la uses para desarrollo normal
+  de features.
 compatibility: Requires BancaPorWhatsApp project context
 metadata:
   author: CEIBA DevOps

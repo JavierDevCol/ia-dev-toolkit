@@ -1,6 +1,8 @@
 ---
 name: bmm-crear-hu-devops
-description: "Crea una Historia de Usuario (User Story) con sus tareas (Tasks) en Azure DevOps para el proyecto FINTIA, a partir de un archivo historia.md del ecosistema BancaPorWhatsapp de BMM. Úsala cuando el usuario pida crear, registrar o subir una HU a Azure DevOps / ADO. Solicita la URL del sprint, el correo del usuario asignado y la ruta al historia.md antes de hacer cualquier otra cosa."
+description: >
+  Usa esta skill cuando el usuario pida crear, registrar o subir una HU
+  a Azure DevOps / ADO para el proyecto FINTIA.
 compatibility: Requires Azure DevOps MCP server, BMM project context
 ---
 

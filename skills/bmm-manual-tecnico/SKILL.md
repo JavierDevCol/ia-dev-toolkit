@@ -1,6 +1,9 @@
 ---
 name: bmm-manual-tecnico
-description: "Genera el Manual Técnico y Funcional (.docx) para un microservicio del ecosistema BancaPorWhatsapp de BMM. Úsala cuando el usuario pida crear, generar o documentar un manual técnico o funcional de instalación para un microservicio. Sigue EXACTAMENTE el proceso de recopilación de datos de entrada antes de hacer cualquier otra cosa."
+description: >
+  Usa esta skill cuando el usuario pida crear, generar o documentar un
+  manual técnico o funcional de instalación para un microservicio del
+  ecosistema BancaPorWhatsapp de BMM.
 compatibility: Requires Azure DevOps, HashiCorp Vault, Kubernetes
 ---
 

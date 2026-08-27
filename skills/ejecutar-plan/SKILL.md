@@ -1,6 +1,8 @@
 ---
 name: ejecutar-plan
-description: Ejecuta planes de implementación para HUs. Soporta modos completo, fase_por_fase, tarea_por_tarea, task_por_task y task_especifica. Actualiza Plan.md en tiempo real. Ejecuta esta skill cuando una HU esté en estado [P] Planificada y necesite implementarse.
+description: >
+  Usa esta skill cuando una HU esté en estado [P] Planificada y necesite
+  implementarse.
 compatibility: Requires .SAC/config/CONFIG_SYSTEM.yaml
 ---
 

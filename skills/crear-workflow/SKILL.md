@@ -1,10 +1,8 @@
 ---
 name: crear-workflow
 description: >
-  Asistente interactivo para crear workflows que siguen la estructura
-  canónica del repositorio. Genera workflow.md, fases/ y plantillas/.
-  Úsala cuando el usuario pida crear un nuevo workflow, definir un
-  flujo de trabajo con fases, o estructurar un proceso repetible.
+  Usa esta skill cuando el usuario pida crear un nuevo workflow, definir
+  un flujo de trabajo con fases o estructurar un proceso repetible.
 compatibility: No special requirements
 metadata:
   author: CEIBA DevOps

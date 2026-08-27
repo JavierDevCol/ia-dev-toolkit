@@ -1,11 +1,11 @@
 ---
 name: ado-wi-comments
 description: >
-  Registra comentarios estructurados en Work Items de Azure DevOps
-  para el proyecto FINTIA. Úsala cuando necesites agregar un comentario
-  de entrega (RELEASE, FEATURE, FIX, HOTFIX) o un comentario técnico
-  general a un WI, incluyendo menciones a colaboradores y reasignación.
-  No la uses para crear o modificar campos del WI (usar bmm-crear-hu-devops).
+  Usa esta skill cuando necesites agregar un comentario estructurado a un
+  Work Item de Azure DevOps, incluyendo comentarios de entrega (RELEASE,
+  FEATURE, FIX, HOTFIX), comentarios técnicos, menciones a colaboradores
+  o reasignación. No la uses para crear o modificar campos del WI
+  (usar bmm-crear-hu-devops).
 compatibility: Requires Azure DevOps MCP server configured
 metadata:
   author: CEIBA DevOps

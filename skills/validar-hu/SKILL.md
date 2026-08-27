@@ -1,6 +1,8 @@
 ---
 name: validar-hu
-description: Valida HUs refinadas contra reglas arquitectónicas, criterios de aceptación y dependencias. Emite veredicto de aprobación, ajustes, bloqueo o rechazo. Ejecuta esta skill cuando una HU esté en estado [R] Refinada y necesite validación antes de planificar.
+description: >
+  Usa esta skill cuando una HU esté en estado [R] Refinada y necesite
+  validación antes de planificar.
 compatibility: Requires .SAC/config/CONFIG_SYSTEM.yaml
 ---
 

@@ -1,12 +1,10 @@
 ---
 name: git-branch-commit
 description: >
-  Crea ramas y gestiona commits siguiendo convenciones del proyecto.
-  Úsala cuando el usuario pida crear una rama, hacer commit, o
-  verificar formato de mensajes de commit. Detecta automáticamente
-  qué necesita el usuario (rama o commit) y ejecuta directamente.
-  No la uses para entregas (usar entrega-ambiente-banco) ni para
-  fixes post-entrega (usar fix-release).
+  Usa esta skill cuando el usuario pida crear una rama, hacer commit
+  o verificar el formato de mensajes de commit. No la uses para entregas
+  formales (usar entrega-ambiente-banco) ni para fixes post-entrega
+  (usar fix-release).
 compatibility: Requires git
 metadata:
   author: CEIBA DevOps

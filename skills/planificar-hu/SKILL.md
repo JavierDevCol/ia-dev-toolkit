@@ -1,6 +1,8 @@
 ---
 name: planificar-hu
-description: Genera planes de implementación para HUs aprobadas. Soporta modo plano y particionado con tasks. Selecciona fases según arquitectura del proyecto. Ejecuta esta skill cuando una HU esté en estado [A] Aprobada y necesite un plan de implementación.
+description: >
+  Usa esta skill cuando una HU esté en estado [A] Aprobada y necesite un
+  plan de implementación.
 compatibility: Requires .SAC/config/CONFIG_SYSTEM.yaml
 ---
 

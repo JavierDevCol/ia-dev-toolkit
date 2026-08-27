@@ -1,6 +1,8 @@
 ---
 name: refinar-hu
-description: Refina Historias de Usuario con criterios de aceptación SMART, desglose técnico vertical, estimación y análisis de riesgos. Soporta modo plano y particionado con tasks funcionales. Ejecuta esta skill cuando el usuario proporcione una HU para refinamiento o solicite refinar una HU existente.
+description: >
+  Usa esta skill cuando el usuario proporcione una HU para refinamiento
+  o solicite refinar una HU existente.
 compatibility: Requires .SAC/config/CONFIG_SYSTEM.yaml
 ---
 

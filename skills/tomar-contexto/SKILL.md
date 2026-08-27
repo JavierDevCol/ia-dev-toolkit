@@ -1,6 +1,9 @@
 ---
 name: tomar-contexto
-description: Analiza un proyecto software y genera archivos de contexto. Detecta workspace, stack, arquitectura, DevOps y genera diagramas. Ejecuta esta skill cuando el usuario pida analizar un proyecto, configurar el workspace, o cuando se necesite contexto para otras operaciones del sistema SAC.
+description: >
+  Usa esta skill cuando el usuario pida analizar un proyecto, configurar
+  el workspace, o cuando se necesite contexto para otras operaciones del
+  sistema SAC.
 compatibility: Requires .SAC/config/CONFIG_SYSTEM.yaml
 ---
 

@@ -1,6 +1,8 @@
 ---
 name: init-reglas-arquitectonicas
-description: Configura las reglas arquitectónicas del proyecto mediante un cuestionario interactivo. Genera artifacts/reglas_arquitectonicas.md con los estándares de nomenclatura, arquitectura, patrones, testing y seguridad. Ejecuta esta skill cuando se necesite definir o actualizar las reglas del proyecto, o cuando otros skills las requieran.
+description: >
+  Usa esta skill cuando se necesite definir o actualizar las reglas
+  arquitectónicas del proyecto, o cuando otros skills las requieran.
 compatibility: Requires .SAC/config/CONFIG_SYSTEM.yaml
 ---
 

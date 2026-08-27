@@ -1,16 +1,11 @@
 ---
 name: pr-config-audit
 description: >
-  Usa esta skill cuando necesites auditar la configuración de un PR, commit o rama.
-  Sirve al revisar un pull request, al planificar un paso entre ambientes (DES→QA→PROD),
-  al incorporar un nuevo microservicio, o cuando te pidan "documentar variables",
-  "mapear variables de entorno", "revisar colas", "analizar configuración del PR",
-  "qué crear en Vault", "qué falta en Variable Groups" o "qué configuraciones nuevas
-  trae este PR". Analiza el diff y detecta variables, colas RabbitMQ, Redis,
-  migraciones BD y secretos hardcodeados. Clasifica cada cambio, pregunta al usuario
-  sobre orígenes desconocidos, muestra un preview   y genera CONFIG-ENTORNO-PR-{ID} ({nombre microservicio}).md
-  indicando exactamente qué crear/actualizar y dónde (Variable Group, path de Vault,
-  archivo de config, declaración de cola, etc.).
+  Usa esta skill cuando necesites auditar la configuración de un PR, commit o
+  rama, al revisar un pull request, al planificar un paso entre ambientes
+  (DES→QA→PROD), al incorporar un nuevo microservicio, o cuando pidan mapear
+  variables de entorno, revisar colas, analizar configuración del PR o documentar
+  configuraciones nuevas.
 compatibility: Requires git. Optional: HashiCorp Vault, RabbitMQ, Redis
 metadata:
   memory_skill: ./memory_skill.json

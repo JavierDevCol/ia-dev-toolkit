@@ -1,9 +1,8 @@
 ---
 name: evaluar-skill
 description: >
-  Evalúa la calidad de skills existentes usando test cases, assertions
-  y benchmarks. Úsala cuando quieras mejorar una skill, verificar si
-  funciona correctamente, comparar versiones, o identificar gaps en
+  Usa esta skill cuando quieras mejorar una skill existente, verificar
+  si funciona correctamente, comparar versiones o identificar gaps en
   las instrucciones.
 compatibility: No special requirements
 metadata:

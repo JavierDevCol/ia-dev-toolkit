@@ -1,12 +1,9 @@
 ---
 name: crear-estrategia
 description: >
-  Skill para crear estrategias de interacción en ms-banca-conversacion.
-  Genera clases Java que extienden EstrategiaBase (Template Method + FSM),
-  registra beans en MotorFsmConfiguration, agrega etapas al enum EtapaInteraccion,
-  crea enums de opciones de menú y genera tests unitarios.
-  Triggers: crear estrategia, nueva estrategia, agregar etapa, nuevo flujo conversacional,
-  nueva etapa FSM, strategy, add strategy, create strategy.
+  Usa esta skill cuando el usuario pida crear una nueva estrategia de
+  interacción, agregar una etapa al FSM o implementar un nuevo flujo
+  conversacional en ms-banca-conversacion.
 compatibility: Requires specific codebase structure (ms-banca-conversacion)
 ---
 

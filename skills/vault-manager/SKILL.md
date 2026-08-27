@@ -1,13 +1,8 @@
 ---
 name: vault-manager
 description: >
-  Gestiona HashiCorp Vault mediante CLI. Autentica con userpass usando
-  VAULT_USER y VAULT_PASS desde un .env, y ejecuta cualquier comando
-  vault que el usuario solicite (leer/escribir secretos, listar paths,
-  etc.). Usa esta skill cuando el usuario mencione vault, secretos,
-  credenciales, tokens, o quiera consultar/administrar Vault.
-  Also triggers on: vault secrets, read secret, vault login, vault
-  commands, hashicorp vault.
+  Usa esta skill cuando el usuario mencione vault, secretos, credenciales,
+  tokens, o quiera consultar/administrar HashiCorp Vault.
 compatibility: Requires HashiCorp Vault CLI, kubectl
 ---
 ## Prerequisitos

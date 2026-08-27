@@ -1,6 +1,8 @@
 ---
 name: registrar-hallazgo
-description: Registra hallazgos encontrados durante el desarrollo. Analiza el hallazgo con sub-agentes, clasifica como BUG o PENDIENTE, y crea el artifact correspondiente. Ejecuta esta skill cuando se encuentre un error, mejora, deuda técnica o cualquier incidencia que deba registrarse.
+description: >
+  Usa esta skill cuando se encuentre un error, mejora, deuda técnica o
+  cualquier incidencia durante el desarrollo que deba registrarse.
 compatibility: Requires .SAC/config/CONFIG_SYSTEM.yaml
 ---
 
