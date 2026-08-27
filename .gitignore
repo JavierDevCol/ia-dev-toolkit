@@ -3,6 +3,7 @@
 # Environment variables
 .env
 opencode.json
+.opencode/
 
 config_consultas.json
 .tmp.driveupload/
