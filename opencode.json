@@ -43,6 +43,7 @@
       }
     }
   },
+   "plugin": ["superpowers@git+https://github.com/obra/superpowers.git"],
   "mcp": {
     "context7": {
       "type": "local",
