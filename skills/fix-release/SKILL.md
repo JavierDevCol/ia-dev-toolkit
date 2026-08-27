@@ -2,8 +2,8 @@
 name: fix-release
 description: >
   Usa esta skill cuando necesites corregir un bug sobre un release ya entregado
-  al banco en el proyecto Banca por WhatsApp. Se activa ante solicitudes de
-  cambios en DES (RC), bugs reportados en PRU/PREPRO/PRO (hotfix), o ajustes
+  a entornos de destino. Se activa ante solicitudes de cambios en el entorno de
+  validación (RC) o bugs reportados en entornos de despliegue (hotfix), o ajustes
   post-entrega. No usar para entregas iniciales ni para bugs en desarrollo.
 ---
 
@@ -11,11 +11,11 @@ description: >
 
 ## Overview
 
-Gestiona fixes y hotfixes sobre releases ya entregados al banco. Cubre ajustes RC en DES y hotfixes en PRU/PREPRO/PRO con back-merge a develop.
+Gestiona fixes y hotfixes sobre releases ya entregados a entornos de destino. Cubre ajustes RC en el entorno de validación y hotfixes en entornos de despliegue con back-merge a develop.
 
 ## When to Use
 
-**Usar cuando:** Banco solicita cambios en DES (RC), bug en PRU/PREPRO/PRO (hotfix), o hotfix en DES antes de promoción a PRU.
+**Usar cuando:** El equipo solicita cambios en el entorno de validación (RC) o reporta bugs en entornos de despliegue (hotfix), incluido hotfix previo a promoción a producción.
 
 **No usar cuando:** Entrega inicial → `entrega-ambiente-banco`. Bug pre-entrega → `fix-develop`.
 
@@ -27,7 +27,7 @@ Preguntar: "¿Versión del release?" (ej. v2.2.3). Validar rama/tag. Preguntar: 
 
 ### Opción 1 — Ajuste RC en DES
 
-El banco pide cambios. Release branch `release/vX.Y.Z` sigue vivo.
+El equipo pide cambios. Release branch `release/vX.Y.Z` sigue vivo.
 
 1. Fix sobre rama base. Validar tests (`references/test-commands.md`). Push.
 2. Back-merge a develop (via PR si develop está protegida).
@@ -60,7 +60,7 @@ Igual que Opción 1 (Ajuste RC).
 | Hotfix | `vX.Y.Z+1` | `v2.2.4` |
 | Promoción | `vX.Y.Z-<ambiente>` | `v2.2.3-pru` |
 
-**Reglas:** RC = rama efímera (eliminar después del merge). Rama base viva durante ciclo RC. Hotfix merge a develop PRIMERO. Hotfix = nuevo release (incrementar PATCH). Flujo completo: develop → DES → PRU → PREPRO → PRO. No crear tags (los genera el banco). Back-merge siempre. develop protegida → PR.
+**Reglas:** RC = rama efímera (eliminar después del merge). Rama base viva durante ciclo RC. Hotfix merge a develop PRIMERO. Hotfix = nuevo release (incrementar PATCH). Flujo completo: develop → entornos de validación → despliegue → producción. No crear tags (los genera el equipo de despliegue). Back-merge siempre. develop protegida → PR.
 
 **Skills:** `entrega-ambiente-banco` · `pr-config-audit` · `ado-pipeline-analyzer`
 
@@ -68,6 +68,6 @@ Igual que Opción 1 (Ajuste RC).
 
 - **Forzar merge con `--ff-only`:** Si falla, release tiene commits propios (esperado tras fix). No forzar.
 - **Hotfix desde develop:** Siempre desde el tag del ambiente afectado. develop puede tener commits que contaminan el fix.
-- **Tag RC vs final:** Banco taggea `vX.Y.Z-rc.1` al mergear RC; taggea `vX.Y.Z` (sin RC) como final.
+- **Tag RC vs final:** El equipo de despliegue taggea `vX.Y.Z-rc.1` al mergear RC; taggea `vX.Y.Z` (sin RC) como final.
 - **Saltar ambientes:** Hotfix pasa por TODOS los ambientes. No promover directamente a PRO.
 - **Omitir `pr-config-audit`:** Si el fix toca variables/secretos/Vault y no se genera `CONFIG-ENTORNO-PR`, la config queda sin documentar en ADO Variable Groups / Vault. Ejecutarlo antes de entregar.
