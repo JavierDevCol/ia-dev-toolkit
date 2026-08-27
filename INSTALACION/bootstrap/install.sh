@@ -1,13 +1,13 @@
 #!/bin/bash
 # ============================================
-# squad-skills — Instalador Bootstrap para Linux/Mac
+# ia-dev-toolkit — Instalador Bootstrap para Linux/Mac
 # ============================================
 #
 # Uso:
-#   curl -fsSL https://raw.githubusercontent.com/JavierDevCol/squad-skills/main/INSTALACION/bootstrap/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/JavierDevCol/ia-dev-toolkit/main/INSTALACION/bootstrap/install.sh | bash
 #
 # O descargando primero:
-#   curl -o install.sh https://raw.githubusercontent.com/JavierDevCol/squad-skills/main/INSTALACION/bootstrap/install.sh
+#   curl -o install.sh https://raw.githubusercontent.com/JavierDevCol/ia-dev-toolkit/main/INSTALACION/bootstrap/install.sh
 #   chmod +x install.sh
 #   ./install.sh
 #
@@ -17,9 +17,9 @@ set -e
 # ============================================
 # CONFIGURACIÓN
 # ============================================
-SKILLS_HOME="$HOME/.local/share/squad-skills"
+SKILLS_HOME="$HOME/.local/share/ia-dev-toolkit"
 BIN_PATH="$HOME/.local/bin"
-REPO_URL="https://github.com/JavierDevCol/squad-skills.git"
+REPO_URL="https://github.com/JavierDevCol/ia-dev-toolkit.git"
 REPO_BRANCH="main"
 
 # ============================================
@@ -39,7 +39,7 @@ print_banner() {
     echo ""
     echo -e "${CYAN}╔═══════════════════════════════════════════════════════════════╗${NC}"
     echo -e "${CYAN}║                                                               ║${NC}"
-    echo -e "${CYAN}║   🛠️  squad-skills — Instalador Bootstrap                     ║${NC}"
+    echo -e "${CYAN}║   🛠️  ia-dev-toolkit — Instalador Bootstrap                     ║${NC}"
     echo -e "${CYAN}║   Skills y Agentes IA para tu proyecto                        ║${NC}"
     echo -e "${CYAN}║                                                               ║${NC}"
     echo -e "${CYAN}╚═══════════════════════════════════════════════════════════════╝${NC}"
@@ -99,7 +99,7 @@ check_prerequisites() {
 # INSTALACIÓN
 # ============================================
 install_skills() {
-    echo -e "${WHITE}📦 Instalando squad-skills...${NC}"
+    echo -e "${WHITE}📦 Instalando ia-dev-toolkit...${NC}"
     echo ""
 
     REPO_PATH="$SKILLS_HOME/repo"
@@ -134,14 +134,14 @@ install_skills() {
 
     cat > "$SKILLS_SCRIPT" << 'EOF'
 #!/bin/bash
-# squad-skills — Comando global
+# ia-dev-toolkit — Comando global
 
 PYTHON_CMD="python3"
 if ! command -v python3 &> /dev/null; then
     PYTHON_CMD="python"
 fi
 
-INSTALLER_PATH="$HOME/.local/share/squad-skills/repo/INSTALACION/instalar.py"
+INSTALLER_PATH="$HOME/.local/share/ia-dev-toolkit/repo/INSTALACION/instalar.py"
 
 if [ -f "$INSTALLER_PATH" ]; then
     $PYTHON_CMD "$INSTALLER_PATH" "$@"
@@ -169,7 +169,7 @@ EOF
         if [ -n "$SHELL_RC" ]; then
             if ! grep -q ".local/bin" "$SHELL_RC" 2>/dev/null; then
                 echo "" >> "$SHELL_RC"
-                echo "# squad-skills" >> "$SHELL_RC"
+                echo "# ia-dev-toolkit" >> "$SHELL_RC"
                 echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$SHELL_RC"
                 print_success "PATH agregado a $SHELL_RC"
             fi

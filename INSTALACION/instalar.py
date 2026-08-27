@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 ╔═══════════════════════════════════════════════════════════════╗
-║           INSTALADOR MODULAR — squad-skills                  ║
+║           INSTALADOR MODULAR — ia-dev-toolkit                  ║
 ║   Instalador multiplataforma de skills, agentes, workflows   ║
 ║   y tools para equipos de desarrollo IA                      ║
 ╚═══════════════════════════════════════════════════════════════╝
@@ -46,7 +46,7 @@ if platform.system() == "Windows":
 # ============================================
 # CONFIGURACIÓN
 # ============================================
-REPO_URL = "https://github.com/JavierDevCol/squad-skills.git"
+REPO_URL = "https://github.com/JavierDevCol/ia-dev-toolkit.git"
 REPO_BRANCH = "main"
 
 SAC_SKILLS = [
@@ -209,7 +209,7 @@ def print_banner():
     print("""
 ╔═══════════════════════════════════════════════════════════════╗
 ║                                                               ║
-║   🛠️  INSTALADOR MODULAR — squad-skills                      ║
+║   🛠️  INSTALADOR MODULAR — ia-dev-toolkit                      ║
 ║   Skills · Agents · Workflows · Tools · Config                ║
 ║                                                               ║
 ╚═══════════════════════════════════════════════════════════════╝
@@ -244,11 +244,11 @@ def get_temp_repo_path():
     if platform.system() == "Windows":
         local_app_data = os.environ.get("LOCALAPPDATA")
         if local_app_data:
-            base_path = Path(local_app_data) / "squad-skills" / "repo"
+            base_path = Path(local_app_data) / "ia-dev-toolkit" / "repo"
         else:
-            base_path = Path.home() / "AppData" / "Local" / "squad-skills" / "repo"
+            base_path = Path.home() / "AppData" / "Local" / "ia-dev-toolkit" / "repo"
     else:
-        base_path = Path.home() / ".local" / "share" / "squad-skills" / "repo"
+        base_path = Path.home() / ".local" / "share" / "ia-dev-toolkit" / "repo"
     return base_path
 
 
@@ -675,7 +675,7 @@ def show_checkbox_menu(items, item_type, show_deps=True):
 def show_main_menu():
     print("""
 ╔══════════════════════════════════════════════════════════╗
-║          INSTALADOR MODULAR — squad-skills              ║
+║          INSTALADOR MODULAR — ia-dev-toolkit              ║
 ╚══════════════════════════════════════════════════════════╝
 
 ¿Qué deseas instalar?
@@ -891,7 +891,7 @@ def main():
         # ─── [6] KIT COMPLETO ─────────────────────────────────
         elif choice == "6":
             print(f"\n╔══════════════════════════════════════════════════════════╗")
-            print(f"║              KIT COMPLETO — squad-skills                ║")
+            print(f"║              KIT COMPLETO — ia-dev-toolkit                ║")
             print(f"╚══════════════════════════════════════════════════════════╝")
 
             print(f"\n  Se instalarán:")
@@ -972,7 +972,7 @@ def ensure_repo_available():
 def download_from_github(dest_path):
     """Descarga solo las carpetas necesarias desde GitHub usando la API."""
     # Extraer owner/repo de la URL
-    # REPO_URL = "https://github.com/JavierDevCol/squad-skills.git"
+    # REPO_URL = "https://github.com/JavierDevCol/ia-dev-toolkit.git"
     parts = REPO_URL.replace("https://github.com/", "").replace(".git", "").split("/")
     owner, repo = parts[0], parts[1]
 
@@ -984,7 +984,7 @@ def download_from_github(dest_path):
 
     try:
         print_info(f"Descargando desde {tarball_url}...")
-        req = urllib.request.Request(tarball_url, headers={"User-Agent": "squad-skills-installer"})
+        req = urllib.request.Request(tarball_url, headers={"User-Agent": "ia-dev-toolkit-installer"})
         response = urllib.request.urlopen(req, timeout=120)
         tarball_data = response.read()
 
@@ -996,7 +996,7 @@ def download_from_github(dest_path):
 
         # Extraer solo las carpetas necesarias del tarball
         with tarfile.open(fileobj=io.BytesIO(tarball_data), mode="r:gz") as tar:
-            # El tarball tiene prefijo "squad-skills-main/"
+            # El tarball tiene prefijo "ia-dev-toolkit-main/"
             prefix = f"{repo}-{REPO_BRANCH}/"
 
             for member in tar.getmembers():

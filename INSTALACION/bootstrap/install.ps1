@@ -1,12 +1,12 @@
 # ============================================
-# squad-skills — Instalador Bootstrap para Windows
+# ia-dev-toolkit — Instalador Bootstrap para Windows
 # ============================================
 #
 # Uso:
-#   irm https://github.com/JavierDevCol/squad-skills/main/INSTALACION/bootstrap/install.ps1 | iex
+#   irm https://github.com/JavierDevCol/ia-dev-toolkit/main/INSTALACION/bootstrap/install.ps1 | iex
 #
 # O descargando primero:
-#   Invoke-WebRequest -Uri "https://github.com/JavierDevCol/squad-skills/main/INSTALACION/bootstrap/install.ps1" -OutFile install.ps1
+#   Invoke-WebRequest -Uri "https://github.com/JavierDevCol/ia-dev-toolkit/main/INSTALACION/bootstrap/install.ps1" -OutFile install.ps1
 #   Get-Content install.ps1
 #   .\install.ps1
 #
@@ -14,9 +14,9 @@
 # ============================================
 # CONFIGURACIÓN
 # ============================================
-$SKILLS_HOME = "$env:LOCALAPPDATA\squad-skills"
-$BIN_PATH = "$env:LOCALAPPDATA\squad-skills\bin"
-$REPO_URL = "https://github.com/JavierDevCol/squad-skills.git"
+$SKILLS_HOME = "$env:LOCALAPPDATA\ia-dev-toolkit"
+$BIN_PATH = "$env:LOCALAPPDATA\ia-dev-toolkit\bin"
+$REPO_URL = "https://github.com/JavierDevCol/ia-dev-toolkit.git"
 $REPO_BRANCH = "main"
 
 # ============================================
@@ -26,7 +26,7 @@ function Print-Banner {
     Write-Host ""
     Write-Host "╔═══════════════════════════════════════════════════════════════╗" -ForegroundColor Cyan
     Write-Host "║                                                               ║" -ForegroundColor Cyan
-    Write-Host "║   🛠️  squad-skills — Instalador Bootstrap para Windows        ║" -ForegroundColor Cyan
+    Write-Host "║   🛠️  ia-dev-toolkit — Instalador Bootstrap para Windows        ║" -ForegroundColor Cyan
     Write-Host "║   Skills y Agentes IA para tu proyecto                        ║" -ForegroundColor Cyan
     Write-Host "║                                                               ║" -ForegroundColor Cyan
     Write-Host "╚═══════════════════════════════════════════════════════════════╝" -ForegroundColor Cyan
@@ -93,7 +93,7 @@ function Check-Prerequisites {
 # INSTALACIÓN
 # ============================================
 function Install-Skills {
-    Write-Host "📦 Instalando squad-skills..." -ForegroundColor White
+    Write-Host "📦 Instalando ia-dev-toolkit..." -ForegroundColor White
     Write-Host ""
 
     $repoPath = "$SKILLS_HOME\repo"
@@ -135,7 +135,7 @@ function Install-Skills {
 set PYTHON_CMD=python3
 where python3 >nul 2>&1 || set PYTHON_CMD=python
 
-set INSTALLER_PATH=%LOCALAPPDATA%\squad-skills\repo\INSTALACION\instalar.py
+set INSTALLER_PATH=%LOCALAPPDATA%\ia-dev-toolkit\repo\INSTALACION\instalar.py
 
 if exist "%INSTALLER_PATH%" (
     %PYTHON_CMD% "%INSTALLER_PATH%" %*

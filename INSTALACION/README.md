@@ -1,4 +1,4 @@
-# Instalador Modular de squad-skills
+# Instalador Modular de ia-dev-toolkit
 
 > Instalador multiplataforma de skills, agentes, workflows y tools para equipos de desarrollo IA
 
@@ -10,12 +10,12 @@
 
 **Linux/Mac:**
 ```bash
-curl -fsSL https://raw.githubusercontent.com/JavierDevCol/squad-skills/main/INSTALACION/bootstrap/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/JavierDevCol/ia-dev-toolkit/main/INSTALACION/bootstrap/install.sh | bash
 ```
 
 **Windows (PowerShell):**
 ```powershell
-irm https://github.com/JavierDevCol/squad-skills/main/INSTALACION/bootstrap/install.ps1 | iex
+irm https://github.com/JavierDevCol/ia-dev-toolkit/main/INSTALACION/bootstrap/install.ps1 | iex
 ```
 
 Después de reiniciar la terminal:
@@ -40,7 +40,7 @@ El instalador ofrece 6 opciones modulares:
 
 ```
 ╔══════════════════════════════════════════════════════════╗
-║          INSTALADOR MODULAR — squad-skills              ║
+║          INSTALADOR MODULAR — ia-dev-toolkit              ║
 ╚══════════════════════════════════════════════════════════╝
 
 ¿Qué deseas instalar?
