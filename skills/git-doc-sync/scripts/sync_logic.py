@@ -26,16 +26,17 @@ def run_git(args, cwd):
 
 
 def cmd_inventory(args):
-    """List registered repositories from the inventory file."""
+    """List registered repositories from the shared memory_skill.json."""
     try:
         with open(args.file, "r") as f:
             data = json.load(f)
     except FileNotFoundError:
-        print(json.dumps({"error": f"Inventory file not found: {args.file}"}))
+        print(json.dumps({"error": f"Memory file not found: {args.file}"}))
         sys.exit(1)
 
-    repos = data.get("inventory", [])
-    settings = data.get("settings", {})
+    section = data.get(args.skill_key, {})
+    repos = section.get("memory", {}).get("inventory", [])
+    settings = section.get("config", {})
     print(json.dumps({
         "repos": repos,
         "required_branches": settings.get("required_branches", []),
@@ -111,8 +112,10 @@ def main():
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     # inventory
-    p_inv = subparsers.add_parser("inventory", help="List repos from inventory file")
-    p_inv.add_argument("--file", required=True, help="Path to inventory.json")
+    p_inv = subparsers.add_parser("inventory", help="List repos from shared memory file")
+    p_inv.add_argument("--file", required=True, help="Path to memory_skill.json")
+    p_inv.add_argument("--skill-key", default="git-doc-sync",
+                       help="Skill section key inside memory_skill.json")
 
     # status
     p_st = subparsers.add_parser("status", help="Show categorized git status")

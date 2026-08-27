@@ -40,5 +40,16 @@
     "memory": {
       "output_base_path": null
     }
+  },
+  "git-doc-sync": {
+    "config": {
+      "default_mode": "interactive",
+      "required_branches": [],
+      "version": "1.0.0"
+    },
+    "memory": {
+      "inventory": [],
+      "last_access": ""
+    }
   }
 }
