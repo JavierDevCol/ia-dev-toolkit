@@ -8,6 +8,7 @@ description: >
   work item. También activa cuando mencione: detalle ítem, detalle HU,
   ver bug, buscar tarea, información de la tarea. Also triggers on: item
   detail, work item info, search task, task detail.
+compatibility: Requires Azure DevOps MCP server configured
 ---
 
 ## CONTEXTO

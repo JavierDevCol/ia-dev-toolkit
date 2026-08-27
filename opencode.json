@@ -44,12 +44,6 @@
     }
   },
   "mcp": {
-    "ado": {
-      "type": "local",
-      "command": ["npx", "-y", "@azure-devops/mcp@latest", "GestionRequerimientos"],
-      "enabled": true,
-      "description": "Azure DevOps MCP - 90 tools (work items, repos, pipelines, PRs, wiki, search, test plans)"
-    },
     "context7": {
       "type": "local",
       "command": ["npx", "-y", "@upstash/context7-mcp@latest"],

@@ -9,6 +9,7 @@ description: >
   agregar un comentario, revisar el historial, o ver adjuntos de un WI.
   Also triggers on: ver comentarios, historial WI, agregar comentario,
   mostrar adjuntos, attachments del work item, discusión del ítem.
+compatibility: Requires Azure DevOps MCP server configured
 ---
 ## Contexto
 - project_name — proyecto ADO

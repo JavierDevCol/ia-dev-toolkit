@@ -8,6 +8,7 @@ description: >
   Triggers on: listar repos, ver ramas, PRs activos, repositorios del proyecto,
   clonar repo, mis repos, list repositories, browse repos, active pull requests,
   repo branches.
+compatibility: Requires Azure DevOps MCP server configured
 ---
 
 # ADO Repo Browser

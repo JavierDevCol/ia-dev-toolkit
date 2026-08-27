@@ -7,6 +7,7 @@ description: >
   tareas, consultar trabajo, mis WIs, ver trabajo, resumen de trabajo,
   sincronizar, generar histórico. Also triggers on: my work items, work
   report, sync work items, consultar trabajo.
+compatibility: Requires Azure DevOps MCP server configured
 ---
 
 ## CONTEXTO
