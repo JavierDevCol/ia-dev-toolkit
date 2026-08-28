@@ -4,6 +4,7 @@ description: >-
   Use when the user asks to analyze, inspect, or debug an Azure DevOps build or pipeline run.
   Triggers on requests like "analyze build", "why did the build fail", "check pipeline status",
   "review logs", "pipeline run details", "what happened in the build", or pasting a pipeline URL.
+ready: true
 ---
 
 # ADO Pipeline Analyzer

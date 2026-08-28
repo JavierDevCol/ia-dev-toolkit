@@ -4,6 +4,7 @@ description: >-
   Use when the user wants to create a Pull Request in Azure DevOps, merge branches,
   assign reviewers, or link work items to a new PR. Triggers on "create PR",
   "open pull request", "new PR", "generate PR", or requests to propose a merge between branches.
+ready: true
 ---
 
 # ADO PR Creator

@@ -4,6 +4,7 @@ description: >
   Usa esta skill cuando el usuario mencione convertir markdown a PDF,
   exportar documento como PDF, generar PDF desde Mermaid o renderizar
   diagramas a PDF.
+ready: true
 ---
 
 # PDF from Markdown

@@ -1,6 +1,7 @@
 ---
 name: tomar-contexto
 description: Use when no existe .SAC/workspace.md, el contexto está desactualizado, el usuario pide analizar/inicializar proyecto, o antes de refinar HUs/planificar/diagnosticar DevOps sin contexto previo.
+ready: true
 ---
 
 # Tomar Contexto

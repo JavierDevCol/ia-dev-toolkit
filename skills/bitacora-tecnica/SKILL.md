@@ -4,6 +4,7 @@ description: >
   Usa esta skill únicamente cuando se presente Decisiones de arquitectura, infraestructura o diseño del sistema,
   Acuerdo para modificar código, Cambios estructurales en código existente, refactorizaciones aprobadas, modificación de lógica de negocio o ajustes de dependencias,
   Solución de errores complejos o bloqueantes.
+ready: true
 ---
 
 # Bitácora de Sesiones de Trabajo

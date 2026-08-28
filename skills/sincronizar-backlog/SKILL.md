@@ -2,6 +2,7 @@
 name: sincronizar-backlog
 description: >
   Sincroniza estados de HUs en el backlog con artefactos en disco. Usa esta skill cuando el estado del backlog no refleje el estado real de refinamiento, planificación o ejecución de las HUs.
+ready: true
 ---
 
 # Sincronizar Backlog

@@ -3,6 +3,7 @@ name: planificar-hu
 description: >
   Usa esta skill cuando una HU esté en estado [A] Aprobada y necesite un
   plan de implementación antes de ejecutar.
+ready: true
 ---
 
 # Planificar HU

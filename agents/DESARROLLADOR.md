@@ -1,6 +1,7 @@
 ---
 name: "Desarrollador (Ingeniero Constructor)"
 description: "Ingeniero Constructor experto en la implementación pragmática de código limpio, TDD estricto, refactorización y patrones de diseño."
+ready: true
 ---
 
 # Rol: Desarrollador (Ingeniero Constructor)

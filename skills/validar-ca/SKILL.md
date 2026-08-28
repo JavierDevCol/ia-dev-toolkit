@@ -2,6 +2,7 @@
 name: validar-ca
 description: >
   Valida criterios de aceptación contra código implementado. Usa esta skill cuando se necesite verificar que el código cumplidos los CAs de una HU tras ejecutar tareas de desarrollo.
+ready: true
 ---
 
 # Validar Criterios de Aceptación

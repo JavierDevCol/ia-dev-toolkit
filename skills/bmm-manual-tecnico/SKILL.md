@@ -5,6 +5,7 @@ description: >
   y funcional de instalación para un microservicio del ecosistema
   BancaPorWhatsapp, entregando un documento Word (.docx) con la plantilla
   corporativa.
+ready: true
 ---
 
 # Generación de Manual Técnico y Funcional

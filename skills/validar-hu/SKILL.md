@@ -3,6 +3,7 @@ name: validar-hu
 description: >
   Usa esta skill cuando una HU esté en estado [R] Refinada y necesite
   validación arquitectónica antes de planificar.
+ready: true
 ---
 
 # Validar HU

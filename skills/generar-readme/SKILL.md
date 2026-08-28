@@ -1,6 +1,7 @@
 ---
 name: generar-readme
 description: Use when user requests to generate, create, or improve a README.md file for a project. Validates project structure, enforces mandatory sections, and ensures professional documentation standards.
+ready: true
 ---
 
 # Generar README

@@ -1,6 +1,7 @@
 ---
 name: ejecutar-plan
 description: Usa esta skill cuando una HU esté en estado [P] Planificada y el usuario solicite implementarla.
+ready: true
 ---
 
 # Ejecutar Plan

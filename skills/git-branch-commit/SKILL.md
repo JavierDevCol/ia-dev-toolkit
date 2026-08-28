@@ -1,6 +1,7 @@
 ---
 name: git-branch-commit
 description: Use when you need to create a Git branch, make a commit, or verify the commit message format (Conventional Commits) on a feature or work branch.
+ready: true
 ---
 
 # Git Branch & Commit

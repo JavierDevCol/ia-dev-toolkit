@@ -1,6 +1,7 @@
 ---
 name: ado-profile-setup
 description: Use when the active `[ado]` profile in memory_skill.json is incomplete or invalid, or the user wants to add a new Azure DevOps profile.
+ready: true
 ---
 
 # ADO Profile Setup

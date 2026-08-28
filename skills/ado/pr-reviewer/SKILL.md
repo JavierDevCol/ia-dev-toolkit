@@ -5,6 +5,7 @@ description: >
   check coding standards on changed lines, detect merge conflicts, or manage pending PR reviews.
   Triggers on: review PR, code review, PR analysis, check coding standards, merge conflicts,
   pull request review, validate PR, pending reviews.
+ready: true
 ---
 
 # ADO PR Reviewer

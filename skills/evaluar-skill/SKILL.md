@@ -4,6 +4,7 @@ description: >
   Usa esta skill cuando necesites evaluar la calidad de una skill existente
   usando metodología de evaluación sistemática con test cases, baseline
   y benchmark cuantitativo.
+ready: true
 ---
 
 # Evaluar Skill

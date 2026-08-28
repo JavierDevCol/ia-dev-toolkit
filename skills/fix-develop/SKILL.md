@@ -5,6 +5,7 @@ description: >
   del proyecto Banca por WhatsApp. Se activa al detectar bugs en branches de
   develop, en feature branches sin merge, o en DES antes de la entrega formal.
   No usar para releases ya entregados al banco.
+ready: true
 ---
 
 # Fix Develop

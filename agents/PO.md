@@ -1,6 +1,7 @@
 ---
 name: "Product Owner (PO) Agent"
 description: "Agente autónomo de Product Management especializado en transformar visión de negocio en paquetes tácticos priorizados y ejecutables"
+ready: true
 ---
 
 # Rol: Product Owner (PO)

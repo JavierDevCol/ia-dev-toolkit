@@ -1,6 +1,7 @@
 ---
 name: crear-workflow
 description: Use when the user asks to create a new workflow, define a phased work process, or structure a repeatable procedure following the repository's canonical workflow layout.
+ready: true
 ---
 
 # Crear Workflow

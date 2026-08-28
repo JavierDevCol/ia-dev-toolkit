@@ -1,6 +1,7 @@
 ---
 name: analizar-calidad-codigo
 description: Usa esta skill cuando el usuario solicite revisar código tras implementar una task/HU, o antes de liberar un release para verificar cumplimiento.
+ready: true
 ---
 
 # Analizar Calidad de Código

@@ -3,6 +3,7 @@ name: init-reglas-arquitectonicas
 description: >
   Usa esta skill cuando se necesite definir o actualizar las reglas
   arquitectónicas del proyecto, o cuando otros skills las requieran.
+ready: true
 ---
 
 # Init Reglas Arquitectónicas

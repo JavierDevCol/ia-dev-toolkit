@@ -1,6 +1,7 @@
 ---
 name: git-doc-sync
 description: Use when the user wants to selectively push documents to git, sync documentation with repos, do a partial file push, review a documentation repo status, or choose which files to commit.
+ready: true
 ---
 
 # Git Documentation Synchronizer

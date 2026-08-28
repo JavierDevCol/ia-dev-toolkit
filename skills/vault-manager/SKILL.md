@@ -1,6 +1,7 @@
 ---
 name: vault-manager
 description: Usa esta skill cuando el usuario necesite consultar, listar o gestionar secretos en HashiCorp Vault — ya sea para leer valores, verificar paths, revisar auditoría o ejecutar comandos vault específicos.
+ready: true
 ---
 
 # Vault Manager

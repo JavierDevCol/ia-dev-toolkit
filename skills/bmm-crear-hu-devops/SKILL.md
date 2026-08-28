@@ -3,6 +3,7 @@ name: bmm-crear-hu-devops
 description: >
   Usa esta skill cuando el usuario pida crear, registrar o subir una HU
   a Azure DevOps con sus tareas hijas, a partir de un archivo historia.md.
+ready: true
 ---
 
 # Crear HU y Tareas en Azure DevOps

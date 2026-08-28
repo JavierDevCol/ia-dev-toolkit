@@ -4,6 +4,7 @@ description: >
   Usa esta skill cuando el usuario inicie un proyecto desde cero, pida
   especificar una blueprint arquitectónica o solicite definir estilos,
   estructura de directorios, ADRs y estándares Git iniciales.
+ready: true
 ---
 
 # Architecture Inception & Blueprint

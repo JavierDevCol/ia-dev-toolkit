@@ -5,6 +5,7 @@ description: >
   a entornos de destino. Se activa al crear ramas release desde develop, generar
   release notes, o preparar el handoff entre equipos de Dev y Ops. No usar para
   hotfixes o ajustes RC post-entrega.
+ready: true
 ---
 
 # Handoff Release

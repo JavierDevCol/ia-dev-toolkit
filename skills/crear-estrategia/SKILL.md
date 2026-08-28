@@ -4,6 +4,7 @@ description: >
   Usa esta skill cuando el usuario pida crear una nueva estrategia de
   interacción, agregar una etapa al FSM o implementar un nuevo flujo
   conversacional en ms-banca-conversacion.
+ready: true
 ---
 
 # Crear Estrategia — ms-banca-conversacion

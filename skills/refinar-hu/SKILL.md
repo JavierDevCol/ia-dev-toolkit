@@ -3,6 +3,7 @@ name: refinar-hu
 description: >
   Usa esta skill cuando el usuario proporcione una HU para refinamiento
   o solicite refinar una HU existente.
+ready: true
 ---
 
 # Refinar HU

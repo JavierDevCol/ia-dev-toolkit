@@ -5,6 +5,7 @@ description: >
   a entornos de destino. Se activa ante solicitudes de cambios en el entorno de
   validación (RC) o bugs reportados en entornos de despliegue (hotfix), o ajustes
   post-entrega. No usar para entregas iniciales ni para bugs en desarrollo.
+ready: true
 ---
 
 # Fix Release

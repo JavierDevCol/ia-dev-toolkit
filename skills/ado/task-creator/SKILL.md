@@ -1,6 +1,7 @@
 ---
 name: ado-task-creator
 description: Use when the user wants to add child tasks to a User Story, create subtasks from a technical document, break down a HU into executable work, or mentions commands like agg-tarea, crear tareas, or desglosar HU.
+ready: true
 ---
 
 # ADO Task Creator

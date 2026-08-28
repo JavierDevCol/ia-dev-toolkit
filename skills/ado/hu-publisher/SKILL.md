@@ -5,6 +5,7 @@ description: >-
   sync a markdown-drafted story to ADO, or create a User Story from a local file.
   Triggers on "publish HU", "push HU to ADO", "create user story from file",
   "sync local story", "subir HU", "publicar historia de usuario", or providing a local HU path.
+ready: true
 ---
 
 # ADO HU Publisher

@@ -5,6 +5,7 @@ description: >
   Work Item de Azure DevOps, incluyendo comentarios de entrega (RELEASE,
   FEATURE, FIX, HOTFIX), comentarios técnicos, menciones a colaboradores
   o reasignación. No la uses para crear o modificar campos del WI.
+ready: true
 ---
 
 # ADO WI Comments

@@ -3,6 +3,7 @@ name: mermaid-diagram
 description: >
   Usa esta skill cuando necesites crear, validar o corregir diagramas
   Mermaid (sequence, flowchart, state, C4).
+ready: true
 ---
 
 # Mermaid Diagram
