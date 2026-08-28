@@ -92,6 +92,45 @@ def get_temp_repo_path():
     return Path.home() / ".local" / "share" / TOOLKIT_NAME / "repo"
 
 
+def ensure_instalar():
+    """Asegurar que instalar.py existe localmente, descargar si no."""
+    script_dir = get_script_directory()
+    instalar_path = script_dir / "instalar.py"
+
+    # Si ya existe localmente
+    if instalar_path.exists():
+        return str(script_dir)
+
+    # Si estamos en el repo, buscar en directorio padre
+    root_dir = get_root_directory()
+    instalar_in_repo = root_dir / "INSTALACION" / "instalar.py"
+    if instalar_in_repo.exists():
+        return str(root_dir / "INSTALACION")
+
+    # Descargar instalar.py
+    print("📥 Descargando instalar.py...")
+    import urllib.request
+
+    instalar_url = "https://raw.githubusercontent.com/JavierDevCol/ia-dev-toolkit/main/INSTALACION/instalar.py"
+
+    try:
+        # Crear directorio si no existe
+        script_dir.mkdir(parents=True, exist_ok=True)
+
+        # Descargar
+        req = urllib.request.Request(instalar_url, headers={"User-Agent": "diat-cli"})
+        response = urllib.request.urlopen(req, timeout=30)
+        content = response.read()
+
+        # Guardar
+        instalar_path.write_bytes(content)
+        print("✅ instalar.py descargado")
+        return str(script_dir)
+    except Exception as e:
+        print(f"❌ Error al descargar instalar.py: {e}")
+        return None
+
+
 # ============================================
 # COMANDOS
 # ============================================
@@ -306,7 +345,12 @@ def cmd_update():
         shutil.rmtree(temp_repo_path)
 
     # Importar y ejecutar descarga
-    sys.path.insert(0, str(get_script_directory()))
+    instalar_dir = ensure_instalar()
+    if not instalar_dir:
+        print(f"\n  ❌ No se pudo obtener instalar.py")
+        return
+
+    sys.path.insert(0, instalar_dir)
     try:
         from instalar import download_from_github
         result = download_from_github(temp_repo_path)
@@ -422,7 +466,11 @@ def cmd_uninstall():
 def main():
     # Sin argumentos → modo interactivo (instalar)
     if len(sys.argv) == 1:
-        sys.path.insert(0, str(get_script_directory()))
+        instalar_dir = ensure_instalar()
+        if not instalar_dir:
+            print("❌ No se pudo obtener instalar.py")
+            sys.exit(1)
+        sys.path.insert(0, instalar_dir)
         from instalar import main as install_main
         install_main()
         return
@@ -464,7 +512,11 @@ def main():
 
     else:
         # Asumir que es una ruta → instalar
-        sys.path.insert(0, str(get_script_directory()))
+        instalar_dir = ensure_instalar()
+        if not instalar_dir:
+            print("❌ No se pudo obtener instalar.py")
+            sys.exit(1)
+        sys.path.insert(0, instalar_dir)
         from instalar import main as install_main
         sys.argv = [sys.argv[0]] + sys.argv[1:]  # Pasar ruta como argumento
         install_main()
