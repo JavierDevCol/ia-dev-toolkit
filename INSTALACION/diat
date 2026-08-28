@@ -48,19 +48,24 @@ def print_help():
     print(f"""
 📖 USO:
     diat [RUTA]              Instalar en proyecto específico
-    diat                     Modo interactivo
+    diat                     Mostrar comandos disponibles
     diat --help              Mostrar esta ayuda
     diat --list              Listar componentes disponibles
     diat --version           Mostrar versión actual
     diat --update            Actualizar toolkit
     diat --check             Verificar requisitos del sistema
     diat --status [RUTA]     Mostrar estado de instalación
+    diat --install [RUTA]    Instalar componentes en proyecto
+    diat --alma [RUTA]       Instalar personalidad del agente
     diat --uninstall         Desinstalar ia-dev-toolkit
+    diat --non-interactive   Modo no interactivo para CI/CD
 
 📍 EJEMPLOS:
-    diat "/home/usuario/proyecto"
-    diat --list
-    diat --status "/home/usuario/proyecto"
+    diat --install                    # Instalar en ruta actual
+    diat --install /home/user/proy    # Instalar en ruta específica
+    diat --non-interactive --install  # Instalar sin interacción (CI/CD)
+    diat --list                       # Listar componentes
+    diat --status /home/user/proy     # Ver estado
 
 📦 COMPONENTES:
     Skills      — Capacidades de IA para tareas específicas
@@ -366,6 +371,9 @@ def cmd_update():
 
 def cmd_install():
     """Instalar componentes en un proyecto."""
+    # Verificar modo no interactivo
+    non_interactive = "--non-interactive" in sys.argv or "-ni" in sys.argv
+
     # Determinar ruta
     if len(sys.argv) > 2 and not sys.argv[2].startswith("-"):
         project_path = Path(sys.argv[2]).resolve()
@@ -379,11 +387,16 @@ def cmd_install():
 
     # Verificar que la ruta existe
     if not project_path.exists():
-        create = input(f"  La ruta no existe. ¿Crearla? (s/N): ").strip().lower()
-        if create != 's':
-            print("❌ Instalación cancelada")
-            return
-        project_path.mkdir(parents=True, exist_ok=True)
+        if non_interactive:
+            # En modo no interactivo, crear automáticamente
+            project_path.mkdir(parents=True, exist_ok=True)
+            print(f"  ✅ Directorio creado: {project_path}")
+        else:
+            create = input(f"  La ruta no existe. ¿Crearla? (s/N): ").strip().lower()
+            if create != 's':
+                print("❌ Instalación cancelada")
+                return
+            project_path.mkdir(parents=True, exist_ok=True)
 
     # Obtener instalar.py
     instalar_dir = ensure_instalar()
@@ -578,6 +591,11 @@ def main():
         print_banner()
         show_menu()
         return
+
+    # Verificar flag --non-interactive
+    non_interactive = "--non-interactive" in sys.argv or "-ni" in sys.argv
+    if non_interactive:
+        sys.argv.remove("--non-interactive") if "--non-interactive" in sys.argv else sys.argv.remove("-ni")
 
     # Procesar argumentos
     arg = sys.argv[1]
