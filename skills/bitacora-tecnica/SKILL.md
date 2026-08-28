@@ -1,10 +1,9 @@
 ---
 name: bitacora-tecnica
 description: >
-  Usa esta skill cuando necesites retomar contexto de una sesión previa,
-  documentar decisiones técnicas, registrar estado actual de una tarea
-  o crear una bitácora de sesión. Se activa al inicio o fin de una
-  sesión de trabajo técnica.
+  Usa esta skill únicamente cuando se presente Decisiones de arquitectura, infraestructura o diseño del sistema,
+  Acuerdo para modificar código, Cambios estructurales en código existente, refactorizaciones aprobadas, modificación de lógica de negocio o ajustes de dependencias,
+  Solución de errores complejos o bloqueantes.
 ---
 
 # Bitácora de Sesiones de Trabajo
@@ -27,6 +26,11 @@ Registra progreso de sesiones de trabajo para retomar contexto de forma incremen
 - Para notas personales no relacionadas con tareas técnicas
 
 ## Implementation
+
+### Pregunta de gestión
+
+- Desea realizar seguimiento de la sesión de trabajo actual? **[S]** Sí · **[N]** No
+- Si es negativa, ignore todos los pasos siguientes de esta skill.
 
 ### Plantilla
 
