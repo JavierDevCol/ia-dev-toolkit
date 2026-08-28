@@ -20,8 +20,9 @@ irm https://github.com/JavierDevCol/ia-dev-toolkit/main/INSTALACION/bootstrap/in
 
 Después de reiniciar la terminal:
 ```bash
-skills --help                    # Ver ayuda
-skills "/home/usuario/proyecto"  # Instalar en un proyecto
+diat                          # Ver comandos disponibles
+diat --install                # Instalar en ruta actual
+diat --install /mi-proyecto   # Instalar en ruta específica
 ```
 
 ### Opción 2: Script Directo
@@ -36,7 +37,7 @@ python instalar.py "C:/mi-proyecto"
 
 ## Uso del Instalador
 
-El instalador ofrece 6 opciones modulares:
+El instalador ofrece 7 opciones modulares:
 
 ```
 ╔══════════════════════════════════════════════════════════╗
@@ -51,6 +52,7 @@ El instalador ofrece 6 opciones modulares:
   [4] Tools — Seleccionar tools individuales
   [5] Team Dev SAC — Skills SAC + Configuración
   [6] Kit Completo — Agents + Skills + Workflows + Tools + Config
+  [7] Alma — Personalidad del agente (ALMA.md)
   [Q] Salir
 ```
 
@@ -152,6 +154,65 @@ Instala todo el ecosistema:
 - Tools requeridos
 - Configuración `.SAC/`
 
+### [7] Alma — Personalidad del agente
+
+Copia el contenido de `ALMA.md` al archivo de personalidad del proyecto.
+
+**Comportamiento según plataforma:**
+
+| Plataforma | Archivo creado/actualizado |
+|---|---|
+| `.claude/` | `claude.md` |
+| `.opencode/` | `opencode.md` |
+| `.agent/` | `agent.md` |
+| Ninguna (default) | `agent.md` |
+
+**Reglas:**
+- Siempre agrega el contenido **AL INICIO**
+- Si ya existe contenido, lo deja **por debajo**
+- Si no existe ningún archivo, crea el apropiado
+
+---
+
+## CLI `diat`
+
+Comando principal del toolkit:
+
+| Comando | Función |
+|---|---|
+| `diat` | Mostrar menú de comandos disponibles |
+| `diat --help` | Mostrar ayuda detallada |
+| `diat --version` | Mostrar versión actual |
+| `diat --check` | Verificar requisitos del sistema |
+| `diat --install [/ruta]` | Instalar componentes en proyecto |
+| `diat --update [/ruta]` | Actualizar componentes en proyecto |
+| `diat --status [/ruta]` | Mostrar estado de instalación |
+| `diat --list` | Listar componentes en cache |
+| `diat --alma [/ruta]` | Instalar personalidad del agente |
+
+**Ejemplos:**
+```bash
+diat                          # Ver comandos disponibles
+diat --install                # Instalar en ruta actual
+diat --install /mi-proyecto   # Instalar en ruta específica
+diat --update                 # Actualizar ruta actual
+diat --status                 # Ver estado ruta actual
+diat --alma                   # Instalar personalidad
+```
+
+---
+
+## Orden de Prioridad de Plataformas
+
+El instalador detecta automáticamente la plataforma del proyecto:
+
+| Prioridad | Plataforma | Skills en |
+|---|---|---|
+| 1 | `.claude/` | `.claude/skills/` |
+| 2 | `.opencode/` | `.opencode/skills/` |
+| 3 | `.agent/` | `.agent/skills/` |
+| Default | `.agent/` | `.agent/skills/` |
+
 ---
 
 ## Estructura del Instalador
@@ -160,11 +221,13 @@ Instala todo el ecosistema:
 INSTALACION/
 ├── README.md              ← Este archivo
 ├── instalar.py            ← Instalador principal (Python)
+├── diat                   ← CLI principal (Linux/Mac)
+├── diat.bat               ← CLI principal (Windows)
 └── bootstrap/
     ├── install.sh         ← Bootstrap Linux/Mac
     ├── install.ps1        ← Bootstrap Windows
-    ├── skills.sh          ← Comando global Linux/Mac
-    └── skills.bat         ← Comando global Windows
+    ├── skills.sh          ← Wrapper global Linux/Mac
+    └── skills.bat         ← Wrapper global Windows
 ```
 
 ---
@@ -172,7 +235,6 @@ INSTALACION/
 ## Requisitos
 
 - **Python 3.8+**
-- **Git** (para clonar desde GitHub)
 
 ### Requisitos por Componente
 
@@ -185,16 +247,7 @@ INSTALACION/
 | SAC skills | .SAC/config/CONFIG_SYSTEM.yaml |
 | Workflows | Ninguno (instalan tools automáticamente) |
 | Agentes | Ninguno |
-
----
-
-## Comandos Disponibles
-
-| Comando | Descripción |
-|---------|-------------|
-| `skills` | Modo interactivo |
-| `skills "RUTA"` | Instalar en la ruta especificada |
-| `skills --help` | Mostrar ayuda |
+| Alma | Ninguno |
 
 ---
 
