@@ -14,10 +14,8 @@
 # ============================================
 # CONFIGURACIÓN
 # ============================================
-$SKILLS_HOME = "$env:LOCALAPPDATA\ia-dev-toolkit"
+$DIAT_URL = "https://raw.githubusercontent.com/JavierDevCol/ia-dev-toolkit/main/INSTALACION/diat"
 $BIN_PATH = "$env:LOCALAPPDATA\ia-dev-toolkit\bin"
-$REPO_URL = "https://github.com/JavierDevCol/ia-dev-toolkit.git"
-$REPO_BRANCH = "main"
 
 # ============================================
 # FUNCIONES DE UTILIDAD
@@ -27,7 +25,7 @@ function Print-Banner {
     Write-Host "╔═══════════════════════════════════════════════════════════════╗" -ForegroundColor Cyan
     Write-Host "║                                                               ║" -ForegroundColor Cyan
     Write-Host "║   🛠️  ia-dev-toolkit — Instalador Bootstrap para Windows        ║" -ForegroundColor Cyan
-    Write-Host "║   Skills y Agentes IA para tu proyecto                        ║" -ForegroundColor Cyan
+    Write-Host "║   Skills · Agents · Workflows · Tools · Config                ║" -ForegroundColor Cyan
     Write-Host "║                                                               ║" -ForegroundColor Cyan
     Write-Host "╚═══════════════════════════════════════════════════════════════╝" -ForegroundColor Cyan
     Write-Host ""
@@ -75,16 +73,6 @@ function Check-Prerequisites {
     $pythonVersion = & $pythonCmd --version 2>&1
     Print-Success "Python encontrado: $pythonVersion"
 
-    # Verificar Git
-    if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
-        Print-Error "Git no está instalado"
-        Print-Info "Instala Git desde: https://git-scm.com/downloads"
-        return $false
-    }
-
-    $gitVersion = git --version 2>&1
-    Print-Success "Git encontrado: $gitVersion"
-
     Write-Host ""
     return $true
 }
@@ -92,61 +80,47 @@ function Check-Prerequisites {
 # ============================================
 # INSTALACIÓN
 # ============================================
-function Install-Skills {
-    Write-Host "📦 Instalando ia-dev-toolkit..." -ForegroundColor White
+function Install-Diat {
+    Write-Host "📦 Instalando diat..." -ForegroundColor White
     Write-Host ""
 
-    $repoPath = "$SKILLS_HOME\repo"
-
-    # Crear estructura
-    Print-Info "Creando estructura de carpetas..."
-    New-Item -ItemType Directory -Force -Path $SKILLS_HOME | Out-Null
+    # Crear directorio
+    Print-Info "Creando directorio $BIN_PATH..."
     New-Item -ItemType Directory -Force -Path $BIN_PATH | Out-Null
-    Print-Success "Carpeta creada: $SKILLS_HOME"
+    Print-Success "Directorio creado: $BIN_PATH"
 
-    # Clonar o actualizar repositorio
-    if (Test-Path "$repoPath\.git") {
-        Print-Info "Repositorio existente, actualizando..."
-        Set-Location $repoPath
-        git fetch origin 2>$null
-        git checkout $REPO_BRANCH 2>$null
-        git pull origin $REPO_BRANCH 2>$null
-        Set-Location $PSScriptRoot
-        Print-Success "Repositorio actualizado"
-    } else {
-        Print-Info "Clonando repositorio desde GitHub..."
-        if (Test-Path $repoPath) {
-            Remove-Item -Recurse -Force $repoPath
-        }
-        $result = git clone --branch $REPO_BRANCH $REPO_URL $repoPath 2>&1
-        if ($LASTEXITCODE -ne 0) {
-            Print-Error "Error al clonar el repositorio"
-            return $false
-        }
-        Print-Success "Repositorio clonado"
+    # Descargar diat
+    Print-Info "Descargando diat desde GitHub..."
+    try {
+        Invoke-WebRequest -Uri $DIAT_URL -OutFile "$BIN_PATH\diat" -ErrorAction Stop
+        Print-Success "diat descargado en $BIN_PATH\diat"
+    } catch {
+        Print-Error "Error al descargar diat"
+        Print-Info "Verifica tu conexión a internet"
+        return $false
     }
 
-    # Crear comando global 'skills.bat'
-    Print-Info "Creando comando global 'skills'..."
-    $skillsBat = "$BIN_PATH\skills.bat"
+    # Crear wrapper .bat
+    Print-Info "Creando comando diat.bat..."
+    $diatBat = "$BIN_PATH\diat.bat"
 
     @'
 @echo off
 set PYTHON_CMD=python3
 where python3 >nul 2>&1 || set PYTHON_CMD=python
 
-set INSTALLER_PATH=%LOCALAPPDATA%\ia-dev-toolkit\repo\INSTALACION\instalar.py
+set DIAT_PATH=%LOCALAPPDATA%\ia-dev-toolkit\bin\diat
 
-if exist "%INSTALLER_PATH%" (
-    %PYTHON_CMD% "%INSTALLER_PATH%" %*
+if exist "%DIAT_PATH%" (
+    %PYTHON_CMD% "%DIAT_PATH%" %*
 ) else (
-    echo ❌ Error: No se encontró el instalador
+    echo ❌ Error: No se encontró diat
     echo    Ejecuta el script de instalación nuevamente
     exit /b 1
 )
-'@ | Out-File -FilePath $skillsBat -Encoding ASCII
+'@ | Out-File -FilePath $diatBat -Encoding ASCII
 
-    Print-Success "Comando 'skills' creado en $BIN_PATH"
+    Print-Success "Comando diat.bat creado en $BIN_PATH"
 
     # Agregar al PATH si no está
     Print-Info "Verificando PATH..."
@@ -171,18 +145,19 @@ function Print-Summary {
     Write-Host ""
     Write-Host "╔═══════════════════════════════════════════════════════════════╗" -ForegroundColor Green
     Write-Host "║                                                               ║" -ForegroundColor Green
-    Write-Host "║   ✅ SQUAD-SKILLS INSTALADO CORRECTAMENTE                     ║" -ForegroundColor Green
+    Write-Host "║   ✅ IA DEV TOOLKIT INSTALADO CORRECTAMENTE                   ║" -ForegroundColor Green
     Write-Host "║                                                               ║" -ForegroundColor Green
     Write-Host "╚═══════════════════════════════════════════════════════════════╝" -ForegroundColor Green
     Write-Host ""
-    Write-Host "   📍 Ubicación:  $SKILLS_HOME" -ForegroundColor White
+    Write-Host "   📍 Ubicación:  $BIN_PATH\diat" -ForegroundColor White
     Write-Host ""
     Write-Host "   🚀 Comandos disponibles:" -ForegroundColor Cyan
     Write-Host ""
-    Write-Host "      skills --help              Ver ayuda"
-    Write-Host "      skills `"C:\mi-proyecto`"    Instalar en un proyecto"
+    Write-Host "      diat                     Ver comandos disponibles"
+    Write-Host "      diat --install            Instalar componentes"
+    Write-Host "      diat --help               Ver ayuda"
     Write-Host ""
-    Write-Host "   ⚠️  IMPORTANTE: Reinicia la terminal para usar el comando 'skills'" -ForegroundColor Yellow
+    Write-Host "   ⚠️  IMPORTANTE: Reinicia la terminal para usar el comando 'diat'" -ForegroundColor Yellow
     Write-Host ""
 }
 
@@ -197,7 +172,7 @@ if (-not (Check-Prerequisites)) {
     exit 1
 }
 
-if (-not (Install-Skills)) {
+if (-not (Install-Diat)) {
     Write-Host ""
     Print-Error "La instalación falló."
     exit 1

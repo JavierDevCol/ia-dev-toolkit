@@ -17,10 +17,8 @@ set -e
 # ============================================
 # CONFIGURACIÓN
 # ============================================
-SKILLS_HOME="$HOME/.local/share/ia-dev-toolkit"
+DIAT_URL="https://raw.githubusercontent.com/JavierDevCol/ia-dev-toolkit/main/INSTALACION/diat"
 BIN_PATH="$HOME/.local/bin"
-REPO_URL="https://github.com/JavierDevCol/ia-dev-toolkit.git"
-REPO_BRANCH="main"
 
 # ============================================
 # COLORES
@@ -40,7 +38,7 @@ print_banner() {
     echo -e "${CYAN}╔═══════════════════════════════════════════════════════════════╗${NC}"
     echo -e "${CYAN}║                                                               ║${NC}"
     echo -e "${CYAN}║   🛠️  ia-dev-toolkit — Instalador Bootstrap                     ║${NC}"
-    echo -e "${CYAN}║   Skills y Agentes IA para tu proyecto                        ║${NC}"
+    echo -e "${CYAN}║   Skills · Agents · Workflows · Tools · Config                ║${NC}"
     echo -e "${CYAN}║                                                               ║${NC}"
     echo -e "${CYAN}╚═══════════════════════════════════════════════════════════════╝${NC}"
     echo ""
@@ -82,15 +80,6 @@ check_prerequisites() {
     PYTHON_VERSION=$($PYTHON_CMD --version 2>&1)
     print_success "Python encontrado: $PYTHON_VERSION"
 
-    if ! command -v git &> /dev/null; then
-        print_error "Git no está instalado"
-        print_info "Instala Git desde: https://git-scm.com/downloads"
-        return 1
-    fi
-
-    GIT_VERSION=$(git --version 2>&1)
-    print_success "Git encontrado: $GIT_VERSION"
-
     echo ""
     return 0
 }
@@ -98,62 +87,23 @@ check_prerequisites() {
 # ============================================
 # INSTALACIÓN
 # ============================================
-install_skills() {
-    echo -e "${WHITE}📦 Instalando ia-dev-toolkit...${NC}"
+install_diat() {
+    echo -e "${WHITE}📦 Instalando diat...${NC}"
     echo ""
 
-    REPO_PATH="$SKILLS_HOME/repo"
-
-    print_info "Creando estructura de carpetas..."
-    mkdir -p "$SKILLS_HOME"
+    print_info "Creando directorio ~/.local/bin..."
     mkdir -p "$BIN_PATH"
-    print_success "Carpeta creada: $SKILLS_HOME"
+    print_success "Directorio creado: $BIN_PATH"
 
-    if [ -d "$REPO_PATH/.git" ]; then
-        print_info "Repositorio existente, actualizando..."
-        cd "$REPO_PATH"
-        git fetch origin 2>/dev/null || true
-        git checkout "$REPO_BRANCH" 2>/dev/null || true
-        git pull origin "$REPO_BRANCH" 2>/dev/null || print_warning "No se pudo actualizar"
-        cd - > /dev/null
-        print_success "Repositorio actualizado"
-    else
-        print_info "Clonando repositorio desde GitHub..."
-        if [ -d "$REPO_PATH" ]; then
-            rm -rf "$REPO_PATH"
-        fi
-        if ! git clone --branch "$REPO_BRANCH" "$REPO_URL" "$REPO_PATH" 2>/dev/null; then
-            print_error "Error al clonar el repositorio"
-            return 1
-        fi
-        print_success "Repositorio clonado"
+    print_info "Descargando diat desde GitHub..."
+    if ! curl -fsSL "$DIAT_URL" -o "$BIN_PATH/diat" 2>/dev/null; then
+        print_error "Error al descargar diat"
+        print_info "Verifica tu conexión a internet"
+        return 1
     fi
 
-    print_info "Creando comando global 'skills'..."
-    SKILLS_SCRIPT="$BIN_PATH/skills"
-
-    cat > "$SKILLS_SCRIPT" << 'EOF'
-#!/bin/bash
-# ia-dev-toolkit — Comando global
-
-PYTHON_CMD="python3"
-if ! command -v python3 &> /dev/null; then
-    PYTHON_CMD="python"
-fi
-
-INSTALLER_PATH="$HOME/.local/share/ia-dev-toolkit/repo/INSTALACION/instalar.py"
-
-if [ -f "$INSTALLER_PATH" ]; then
-    $PYTHON_CMD "$INSTALLER_PATH" "$@"
-else
-    echo "❌ Error: No se encontró el instalador"
-    echo "   Ejecuta el script de instalación nuevamente"
-    exit 1
-fi
-EOF
-
-    chmod +x "$SKILLS_SCRIPT"
-    print_success "Comando 'skills' creado en $BIN_PATH"
+    chmod +x "$BIN_PATH/diat"
+    print_success "diat instalado en $BIN_PATH/diat"
 
     print_info "Verificando PATH..."
     SHELL_RC=""
@@ -190,16 +140,17 @@ print_summary() {
     echo ""
     echo -e "${GREEN}╔═══════════════════════════════════════════════════════════════╗${NC}"
     echo -e "${GREEN}║                                                               ║${NC}"
-    echo -e "${GREEN}║   ✅ SQUAD-SKILLS INSTALADO CORRECTAMENTE                     ║${NC}"
+    echo -e "${GREEN}║   ✅ IA DEV TOOLKIT INSTALADO CORRECTAMENTE                   ║${NC}"
     echo -e "${GREEN}║                                                               ║${NC}"
     echo -e "${GREEN}╚═══════════════════════════════════════════════════════════════╝${NC}"
     echo ""
-    echo -e "   ${WHITE}📍 Ubicación:  $SKILLS_HOME${NC}"
+    echo -e "   ${WHITE}📍 Ubicación:  $BIN_PATH/diat${NC}"
     echo ""
     echo -e "   ${CYAN}🚀 Comandos disponibles:${NC}"
     echo ""
-    echo -e "      skills --help              Ver ayuda"
-    echo -e "      skills \"/ruta/proyecto\"    Instalar en un proyecto"
+    echo -e "      diat                     Ver comandos disponibles"
+    echo -e "      diat --install            Instalar componentes"
+    echo -e "      diat --help               Ver ayuda"
     echo ""
     echo -e "   ${YELLOW}⚠️  IMPORTANTE: Reinicia la terminal o ejecuta:${NC}"
     echo -e "      ${WHITE}source ~/.bashrc${NC}  (o ~/.zshrc)"
@@ -217,7 +168,7 @@ if ! check_prerequisites; then
     exit 1
 fi
 
-if ! install_skills; then
+if ! install_diat; then
     echo ""
     print_error "La instalación falló."
     exit 1
