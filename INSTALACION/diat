@@ -364,6 +364,88 @@ def cmd_update():
     print(f"\n{'═' * 70}\n")
 
 
+def cmd_install():
+    """Instalar componentes en un proyecto."""
+    # Determinar ruta
+    if len(sys.argv) > 2 and not sys.argv[2].startswith("-"):
+        project_path = Path(sys.argv[2]).resolve()
+    else:
+        project_path = Path.cwd().resolve()
+
+    print(f"\n{'═' * 70}")
+    print(f"  📦 INSTALAR COMPONENTES")
+    print(f"  📍 Ruta: {project_path}")
+    print(f"{'═' * 70}\n")
+
+    # Verificar que la ruta existe
+    if not project_path.exists():
+        create = input(f"  La ruta no existe. ¿Crearla? (s/N): ").strip().lower()
+        if create != 's':
+            print("❌ Instalación cancelada")
+            return
+        project_path.mkdir(parents=True, exist_ok=True)
+
+    # Obtener instalar.py
+    instalar_dir = ensure_instalar()
+    if not instalar_dir:
+        print("❌ No se pudo obtener instalar.py")
+        return
+
+    # Ejecutar instalador
+    sys.path.insert(0, instalar_dir)
+    from instalar import main as install_main
+    sys.argv = ["instalar.py", str(project_path)]
+    install_main()
+
+
+def cmd_alma():
+    """Instalar personalidad del agente."""
+    # Determinar ruta
+    if len(sys.argv) > 2 and not sys.argv[2].startswith("-"):
+        project_path = Path(sys.argv[2]).resolve()
+    else:
+        project_path = Path.cwd().resolve()
+
+    print(f"\n{'═' * 70}")
+    print(f"  🧠 ALMA — Personalidad del Agente")
+    print(f"  📍 Ruta: {project_path}")
+    print(f"{'═' * 70}\n")
+
+    # Verificar que la ruta existe
+    if not project_path.exists():
+        print(f"❌ La ruta no existe: {project_path}")
+        return
+
+    # Obtener instalar.py
+    instalar_dir = ensure_instalar()
+    if not instalar_dir:
+        print("❌ No se pudo obtener instalar.py")
+        return
+
+    # Importar y ejecutar install_alma
+    sys.path.insert(0, instalar_dir)
+    from instalar import install_alma
+
+    # Determinar root_dir (donde está ALMA.md)
+    # Buscar en cache primero
+    cache_dir = get_temp_repo_path()
+    if cache_dir.exists() and (cache_dir / "ALMA.md").exists():
+        root_dir = cache_dir
+    else:
+        # Buscar en directorio del script
+        script_dir = Path(instalar_dir)
+        if (script_dir / "ALMA.md").exists():
+            root_dir = script_dir
+        elif (script_dir.parent / "ALMA.md").exists():
+            root_dir = script_dir.parent
+        else:
+            print("❌ No se encontró ALMA.md")
+            print("   Ejecuta `diat --update` primero")
+            return
+
+    install_alma(project_path, root_dir)
+
+
 def cmd_uninstall():
     """Desinstalar ia-dev-toolkit del sistema."""
     print(f"\n{'═' * 70}")
@@ -463,16 +545,38 @@ def cmd_uninstall():
 # MAIN
 # ============================================
 
+def show_menu():
+    """Mostrar menú de comandos disponibles."""
+    print(f"""
+╔═══════════════════════════════════════════════════════════════╗
+║                    diat — IA Dev Toolkit CLI                  ║
+╚═══════════════════════════════════════════════════════════════╝
+
+Comandos disponibles:
+
+  diat --help              Mostrar ayuda detallada
+  diat --version           Mostrar versión actual
+  diat --check             Verificar requisitos del sistema
+  diat --install [/ruta]   Instalar componentes en proyecto
+  diat --update [/ruta]    Actualizar componentes en proyecto
+  diat --status [/ruta]    Mostrar estado de instalación
+  diat --list              Listar componentes en cache
+  diat --alma [/ruta]      Instalar personalidad del agente
+  diat --uninstall         Desinstalar ia-dev-toolkit
+
+Ejemplos:
+  diat --install                    # Instalar en ruta actual
+  diat --install /home/user/proy    # Instalar en ruta específica
+  diat --update                     # Actualizar ruta actual
+  diat --update /home/user/proy     # Actualizar ruta específica
+""")
+
+
 def main():
-    # Sin argumentos → modo interactivo (instalar)
+    # Sin argumentos → mostrar menú de comandos
     if len(sys.argv) == 1:
-        instalar_dir = ensure_instalar()
-        if not instalar_dir:
-            print("❌ No se pudo obtener instalar.py")
-            sys.exit(1)
-        sys.path.insert(0, instalar_dir)
-        from instalar import main as install_main
-        install_main()
+        print_banner()
+        show_menu()
         return
 
     # Procesar argumentos
@@ -500,6 +604,14 @@ def main():
     elif arg in ("--status", "-s"):
         print_banner()
         cmd_status()
+
+    elif arg in ("--install", "-i"):
+        print_banner()
+        cmd_install()
+
+    elif arg in ("--alma", "-a"):
+        print_banner()
+        cmd_alma()
 
     elif arg in ("--uninstall", "-U"):
         print_banner()

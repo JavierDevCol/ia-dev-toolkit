@@ -166,7 +166,7 @@ Genera READMEs profesionales y completos validando la estructura del proyecto y 
 ## Licencia
 
 Distribuído bajo la licencia [Tipo]. Ver `LICENSE` para más información.
-
+```
 
 ### Paso 4: Validar README (OBLIGATORIO)
 

@@ -1061,6 +1061,8 @@ def download_from_github(dest_path):
 
     # Carpetas necesarias para el instalador
     REQUIRED_DIRS = ["skills", "agents", "workflows", "tools", "config"]
+    # Archivos raíz necesarios
+    REQUIRED_FILES = ["ALMA.md"]
 
     try:
         print_info(f"Descargando desde {tarball_url}...")
@@ -1088,12 +1090,21 @@ def download_from_github(dest_path):
                 if not rel_path:
                     continue
 
-                # Verificar si pertenece a una carpeta requerida
+                # Verificar si pertenece a una carpeta requerida o es un archivo raíz requerido
                 is_required = False
+
+                # Verificar carpetas requeridas
                 for req_dir in REQUIRED_DIRS:
                     if rel_path.startswith(req_dir + "/") or rel_path == req_dir:
                         is_required = True
                         break
+
+                # Verificar archivos raíz requeridos
+                if not is_required:
+                    for req_file in REQUIRED_FILES:
+                        if rel_path == req_file:
+                            is_required = True
+                            break
 
                 if not is_required:
                     continue

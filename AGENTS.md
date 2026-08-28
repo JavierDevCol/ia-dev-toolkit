@@ -61,9 +61,10 @@ Detecta solicitudes: "genera un README", "crea un README", "mejora el README", "
 
 ### Protocolo:
 1. **Validar proyecto** - Verificar archivos y estructura antes de generar
-2. **Recopilar información** - Preguntar información faltante
-3. **Generar README** - Incluir secciones obligatorias
-4. **Validar README** - Verificar completitud y validez
+2. **Auto-detectar secciones** - Buscar tests, CI/CD, contribución
+3. **Recopilar información** - Preguntar información faltante
+4. **Generar README** - Incluir secciones obligatorias + auto-detectadas
+5. **Validar README** - Verificar completitud y validez
 
 ### Secciones obligatorias:
 - Título
@@ -72,3 +73,9 @@ Detecta solicitudes: "genera un README", "crea un README", "mejora el README", "
 - Uso
 - Créditos
 - Licencia
+
+### Secciones auto-detectadas:
+- **Badges** - Siempre incluir (licencia, versión, build status)
+- **Pruebas/Tests** - Si se detecta tests/, __tests__/, *_test.*
+- **Contribución** - Si se detecta CONTRIBUTING.md o es público
+- **CI/CD** - Si se detecta .github/workflows/, .gitlab-ci.yml
