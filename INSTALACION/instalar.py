@@ -309,6 +309,63 @@ def parse_compatibility(skill_dir):
         return "No information available"
 
 
+def parse_ready(skill_dir):
+    """Extraer flag ready del frontmatter de SKILL.md. Default: False (oculto)."""
+    skill_file = skill_dir / "SKILL.md"
+    if not skill_file.exists():
+        return False
+    try:
+        content = skill_file.read_text(encoding="utf-8")
+        in_frontmatter = False
+        for line in content.split("\n"):
+            stripped = line.strip()
+            if stripped == "---":
+                in_frontmatter = not in_frontmatter
+                continue
+            if in_frontmatter and stripped.startswith("ready:"):
+                value = stripped.split(":", 1)[1].strip().lower()
+                return value == "true"
+        return False
+    except Exception:
+        return False
+
+
+def parse_ready_agent(agent_file):
+    """Extraer flag ready del frontmatter de agente. Default: False."""
+    try:
+        content = agent_file.read_text(encoding="utf-8")
+        in_frontmatter = False
+        for line in content.split("\n"):
+            stripped = line.strip()
+            if stripped == "---":
+                in_frontmatter = not in_frontmatter
+                continue
+            if in_frontmatter and stripped.startswith("ready:"):
+                value = stripped.split(":", 1)[1].strip().lower()
+                return value == "true"
+        return False
+    except Exception:
+        return False
+
+
+def parse_ready_workflow(wf_file):
+    """Extraer flag ready del frontmatter de workflow. Default: False."""
+    try:
+        content = wf_file.read_text(encoding="utf-8")
+        in_frontmatter = False
+        for line in content.split("\n"):
+            stripped = line.strip()
+            if stripped == "---":
+                in_frontmatter = not in_frontmatter
+                continue
+            if in_frontmatter and stripped.startswith("ready:"):
+                value = stripped.split(":", 1)[1].strip().lower()
+                return value == "true"
+        return False
+    except Exception:
+        return False
+
+
 def extract_required_tools(compatibility_str):
     tools = []
     lower = compatibility_str.lower()
@@ -343,6 +400,10 @@ def scan_skills(skills_dir):
         if any(s["name"] == skill_name for s in skills):
             continue
 
+        # Filtrar por ready (default: false = oculto)
+        if not parse_ready(skill_dir):
+            continue
+
         compatibility = parse_compatibility(skill_dir)
         is_sac = skill_name in SAC_SKILLS
         description = SKILL_DESCRIPTIONS.get(skill_name, "Sin descripción")
@@ -367,6 +428,10 @@ def scan_agents(agents_dir):
     if not agents_dir.exists():
         return agents
     for agent_file in sorted(agents_dir.glob("*.md")):
+        # Filtrar por ready (default: false = oculto)
+        if not parse_ready_agent(agent_file):
+            continue
+
         name = agent_file.stem
         agents.append({
             "name": name,
@@ -388,6 +453,11 @@ def scan_workflows(workflows_dir):
         wf_file = wf_dir / "workflow.md"
         if not wf_file.exists():
             continue
+
+        # Filtrar por ready (default: false = oculto)
+        if not parse_ready_workflow(wf_file):
+            continue
+
         name = wf_dir.name
         description = WORKFLOW_DESCRIPTIONS.get(name, "Workflow")
         dependencies = WORKFLOW_DEPENDENCIES.get(name, "ninguna")
