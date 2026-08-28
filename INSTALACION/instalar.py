@@ -697,17 +697,17 @@ def install_alma(project_path, root_dir):
     print(f"║              ALMA — Personalidad del Agente              ║")
     print(f"╚══════════════════════════════════════════════════════════╝")
 
-    # Buscar archivo AGENTS.md en el repo
-    agent_md_path = root_dir / "AGENTS.md"
+    # Buscar archivo ALMA.md en el repo
+    agent_md_path = root_dir / "ALMA.md"
     if not agent_md_path.exists():
-        print_error("No se encontró AGENTS.md en el repositorio")
+        print_error("No se encontró ALMA.md en el repositorio")
         return False
 
-    # Leer contenido de AGENTS.md
+    # Leer contenido de ALMA.md
     try:
         agent_content = agent_md_path.read_text(encoding="utf-8")
     except Exception as e:
-        print_error(f"Error al leer AGENTS.md: {e}")
+        print_error(f"Error al leer ALMA.md: {e}")
         return False
 
     # Determinar archivo de personalidad destino
@@ -721,22 +721,22 @@ def install_alma(project_path, root_dir):
             existing_content = personality_file.read_text(encoding="utf-8")
             # Verificar si el contenido ya está al inicio
             if agent_content.strip() in existing_content:
-                print_warning("El contenido de AGENTS.md ya está presente")
+                print_warning("El contenido de ALMA.md ya está presente")
                 return True
 
             # Agregar contenido al inicio
             new_content = agent_content + "\n\n" + existing_content
             personality_file.write_text(new_content, encoding="utf-8")
-            print_success(f"Contenido de AGENTS.md agregado al inicio de {personality_file.name}")
+            print_success(f"Contenido de ALMA.md agregado al inicio de {personality_file.name}")
             return True
         except Exception as e:
             print_error(f"Error al actualizar {personality_file.name}: {e}")
             return False
     else:
-        # Crear archivo con contenido de AGENTS.md
+        # Crear archivo con contenido de ALMA.md
         try:
             personality_file.write_text(agent_content, encoding="utf-8")
-            print_success(f"{personality_file.name} creado con contenido de AGENTS.md")
+            print_success(f"{personality_file.name} creado con contenido de ALMA.md")
             return True
         except Exception as e:
             print_error(f"Error al crear {personality_file.name}: {e}")
