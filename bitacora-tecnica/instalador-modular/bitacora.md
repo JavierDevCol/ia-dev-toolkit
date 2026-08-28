@@ -58,13 +58,13 @@ Rediseñar el instalador de ia-dev-toolkit para permitir instalación modular de
   - Opción Alma copia `ALMA.md` al archivo de personalidad según plataforma
 
 ## Estado Actual
-CLI `diat` funcional con todos los comandos. Bootstrap descarga solo `diat` (~10KB). Cache descarga componentes selectivos (~322KB).
+CLI `diat` funcional con todos los comandos. Bootstrap descarga solo `diat` (~10KB). Cache descarga componentes selectivos (~322KB). Menú interactivo con curses nativo.
 
 ### Pendientes
-- [ ] **Menú interactivo con flechas y espacio** — Actualmente se escriben números, usuario espera navegación con ↑↓ y selección con espacio
-- [ ] Evaluar librerías: `inquirer`, `pick`, `simple-term-menu`, `blessed`
-- [ ] Skills ADO archived muestran "Sin descripción" — Agregar descripciones
-- [ ] Flag `--non-interactive` para instalación automatizada
+- [x] **Menú interactivo con flechas y espacio** — Implementado con curses nativo (interactive_menu.py)
+- [x] Evaluar librerías: `inquirer`, `pick`, `simple-term-menu`, `blessed` — Se usó curses nativo (sin dependencias)
+- [x] Skills ADO archived muestran "Sin descripción" — Agregadas descripciones
+- [x] Flag `--non-interactive` para instalación automatizada — Implementado
 
 ### Bloqueantes
 - Ninguno
@@ -89,29 +89,23 @@ Seleccionados: transversales-workitems
 ¿Confirmar selección? (s/N):
 ```
 
-### Solución Esperada
-Menú interactivo con navegación por teclado:
+### Solución Implementada
+Menú interactivo con navegación por teclado usando curses nativo:
 - Flechas ↑↓ para navegar
 - Espacio para marcar/desmarcar
 - Enter para confirmar selección
+- Fallback a modo texto si curses falla
 
-### Librerías a Evaluar
-
-| Librería | Ventajas | Desventajas |
-|---|---|---|
-| `inquirer` | Popular, bien mantenida | Dependencia externa |
-| `pick` | Simple, ligera | Menos opciones |
-| `simple-term-menu` | Sin dependencias | Solo Python 3.7+ |
-| `blessed` | Muy flexible | Compleja |
-
-### Implementación Sugerida
+### Implementación
 ```python
-# Reemplazar show_checkbox_menu() con:
-from simple_term_menu import TerminalMenu
+# interactive_menu.py - Menú con curses nativo (sin dependencias)
+from interactive_menu import show_interactive_menu
 
 def show_checkbox_menu(items, item_type):
-    options = [f"{item['name']} — {item['description']}" for item in items]
-    terminal_menu = TerminalMenu(
+    options = [{"name": item["name"], "description": item["description"]} for item in items]
+    selected = show_interactive_menu(options, f"📦 {item_type}")
+    return selected
+```
         options,
         title=f"{item_type} DISPONIBLES",
         multi_select=True,
