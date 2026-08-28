@@ -20,3 +20,4 @@ SPIKE/
 # Test artifacts temporales
 tests/e2e/tmp/
 AGENTS.md
+docker-opencode/

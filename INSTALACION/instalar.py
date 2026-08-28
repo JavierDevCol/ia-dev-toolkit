@@ -621,7 +621,36 @@ def install_sac_config(project_path, root_dir, project_config=None):
 # ============================================
 
 def show_checkbox_menu(items, item_type, show_deps=True):
-    """Muestra menú con checkboxes [ ]/[x] y permite selección interactiva."""
+    """Muestra menú interactivo con flechas y espacio para selección."""
+    try:
+        # Intentar usar menú interactivo con curses
+        from interactive_menu import show_interactive_menu
+
+        # Preparar opciones para el menú interactivo
+        options = []
+        for item in items:
+            opt = {
+                "name": item["name"],
+                "description": item.get("description", ""),
+                "dependencies": item.get("dependencies", "") if show_deps else ""
+            }
+            options.append(opt)
+
+        # Mostrar menú interactivo
+        selected_items = show_interactive_menu(options, f"📦 {item_type}", multi_select=True)
+
+        if selected_items is None:
+            return None
+
+        return selected_items
+
+    except Exception:
+        # Fallback a modo texto si curses falla
+        return _show_checkbox_menu_fallback(items, item_type, show_deps)
+
+
+def _show_checkbox_menu_fallback(items, item_type, show_deps=True):
+    """Fallback: menú con checkboxes por texto."""
     selected = {item["name"]: False for item in items}
 
     while True:
