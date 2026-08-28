@@ -436,11 +436,11 @@ def scan_tools(tools_dir):
 # ============================================
 
 def get_skills_target(project_path):
-    for platform_dir in [".opencode", ".claude", ".agent"]:
+    for platform_dir in [".claude", ".opencode", ".agent"]:
         platform_path = project_path / platform_dir
         if platform_path.exists():
             return platform_path / "skills"
-    target = project_path / ".opencode" / "skills"
+    target = project_path / ".agent" / "skills"
     target.mkdir(parents=True, exist_ok=True)
     return target
 
@@ -669,6 +669,81 @@ def show_checkbox_menu(items, item_type, show_deps=True):
 
 
 # ============================================
+# INSTALACIÓN DE ALMA (PERSONALIDAD)
+# ============================================
+
+def get_personality_file(project_path):
+    """Determinar qué archivo de personalidad crear/actualizar según la plataforma."""
+    # Buscar plataforma existente
+    for platform_dir in [".claude", ".opencode", ".agent"]:
+        platform_path = project_path / platform_dir
+        if platform_path.exists():
+            # Mapear plataforma a archivo de personalidad
+            if platform_dir == ".claude":
+                return project_path / "claude.md"
+            elif platform_dir == ".opencode":
+                return project_path / "opencode.md"
+            elif platform_dir == ".agent":
+                return project_path / "agent.md"
+
+    # Si no existe ninguna plataforma, crear .agent/ y agent.md
+    (project_path / ".agent").mkdir(parents=True, exist_ok=True)
+    return project_path / "agent.md"
+
+
+def install_alma(project_path, root_dir):
+    """Instalar alma (personalidad) del agente."""
+    print(f"\n╔══════════════════════════════════════════════════════════╗")
+    print(f"║              ALMA — Personalidad del Agente              ║")
+    print(f"╚══════════════════════════════════════════════════════════╝")
+
+    # Buscar archivo AGENTS.md en el repo
+    agent_md_path = root_dir / "AGENTS.md"
+    if not agent_md_path.exists():
+        print_error("No se encontró AGENTS.md en el repositorio")
+        return False
+
+    # Leer contenido de AGENTS.md
+    try:
+        agent_content = agent_md_path.read_text(encoding="utf-8")
+    except Exception as e:
+        print_error(f"Error al leer AGENTS.md: {e}")
+        return False
+
+    # Determinar archivo de personalidad destino
+    personality_file = get_personality_file(project_path)
+
+    print_info(f"Archivo de personalidad: {personality_file.name}")
+
+    # Si el archivo ya existe, agregar contenido al inicio
+    if personality_file.exists():
+        try:
+            existing_content = personality_file.read_text(encoding="utf-8")
+            # Verificar si el contenido ya está al inicio
+            if agent_content.strip() in existing_content:
+                print_warning("El contenido de AGENTS.md ya está presente")
+                return True
+
+            # Agregar contenido al inicio
+            new_content = agent_content + "\n\n" + existing_content
+            personality_file.write_text(new_content, encoding="utf-8")
+            print_success(f"Contenido de AGENTS.md agregado al inicio de {personality_file.name}")
+            return True
+        except Exception as e:
+            print_error(f"Error al actualizar {personality_file.name}: {e}")
+            return False
+    else:
+        # Crear archivo con contenido de AGENTS.md
+        try:
+            personality_file.write_text(agent_content, encoding="utf-8")
+            print_success(f"{personality_file.name} creado con contenido de AGENTS.md")
+            return True
+        except Exception as e:
+            print_error(f"Error al crear {personality_file.name}: {e}")
+            return False
+
+
+# ============================================
 # MENÚS
 # ============================================
 
@@ -686,6 +761,7 @@ def show_main_menu():
   [4] Tools — Seleccionar tools individuales
   [5] Team Dev SAC — Skills SAC + Configuración
   [6] Kit Completo — Agents + Skills + Workflows + Tools + Config
+  [7] Alma — Personalidad del agente (AGENT.md)
   [Q] Salir
     """)
 
@@ -934,6 +1010,10 @@ def main():
             for wf in workflows:
                 if install_workflow(wf, project_path, root_dir):
                     installed_workflows.append(wf["name"])
+
+        # ─── [7] ALMA (PERSONALIDAD) ──────────────────────────
+        elif choice == "7":
+            install_alma(project_path, root_dir)
 
         else:
             print_error("Opción inválida")
