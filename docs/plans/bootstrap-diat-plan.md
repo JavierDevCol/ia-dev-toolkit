@@ -22,6 +22,31 @@ El usuario quiere:
 | `diat --install` | Menú selección → descarga bajo demanda → instala |
 | `diat --update` | Actualizar componentes en ruta actual o `/ruta` |
 | `diat --list` | Listar componentes disponibles en cache |
+| `diat --alma` | Instalar personalidad del agente (AGENTS.md) |
+
+## Orden de Prioridad de Plataformas
+
+| Prioridad | Plataforma | Archivo de personalidad |
+|---|---|---|
+| 1 | `.claude/` | `claude.md` |
+| 2 | `.opencode/` | `opencode.md` |
+| 3 | `.agent/` | `agent.md` |
+| Default | `.agent/` | `agent.md` |
+
+## Comando `--alma` (Personalidad)
+
+**Qué hace:** Copia contenido de `AGENTS.md` al archivo de personalidad del proyecto.
+
+**Reglas:**
+- Siempre agrega el contenido **AL INICIO**
+- Si ya existe contenido, lo deja **por debajo**
+- Si no existe ningún archivo, crea el apropiado según la plataforma
+
+**Ejemplo:**
+```
+diat --alma                    # Usar ruta actual
+diat --alma /mi/proyecto       # Usar ruta específica
+```
 
 ## Comportamiento de Rutas
 
