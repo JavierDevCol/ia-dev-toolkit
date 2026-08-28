@@ -58,7 +58,7 @@ Rediseñar el instalador de ia-dev-toolkit para permitir instalación modular de
   - Opción Alma copia `ALMA.md` al archivo de personalidad según plataforma
 
 ## Estado Actual
-CLI `diat` funcional con todos los comandos. Bootstrap descarga solo `diat` (~10KB). Cache descarga componentes selectivos (~322KB). Menú interactivo con curses nativo. Flag `ready` para filtrar componentes.
+CLI `diat` funcional con todos los comandos. Bootstrap descarga solo `diat` (~10KB). Cache descarga componentes selectivos (~322KB). Menú interactivo con curses nativo. Flag `ready` para filtrar componentes. Skill auto-versioning con análisis de diffs.
 
 ### Pendientes
 - [x] **Menú interactivo con flechas y espacio** — Implementado con curses nativo (interactive_menu.py)
@@ -66,6 +66,8 @@ CLI `diat` funcional con todos los comandos. Bootstrap descarga solo `diat` (~10
 - [x] Skills ADO archived muestran "Sin descripción" — Agregadas descripciones
 - [x] Flag `--non-interactive` para instalación automatizada — Implementado
 - [x] **Flag `ready: true/false`** — Filtra componentes en instalador (default: false = oculto)
+- [x] **Versionado con Git Tags** — `diat --version` obtiene versión desde GitHub API
+- [x] **Auto-versioning skill** — `diat --analyze-version` analiza diffs y sugiere versión
 
 ### Bloqueantes
 - Ninguno
