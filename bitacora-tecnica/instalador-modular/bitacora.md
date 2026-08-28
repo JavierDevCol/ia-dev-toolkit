@@ -1,43 +1,70 @@
-# Sesión: Instalador Modular — squad-skills
+# Sesión: Instalador Modular — ia-dev-toolkit
 - **ID:** 2026-08-27-instalador-modular
 - **Fecha inicio:** 2026-08-27 17:30
-- **Última actualización:** 2026-08-27 18:00
-- **Estado:** Completado
-- **Rama de Trabajo:** `feat/installer-modular`
-- **Tags:** `instalador`, `modular`, `workflows`, `tools`, `checkboxes`
+- **Última actualización:** 2026-08-28 01:00
+- **Estado:** En progreso
+- **Rama de Trabajo:** `main`
+- **Tags:** `instalador`, `modular`, `workflows`, `tools`, `checkboxes`, `diat`, `cli`
 - **Ambiente:** Local
 
 ## Tiempo
-- **Invertido:** 0.5h
-- **Estimado restante:** 0h
+- **Invertido:** 3h
+- **Estimado restante:** 1h
 - **Deadline:** N/A
 
 ## Objetivo de la Sesión
-Rediseñar el instalador de squad-skills para permitir instalación modular de componentes individuales: skills, agentes, workflows, tools y configuración. Agregar selección interactiva con checkboxes `[x]`/`[ ]` que muestren descripción y dependencias de cada componente.
+Rediseñar el instalador de ia-dev-toolkit para permitir instalación modular de componentes individuales: skills, agentes, workflows, tools y configuración. Crear CLI `diat` con comandos completos.
 
 ## Lo Realizado
 - **Commits:**
-  - `425e709` — feat: e2e tests expansion + workspace fixtures + opencode config updates (previo)
-  - `7c5c14e` — feat(installer): modular installation with checkboxes, workflows, tools and kit completo
+  - `425e709` — feat: e2e tests expansion + workspace fixtures
+  - `7c5c14e` — feat(installer): modular installation with checkboxes
+  - `8d5cce3` — feat(installer): autocompletado interactivo de CONFIG_USER.yaml
+  - `7e004f7` — feat(installer): descarga selectiva desde GitHub API
+  - `ff0bb10` — refactor: rename squad-skills → ia-dev-toolkit
+  - `20f39cb` — feat: CLI diat con comandos --help, --list, --version, --update, --check, --status
+  - `e8aa488` — docs: plan bootstrap diat
+  - `eb1c236` — docs: plan bootstrap diat sin clon de repo
+  - `445df17` — docs: plan bootstrap diat corregido
+  - `f320cf1` — docs: plan bootstrap diat - comportamiento corregido
+  - `8841255` — feat(installer): opción alma + cambio orden plataformas
+  - `3677376` — refactor: rename AGENTS.md → ALMA.md
+  - `e084732` — refactor(installer): actualizar referencias AGENTS.md → ALMA.md
+  - `fc91f21` — chore: limpiar .gitignore
+  - `b0adb64` — docs: actualizar README.md con opciones actuales
+  - `86902a6` — feat(bootstrap): migrar a diat sin clon de repo
+  - `ae91245` — feat: comando --uninstall para desinstalar diat
+  - `45e2259` — fix(diat): descargar instalar.py bajo demanda
+  - `053620d` — fix: descargar ALMA.md en cache + comandos --install y --alma
+
 - **Cambios en Código:**
-  - `INSTALACION/instalar.py` — Reescrito completamente con menú de 6 opciones y selección interactiva por checkboxes
-  - `INSTALACION/README.md` — Actualizado con nuevas opciones de instalación y formato de checkboxes
+  - `INSTALACION/instalar.py` — Reescrito con menú de 7 opciones, checkboxes, autocompletado config
+  - `INSTALACION/diat` — CLI principal con 10 comandos
+  - `INSTALACION/diat.bat` — Wrapper Windows
+  - `INSTALACION/bootstrap/install.sh` — Descarga directa diat (sin clon)
+  - `INSTALACION/bootstrap/install.ps1` — Descarga directa diat (sin clon)
+  - `INSTALACION/bootstrap/uninstall.sh` — Desinstalador Linux/Mac
+  - `INSTALACION/bootstrap/uninstall.ps1` — Desinstalador Windows
+  - `ALMA.md` — Personalidad del agente (renombrado de AGENTS.md)
+  - `docs/plans/bootstrap-diat-plan.md` — Plan de implementación
+
 - **Decisiones Técnicas:**
-  - Usar `show_checkbox_menu()` como función genérica reutilizable para todos los tipos de componentes → Reduce duplicación y mantiene consistencia visual
-  - Workflows instalan automáticamente sus tools requeridos → Evita que el usuario olvide dependencias
-  - Skills instaladas como symlinks, agentes/workflows/tools como copias → Skills se actualizan con el repo, el resto es independiente
+  - CLI `diat` como comando principal (acrónimo de IA Dev Toolkit)
+  - Descarga selectiva desde GitHub API (~322KB vs ~2-3MB del repo)
+  - Cache en `~/.local/share/ia-dev-toolkit/repo/`
+  - `instalar.py` se descarga bajo demanda con `ensure_instalar()`
+  - Orden prioridad plataformas: `.claude` → `.opencode` → `.agent`
+  - Default si no existe: crea `.agent/`
+  - Opción Alma copia `ALMA.md` al archivo de personalidad según plataforma
 
 ## Estado Actual
-Instalador funcional en rama `feat/installer-modular`. Prueba exitosa en `/tmp/test-installer` con Kit Completo:
-- 41 skills (symlinks)
-- 4 agentes (copias)
-- 3 workflows (copias con fases/ y plantillas/)
-- 2 tools (copias)
-- Config `.SAC/` con rutas actualizadas
+CLI `diat` funcional con todos los comandos. Bootstrap descarga solo `diat` (~10KB). Cache descarga componentes selectivos (~322KB).
 
 ### Pendientes
-- [ ] Crear PR a main
-- [ ] Revisar si hay skills ADO archived que no deberían instalarse por defecto
+- [ ] **Menú interactivo con flechas y espacio** — Actualmente se escriben números, usuario espera navegación con ↑↓ y selección con espacio
+- [ ] Evaluar librerías: `inquirer`, `pick`, `simple-term-menu`, `blessed`
+- [ ] Skills ADO archived muestran "Sin descripción" — Agregar descripciones
+- [ ] Flag `--non-interactive` para instalación automatizada
 
 ### Bloqueantes
 - Ninguno
@@ -45,14 +72,57 @@ Instalador funcional en rama `feat/installer-modular`. Prueba exitosa en `/tmp/t
 ### Tests
 - [ ] Unitarios: Pendiente
 - [ ] Integración: Pendiente
-- [x] E2E: OK (prueba manual en /tmp)
+- [x] E2E: OK (prueba manual)
 
 ### Rollback Plan
 Si algo sale mal, ejecutar:
 1. `git checkout main`
 2. `git branch -D feat/installer-modular`
 
+## Análisis: Menú Interactivo
+
+### Problema Actual
+El menú de selección requiere escribir números:
+```
+Selección: 5
+Seleccionados: transversales-workitems
+¿Confirmar selección? (s/N):
+```
+
+### Solución Esperada
+Menú interactivo con navegación por teclado:
+- Flechas ↑↓ para navegar
+- Espacio para marcar/desmarcar
+- Enter para confirmar selección
+
+### Librerías a Evaluar
+
+| Librería | Ventajas | Desventajas |
+|---|---|---|
+| `inquirer` | Popular, bien mantenida | Dependencia externa |
+| `pick` | Simple, ligera | Menos opciones |
+| `simple-term-menu` | Sin dependencias | Solo Python 3.7+ |
+| `blessed` | Muy flexible | Compleja |
+
+### Implementación Sugerida
+```python
+# Reemplazar show_checkbox_menu() con:
+from simple_term_menu import TerminalMenu
+
+def show_checkbox_menu(items, item_type):
+    options = [f"{item['name']} — {item['description']}" for item in items]
+    terminal_menu = TerminalMenu(
+        options,
+        title=f"{item_type} DISPONIBLES",
+        multi_select=True,
+        show_multi_select_hint=True
+    )
+    selected_indices = terminal_menu.show()
+    return [items[i] for i in selected_indices]
+```
+
 ## Próxima Sesión
-1. Crear PR de `feat/installer-modular` a `main`
-2. Evaluar si las skills archived de ADO deben excluirse por defecto del escaneo
-3. Considerar agregar flag `--non-interactive` para instalación automatizada
+1. Implementar menú interactivo con flechas y espacio
+2. Evaluar `simple-term-menu` o `inquirer` para menús interactivos
+3. Agregar descripciones a skills ADO archived
+4. Considerar flag `--non-interactive` para CI/CD
