@@ -615,13 +615,22 @@ def cmd_analyze_version():
     print(f"  📊 Analizando cambios...")
 
     try:
-        # Ejecutar script de análisis
-        script_dir = get_temp_repo_path() / "skills" / "auto-versioning" / "scripts"
-        if not script_dir.exists():
-            script_dir = Path(__file__).parent / "skills" / "auto-versioning" / "scripts"
+        # Buscar script en múltiples ubicaciones
+        script_locations = [
+            Path.cwd() / "skills" / "auto-versioning" / "scripts",
+            get_temp_repo_path() / "skills" / "auto-versioning" / "scripts",
+            Path.home() / ".local" / "share" / "ia-dev-toolkit" / "repo" / "skills" / "auto-versioning" / "scripts",
+            Path(__file__).parent / "skills" / "auto-versioning" / "scripts",
+        ]
 
-        analyze_script = script_dir / "analyze-diff.py"
-        if analyze_script.exists():
+        analyze_script = None
+        for script_dir in script_locations:
+            script_path = script_dir / "analyze-diff.py"
+            if script_path.exists():
+                analyze_script = script_path
+                break
+
+        if analyze_script:
             import subprocess
             result = subprocess.run(
                 ["python3", str(analyze_script)],
