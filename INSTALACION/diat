@@ -336,17 +336,38 @@ def cmd_status(project_path=None):
 
 
 def cmd_update():
-    """Actualizar el toolkit desde GitHub."""
+    """Actualizar el toolkit y el CLI diat desde GitHub."""
     print(f"\n{'═' * 70}")
     print(f"  🔄 ACTUALIZANDO IA DEV TOOLKIT")
     print(f"{'═' * 70}\n")
 
-    temp_repo_path = get_temp_repo_path()
+    # 1. Actualizar CLI diat
+    print(f"  📦 Actualizando CLI diat...")
+    diat_path = Path(__file__).resolve()
+    diat_url = "https://raw.githubusercontent.com/JavierDevCol/ia-dev-toolkit/main/INSTALACION/diat"
 
-    # Eliminar cache anterior
+    try:
+        import urllib.request
+        req = urllib.request.Request(diat_url, headers={"User-Agent": "diat-cli"})
+        response = urllib.request.urlopen(req, timeout=30)
+        new_diat = response.read()
+
+        # Guardar backup
+        backup_path = diat_path.with_suffix(".bak")
+        backup_path.write_bytes(diat_path.read_bytes())
+
+        # Actualizar
+        diat_path.write_bytes(new_diat)
+        diat_path.chmod(0o755)
+        print(f"  ✅ CLI diat actualizado (backup: {backup_path})")
+    except Exception as e:
+        print(f"  ⚠️  No se pudo actualizar diat: {e}")
+
+    # 2. Actualizar cache de componentes
+    temp_repo_path = get_temp_repo_path()
     if temp_repo_path.exists():
+        print(f"\n  🗑️  Eliminando cache anterior...")
         import shutil
-        print(f"  🗑️  Eliminando cache anterior...")
         shutil.rmtree(temp_repo_path)
 
     # Importar y ejecutar descarga
@@ -360,13 +381,16 @@ def cmd_update():
         from instalar import download_from_github
         result = download_from_github(temp_repo_path)
         if result:
-            print(f"\n  ✅ Toolkit actualizado en: {temp_repo_path}")
+            print(f"\n  ✅ Componentes actualizados en: {temp_repo_path}")
         else:
-            print(f"\n  ❌ Error al actualizar")
+            print(f"\n  ❌ Error al actualizar componentes")
     except Exception as e:
         print(f"\n  ❌ Error: {e}")
 
-    print(f"\n{'═' * 70}\n")
+    print(f"\n{'═' * 70}")
+    print(f"  ✅ ACTUALIZACIÓN COMPLETADA")
+    print(f"{'═' * 70}")
+    print(f"\n  ⚠️  Reinicia la terminal o ejecuta: diat --version\n")
 
 
 def cmd_install():
