@@ -55,6 +55,7 @@ def print_help():
     diat --update            Actualizar toolkit
     diat --check             Verificar requisitos del sistema
     diat --status [RUTA]     Mostrar estado de instalación
+    diat --uninstall         Desinstalar ia-dev-toolkit
 
 📍 EJEMPLOS:
     diat "/home/usuario/proyecto"
@@ -319,6 +320,101 @@ def cmd_update():
     print(f"\n{'═' * 70}\n")
 
 
+def cmd_uninstall():
+    """Desinstalar ia-dev-toolkit del sistema."""
+    print(f"\n{'═' * 70}")
+    print(f"  🗑️  DESINSTALAR IA DEV TOOLKIT")
+    print(f"{'═' * 70}\n")
+
+    # Determinar rutas según plataforma
+    if platform.system() == "Windows":
+        local_app_data = os.environ.get("LOCALAPPDATA")
+        if local_app_data:
+            diat_path = Path(local_app_data) / "ia-dev-toolkit" / "bin" / "diat"
+            diat_bat = Path(local_app_data) / "ia-dev-toolkit" / "bin" / "diat.bat"
+            toolkit_home = Path(local_app_data) / "ia-dev-toolkit"
+        else:
+            print_error("No se pudo determinar LOCALAPPDATA")
+            return
+    else:
+        diat_path = Path.home() / ".local" / "bin" / "diat"
+        toolkit_home = Path.home() / ".local" / "share" / "ia-dev-toolkit"
+
+    # Mostrar qué se eliminará
+    print(f"  Se eliminarán los siguientes elementos:\n")
+
+    items_to_remove = []
+    if platform.system() == "Windows":
+        if diat_path.exists():
+            print(f"    📄 {diat_path}")
+            items_to_remove.append(diat_path)
+        if diat_bat.exists():
+            print(f"    📄 {diat_bat}")
+            items_to_remove.append(diat_bat)
+    else:
+        if diat_path.exists():
+            print(f"    📄 {diat_path}")
+            items_to_remove.append(diat_path)
+
+    if toolkit_home.exists():
+        print(f"    📁 {toolkit_home}/")
+        items_to_remove.append(toolkit_home)
+
+    if not items_to_remove:
+        print(f"    ℹ️  No se encontraron elementos para eliminar")
+        return
+
+    print(f"\n  ⚠️  Esta acción no se puede deshacer\n")
+
+    confirm = input("  ¿Continuar con la desinstalación? (s/N): ").strip().lower()
+    if confirm != 's':
+        print(f"\n  ℹ️  Desinstalación cancelada")
+        return
+
+    print(f"\n  🗑️  Desinstalando...\n")
+
+    # Eliminar elementos
+    import shutil
+    for item in items_to_remove:
+        try:
+            if item.is_file() or item.is_symlink():
+                item.unlink()
+                print_success(f"Eliminado: {item}")
+            elif item.is_dir():
+                shutil.rmtree(item)
+                print_success(f"Eliminado: {item}/")
+        except Exception as e:
+            print_error(f"Error al eliminar {item}: {e}")
+
+    # Limpiar PATH (solo en Linux/Mac)
+    if platform.system() != "Windows":
+        print(f"\n  ℹ️  Limpiando PATH en archivos de shell...")
+        for shell_rc in [Path.home() / ".bashrc", Path.home() / ".zshrc", Path.home() / ".bash_profile"]:
+            if shell_rc.exists():
+                try:
+                    content = shell_rc.read_text(encoding="utf-8")
+                    if "# ia-dev-toolkit" in content:
+                        # Crear backup
+                        backup = shell_rc.with_suffix(".bak")
+                        backup.write_text(content, encoding="utf-8")
+
+                        # Eliminar líneas
+                        lines = content.split("\n")
+                        new_lines = [line for line in lines if "# ia-dev-toolkit" not in line and 'export PATH="$HOME/.local/bin:$PATH"' not in line]
+                        shell_rc.write_text("\n".join(new_lines), encoding="utf-8")
+
+                        print_success(f"Limpiado: {shell_rc} (backup: {backup})")
+                except Exception as e:
+                    print_warning(f"No se pudo limpiar {shell_rc}: {e}")
+
+    print(f"\n{'═' * 70}")
+    print(f"  ✅ IA DEV TOOLKIT DESINSTALADO CORRECTAMENTE")
+    print(f"{'═' * 70}")
+    print(f"\n  📍 Para reinstalar:")
+    print(f"     curl -fsSL https://raw.githubusercontent.com/JavierDevCol/ia-dev-toolkit/main/INSTALACION/bootstrap/install.sh | bash")
+    print(f"\n  ⚠️  Reinicia la terminal para aplicar los cambios\n")
+
+
 # ============================================
 # MAIN
 # ============================================
@@ -356,6 +452,10 @@ def main():
     elif arg in ("--status", "-s"):
         print_banner()
         cmd_status()
+
+    elif arg in ("--uninstall", "-U"):
+        print_banner()
+        cmd_uninstall()
 
     elif arg.startswith("-"):
         print(f"❌ Opción desconocida: {arg}")

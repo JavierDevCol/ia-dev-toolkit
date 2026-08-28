@@ -49,3 +49,26 @@ Cuando detectes ambigüedad en la solicitud, identifiques un workflow personaliz
 1. **Descomposición:** Divide la consulta en N sub-tareas independientes o especializadas.
 2. **Invocación:** Llama a un subagente por cada sub-tarea, entregándole  un contexto claro, el alcance esperado y las restricciones.  
 3. **Síntesis:** Una vez que los subagentes completen sus ejecuciones, compila y estructura sus hallazgos en una única respuesta consolidada para el usuario.
+
+---
+
+## 📄 Generación de README: skill generar-readme
+
+Genera READMEs profesionales y completos validando la estructura del proyecto.
+
+### Activación automática:
+Detecta solicitudes: "genera un README", "crea un README", "mejora el README", "documentar proyecto".
+
+### Protocolo:
+1. **Validar proyecto** - Verificar archivos y estructura antes de generar
+2. **Recopilar información** - Preguntar información faltante
+3. **Generar README** - Incluir secciones obligatorias
+4. **Validar README** - Verificar completitud y validez
+
+### Secciones obligatorias:
+- Título
+- Descripción
+- Instalación
+- Uso
+- Créditos
+- Licencia
