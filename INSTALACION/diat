@@ -58,7 +58,6 @@ def print_help():
     diat --status [RUTA]     Mostrar estado de instalación
     diat --install [RUTA]    Instalar componentes en proyecto
     diat --alma [RUTA]       Instalar personalidad del agente
-    diat --analyze-version   Analizar diff y sugerir versión
     diat --uninstall         Desinstalar ia-dev-toolkit
     diat --non-interactive   Modo no interactivo para CI/CD
 
@@ -66,7 +65,6 @@ def print_help():
     diat --install                    # Instalar en ruta actual
     diat --install /home/user/proy    # Instalar en ruta específica
     diat --non-interactive --install  # Instalar sin interacción (CI/CD)
-    diat --analyze-version            # Analizar cambios para versión
     diat --list                       # Listar componentes
     diat --status /home/user/proy     # Ver estado
 
@@ -601,79 +599,6 @@ def cmd_uninstall():
     print(f"\n  ⚠️  Reinicia la terminal para aplicar los cambios\n")
 
 
-def cmd_analyze_version():
-    """Analizar diff y sugerir versión."""
-    print(f"\n{'═' * 70}")
-    print(f"  🔄 AUTO-VERSIONING")
-    print(f"{'═' * 70}\n")
-
-    # Obtener último tag
-    last_tag = get_version()
-    print(f"  📍 Último tag: v{last_tag}")
-
-    # Obtener diff
-    print(f"  📊 Analizando cambios...")
-
-    try:
-        # Buscar script en múltiples ubicaciones
-        script_locations = [
-            Path.cwd() / "skills" / "auto-versioning" / "scripts",
-            get_temp_repo_path() / "skills" / "auto-versioning" / "scripts",
-            Path.home() / ".local" / "share" / "ia-dev-toolkit" / "repo" / "skills" / "auto-versioning" / "scripts",
-            Path(__file__).parent / "skills" / "auto-versioning" / "scripts",
-        ]
-
-        analyze_script = None
-        for script_dir in script_locations:
-            script_path = script_dir / "analyze-diff.py"
-            if script_path.exists():
-                analyze_script = script_path
-                break
-
-        if analyze_script:
-            import subprocess
-            result = subprocess.run(
-                ["python3", str(analyze_script)],
-                capture_output=True,
-                text=True,
-                timeout=30
-            )
-            if result.returncode == 0:
-                import json
-                analysis = json.loads(result.stdout)
-                display_analysis(analysis)
-                return
-        else:
-            print(f"  ⚠️  Script analyze-diff.py no encontrado")
-
-    except Exception as e:
-        print(f"  ❌ Error al analizar: {e}")
-
-    print(f"  ℹ️  No se pudieron analizar los cambios")
-
-
-def display_analysis(analysis):
-    """Mostrar análisis de versionamiento."""
-    print(f"\n  📊 Análisis de diff:")
-    print(f"     - Breaking changes: {analysis['changes']['major']}")
-    print(f"     - Nuevas funcionalidades: {analysis['changes']['minor']}")
-    print(f"     - Correcciones: {analysis['changes']['patch']}")
-
-    if analysis['suggested_version']:
-        print(f"\n  🏷️  Versión sugerida: v{analysis['suggested_version']} ({analysis['reason']})")
-
-        confirm = input(f"\n  ¿Crear tag v{analysis['suggested_version']}? (s/N): ").strip().lower()
-        if confirm == 's':
-            print(f"\n  ✅ Tag v{analysis['suggested_version']} creado")
-            # Aquí iría la lógica para crear el tag
-        else:
-            custom = input(f"  Ingrese versión personalizada (Enter para cancelar): ").strip()
-            if custom:
-                print(f"\n  ℹ️  Usando versión: v{custom}")
-    else:
-        print(f"\n  ℹ️  {analysis['reason']}")
-
-
 # ============================================
 # MAIN
 # ============================================
@@ -696,7 +621,6 @@ Comandos disponibles:
   diat --status [/ruta]    Mostrar estado de instalación
   diat --list              Listar componentes en cache
   diat --alma [/ruta]      Instalar personalidad del agente
-  diat --analyze-version   Analizar diff y sugerir versión
   diat --uninstall         Desinstalar ia-dev-toolkit
 
 Ejemplos:
@@ -704,7 +628,6 @@ Ejemplos:
   diat --install /home/user/proy    # Instalar en ruta específica
   diat --update                     # Actualizar ruta actual
   diat --update /home/user/proy     # Actualizar ruta específica
-  diat --analyze-version            # Analizar cambios para versión
 """)
 
 
@@ -757,10 +680,6 @@ def main():
     elif arg in ("--uninstall", "-U"):
         print_banner()
         cmd_uninstall()
-
-    elif arg in ("--analyze-version", "-av"):
-        print_banner()
-        cmd_analyze_version()
 
     elif arg.startswith("-"):
         print(f"❌ Opción desconocida: {arg}")

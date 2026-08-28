@@ -8,14 +8,35 @@ ready: true
 
 ## Overview
 
-Automatically determines the next semantic version (SemVer) by analyzing code diffs, not commit titles. Validates actual changes in the codebase to suggest accurate versioning.
+Determines the next semantic version (SemVer) by analyzing code diffs between the last tag and the changes being pushed to main. The agent follows this process automatically.
 
 ## When to Use
 
-- Before merging to main branch
-- When creating release tags
-- After PR approval
-- When preparing for deployment
+- Before committing to main branch
+- Before merging a PR to main
+- Before pushing to main
+- After receiving a PR approval
+
+## Process Flowchart
+
+```
+Start
+    ↓
+Get last tag from GitHub API or git
+    ↓
+Get diff between last tag and HEAD (or pending changes)
+    ↓
+Analyze diff for:
+  - Breaking changes → Major
+  - New features → Minor
+  - Bug fixes → Patch
+    ↓
+Calculate new version
+    ↓
+Create tag automatically
+    ↓
+Push tag to origin
+```
 
 ## Versioning Rules (SemVer)
 
@@ -25,29 +46,6 @@ Automatically determines the next semantic version (SemVer) by analyzing code di
 | New features (functions, modules, capabilities) | Minor | `v0.2.1` → `v0.3.0` |
 | Bug fixes, docs, refactoring | Patch | `v0.2.1` → `v0.2.2` |
 | No significant changes | No tag | — |
-
-## Flowchart
-
-```
-Start
-    ↓
-Get last tag from GitHub API
-    ↓
-Get diff between last tag and HEAD
-    ↓
-Analyze diff for:
-  - Breaking changes (Major)
-  - New features (Minor)
-  - Bug fixes (Patch)
-    ↓
-Calculate new version
-    ↓
-Show to user + ask confirmation
-    ↓
-User confirms?
-    ├─ YES → Create tag and push
-    └─ NO → Ask which version to use
-```
 
 ## Diff Analysis Rules
 
@@ -75,49 +73,66 @@ User confirms?
 - Performance improvements
 - Test additions
 
-## Usage
+## Commands to Execute
 
-### Interactive Mode
+### 1. Get Last Tag
 
 ```bash
-# Analyze diff and suggest version
-python scripts/analyze-diff.py
+# From GitHub API (preferred)
+curl -s https://api.github.com/repos/{owner}/{repo}/tags | jq -r '.[0].name'
 
-# Or via diat CLI
-diat --analyze-version
+# From git
+git describe --tags --abbrev=0
 ```
 
-### Programmatic Usage
+### 2. Get Diff
 
-```python
-from scripts.analyze_diff import analyze_diff, calculate_version
+```bash
+# Between last tag and HEAD
+git diff {last_tag}...HEAD
 
-# Analyze diff
-changes = analyze_diff("main")
-
-# Calculate next version
-new_version = calculate_version(changes)
-
-# Show confirmation
-print(f"Suggested: v{new_version}")
+# For pending changes (not yet committed)
+git diff HEAD
 ```
 
-## Confirmation Format
+### 3. Analyze Diff
+
+Look for:
+- Lines removed (`-`) that define public APIs
+- Lines added (`+`) that define new functions/classes
+- Lines removed (`-`) that fix bugs
+- Lines added (`+`) that add features
+
+### 4. Create Tag
+
+```bash
+# Create annotated tag
+git tag -a v{version} -m "Release {version}"
+
+# Push tag
+git push origin v{version}
+```
+
+## Agent Execution
+
+When the agent detects it's about to commit/merge/push to main:
+
+1. **Run the analysis** using the commands above
+2. **Determine version** based on diff content
+3. **Create tag** with the new version
+4. **Push tag** to origin
+5. **Report** what was done
+
+## Example Output
 
 ```
-╔═══════════════════════════════════════════════════════════════╗
-║                    AUTO-VERSIONING                            ║
-╚═══════════════════════════════════════════════════════════════╝
+📊 Diff analysis:
+   - Breaking changes: 0
+   - New features: 2
+   - Bug fixes: 1
 
-  📍 Last tag: v0.2.1
-  📊 Diff analysis:
-     - Breaking changes: 1 (function signature changed)
-     - New features: 2
-     - Bug fixes: 3
-
-  🏷️  Suggested version: v1.0.0 (Major)
-
-  Create tag v1.0.0? (s/N):
+🏷️  Creating tag: v0.3.0
+✅ Tag v0.3.0 created and pushed
 ```
 
 ## Common Mistakes
@@ -127,20 +142,4 @@ print(f"Suggested: v{new_version}")
 | Relying on commit titles | Always analyze actual diffs |
 | Forgetting breaking changes | Check for removed/modified APIs |
 | Overlooking minor additions | Scan for new functions/classes |
-
-## Script Output
-
-The `analyze-diff.py` script returns:
-
-```json
-{
-  "last_tag": "v0.2.1",
-  "changes": {
-    "major": 1,
-    "minor": 2,
-    "patch": 3
-  },
-  "suggested_version": "1.0.0",
-  "reason": "Breaking change detected"
-}
-```
+| Not pushing tags | Always push tags after creating |
