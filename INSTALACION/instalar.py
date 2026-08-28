@@ -100,6 +100,12 @@ SKILL_DESCRIPTIONS = {
     "ado/pr-reviewer": "Revisión estructurada de PRs en ADO",
     "ado/pr-creator": "Creación guiada de PRs en ADO",
     "ado/hu-publisher": "Publica HUs locales a Azure DevOps",
+    # ADO Archived
+    "comment-manager": "Lee y agrega comentarios en Work Items de ADO",
+    "item-detail": "Extrae y consulta detallada de items individuales de ADO",
+    "repo-browser": "Exploración read-only de repositorios Git en ADO",
+    "sprint-tracker": "Consulta de Work Items en ADO y sincronización",
+    "transversales-workitems": "Gestiona work items para la célula transversal BMM",
 }
 
 # Descripciones cortas de agentes
