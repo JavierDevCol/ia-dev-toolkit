@@ -4,7 +4,7 @@ description: >
   Usa esta skill cuando necesites preparar una entrega formal al banco
   para el proyecto Banca por WhatsApp. No la uses para desarrollo normal
   de features.
-ready: true
+ready: false
 ---
 
 # Entrega Ambiente Banco
