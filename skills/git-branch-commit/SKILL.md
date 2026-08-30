@@ -1,6 +1,6 @@
 ---
 name: git-branch-commit
-description: Use when creating Git branches or making commits on feature or work branches
+description: Use when creating git branches, making commits with conventional commits format, or needing preview before push. Triggers on "commit", "branch", "guardar cambios", "crear rama", "conventional commits"
 ready: true
 ---
 
@@ -14,7 +14,33 @@ Crea ramas y gestiona commits con Conventional Commits y preview antes de push.
 - Hacer commit o guardar cambios
 - Verificar formato de mensajes de commit
 
-**No usar:** entregas formales a ambiente banco (`entrega-ambiente-banco`); fixes post-entrega (`fix-release`).
+**No usar:**
+- Entregas formales a ambiente banco → `entrega-ambiente-banco`
+- Fixes post-entrega → `fix-release`
+- Commits en `main` o `develop` directamente → siempre crear rama
+
+```dot
+digraph git_decisions {
+    rankdir=LR;
+    node [shape=diamond, style=filled, fillcolor="#E8F4FD", fontsize=10];
+
+    start [label="¿Qué\nnecesitas?", shape=box, fillcolor="#2196F3", fontcolor=white];
+    tipo [label="¿Tipo de\ntrabajo?"];
+    hu [label="hu-[ID]-\n[desc]", shape=box, fillcolor="#4CAF50", fontcolor=white];
+    otro [label="[tipo]-\n[desc]", shape=box, fillcolor="#FF9800", fontcolor=white];
+    protegida [label="¿Rama\nprotegida?"];
+    pr [label="Crear PR", shape=box, fillcolor="#F44336", fontcolor=white];
+    push [label="git push -u", shape=box, fillcolor="#9C27B0", fontcolor=white];
+
+    start -> tipo;
+    tipo -> hu [label="HU"];
+    tipo -> otro [label="feature/\nhotfix/\nchore"];
+    hu -> protegida;
+    otro -> protegida;
+    protegida -> pr [label="Sí\n(main,\ndevelop)"];
+    protegida -> push [label="No"];
+}
+```
 
 ## Implementation
 
