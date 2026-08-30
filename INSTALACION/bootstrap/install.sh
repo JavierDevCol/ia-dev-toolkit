@@ -91,9 +91,9 @@ install_diat() {
     echo -e "${WHITE}📦 Instalando diat...${NC}"
     echo ""
 
-    print_info "Creando directorio ~/.local/bin..."
+    print_info "Creando directorio de instalación..."
     mkdir -p "$BIN_PATH"
-    print_success "Directorio creado: $BIN_PATH"
+    print_success "Directorio creado"
 
     print_info "Descargando diat desde GitHub..."
     if ! curl -fsSL "$DIAT_URL" -o "$BIN_PATH/diat" 2>/dev/null; then
@@ -103,7 +103,17 @@ install_diat() {
     fi
 
     chmod +x "$BIN_PATH/diat"
-    print_success "diat instalado en $BIN_PATH/diat"
+    print_success "diat instalado"
+
+    # Guardar versión instalada
+    print_info "Guardando versión..."
+    REMOTE_VERSION=$(curl -fsSL "https://api.github.com/repos/JavierDevCol/ia-dev-toolkit/tags" 2>/dev/null | grep -o '"name": "v[^"]*"' | head -1 | cut -d'"' -f4 | tr -d 'v')
+    if [ -n "$REMOTE_VERSION" ]; then
+        VERSION_DIR="$HOME/.local/share/ia-dev-toolkit"
+        mkdir -p "$VERSION_DIR"
+        echo "$REMOTE_VERSION" > "$VERSION_DIR/.installed_version"
+        print_success "Versión $REMOTE_VERSION guardada"
+    fi
 
     print_info "Verificando PATH..."
     SHELL_RC=""
@@ -121,12 +131,12 @@ install_diat() {
                 echo "" >> "$SHELL_RC"
                 echo "# ia-dev-toolkit" >> "$SHELL_RC"
                 echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$SHELL_RC"
-                print_success "PATH agregado a $SHELL_RC"
+                print_success "PATH configurado"
             fi
         fi
         export PATH="$BIN_PATH:$PATH"
     else
-        print_info "PATH ya contiene ~/.local/bin"
+        print_info "PATH ya configurado"
     fi
 
     echo ""
@@ -143,8 +153,6 @@ print_summary() {
     echo -e "${GREEN}║   ✅ IA DEV TOOLKIT INSTALADO CORRECTAMENTE                   ║${NC}"
     echo -e "${GREEN}║                                                               ║${NC}"
     echo -e "${GREEN}╚═══════════════════════════════════════════════════════════════╝${NC}"
-    echo ""
-    echo -e "   ${WHITE}📍 Ubicación:  $BIN_PATH/diat${NC}"
     echo ""
     echo -e "   ${CYAN}🚀 Comandos disponibles:${NC}"
     echo ""

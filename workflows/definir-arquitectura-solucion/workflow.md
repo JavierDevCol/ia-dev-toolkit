@@ -1,6 +1,7 @@
 ---
 name: definir-arquitectura-solucion
 description: Diseña colaborativamente la arquitectura integral del proyecto (Cloud, software, datos, seguridad, DevOps) proponiendo opciones técnicas en cada fase para validación antes de formalizar los ADRs.
+ready: true
 ---
 
 # Workflow: Definir / Sincronizar Arquitectura de Solución (Onad)

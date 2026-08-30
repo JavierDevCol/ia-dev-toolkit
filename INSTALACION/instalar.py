@@ -48,6 +48,8 @@ if platform.system() == "Windows":
 # ============================================
 REPO_URL = "https://github.com/JavierDevCol/ia-dev-toolkit.git"
 REPO_BRANCH = "main"
+REQUIRED_DIRS = ["skills", "agents", "workflows", "tools", "config"]
+REQUIRED_FILES = ["ALMA.md"]
 
 SAC_SKILLS = [
     "analizar-calidad-codigo",
@@ -925,7 +927,17 @@ def main():
     agents = scan_agents(agents_dir)
     workflows = scan_workflows(workflows_dir)
     tools = scan_tools(tools_dir)
+
     print_success(f"Encontrados: {len(skills)} skills, {len(agents)} agentes, {len(workflows)} workflows, {len(tools)} tools")
+
+    if not skills:
+        print_warning("No se encontraron skills disponibles")
+    if not agents:
+        print_warning("No se encontraron agentes disponibles")
+    if not workflows:
+        print_warning("No se encontraron workflows disponibles")
+    if not tools:
+        print_warning("No se encontraron tools disponibles")
 
     if len(sys.argv) > 1 and not sys.argv[1].startswith("--"):
         project_path = Path(sys.argv[1])
@@ -1154,95 +1166,210 @@ def ensure_repo_available():
     return download_from_github(temp_repo_path)
 
 
+def filter_ready_components(repo_path):
+    """Elimina componentes que no tengan ready: true en su frontmatter."""
+    # Esta función ya no se necesita con la nueva estrategia de API
+    pass
+
+
+def github_api_get(url):
+    """Hacer petición a la API de GitHub."""
+    import json
+    req = urllib.request.Request(url, headers={
+        "User-Agent": "ia-dev-toolkit-installer",
+        "Accept": "application/vnd.github.v3+json"
+    })
+    response = urllib.request.urlopen(req, timeout=30)
+    return json.loads(response.read())
+
+
+def github_api_get_raw(url):
+    """Descargar contenido raw de GitHub."""
+    req = urllib.request.Request(url, headers={"User-Agent": "ia-dev-toolkit-installer"})
+    response = urllib.request.urlopen(req, timeout=30)
+    return response.read()
+
+
+def parse_frontmatter_ready(content):
+    """Verificar si el frontmatter tiene ready: true."""
+    try:
+        text = content.decode("utf-8") if isinstance(content, bytes) else content
+        in_frontmatter = False
+        for line in text.split("\n"):
+            stripped = line.strip()
+            if stripped == "---":
+                in_frontmatter = not in_frontmatter
+                continue
+            if in_frontmatter and stripped.startswith("ready:"):
+                value = stripped.split(":", 1)[1].strip().lower()
+                return value == "true"
+        return False
+    except Exception:
+        return False
+
+
 def download_from_github(dest_path):
-    """Descarga solo las carpetas necesarias desde GitHub usando la API."""
-    # Extraer owner/repo de la URL
-    # REPO_URL = "https://github.com/JavierDevCol/ia-dev-toolkit.git"
+    """Descarga componentes desde GitHub usando la API, filtrando por ready: true."""
     parts = REPO_URL.replace("https://github.com/", "").replace(".git", "").split("/")
     owner, repo = parts[0], parts[1]
-
-    # URL del tarball
-    tarball_url = f"https://github.com/{owner}/{repo}/archive/refs/heads/{REPO_BRANCH}.tar.gz"
-
-    # Carpetas necesarias para el instalador
-    REQUIRED_DIRS = ["skills", "agents", "workflows", "tools", "config"]
-    # Archivos raíz necesarios
-    REQUIRED_FILES = ["ALMA.md"]
+    api_base = f"https://api.github.com/repos/{owner}/{repo}/contents"
+    raw_base = f"https://raw.githubusercontent.com/{owner}/{repo}/{REPO_BRANCH}"
 
     try:
-        print_info(f"Descargando desde {tarball_url}...")
-        req = urllib.request.Request(tarball_url, headers={"User-Agent": "ia-dev-toolkit-installer"})
-        response = urllib.request.urlopen(req, timeout=120)
-        tarball_data = response.read()
-
-        print_info(f"Descargado: {len(tarball_data) / 1024:.0f} KB")
-        print_info("Extrayendo componentes necesarios...")
-
-        # Crear directorio destino
         dest_path.mkdir(parents=True, exist_ok=True)
 
-        # Extraer solo las carpetas necesarias del tarball
-        with tarfile.open(fileobj=io.BytesIO(tarball_data), mode="r:gz") as tar:
-            # El tarball tiene prefijo "ia-dev-toolkit-main/"
-            prefix = f"{repo}-{REPO_BRANCH}/"
+        # 1. Descargar archivos raíz (ALMA.md)
+        print_info("Descargando archivos raíz...")
+        for filename in REQUIRED_FILES:
+            try:
+                content = github_api_get_raw(f"{raw_base}/{filename}")
+                (dest_path / filename).write_bytes(content)
+                print_success(filename)
+            except Exception:
+                print_warning(f"No se encontró {filename}")
 
-            for member in tar.getmembers():
-                # Verificar si el archivo pertenece a una carpeta necesaria
-                if not member.name.startswith(prefix):
-                    continue
+        # 2. Descargar config (sin filtro)
+        print_info("Descargando config...")
+        config_items = github_api_get(f"{api_base}/config/config")
+        if isinstance(config_items, list):
+            (dest_path / "config" / "config").mkdir(parents=True, exist_ok=True)
+            for item in config_items:
+                if item["name"].endswith(".yaml"):
+                    content = github_api_get_raw(item["download_url"])
+                    (dest_path / "config" / "config" / item["name"]).write_bytes(content)
+                    print_success(item["name"])
 
-                rel_path = member.name[len(prefix):]
-                if not rel_path:
-                    continue
+        # 3. Descargar tools (sin filtro)
+        print_info("Descargando tools...")
+        try:
+            tools_items = github_api_get(f"{api_base}/tools")
+            if isinstance(tools_items, list):
+                (dest_path / "tools").mkdir(parents=True, exist_ok=True)
+                for item in tools_items:
+                    if item["type"] == "file" and item["name"].endswith((".ts", ".js", ".py", ".sh")):
+                        content = github_api_get_raw(item["download_url"])
+                        (dest_path / "tools" / item["name"]).write_bytes(content)
+                        print_success(item["name"])
+                    elif item["type"] == "dir":
+                        # Descargar contents del subdirectorio
+                        sub_items = github_api_get(item["url"])
+                        if isinstance(sub_items, list):
+                            (dest_path / "tools" / item["name"]).mkdir(parents=True, exist_ok=True)
+                            for sub in sub_items:
+                                if sub["type"] == "file" and sub["name"].endswith((".ts", ".js", ".py", ".sh")):
+                                    content = github_api_get_raw(sub["download_url"])
+                                    (dest_path / "tools" / item["name"] / sub["name"]).write_bytes(content)
+                                    print_success(f"{item['name']}/{sub['name']}")
+        except Exception:
+            print_warning("No se encontró carpeta tools")
 
-                # Verificar si pertenece a una carpeta requerida o es un archivo raíz requerido
-                is_required = False
+        # 4. Descargar skills (CON filtro ready: true)
+        print_info("Descargando skills (solo ready: true)...")
+        skills_ready = 0
+        skills_total = 0
+        try:
+            skills_items = github_api_get(f"{api_base}/skills")
+            if isinstance(skills_items, list):
+                (dest_path / "skills").mkdir(parents=True, exist_ok=True)
+                for skill_dir in skills_items:
+                    if skill_dir["type"] != "dir":
+                        continue
+                    skills_total += 1
+                    # Verificar si tiene SKILL.md con ready: true
+                    try:
+                        skill_md_items = github_api_get(f"{api_base}/skills/{skill_dir['name']}")
+                        has_skill_md = False
+                        for f in skill_md_items:
+                            if f["name"] == "SKILL.md":
+                                has_skill_md = True
+                                content = github_api_get_raw(f["download_url"])
+                                if parse_frontmatter_ready(content):
+                                    skills_ready += 1
+                                    # Descargar toda la carpeta de la skill
+                                    download_directory(api_base, raw_base, f"skills/{skill_dir['name']}", dest_path / "skills" / skill_dir["name"])
+                                    print_success(skill_dir["name"])
+                                break
+                        if not has_skill_md:
+                            pass  # Skill sin SKILL.md, se ignora
+                    except Exception:
+                        pass
+        except Exception:
+            print_warning("No se encontró carpeta skills")
 
-                # Verificar carpetas requeridas
-                for req_dir in REQUIRED_DIRS:
-                    if rel_path.startswith(req_dir + "/") or rel_path == req_dir:
-                        is_required = True
-                        break
+        # 5. Descargar agents (CON filtro ready: true)
+        print_info("Descargando agents (solo ready: true)...")
+        agents_ready = 0
+        agents_total = 0
+        try:
+            agents_items = github_api_get(f"{api_base}/agents")
+            if isinstance(agents_items, list):
+                (dest_path / "agents").mkdir(parents=True, exist_ok=True)
+                for agent_file in agents_items:
+                    if agent_file["type"] != "file" or not agent_file["name"].endswith(".md"):
+                        continue
+                    agents_total += 1
+                    content = github_api_get_raw(agent_file["download_url"])
+                    if parse_frontmatter_ready(content):
+                        agents_ready += 1
+                        (dest_path / "agents" / agent_file["name"]).write_bytes(content)
+                        print_success(agent_file["name"].replace(".md", ""))
+        except Exception:
+            print_warning("No se encontró carpeta agents")
 
-                # Verificar archivos raíz requeridos
-                if not is_required:
-                    for req_file in REQUIRED_FILES:
-                        if rel_path == req_file:
-                            is_required = True
-                            break
+        # 6. Descargar workflows (CON filtro ready: true)
+        print_info("Descargando workflows (solo ready: true)...")
+        workflows_ready = 0
+        workflows_total = 0
+        try:
+            wf_items = github_api_get(f"{api_base}/workflows")
+            if isinstance(wf_items, list):
+                (dest_path / "workflows").mkdir(parents=True, exist_ok=True)
+                for wf_dir in wf_items:
+                    if wf_dir["type"] != "dir":
+                        continue
+                    workflows_total += 1
+                    # Verificar si tiene workflow.md con ready: true
+                    try:
+                        wf_md_items = github_api_get(f"{api_base}/workflows/{wf_dir['name']}")
+                        for f in wf_md_items:
+                            if f["name"] == "workflow.md":
+                                content = github_api_get_raw(f["download_url"])
+                                if parse_frontmatter_ready(content):
+                                    workflows_ready += 1
+                                    download_directory(api_base, raw_base, f"workflows/{wf_dir['name']}", dest_path / "workflows" / wf_dir["name"])
+                                    print_success(wf_dir["name"])
+                                break
+                    except Exception:
+                        pass
+        except Exception:
+            print_warning("No se encontró carpeta workflows")
 
-                if not is_required:
-                    continue
-
-                # Extraer archivo
-                dest_file = dest_path / rel_path
-
-                if member.isdir():
-                    dest_file.mkdir(parents=True, exist_ok=True)
-                elif member.isfile():
-                    dest_file.parent.mkdir(parents=True, exist_ok=True)
-                    src_file = tar.extractfile(member)
-                    if src_file:
-                        with open(dest_file, "wb") as f:
-                            f.write(src_file.read())
-
-        print_success(f"Componentes descargados en {dest_path}")
-
-        # Verificar que se descargaron las carpetas necesarias
-        missing = [d for d in REQUIRED_DIRS if not (dest_path / d).exists()]
-        if missing:
-            print_warning(f"Carpetas no encontradas: {', '.join(missing)}")
-            return None
+        # Resumen
+        print_info(f"Resumen: {skills_ready}/{skills_total} skills, "
+                   f"{agents_ready}/{agents_total} agents, "
+                   f"{workflows_ready}/{workflows_total} workflows")
 
         return dest_path
 
-    except urllib.error.URLError as e:
-        print_error(f"Error de red: {e}")
-        print_info("Verifica tu conexión a internet")
-        return None
     except Exception as e:
         print_error(f"Error al descargar: {e}")
         return None
+
+
+def download_directory(api_base, raw_base, path, dest):
+    """Descargar un directorio completo desde GitHub."""
+    items = github_api_get(f"{api_base}/{path}")
+    if not isinstance(items, list):
+        return
+    for item in items:
+        dest_file = dest / item["name"]
+        if item["type"] == "file":
+            content = github_api_get_raw(item["download_url"])
+            dest_file.parent.mkdir(parents=True, exist_ok=True)
+            dest_file.write_bytes(content)
+        elif item["type"] == "dir":
+            dest_file.mkdir(parents=True, exist_ok=True)
+            download_directory(api_base, raw_base, f"{path}/{item['name']}", dest_file)
 
 
 def print_summary(project_path, skills, agents, workflows, tools, sac_installed):
@@ -1264,11 +1391,17 @@ def print_summary(project_path, skills, agents, workflows, tools, sac_installed)
         for s in skills:
             print(f"   → {s}")
         print()
+    else:
+        print_warning("⚠️  No se instaló ninguna skill")
+        print()
 
     if agents:
         print(f"👤 Agentes instalados ({len(agents)}):")
         for a in agents:
             print(f"   → {a}")
+        print()
+    else:
+        print_warning("⚠️  No se instaló ningún agente")
         print()
 
     if workflows:
@@ -1276,11 +1409,17 @@ def print_summary(project_path, skills, agents, workflows, tools, sac_installed)
         for w in workflows:
             print(f"   → {w}")
         print()
+    else:
+        print_warning("No se instaló ningún workflow")
+        print()
 
     if tools:
         print(f"🔧 Tools instalados ({len(tools)}):")
         for t in tools:
             print(f"   → {t}")
+        print()
+    else:
+        print_warning("⚠️  No se instaló ningún tool")
         print()
 
     print("🚀 Cómo usar:")

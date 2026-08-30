@@ -1,6 +1,7 @@
 ---
 name: gestionar-backlog-roadmap
 description: Genera y sincroniza el backlog técnico y funcional a partir de ADRs y Visión.
+ready: true
 output_config:
   base_dir: "./docs/backlog" # Ruta raíz en el proyecto del usuario donde se creará el output
   summary_file: "${base_dir}/SUMMARY.md"

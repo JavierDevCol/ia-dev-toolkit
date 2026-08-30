@@ -1,6 +1,7 @@
 ---
 name: definir-vision-producto
 description: Descubre y estructura la visión estratégica de una idea de negocio, delimitando el MVP, los actores y los requerimientos de alto nivel.
+ready: true
 ---
 
 # Workflow: Definir Visión del Producto (PO)
