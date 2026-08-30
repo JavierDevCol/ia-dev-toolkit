@@ -27,8 +27,8 @@ Crea ramas y gestiona commits con Conventional Commits y preview antes de push.
 **Hacer commit:**
 1. `git status && git diff --staged && git diff`
 2. Archivos: [T] todos, [E] específicos, [S] solo staged
-3. Tipo: feat / fix / refactor / docs / chore / BREAKING
-4. Scope opcional: `tipo(ámbito): descripción`
+3. Tipo: feat / fix / refactor / docs / chore / BREAKING. [auto-gestionar]
+4. Scope opcional: `tipo(ámbito): descripción` [auto-gestionar]
 5. Mensaje: inglés, imperativo, sin punto, ≤72 chars; BREAKING → `BREAKING CHANGE:` en cuerpo
 6. **Mostrar preview del commit al usuario y esperar confirmación**
 7. `git commit -m "[mensaje]" && git push origin [rama_actual]`
