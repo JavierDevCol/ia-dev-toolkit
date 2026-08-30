@@ -1,6 +1,6 @@
 ---
 name: autoaprendizaje
-description: Use when user expresses dissatisfaction ("no me gusta", "no así no es como lo quiero", "corregir", "cambiar"), requests corrections, or indicates preferences for style, format, tone, or workflow. Detects learning opportunities in real-time and persists them to config files.
+description: Use when user expresses dissatisfaction ("no me gusta", "no así no es como lo quiero", "corregir", "cambiar", "usa ..."), requests corrections, or indicates preferences for style, format, tone, or workflow. Detects learning opportunities in real-time and persists them to config files.
 ready: true
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: auto-versioning
-description: Use when committing, merging, or creating PRs to main branch to automatically determine and create the next version tag based on diff analysis
+description: Use it before committing to the main branch to automatically determine and create the next version tag based on a diff analysis.
 ---
 
 # Auto-Versioning
