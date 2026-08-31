@@ -68,7 +68,6 @@ SAC_SKILLS = [
 SKILL_DESCRIPTIONS = {
     "ado-wi-comments": "Gestiona comentarios en Work Items de ADO",
     "analizar-calidad-codigo": "Revisa código detectando code smells y violaciones",
-    "architecture-inception": "Transforma specs en Blueprint de Arquitectura",
     "bitacora-tecnica": "Registra progreso de sesiones de trabajo",
     "bmm-crear-hu-devops": "Crea HUs con tareas en Azure DevOps",
     "bmm-manual-tecnico": "Genera Manual Técnico en Word (.docx)",
@@ -148,7 +147,6 @@ TOOL_DESCRIPTIONS = {
 SKILL_DEPENDENCIES = {
     "ado-wi-comments": "Azure DevOps MCP",
     "analizar-calidad-codigo": ".SAC/config/",
-    "architecture-inception": "ninguna",
     "bitacora-tecnica": "ninguna",
     "bmm-crear-hu-devops": "Azure DevOps MCP",
     "bmm-manual-tecnico": "Python 3, python-docx",

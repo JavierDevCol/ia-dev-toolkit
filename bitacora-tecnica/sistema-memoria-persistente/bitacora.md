@@ -59,12 +59,14 @@ Diseño v3 completado (simplificado). Falta implementación.
 - [x] Diseñar tool de acceso (memory_tool.py)
 - [x] Documentar arquitectura completa
 - [x] Simplificar a 2 capas (sin skill, sin MEMORY_SAC.md)
+- [x] Eliminar skill architecture-inception (reemplazada por workflow)
 - [ ] Implementar memory_tool.py con SQLite
 - [ ] Agregar referencia en AGENTS.md
 - [ ] Implementar confidence decay
 - [ ] Implementar PII filter
 - [ ] Testing con subagentes
 - [ ] Agregar cifrado SQLCipher (opcional)
+- [ ] **Mejorar hardcodeo de descripciones en instalar.py** — Las descripciones de skills y workflows están hardcodeadas en diccionarios Python (`SKILL_DESCRIPTIONS`, `WORKFLOW_DESCRIPTIONS`, etc.). Deberían leerse dinámicamente desde el frontmatter de cada SKILL.md/workflow.md para evitar desincronización.
 
 ### Bloqueantes
 - Ninguno actualmente
