@@ -149,6 +149,14 @@ COMMAND_DESCRIPTIONS = {
     "workflow-sac": "Ejecutar workflow SAC fase por fase",
 }
 
+# Dependencias de componentes: qué tools y commands se instalan automáticamente
+COMPONENT_DEPENDENCIES = {
+    "workflows": {
+        "tools": ["workflow-sac", "workflow-discover"],
+        "commands": ["workflow-sac"],
+    }
+}
+
 # Dependencias de skills
 SKILL_DEPENDENCIES = {
     "ado-wi-comments": "Azure DevOps MCP",
@@ -915,12 +923,9 @@ def show_main_menu():
 
   [1] Skills — Seleccionar skills específicas
   [2] Agents — Seleccionar agentes específicos
-  [3] Workflows — Seleccionar workflows (+ tools automáticos)
-  [4] Tools — Seleccionar tools individuales
-  [5] Commands — Seleccionar comandos slash
-  [6] Team Dev SAC — Skills SAC + Configuración
-  [7] Kit Completo — Agents + Skills + Workflows + Tools + Commands + Config
-  [8] Alma — Personalidad del agente (AGENT.md)
+  [3] Workflows — Seleccionar workflows (+ tools + commands automáticos)
+  [4] Team Dev SAC — Skills SAC + Configuración
+  [5] Kit Completo — Agents + Skills + Workflows + Config
   [Q] Salir
     """)
 
@@ -1084,59 +1089,33 @@ def main():
             if selected is None:
                 continue
 
-            # Verificar si se necesitan tools adicionales
-            all_wf_tools = set()
-            for wf in selected:
-                all_wf_tools.update(wf.get("tools_required", []))
+            # Instalar tools y commands asociados automáticamente
+            deps = COMPONENT_DEPENDENCIES.get("workflows", {})
+            associated_tools = [t for t in tools if t["name"] in deps.get("tools", [])]
+            associated_commands = [c for c in commands if c["name"] in deps.get("commands", [])]
 
-            if all_wf_tools:
-                print(f"\n  ⚠️  Tools requeridos por los workflows seleccionados:")
-                for tool_name in all_wf_tools:
-                    print(f"    → {tool_name}")
+            if associated_tools or associated_commands:
+                print(f"\n  📦 Instalando dependencias automáticamente:")
+                for t in associated_tools:
+                    print(f"    → tool: {t['name']}")
+                for c in associated_commands:
+                    print(f"    → command: {c['name']}")
 
-            # Instalar tools automáticamente
-            print(f"\n  Instalando tools requeridos...")
-            for tool in tools:
+            for tool in associated_tools:
                 if install_tool(tool, project_path):
                     installed_tools.append(tool["name"])
+
+            for cmd in associated_commands:
+                if install_command(cmd, project_path):
+                    installed_commands.append(cmd["name"])
 
             print(f"\n  Instalando workflows...")
             for wf in selected:
                 if install_workflow(wf, project_path, root_dir):
                     installed_workflows.append(wf["name"])
 
-        # ─── [4] TOOLS ────────────────────────────────────────
+        # ─── [4] TEAM DEV SAC ─────────────────────────────────
         elif choice == "4":
-            if not tools:
-                print_warning("No se encontraron tools")
-                continue
-
-            selected = show_tools_menu(tools)
-            if selected is None:
-                continue
-
-            print(f"\n  Instalando tools...")
-            for t in selected:
-                if install_tool(t, project_path):
-                    installed_tools.append(t["name"])
-
-        # ─── [5] COMMANDS ──────────────────────────────────────
-        elif choice == "5":
-            if not commands:
-                print_warning("No se encontraron commands")
-                continue
-
-            selected = show_commands_menu(commands)
-            if selected is None:
-                continue
-
-            print(f"\n  Instalando commands...")
-            for c in selected:
-                if install_command(c, project_path):
-                    installed_commands.append(c["name"])
-
-        # ─── [6] TEAM DEV SAC ─────────────────────────────────
-        elif choice == "6":
             sac_skills_list = [s for s in skills if s["is_sac"]]
 
             print(f"\n╔══════════════════════════════════════════════════════════╗")
@@ -1158,8 +1137,13 @@ def main():
                 if install_skill(s, project_path, skills_target):
                     installed_skills.append(s["name"])
 
-        # ─── [7] KIT COMPLETO ─────────────────────────────────
-        elif choice == "7":
+        # ─── [5] KIT COMPLETO ─────────────────────────────────
+        elif choice == "5":
+            # Calcular tools y commands derivados de dependencias
+            deps = COMPONENT_DEPENDENCIES.get("workflows", {})
+            associated_tools = [t for t in tools if t["name"] in deps.get("tools", [])]
+            associated_commands = [c for c in commands if c["name"] in deps.get("commands", [])]
+
             print(f"\n╔══════════════════════════════════════════════════════════╗")
             print(f"║              KIT COMPLETO — ia-dev-toolkit                ║")
             print(f"╚══════════════════════════════════════════════════════════╝")
@@ -1168,8 +1152,8 @@ def main():
             print(f"    → {len(agents)} agentes")
             print(f"    → {len(skills)} skills")
             print(f"    → {len(workflows)} workflows")
-            print(f"    → {len(tools)} tools")
-            print(f"    → {len(commands)} commands")
+            print(f"    → {len(associated_tools)} tools (asociados a workflows)")
+            print(f"    → {len(associated_commands)} commands (asociados a workflows)")
             print(f"    → Configuración .SAC/")
 
             confirm = input("\n  ¿Continuar con la instalación completa? (s/N): ").strip().lower()
@@ -1194,9 +1178,9 @@ def main():
                 if install_skill(s, project_path, skills_target):
                     installed_skills.append(s["name"])
 
-            # Instalar tools
+            # Instalar tools asociados
             print(f"\n  Instalando tools...")
-            for t in tools:
+            for t in associated_tools:
                 if install_tool(t, project_path):
                     installed_tools.append(t["name"])
 
@@ -1206,15 +1190,11 @@ def main():
                 if install_workflow(wf, project_path, root_dir):
                     installed_workflows.append(wf["name"])
 
-            # Instalar commands
+            # Instalar commands asociados
             print(f"\n  Instalando commands...")
-            for c in commands:
+            for c in associated_commands:
                 if install_command(c, project_path):
                     installed_commands.append(c["name"])
-
-        # ─── [8] ALMA (PERSONALIDAD) ──────────────────────────
-        elif choice == "8":
-            install_alma(project_path, root_dir)
 
         else:
             print_error("Opción inválida")
