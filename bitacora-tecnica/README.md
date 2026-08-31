@@ -8,6 +8,7 @@
 
 | Fecha | Entrada | Descripción |
 |---|---|---|
+| 2026-08-30 | [Sistema Memoria Persistente](sistema-memoria-persistente/bitacora.md) | Diseño de sistema SQLite + MCP para memoria persistente de agentes AI |
 | 2026-08-27 | [Pruebas E2E Skills SAC](pruebas-e2e-skills/bitacora.md) | Pruebas punto a punto del pipeline de skills SAC (7 escenarios, 108 assertions) |
 | 2026-08-26 | [Revisar install-skill](revisar-install-skill/) | Análisis del script de instalación legacy |
 | 2026-08-26 | [Spike Workflows](spike-workflows-opencode-claudecode/) | Spike de workflows para OpenCode y Claude Code |
