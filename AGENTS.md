@@ -17,6 +17,19 @@ Siempre que el usuario solicite leer, modificar o crear archivos en el repositor
 
 ---
 
+## 📋 Workflows SAC
+
+Para ejecutar un workflow:
+1. Usa `workflow-sac action=list` para listar workflows disponibles
+2. Usa `workflow-sac action=read workflow={nombre}` para leer el pipeline
+3. Usa `workflow-sac action=execute workflow={nombre} phase={fase}` para ejecutar una fase
+4. Usa `workflow-sac action=approve workflow={nombre} phase={fase}` para aprobar una fase
+5. Usa `workflow-sac action=status workflow={nombre}` para ver progreso
+
+Workflows disponibles en `.SAC/workflows/`. Lazy loading: solo se inyecta la fase activa.
+
+---
+
 ## 🎯 Validación de Comprensión (Feedback Loop) [OBLIGATORIO]
 
 Cuando detectes ambigüedad en la solicitud, identifiques un workflow personalizado definido por el usuario durante la conversación, o consideres necesario confirmar supuestos técnicos, aplica estrictamente las siguientes reglas antes de proceder:
