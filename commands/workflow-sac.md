@@ -1,22 +1,10 @@
 ---
-name: workflow-sac
-description: Use when user requests to execute, list, or check status of SAC workflows. Orchestrates workflow execution phase by phase with approval gates.
-ready: true
+description: Ejecutar workflow SAC fase por fase
 ---
 
-# Workflow SAC Executor
+Usa la tool `workflow-sac` para ejecutar el workflow {$ARGUMENTS}.
 
-## Overview
-Orquesta la ejecución de workflows SAC fase por fase, con aprobaciones obligatorias entre fases y persistencia de progreso. Usa lazy loading: solo inyecta la fase activa en el contexto.
-
-## When to Use
-- Usuario pide ejecutar un workflow
-- Usuario quiere listar workflows disponibles
-- Usuario quiere verificar progreso de un workflow
-
-**When NOT to Use**
-- Para skills simples (usar skill directamente)
-- Para workflows fuera de `.SAC/workflows/`
+Si no se proporciona nombre, ejecuta `workflow-sac action=list`.
 
 ## Implementation
 
