@@ -57,8 +57,9 @@ digraph git_decisions {
 4. Scope opcional: `tipo(ámbito): descripción` [auto-gestionar]
 5. Mensaje: inglés, imperativo, sin punto, ≤72 chars; BREAKING → `BREAKING CHANGE:` en cuerpo
 6. **Mostrar preview del commit al usuario y esperar confirmación**
-7. **Activar sub agente para que ejecute skill "auto-versioning" y el contexto requerido.**
-8. `git commit -m "[mensaje]" && git push origin [rama_actual]`
+7. `git commit -m "[mensaje]" && git push origin [rama_actual]`
+
+> **Nota:** `auto-versioning` se auto-activa al detectar push/merge a `main`. No requiere invocación manual.
 
 ## Quick Reference
 

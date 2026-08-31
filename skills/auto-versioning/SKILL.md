@@ -1,6 +1,7 @@
 ---
 name: auto-versioning
-description: Use it before committing to the main branch to automatically determine and create the next version tag based on a diff analysis.
+description: Use when pushing, merging a PR, or committing to main branch. Self-triggers on semantic versioning needs. Triggers on "version", "tag", "release", "semver", "git tag", "version bump", "push to main", "merge to main"
+ready: true
 ---
 
 # Auto-Versioning
@@ -53,6 +54,19 @@ digraph version_flowchart {
 - Committing to feature branches (use manual versioning or skip)
 - Hotfix branches (determine version after merge to main)
 - Initial project setup (start at v0.1.0 manually)
+
+## Implementation
+
+1. Detectar si el push/merge es hacia `main`:
+   - Si el agente acaba de hacer `git push origin main` → **activar**
+   - Si el agente acaba de mergear PR a `main` → **activar**
+   - Si NO → **detenerse** (no ejecutar versioning)
+2. Obtener último tag: `git describe --tags --abbrev=0`
+3. Analizar diff: `git diff {last_tag}...HEAD`
+4. Clasificar cambios: Major / Minor / Patch (ver Diff Analysis Triggers)
+5. Calcular versión siguiente
+6. Crear tag: `git tag -a v{version} -m "Release {version}"`
+7. Push tag: `git push origin v{version}`
 
 ## Quick Reference
 
