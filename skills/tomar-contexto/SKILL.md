@@ -1,6 +1,6 @@
 ---
 name: tomar-contexto
-description: Use when no existe .SAC/workspace.md, el contexto está desactualizado, el usuario pide analizar/inicializar proyecto, o antes de refinar HUs/planificar/diagnosticar DevOps sin contexto previo.
+description: Use when .SAC/workspace.md is missing, outdated, or context is needed before refining HUs, planning, or DevOps diagnostics.
 ready: true
 ---
 

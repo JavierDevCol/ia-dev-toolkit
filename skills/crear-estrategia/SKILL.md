@@ -1,9 +1,8 @@
 ---
 name: crear-estrategia
 description: >
-  Usa esta skill cuando el usuario pida crear una nueva estrategia de
-  interacción, agregar una etapa al FSM o implementar un nuevo flujo
-  conversacional en ms-banca-conversacion.
+  Use when creating a new interaction strategy, adding an FSM stage,
+  or implementing a new conversational flow in ms-banca-conversacion.
 ready: true
 ---
 
@@ -48,6 +47,61 @@ TESTS    = ms-banca-conversacion/microservicio/dominio/src/test/java/co/com/bmm
 | PlantillaMensajeId | `{DOMINIO}/modelo/PlantillaMensajeId.java` |
 | MotorFsmConfiguration | `{INFRA}/configuracion/MotorFsmConfiguration.java` |
 | Estrategias existentes | `{DOMINIO}/maquina_estados/estrategias/` (subcarpetas temáticas) |
+
+## Flowchart
+
+```dot
+digraph crear_estrategia {
+  rankdir=LR;
+  node [fontname="Helvetica", fontsize=10];
+  edge [fontname="Helvetica", fontsize=9];
+
+  start [label="Iniciar", shape=oval, style=filled, fillcolor="#4A90D9", fontcolor=white];
+  f1 [label="Fase 1\nRecopilar info", shape=box, style=filled, fillcolor="#7BC67E"];
+  f2 [label="Fase 2\nAgregar etapas\nEtapaInteraccion", shape=box, style=filled, fillcolor="#7BC67E"];
+
+  new_trigger [label="Disparador\nnuevo?", shape=diamond, style=filled, fillcolor="#F5A623"];
+  f3 [label="Fase 3\nAgregar\ndisparadores", shape=box, style=filled, fillcolor="#50E3C2"];
+  skip3 [label="Omitir\nfase 3", shape=box, style=filled, fillcolor="#BD10E0", fontcolor=white];
+
+  has_menu [label="Menú con\nopciones fijas?", shape=diamond, style=filled, fillcolor="#F5A623"];
+  f4 [label="Fase 4\nCrear enum\nOpcionMenu", shape=box, style=filled, fillcolor="#50E3C2"];
+  skip4 [label="Omitir\nfase 4", shape=box, style=filled, fillcolor="#BD10E0", fontcolor=white];
+
+  f5 [label="Fase 5\nCrear clase(s)\nestrategia", shape=box, style=filled, fillcolor="#7BC67E"];
+  f6 [label="Fase 6\nRegistrar beans\nMotorFsmConfig", shape=box, style=filled, fillcolor="#7BC67E"];
+  f7 [label="Fase 7\nCrear tests\nunitarios", shape=box, style=filled, fillcolor="#7BC67E"];
+
+  new_templates [label="Plantillas\nnuevas?", shape=diamond, style=filled, fillcolor="#F5A623"];
+  f8 [label="Fase 8\nAgregar\nPlantillaMensajeId", shape=box, style=filled, fillcolor="#50E3C2"];
+  skip8 [label="Omitir\nfase 8", shape=box, style=filled, fillcolor="#BD10E0", fontcolor=white];
+
+  f9 [label="Fase 9\nValidaciones\nfinales", shape=box, style=filled, fillcolor="#7BC67E"];
+  compile [label="Compilación\nexitosa?", shape=diamond, style=filled, fillcolor="#F5A623"];
+  done [label="Listo", shape=oval, style=filled, fillcolor="#7ED321", fontcolor=white];
+
+  start -> f1 -> f2 -> new_trigger;
+  new_trigger -> f3 [label="Sí"];
+  new_trigger -> skip3 [label="No"];
+  f3 -> has_menu;
+  skip3 -> has_menu;
+
+  has_menu -> f4 [label="Sí"];
+  has_menu -> skip4 [label="No"];
+  f4 -> f5;
+  skip4 -> f5;
+
+  f5 -> f6 -> f7 -> new_templates;
+  new_templates -> f8 [label="Sí"];
+  new_templates -> skip8 [label="No"];
+  f8 -> f9;
+  skip8 -> f9;
+
+  f9 -> compile;
+  compile -> done [label="Sí"];
+  compile -> f5 [label="No,\ncorregir"];
+}
+```
 
 ## Implementation
 

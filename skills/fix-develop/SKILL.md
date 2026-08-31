@@ -1,10 +1,9 @@
 ---
 name: fix-develop
 description: >
-  Usa esta skill cuando necesites corregir un bug durante la fase de desarrollo
-  del proyecto Banca por WhatsApp. Se activa al detectar bugs en branches de
-  develop, en feature branches sin merge, o en DES antes de la entrega formal.
-  No usar para releases ya entregados al banco.
+  Use when fixing a bug during the development phase before formal
+  delivery. Triggers on bugs in develop, feature branches without merge,
+  or DES environments. Not for released environments.
 ready: true
 ---
 
@@ -19,6 +18,34 @@ Gestiona la resolución de bugs durante el desarrollo, antes de la entrega forma
 **Usar cuando:** Bug en develop tras merge, en feature branch sin merge, o en DES pre-entrega formal.
 
 **No usar cuando:** Bug post-entrega (PRU/PREPRO/PRO) → `fix-release`. Entrega formal → `entrega-ambiente-banco`. Feature nueva → desarrollo normal.
+
+## Decision Flow
+
+```dot
+digraph fixdevelop {
+  rankdir=LR
+  node [fontname="Helvetica" fontsize=10]
+
+  start [label="Bug detectado" shape=ellipse style=filled fillcolor="#4A90D9" fontcolor=white]
+  q1 [label="¿Release branch\nactivo?" shape=diamond style=filled fillcolor="#F5A623"]
+  stop [label="→ fix-release" shape=box style=filled fillcolor="#D0021B" fontcolor=white]
+  q2 [label="¿Bug en\ndevelop?" shape=diamond style=filled fillcolor="#F5A623"]
+  opt1 [label="Opción 1\nFix en develop" shape=box style=filled fillcolor="#7ED321"]
+  q3 [label="¿Bug durante\nfeature?" shape=diamond style=filled fillcolor="#F5A623"]
+  opt2 [label="Opción 2\nFix en feature branch" shape=box style=filled fillcolor="#7ED321"]
+  q4 [label="¿DES\npre-entrega?" shape=diamond style=filled fillcolor="#F5A623"]
+  opt3 [label="Opción 3\nFix en DES" shape=box style=filled fillcolor="#7ED321"]
+
+  start -> q1
+  q1 -> stop [label="Sí" color=red]
+  q1 -> q2 [label="No"]
+  q2 -> opt1 [label="Sí"]
+  q2 -> q3 [label="No"]
+  q3 -> opt2 [label="Sí"]
+  q3 -> q4 [label="No"]
+  q4 -> opt3 [label="Sí"]
+}
+```
 
 ## Implementation
 

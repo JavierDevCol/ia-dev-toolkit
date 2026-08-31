@@ -1,10 +1,10 @@
 ---
 name: handoff-release
 description: >
-  Usa esta skill cuando necesites preparar y orquestar la entrega de un release
-  a entornos de destino. Se activa al crear ramas release desde develop, generar
-  release notes, o preparar el handoff entre equipos de Dev y Ops. No usar para
-  hotfixes o ajustes RC post-entrega.
+  Use when preparing and orchestrating a release delivery to target
+  environments. Triggers on creating release branches from develop,
+  generating release notes, or preparing Dev-Ops handoff. Not for
+  hotfixes or post-delivery RC fixes.
 ready: true
 ---
 
@@ -19,6 +19,28 @@ Orquesta la entrega de releases siguiendo GitFlow: crea ramas release desde deve
 **Usar cuando:** Feature integrada en develop lista para entregar. Se necesita crear release branch, generar release notes o preparar handoff. Código en feature branch sin merge a develop.
 
 **No usar cuando:** Hotfix o ajuste RC post-entrega → `fix-release`. Entrega formal con artefactos completos → `entrega-ambiente-banco`.
+
+## Decision Flow
+
+```dot
+digraph handoffrelease {
+  rankdir=LR
+  node [fontname="Helvetica" fontsize=10]
+
+  start [label="Entrega solicitada" shape=ellipse style=filled fillcolor="#4A90D9" fontcolor=white]
+  q1 [label="¿Hotfix o\najuste RC?" shape=diamond style=filled fillcolor="#F5A623"]
+  stop [label="→ fix-release" shape=box style=filled fillcolor="#D0021B" fontcolor=white]
+  q2 [label="¿Código en\ndevelop?" shape=diamond style=filled fillcolor="#F5A623"]
+  opt1 [label="Opción 1\nRelease desde develop" shape=box style=filled fillcolor="#7ED321"]
+  opt2 [label="Opción 2\nPR feature → develop\nluego Opción 1" shape=box style=filled fillcolor="#9B59B6"]
+
+  start -> q1
+  q1 -> stop [label="Sí" color=red]
+  q1 -> q2 [label="No"]
+  q2 -> opt1 [label="Sí"]
+  q2 -> opt2 [label="No\n(feature/fix)"]
+}
+```
 
 ## Implementation
 

@@ -1,8 +1,8 @@
 ---
 name: validar-hu
 description: >
-  Usa esta skill cuando una HU esté en estado [R] Refinada y necesite
-  validación arquitectónica antes de planificar.
+  Use when a HU is in [R] Refinada state and needs architectural validation
+  before planning.
 ready: true
 ---
 
@@ -18,6 +18,59 @@ Valida una HU refinada contra criterios SMART, arquitectura del proyecto y depen
 - El usuario solicita validación de una HU refinada
 
 **Cuándo NO usar:** HU en `[A]` → `>planificar_hu`; HU en `[N]` → `>refinar_hu`; HU en `[B]` → resolver dependencia primero.
+
+## Flowchart
+
+```dot
+digraph validar_hu {
+  rankdir=LR;
+  node [fontname="Helvetica", fontsize=10];
+  edge [fontname="Helvetica", fontsize=9];
+
+  start [label="Iniciar", shape=oval, style=filled, fillcolor="#4A90D9", fontcolor=white];
+  load [label="Cargar config\ny fuentes", shape=box, style=filled, fillcolor="#7BC67E"];
+  bug_check [label="Bug\nCrítica?", shape=diamond, style=filled, fillcolor="#F5A623"];
+  basic [label="nivel_validacion\n= basico", shape=box, style=filled, fillcolor="#BD10E0", fontcolor=white];
+
+  sub1 [label="Sub-agente 1\nAmbigüedades", shape=box, style=filled, fillcolor="#7BC67E"];
+  sub2 [label="Sub-agente 2\nSMART + Cobertura", shape=box, style=filled, fillcolor="#7BC67E"];
+  sub3 [label="Sub-agente 3\nTrazabilidad CA", shape=box, style=filled, fillcolor="#7BC67E"];
+
+  consolidate [label="Consolidar\nresultados", shape=box, style=filled, fillcolor="#50E3C2"];
+  ambiguity [label="Ambigüedades\ndetectadas?", shape=diamond, style=filled, fillcolor="#F5A623"];
+  pause [label="PAUSAR\nesperar respuestas", shape=box, style=filled, fillcolor="#D0021B", fontcolor=white];
+
+  arch [label="Validar\narquitectura + ADR", shape=box, style=filled, fillcolor="#7BC67E"];
+  deps [label="Clasificar\ndependencias", shape=box, style=filled, fillcolor="#7BC67E"];
+  blocking [label="Dependencia\nbloqueante?", shape=diamond, style=filled, fillcolor="#F5A623"];
+
+  verdict [label="Veredicto", shape=diamond, style=filled, fillcolor="#F5A623"];
+  approved [label="APROBADA\n[A]", shape=box, style=filled, fillcolor="#7ED321"];
+  adjustments [label="AJUSTES\n[R] + observaciones", shape=box, style=filled, fillcolor="#F8E71C"];
+  blocked [label="BLOQUEADA\n[B]", shape=box, style=filled, fillcolor="#D0021B", fontcolor=white];
+
+  start -> load -> bug_check;
+  bug_check -> basic [label="Sí"];
+  bug_check -> sub1 [label="No"];
+  basic -> sub1;
+
+  sub1 -> consolidate;
+  sub2 -> consolidate;
+  sub3 -> consolidate;
+
+  consolidate -> ambiguity;
+  ambiguity -> pause [label="Sí"];
+  ambiguity -> arch [label="No"];
+
+  arch -> deps -> blocking;
+  blocking -> blocked [label="Sí"];
+  blocking -> verdict [label="No"];
+
+  verdict -> approved [label="APROBADA"];
+  verdict -> adjustments [label="AJUSTES"];
+  verdict -> blocked [label="BLOQUEADA"];
+}
+```
 
 ## Implementation
 

@@ -1,10 +1,11 @@
 ---
 name: entrega-ambiente-banco
 description: >
-  Usa esta skill cuando necesites preparar una entrega formal al banco
-  para el proyecto Banca por WhatsApp. No la uses para desarrollo normal
-  de features.
-ready: false
+  Use when preparing a formal release handoff to the bank (Banco) for the
+  Banca por WhatsApp project. Triggers on "entregar", "release", "handoff",
+  "paso a ambientes", "entrega banco". Covers develop releases, hotfix
+  flows, RC adjustments, and feature-to-develop PRs.
+ready: true
 ---
 
 # Entrega Ambiente Banco
@@ -22,11 +23,42 @@ Prepara el handoff de releases creando ramas, generando release notes y artefact
 - El banco pidió ajustes sobre un release activo (ciclo RC)
 - Se necesita generar release notes y resumen de entrega
 
-### Cuándo NO usar
+## When NOT to Use
 
-- Desarrollo normal de features (no es handoff)
-- Creación de PR de feature → develop (flujo estándar de git)
-- Configuración de pipelines CI/CD
+- Normal feature development (not a handoff scenario)
+- Creating a PR from feature → develop (standard git flow)
+- CI/CD pipeline configuration
+- Any task that is not a formal release handoff to the bank
+
+## Delivery Flowchart
+
+```
+START: User requests release handoff
+│
+├─ Is the feature ALREADY merged into develop via approved PR?
+│  │
+│  ├─ YES ──────────────────────────────────────── Option 1
+│  │       Release from DEVELOP
+│  │       → Verify develop, generate release notes
+│  │       → Create/update release/vX.Y.Z (--ff-only)
+│  │       → Checklist + Resumen
+│  │
+│  └─ NO
+│     ├─ Is this a HOTFIX from PRU/PREPRO/PRO? ── Option 2b
+│     │  → Identify environment + affected version
+│     │  → hotfix branch → fix → merge develop
+│     │  → New release/vX.Y.Z+1 → Resumen
+│     │
+│     ├─ Is this an RC ADJUSTMENT on a live release? ── Option 2c
+│     │  → Identify active version + RC count
+│     │  → Fix on release/vX.Y.Z
+│     │  → Back-merge develop → ephemeral RC branch
+│     │  → Resumen
+│     │
+│     └─ Otherwise: FEATURE/FIX → develop PR ── Option 2a
+│        → Create PR feature → develop
+│        → Bank approves → re-run Option 1
+```
 
 ## Referencias
 

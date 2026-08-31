@@ -1,8 +1,9 @@
 ---
 name: init-reglas-arquitectonicas
 description: >
-  Usa esta skill cuando se necesite definir o actualizar las reglas
-  arquitectónicas del proyecto, o cuando otros skills las requieran.
+  Use when defining or updating the project's architectural rules, or
+  when other skills require them as context. Triggers on new projects
+  without rules, rule updates, or skills requesting architectural context.
 ready: true
 ---
 

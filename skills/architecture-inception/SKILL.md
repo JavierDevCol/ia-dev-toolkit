@@ -1,9 +1,9 @@
 ---
 name: architecture-inception
 description: >
-  Usa esta skill cuando el usuario inicie un proyecto desde cero, pida
-  especificar una blueprint arquitectónica o solicite definir estilos,
-  estructura de directorios, ADRs y estándares Git iniciales.
+  Use when starting a new project from scratch, requesting an architectural
+  blueprint, or defining architecture styles, directory structure, ADRs,
+  and initial Git standards.
 ready: true
 ---
 
