@@ -18,6 +18,37 @@ Un ADR documenta **una** decisión de arquitectura: contexto, drivers, opciones 
 
 Cuándo NO: decisiones triviales reversibles (naming, formato menor) o requisitos que no cambian la arquitectura.
 
+## Decision Flow
+
+```dot
+digraph crearadr {
+  rankdir=LR
+  node [fontname="Helvetica" fontsize=10]
+
+  start [label="Decisión a\nregistrar" shape=ellipse style=filled fillcolor="#4A90D9" fontcolor=white]
+  q1 [label="¿Formato\nsolicitado?" shape=diamond style=filled fillcolor="#F5A623"]
+  madr [label="MADR\n(defecto)" shape=box style=filled fillcolor="#7ED321"]
+  nygard [label="Nygard" shape=box style=filled fillcolor="#9B59B6"]
+  ystmt [label="Y-Statement" shape=box style=filled fillcolor="#9B59B6"]
+  q2 [label="¿Existe\nmemory_skill.json?" shape=diamond style=filled fillcolor="#F5A623"]
+  use_mem [label="Usar output_folder\nde memory" shape=box style=filled fillcolor="#7ED321"]
+  ask [label="Preguntar carpeta\nal usuario" shape=box style=filled fillcolor="#F5A623"]
+  save [label="Guardar ADR\n+ actualizar memory" shape=box style=filled fillcolor="#4A90D9" fontcolor=white]
+
+  start -> q1
+  q1 -> madr [label="Ninguno\n(defecto)"]
+  q1 -> nygard [label="nygard"]
+  q1 -> ystmt [label="y-statement"]
+  madr -> q2
+  nygard -> q2
+  ystmt -> q2
+  q2 -> use_mem [label="Sí\ncon output_folder"]
+  q2 -> ask [label="No o null"]
+  use_mem -> save
+  ask -> save
+}
+```
+
 ## Implementación
 
 ### 1. Reunir la decisión (preguntar solo lo que falte)

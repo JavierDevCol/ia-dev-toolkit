@@ -1,9 +1,10 @@
 ---
 name: bitacora-tecnica
 description: >
-  Usa esta skill únicamente cuando se presente Decisiones de arquitectura, infraestructura o diseño del sistema,
-  Acuerdo para modificar código, Cambios estructurales en código existente, refactorizaciones aprobadas, modificación de lógica de negocio o ajustes de dependencias,
-  Solución de errores complejos o bloqueantes.
+  Use when documenting architecture, infrastructure, or system design
+  decisions, approved code modifications, structural changes, approved
+  refactors, business logic changes, dependency adjustments, or
+  complex/blocking error solutions.
 ready: true
 ---
 

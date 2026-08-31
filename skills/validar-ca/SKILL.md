@@ -1,7 +1,8 @@
 ---
 name: validar-ca
 description: >
-  Valida criterios de aceptación contra código implementado. Usa esta skill cuando se necesite verificar que el código cumplidos los CAs de una HU tras ejecutar tareas de desarrollo.
+  Use when verifying that implemented code meets acceptance criteria
+  after completing development tasks for a HU.
 ready: true
 ---
 
@@ -20,6 +21,60 @@ Verifica que el código cumple los criterios de aceptación del refinamiento. Fu
 - HU no refinada o no planificada
 - HU en modo Plano con task_id (error: HU plana no tiene tasks)
 - Antes de ejecutar el plan (no hay código que validar)
+
+## Flowchart
+
+```dot
+digraph validar_ca {
+  rankdir=LR;
+  node [fontname="Helvetica", fontsize=10];
+  edge [fontname="Helvetica", fontsize=9];
+
+  start [label="Iniciar", shape=oval, style=filled, fillcolor="#4A90D9", fontcolor=white];
+  load [label="Cargar\nfuentes", shape=box, style=filled, fillcolor="#7BC67E"];
+  scope [label="Scope?", shape=diamond, style=filled, fillcolor="#F5A623"];
+
+  granular [label="Validar CA\ngranular task", shape=box, style=filled, fillcolor="#50E3C2"];
+  integration [label="Validar CA\nintegración", shape=box, style=filled, fillcolor="#50E3C2"];
+  all [label="Validar\ntodos CAs", shape=box, style=filled, fillcolor="#50E3C2"];
+
+  delegate [label="Sub-agente\nvalida CA", shape=box, style=filled, fillcolor="#7BC67E"];
+  pass [label="PASS?", shape=diamond, style=filled, fillcolor="#F5A623"];
+  stop [label="Detener\nal primer FAIL", shape=box, style=filled, fillcolor="#D0021B", fontcolor=white];
+
+  task_done [label="TASK completa?", shape=diamond, style=filled, fillcolor="#F5A623"];
+  ca_candidate [label="CA integración\ncandidato [~]", shape=box, style=filled, fillcolor="#BD10E0", fontcolor=white];
+  confirm_scope [label="--scope\nintegracion?", shape=diamond, style=filled, fillcolor="#F5A623"];
+  hu_complete [label="HU completada\n[X]", shape=box, style=filled, fillcolor="#7ED321"];
+
+  update_plan [label="Actualizar\nPlan.md", shape=box, style=filled, fillcolor="#7BC67E"];
+  update_ref [label="Actualizar\nRefinamiento.md", shape=box, style=filled, fillcolor="#7BC67E"];
+  report [label="Emitir\nreporte", shape=box, style=filled, fillcolor="#4A90D9", fontcolor=white];
+
+  start -> load -> scope;
+  scope -> granular [label="granulares"];
+  scope -> integration [label="integracion"];
+  scope -> all [label="todos"];
+
+  granular -> delegate;
+  integration -> delegate;
+  all -> delegate;
+
+  delegate -> pass;
+  pass -> stop [label="FAIL"];
+  pass -> update_plan [label="PASS"];
+
+  update_plan -> task_done;
+  task_done -> ca_candidate [label="Sí"];
+  task_done -> update_ref [label="No"];
+  ca_candidate -> confirm_scope;
+  confirm_scope -> hu_complete [label="Sí"];
+  confirm_scope -> update_ref [label="No"];
+
+  update_ref -> report;
+  hu_complete -> report;
+}
+```
 
 ## Implementation
 

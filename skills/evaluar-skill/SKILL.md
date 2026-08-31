@@ -1,9 +1,9 @@
 ---
 name: evaluar-skill
 description: >
-  Usa esta skill cuando necesites evaluar la calidad de una skill existente
-  usando metodología de evaluación sistemática con test cases, baseline
-  y benchmark cuantitativo.
+  Use when evaluating the quality of an existing skill using systematic
+  methodology with test cases, baseline comparison, and quantitative
+  benchmarks. Triggers on "evaluate skill", "test skill", "skill quality".
 ready: true
 ---
 

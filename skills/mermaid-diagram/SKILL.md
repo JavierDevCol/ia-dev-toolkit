@@ -1,8 +1,9 @@
 ---
 name: mermaid-diagram
 description: >
-  Usa esta skill cuando necesites crear, validar o corregir diagramas
-  Mermaid (sequence, flowchart, state, C4).
+  Use when creating, validating, or correcting Mermaid diagrams
+  (sequence, flowchart, state, C4). Triggers on "create diagram",
+  "validate mermaid", "fix diagram", "sequence diagram".
 ready: true
 ---
 

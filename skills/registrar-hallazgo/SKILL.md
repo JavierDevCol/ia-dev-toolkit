@@ -1,7 +1,8 @@
 ---
 name: registrar-hallazgo
 description: >
-  Registra errores, mejoras o deuda técnica encontrados durante el desarrollo. Usa esta skill cuando se detecte una incidencia que deba documentarse como BUG o PENDIENTE.
+  Use when a bug, improvement, or technical debt is discovered during development
+  and needs to be logged as BUG or PENDIENTE.
 ready: true
 ---
 

@@ -1,10 +1,10 @@
 ---
 name: ado-wi-comments
 description: >
-  Usa esta skill cuando necesites agregar un comentario estructurado a un
-  Work Item de Azure DevOps, incluyendo comentarios de entrega (RELEASE,
-  FEATURE, FIX, HOTFIX), comentarios técnicos, menciones a colaboradores
-  o reasignación. No la uses para crear o modificar campos del WI.
+  Use when adding a structured comment to an Azure DevOps Work Item,
+  including delivery comments (RELEASE, FEATURE, FIX, HOTFIX), technical
+  updates, collaborator mentions (@mention), or WI reassignment.
+  Do not use for creating or modifying WI fields.
 ready: true
 ---
 

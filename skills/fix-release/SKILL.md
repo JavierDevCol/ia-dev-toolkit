@@ -1,10 +1,9 @@
 ---
 name: fix-release
 description: >
-  Usa esta skill cuando necesites corregir un bug sobre un release ya entregado
-  a entornos de destino. Se activa ante solicitudes de cambios en el entorno de
-  validación (RC) o bugs reportados en entornos de despliegue (hotfix), o ajustes
-  post-entrega. No usar para entregas iniciales ni para bugs en desarrollo.
+  Use when fixing a bug on a release already delivered to target
+  environments. Triggers on RC validation changes, deployment hotfixes,
+  or post-delivery adjustments. Not for initial deliveries or dev bugs.
 ready: true
 ---
 
@@ -19,6 +18,28 @@ Gestiona fixes y hotfixes sobre releases ya entregados a entornos de destino. Cu
 **Usar cuando:** El equipo solicita cambios en el entorno de validación (RC) o reporta bugs en entornos de despliegue (hotfix), incluido hotfix previo a promoción a producción.
 
 **No usar cuando:** Entrega inicial → `entrega-ambiente-banco`. Bug pre-entrega → `fix-develop`.
+
+## Decision Flow
+
+```dot
+digraph fixrelease {
+  rankdir=LR
+  node [fontname="Helvetica" fontsize=10]
+
+  start [label="Fix post-entrega" shape=ellipse style=filled fillcolor="#4A90D9" fontcolor=white]
+  q1 [label="¿Ambiente?" shape=diamond style=filled fillcolor="#F5A623"]
+  opt1 [label="Opción 1\nAjuste RC en DES" shape=box style=filled fillcolor="#7ED321"]
+  q2 [label="¿Hotfix en\nPRU/PREPRO/PRO?" shape=diamond style=filled fillcolor="#F5A623"]
+  opt2 [label="Opción 2\nHotfix + PATCH" shape=box style=filled fillcolor="#7ED321"]
+  opt3 [label="Opción 3\nHotfix en DES" shape=box style=filled fillcolor="#7ED321"]
+
+  start -> q1
+  q1 -> opt1 [label="DES"]
+  q1 -> q2 [label="PRU/PREPRO/PRO"]
+  q2 -> opt2 [label="Sí"]
+  q2 -> opt3 [label="No\n(DES)"]
+}
+```
 
 ## Implementation
 

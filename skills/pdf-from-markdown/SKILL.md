@@ -1,9 +1,8 @@
 ---
 name: pdf-from-markdown
 description: >
-  Usa esta skill cuando el usuario mencione convertir markdown a PDF,
-  exportar documento como PDF, generar PDF desde Mermaid o renderizar
-  diagramas a PDF.
+  Use when converting markdown to PDF, exporting documents as PDF,
+  rendering Mermaid diagrams to PDF, or generating individual diagram PDFs.
 ready: true
 ---
 

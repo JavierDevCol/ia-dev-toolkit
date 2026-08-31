@@ -1,8 +1,8 @@
 ---
 name: crear-skill
 description: >
-  Usa esta skill cuando el usuario pida crear una nueva skill, mejorar
-  una skill existente o configurar testing para skills.
+  Use when creating a new skill, improving an existing skill, or
+  configuring testing for skills.
 ready: true
 ---
 

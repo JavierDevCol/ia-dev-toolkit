@@ -1,7 +1,8 @@
 ---
 name: sincronizar-backlog
 description: >
-  Sincroniza estados de HUs en el backlog con artefactos en disco. Usa esta skill cuando el estado del backlog no refleje el estado real de refinamiento, planificación o ejecución de las HUs.
+  Use when the backlog status doesn't match the actual refinement, planning,
+  or execution state of HUs on disk.
 ready: true
 ---
 
@@ -20,6 +21,40 @@ Detecta y corrige discrepancias entre el estado del backlog y los artefactos en 
 **Cuándo NO usar:**
 - Backlog no existe (ejecutar >refinar_hu primero)
 - Artefactos corruptos o con estructura inválida
+
+## Flowchart
+
+```dot
+digraph sincronizar_backlog {
+  rankdir=LR;
+  node [fontname="Helvetica", fontsize=10];
+  edge [fontname="Helvetica", fontsize=9];
+
+  start [label="Iniciar", shape=oval, style=filled, fillcolor="#4A90D9", fontcolor=white];
+  scan [label="Escanear\nartefactos", shape=box, style=filled, fillcolor="#7BC67E"];
+  plan_exists [label="Plan.md\nexiste?", shape=diamond, style=filled, fillcolor="#F5A623"];
+  plan_status [label="Estado\nPlan.md", shape=diamond, style=filled, fillcolor="#F5A623"];
+
+  pending [label="[ ] Pendiente\nSin refinamiento", shape=box, style=filled, fillcolor="#D0021B", fontcolor=white];
+  refined [label="[R] Refinada\nSin Aprobación", shape=box, style=filled, fillcolor="#BD10E0", fontcolor=white];
+  approved [label="[A] Aprobada\n✅ Aprobada", shape=box, style=filled, fillcolor="#4A90D9", fontcolor=white];
+  planned [label="[P] Planificada\nPENDIENTE", shape=box, style=filled, fillcolor="#50E3C2"];
+  running [label="[E] En Ejecución\nEN_PROGRESO", shape=box, style=filled, fillcolor="#F8E71C"];
+  done [label="[X] Completada\nCOMPLETADO", shape=box, style=filled, fillcolor="#7ED321"];
+  blocked [label="[B] Bloqueada\nBLOQUEADO", shape=box, style=filled, fillcolor="#D0021B", fontcolor=white];
+
+  start -> scan;
+  scan -> plan_exists;
+  plan_exists -> pending [label="No"];
+  plan_exists -> refined [label="Sí,\nsin Aprobación"];
+  plan_exists -> approved [label="Sí,\n✅ Aprobada"];
+  plan_exists -> plan_status [label="Sí,\ncon Plan.md"];
+  plan_status -> planned [label="PENDIENTE"];
+  plan_status -> running [label="EN_PROGRESO"];
+  plan_status -> done [label="COMPLETADO"];
+  plan_status -> blocked [label="BLOQUEADO"];
+}
+```
 
 ## Implementation
 
