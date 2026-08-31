@@ -48,7 +48,7 @@ if platform.system() == "Windows":
 # ============================================
 REPO_URL = "https://github.com/JavierDevCol/ia-dev-toolkit.git"
 REPO_BRANCH = "main"
-REQUIRED_DIRS = ["skills", "agents", "workflows", "tools", "config"]
+REQUIRED_DIRS = ["skills", "agents", "workflows", "tools", "config", "commands"]
 REQUIRED_FILES = ["ALMA.md"]
 
 SAC_SKILLS = [
@@ -141,6 +141,12 @@ WORKFLOW_TOOLS = {
 # Descripciones de tools
 TOOL_DESCRIPTIONS = {
     "workflow-discover": "Lista workflows disponibles desde .SAC/workflows/",
+    "workflow-sac": "Gestiona workflows SAC: listar, leer, ejecutar fases, progreso",
+}
+
+# Descripciones de commands
+COMMAND_DESCRIPTIONS = {
+    "workflow-sac": "Ejecutar workflow SAC fase por fase",
 }
 
 # Dependencias de skills
@@ -507,6 +513,37 @@ def scan_tools(tools_dir):
     return tools
 
 
+def scan_commands(commands_dir):
+    commands = []
+    if not commands_dir.exists():
+        return commands
+    for cmd_file in sorted(commands_dir.glob("*.md")):
+        name = cmd_file.stem
+        # Leer descripción del frontmatter
+        try:
+            content = cmd_file.read_text(encoding="utf-8")
+            in_frontmatter = False
+            description = COMMAND_DESCRIPTIONS.get(name, "Command")
+            for line in content.split("\n"):
+                stripped = line.strip()
+                if stripped == "---":
+                    in_frontmatter = not in_frontmatter
+                    continue
+                if in_frontmatter and stripped.startswith("description:"):
+                    description = stripped.split(":", 1)[1].strip().strip('"').strip("'")
+                    break
+        except Exception:
+            description = COMMAND_DESCRIPTIONS.get(name, "Command")
+        
+        commands.append({
+            "name": name,
+            "path": cmd_file,
+            "description": description,
+            "dependencies": "ninguna"
+        })
+    return commands
+
+
 # ============================================
 # FUNCIONES DE INSTALACIÓN
 # ============================================
@@ -589,6 +626,22 @@ def install_tool(tool_info, project_path):
         return True
     except Exception as e:
         print_error(f"{tool_info['name']} — Error: {e}")
+        return False
+
+
+def install_command(cmd_info, project_path):
+    commands_dest = project_path / ".opencode" / "commands"
+    commands_dest.mkdir(parents=True, exist_ok=True)
+
+    cmd_src = cmd_info["path"]
+    cmd_dst = commands_dest / cmd_src.name
+
+    try:
+        shutil.copy2(cmd_src, cmd_dst)
+        print_success(f"{cmd_info['name']}")
+        return True
+    except Exception as e:
+        print_error(f"{cmd_info['name']} — Error: {e}")
         return False
 
 
@@ -864,9 +917,10 @@ def show_main_menu():
   [2] Agents — Seleccionar agentes específicos
   [3] Workflows — Seleccionar workflows (+ tools automáticos)
   [4] Tools — Seleccionar tools individuales
-  [5] Team Dev SAC — Skills SAC + Configuración
-  [6] Kit Completo — Agents + Skills + Workflows + Tools + Config
-  [7] Alma — Personalidad del agente (AGENT.md)
+  [5] Commands — Seleccionar comandos slash
+  [6] Team Dev SAC — Skills SAC + Configuración
+  [7] Kit Completo — Agents + Skills + Workflows + Tools + Commands + Config
+  [8] Alma — Personalidad del agente (AGENT.md)
   [Q] Salir
     """)
 
@@ -884,6 +938,11 @@ def show_workflows_menu(workflows):
 def show_tools_menu(tools):
     """Muestra menú de tools con checkboxes."""
     return show_checkbox_menu(tools, "🔧 TOOLS", show_deps=False)
+
+
+def show_commands_menu(commands):
+    """Muestra menú de commands con checkboxes."""
+    return show_checkbox_menu(commands, "⚡ COMMANDS", show_deps=False)
 
 
 def show_requirements_preview(items, item_type):
@@ -919,14 +978,16 @@ def main():
     agents_dir = root_dir / "agents"
     workflows_dir = root_dir / "workflows"
     tools_dir = root_dir / "tools"
+    commands_dir = root_dir / "commands"
 
     print_info("Escaneando componentes...")
     skills = scan_skills(skills_dir)
     agents = scan_agents(agents_dir)
     workflows = scan_workflows(workflows_dir)
     tools = scan_tools(tools_dir)
+    commands = scan_commands(commands_dir)
 
-    print_success(f"Encontrados: {len(skills)} skills, {len(agents)} agentes, {len(workflows)} workflows, {len(tools)} tools")
+    print_success(f"Encontrados: {len(skills)} skills, {len(agents)} agentes, {len(workflows)} workflows, {len(tools)} tools, {len(commands)} commands")
 
     if not skills:
         print_warning("No se encontraron skills disponibles")
@@ -936,6 +997,8 @@ def main():
         print_warning("No se encontraron workflows disponibles")
     if not tools:
         print_warning("No se encontraron tools disponibles")
+    if not commands:
+        print_warning("No se encontraron commands disponibles")
 
     if len(sys.argv) > 1 and not sys.argv[1].startswith("--"):
         project_path = Path(sys.argv[1])
@@ -961,6 +1024,7 @@ def main():
     installed_agents = []
     installed_workflows = []
     installed_tools = []
+    installed_commands = []
     sac_config_installed = False
 
     while True:
@@ -1056,8 +1120,23 @@ def main():
                 if install_tool(t, project_path):
                     installed_tools.append(t["name"])
 
-        # ─── [5] TEAM DEV SAC ─────────────────────────────────
+        # ─── [5] COMMANDS ──────────────────────────────────────
         elif choice == "5":
+            if not commands:
+                print_warning("No se encontraron commands")
+                continue
+
+            selected = show_commands_menu(commands)
+            if selected is None:
+                continue
+
+            print(f"\n  Instalando commands...")
+            for c in selected:
+                if install_command(c, project_path):
+                    installed_commands.append(c["name"])
+
+        # ─── [6] TEAM DEV SAC ─────────────────────────────────
+        elif choice == "6":
             sac_skills_list = [s for s in skills if s["is_sac"]]
 
             print(f"\n╔══════════════════════════════════════════════════════════╗")
@@ -1079,8 +1158,8 @@ def main():
                 if install_skill(s, project_path, skills_target):
                     installed_skills.append(s["name"])
 
-        # ─── [6] KIT COMPLETO ─────────────────────────────────
-        elif choice == "6":
+        # ─── [7] KIT COMPLETO ─────────────────────────────────
+        elif choice == "7":
             print(f"\n╔══════════════════════════════════════════════════════════╗")
             print(f"║              KIT COMPLETO — ia-dev-toolkit                ║")
             print(f"╚══════════════════════════════════════════════════════════╝")
@@ -1090,6 +1169,7 @@ def main():
             print(f"    → {len(skills)} skills")
             print(f"    → {len(workflows)} workflows")
             print(f"    → {len(tools)} tools")
+            print(f"    → {len(commands)} commands")
             print(f"    → Configuración .SAC/")
 
             confirm = input("\n  ¿Continuar con la instalación completa? (s/N): ").strip().lower()
@@ -1126,8 +1206,14 @@ def main():
                 if install_workflow(wf, project_path, root_dir):
                     installed_workflows.append(wf["name"])
 
-        # ─── [7] ALMA (PERSONALIDAD) ──────────────────────────
-        elif choice == "7":
+            # Instalar commands
+            print(f"\n  Instalando commands...")
+            for c in commands:
+                if install_command(c, project_path):
+                    installed_commands.append(c["name"])
+
+        # ─── [8] ALMA (PERSONALIDAD) ──────────────────────────
+        elif choice == "8":
             install_alma(project_path, root_dir)
 
         else:
