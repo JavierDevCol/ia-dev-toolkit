@@ -38,7 +38,9 @@ try {
     Invoke-WebRequest -Uri $url -OutFile $tgz -UseBasicParsing
     tar -xzf $tgz -C $tmp
 
-    $src = Join-Path $tmp "$Repo-$Ref\$CliDir"
+    # La carpeta raiz extraida se descubre (robusto ante refs con '/')
+    $root = Get-ChildItem -Path $tmp -Directory | Select-Object -First 1
+    $src = Join-Path $root.FullName $CliDir
     if (-not (Test-Path (Join-Path $src "diat"))) {
         Write-Err "No se encontro el CLI en el repo ($CliDir)."; exit 1
     }

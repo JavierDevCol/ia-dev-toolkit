@@ -53,7 +53,9 @@ else
     wget -qO- "$URL" | tar -xz -C "$TMP"
 fi
 
-SRC="$TMP/$REPO-$REF/$CLI_DIR"
+# La carpeta raíz extraída se descubre (robusto ante refs con '/')
+ROOT="$(find "$TMP" -mindepth 1 -maxdepth 1 -type d | head -1)"
+SRC="$ROOT/$CLI_DIR"
 if [ ! -f "$SRC/diat" ]; then
     echo -e "${RED}❌ No se encontró el CLI en el repo ($CLI_DIR).${NC}"
     exit 1
