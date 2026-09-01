@@ -1,0 +1,111 @@
+================================================================================
+          PLAN DE MEJORAS Y OPTIMIZACIÓN DEL WORKFLOW AGIL DE PO
+                  (gestionar-backlog-roadmap.md)
+================================================================================
+
+1. OBJETIVO
+--------------------------------------------------------------------------------
+Estructurar, corregir y elevar el nivel del workflow actual de Product Owner 
+`gestionar-backlog-roadmap`, corrigiendo fallos de inconsistencia observados en 
+la ejecución real (IDs, archivos huérfanos, monolitos de Enablers) y añadiendo 
+reglas técnicas avanzadas de gobernanza, trazabilidad y capacidad.
+
+
+2. CORRECCIONES CRÍTICAS DE ESTRUCTURA E IDENTIDAD
+--------------------------------------------------------------------------------
+A) Estandarización Estricta de Nomenclatura (Evitar Duplicados en Delta Sync):
+   - Queda estrictamente prohibido usar alias o prefijos no estandarizados como 
+     `ENA-0-01` o `ENA-XX`.
+   - Se debe forzar el estándar único global: `STORY-ENABLER-XX` para historias 
+     técnicas y `EPIC-ENABLER-XX` para épicas técnicas.
+   - Justificación: Los prefijos inconsistentes rompen la trazabilidad de la 
+     sincronización incremental (Delta Sync), haciendo que el algoritmo cree 
+     duplicados en ejecuciones posteriores.
+
+B) Modularización de Épicas Enablers por Dominio Técnico:
+   - Eliminar la generación de un único archivo monolítico `EPIC-ENABLER-01.md` 
+     que agrupe todos los Enablers del proyecto.
+   - Descomponer en múltiples épicas técnicas organizadas por su dominio técnico:
+     * `EPIC-ENABLER-01-DevOps.md` (IaC, FinOps, Pipelines CI/CD, Regiones AWS).
+     * `EPIC-ENABLER-02-Arquitectura.md` (Monorepo, Scaffold de microservicios, OpenAPI).
+   - Justificación: Permite asignar la responsabilidad técnica de forma clara a 
+     diferentes roles (DevOps Engineer vs. Software Architect).
+
+C) Declaración Formal de Artefactos de Salida en Frontmatter (`output_config`):
+   - Cualquier archivo generado en la raíz de `./artifacts/` (como 
+     `auditoria_well_architected.md` o el reporte delta) DEBE estar explícitamente 
+     declarado en el mapa `output_config` del `workflow.md`.
+   - Ejemplo de configuración requerida:
+     ```yaml
+     output_config:
+       base_dir: "./artifacts"
+       summary_file: "${base_dir}/backlog_roadmap.md"
+       delta_file: "${base_dir}/DELTA_CHANGELOG.md"
+       audit_file: "${base_dir}/auditoria_well_architected.md"
+       enablers_dir: "${base_dir}/HU/enablers"
+       epics_dir: "${base_dir}/HU/epics"
+       matrix_file: "${base_dir}/HU/dependencies_matrix.md"
+     ```
+
+
+3. MEJORAS EN EL PROCESO Y REGLAS DE NEGOCIO (FASES 1 - 4)
+--------------------------------------------------------------------------------
+A) Límite Estricto y Decisión Binaria para Spikes (Fase 1):
+   - Todo `SPIKE-ENABLER` debe tener un Timebox estricto no negociable (máximo 8h a 16h).
+   - Al finalizar el Spike, se exige un resultado binario obligatorio:
+     * Viable   -> Generar `STORY-ENABLER-XX` con alcance definitivo.
+     * No Viable -> Registrar ADR de rechazo y pivotar arquitectura.
+
+B) Granularidad de Recálculo WSJF (Fase 3):
+   - Para evitar sobrecarga burocrática cuando el backlog crezca a cientos de ítems, 
+     el recálculo matemático de WSJF solo se aplicará al "Top Horizon" (los 15-20 ítems 
+     superiores en estado `READY` o `BLOCKED`, o los correspondientes a los próximos 
+     2 a 3 Sprints).
+   - El backlog profundo (iceberg) mantendrá estimaciones gruesas sin recálculo continuo.
+
+C) Detección de Bloqueos Transitivos Multi-nivel (Fase 3):
+   - La regla anti-bloqueo no debe evaluarse únicamente como directa ($N-1$ vs $N$).
+   - Si existe una cadena de dependencias en profundidad (ej. `Enabler A` -> `Enabler B` 
+     -> `HU 01`), el flujo debe secuenciar automáticamente en roadmap:
+     * Sprint N   : `Enabler A`
+     * Sprint N+1 : `Enabler B`
+     * Sprint N+2 : `HU 01`
+
+D) Definición de Límite de WIP por Sprint (Fase 4):
+   - Además de respetar el presupuesto de capacidad (70% Negocio / 20% Enablers / 10% Deuda), 
+     se debe fijar un Límite de Trabajo en Proceso (WIP) explícito por Sprint (ejemplo: 
+     máximo 4 a 6 Historias de Usuario / Enablers en paralelo) para evitar la 
+     multitarea y la fragmentación del equipo.
+
+
+4. REDISEÑO DE PLANTILLAS Y ARTEFACTOS DE SALIDA (OUTPUTS)
+--------------------------------------------------------------------------------
+A) `dependencies_matrix.md` (Visualización de Grafo + Detalle de Bloqueo):
+   - Debe incluir obligatoriamente un diagrama visual en bloques Mermaid (`graph TD`) 
+     que exponga visualmente las cadenas críticas de bloqueo.
+   - La tabla debe detallar el tipo de bloqueo (Infraestructura, Contrato API, Modelo de Datos) 
+     y la profundidad del nodo en el grafo.
+
+B) `backlog_roadmap.md` (Transparencia de Presupuesto de Capacidad):
+   - Cada Sprint planificado en el Roadmap debe incluir un encabezado explicativo con 
+     el balance de Story Points consumidos vs. meta:
+     * 🟢 Negocio (Meta 70%)
+     * 🟡 Enablers (Meta 20%)
+     * 🔵 Deuda / Bugs (Meta 10%)
+
+C) `EPIC-ENABLER-XX.md` (Contrato de Habilitación y DoD Técnico Riguroso):
+   - Debe incorporar una sección de "Contrato de Habilitación Arquitectónica", 
+     especificando qué consumidor de software utilizará el entregable.
+   - Criterios de Aceptación (DoD) obligatorios para Enablers:
+     * PR aprobado por Tech Lead / Arquitecto.
+     * Pruebas de integración / infraestructura (IaC) ejecutadas en verde.
+     * Pipeline de CI/CD verificado en ambiente DEV.
+     * Documentación técnica / README / ADR actualizado.
+
+D) `DELTA_CHANGELOG.md` (Nuevo Reporte de Sincronización Incremental):
+   - Archivo de salida que registrará los cambios de cada ejecución del workflow:
+     * Ítems nuevos incorporados.
+     * Ítems desbloqueados en la ejecución actual.
+     * Re-priorizaciones de WSJF debido a variaciones en costo de retraso o riesgo.
+
+================================================================================
