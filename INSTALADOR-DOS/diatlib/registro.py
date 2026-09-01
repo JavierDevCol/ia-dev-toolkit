@@ -33,12 +33,13 @@ def load_installations():
 def find_installation(project_path, installations=None):
     """Devuelve la instalación de un proyecto, o None."""
     installations = load_installations() if installations is None else installations
-    target = str(Path(project_path))
+    target = str(Path(project_path).resolve())
     return next((i for i in installations if i["project_path"] == target), None)
 
 
 def save_installation(project_path, platform_dir, selection, components, sha):
     """Guarda/actualiza una instalación con seeds (selection), resueltos y sha."""
+    project_path = str(Path(project_path).resolve())   # normaliza (symlinks, relativas)
     installations = load_installations()
 
     new_install = {

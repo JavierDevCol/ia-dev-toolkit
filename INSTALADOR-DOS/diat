@@ -260,11 +260,16 @@ def cmd_list():
 
 
 # ============================================================
-# --uninstall  (stub: pendiente de decidir alcance)
+# --uninstall  (ruta = proyecto · sin ruta = todo DIAT)
 # ============================================================
-def cmd_uninstall():
+def cmd_uninstall(argv):
+    from diatlib import desinstalar
     ui.print_banner()
-    ui.print_warning("--uninstall aún no está implementado (alcance por definir).")
+    args = [a for a in argv if not a.startswith("-")]
+    if args:
+        desinstalar.uninstall_project(Path(args[0]).resolve())
+    else:
+        desinstalar.uninstall_global()
 
 
 # ============================================================
@@ -297,7 +302,7 @@ def main():
     elif cmd in ("--list", "-l"):
         cmd_list()
     elif cmd in ("--uninstall",):
-        cmd_uninstall()
+        cmd_uninstall(rest)
     else:
         ui.print_error(f"Comando desconocido: {cmd}")
         cmd_help()

@@ -96,3 +96,53 @@ def ensure_bin_on_path():
         print("     source ~/.zshrc   (o ~/.bashrc / ~/.profile)" if os.name != "nt"
               else "     Abre una terminal nueva para que tome efecto.")
     return changed
+
+
+def remove_bin_from_path():
+    """Quita el bin del PATH (inversa de ensure_bin_on_path)."""
+    bin_dir = paths.get_bin_path()
+    if os.name == "nt":
+        _remove_path_windows(bin_dir)
+    else:
+        _remove_path_unix(bin_dir)
+
+
+def _remove_path_unix(bin_dir):
+    for rc in _rc_targets():
+        if not rc.exists():
+            continue
+        content = rc.read_text(encoding="utf-8")
+        if "# >>> diat >>>" not in content and "fish_add_path" not in content:
+            continue
+        out, skip = [], False
+        for ln in content.splitlines():
+            if ln.strip() == "# >>> diat >>>":
+                skip = True
+                continue
+            if ln.strip() == "# <<< diat <<<":
+                skip = False
+                continue
+            if skip:
+                continue
+            if ln.strip() == "# diat":
+                continue
+            if "fish_add_path" in ln and str(bin_dir) in ln:
+                continue
+            out.append(ln)
+        rc.write_text("\n".join(out).rstrip() + "\n", encoding="utf-8")
+
+
+def _remove_path_windows(bin_dir):
+    import winreg
+    bin_str = str(bin_dir)
+    key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, "Environment", 0,
+                         winreg.KEY_READ | winreg.KEY_WRITE)
+    try:
+        try:
+            current, _ = winreg.QueryValueEx(key, "Path")
+        except FileNotFoundError:
+            return
+        parts = [p for p in current.split(";") if p and p.lower() != bin_str.lower()]
+        winreg.SetValueEx(key, "Path", 0, winreg.REG_EXPAND_SZ, ";".join(parts))
+    finally:
+        winreg.CloseKey(key)
