@@ -37,7 +37,8 @@ Tras instalar, reinicia la terminal (o `source ~/.zshrc`) y ya tienes el comando
 | `diat --update [/ruta]` | Actualiza el CLI, el cache y reinstala en los proyectos registrados |
 | `diat --status [/ruta]` | Estado del sistema (sin ruta) o de un proyecto (con ruta) |
 | `diat --list` | Proyectos donde se instalaron componentes |
-| `diat --uninstall` | *(pendiente)* |
+| `diat --uninstall /ruta` | Quita todos los componentes DIAT de ese proyecto |
+| `diat --uninstall` | Desinstala DIAT por completo (CLI + cache + PATH) |
 
 ### El menú de `--install`
 Interactivo con flechas ↑/↓ y **ESPACIO** para marcar. Opciones:
