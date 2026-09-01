@@ -19,9 +19,8 @@ OWNER = "JavierDevCol"
 REPO = "ia-dev-toolkit"
 REF = "main"
 
-# Carpeta del repo donde viven los archivos del CLI. Durante el desarrollo es
-# INSTALADOR-DOS; en el cutover se renombra a INSTALACION y se actualiza aquí.
-CLI_SRC_DIR = "INSTALADOR-DOS"
+# Carpeta del repo donde viven los archivos del CLI.
+CLI_SRC_DIR = "INSTALACION"
 
 # Archivos/paquetes del CLI que se copian al bin (modelo B).
 CLI_FILES = ("diat", "diat.bat")

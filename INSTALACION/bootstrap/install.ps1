@@ -1,199 +1,81 @@
-# ============================================
-# ia-dev-toolkit — Instalador Bootstrap para Windows
-# ============================================
+# Bootstrap de DIAT (ia-dev-toolkit) para Windows.
+# Descarga el CLI y lo deja invocable como `diat`.
 #
-# Uso:
-#   irm https://github.com/JavierDevCol/ia-dev-toolkit/main/INSTALACION/bootstrap/install.ps1 | iex
+#   irm https://raw.githubusercontent.com/JavierDevCol/ia-dev-toolkit/main/INSTALACION/bootstrap/install.ps1 | iex
 #
-# O descargando primero:
-#   Invoke-WebRequest -Uri "https://github.com/JavierDevCol/ia-dev-toolkit/main/INSTALACION/bootstrap/install.ps1" -OutFile install.ps1
-#   Get-Content install.ps1
-#   .\install.ps1
-#
+$ErrorActionPreference = "Stop"
 
-# ============================================
-# CONFIGURACIÓN
-# ============================================
-$DIAT_URL = "https://raw.githubusercontent.com/JavierDevCol/ia-dev-toolkit/main/INSTALACION/diat"
-$BIN_PATH = "$env:LOCALAPPDATA\ia-dev-toolkit\bin"
+$Owner  = "JavierDevCol"
+$Repo   = "ia-dev-toolkit"
+$Ref    = "main"
+$CliDir = "INSTALACION"
 
-# ============================================
-# FUNCIONES DE UTILIDAD
-# ============================================
-function Print-Banner {
-    Write-Host ""
-    Write-Host "╔═══════════════════════════════════════════════════════════════════════════╗" -ForegroundColor Cyan
-    Write-Host "║                                                                           ║" -ForegroundColor Cyan
-    Write-Host "║   ⢠⢤⡀⠀⠀⠀⠀⢀⠏⠀⠹⣄⠀⠀⠀⠀⠀⢀⡴⠋⢳⠀⠀⠀⠀      ██████╗ ██╗ █████╗ ████████╗   ║" -ForegroundColor Cyan
-    Write-Host "║   ⡼⠀⢠⠀⠈⢣⡀⡼⠀⢠⠀⠈⢣⡀⠀⠀⡴⠋⠀⡀⠘⡆⠀⠀⠀      ██╔══██╗██║██╔══██╗╚══██╔══╝   ║" -ForegroundColor Cyan
-    Write-Host "║   ⢠⠃⠀⣼⣷⠀⠀⠙⠒⠚⠛⠛⠛⠓⠒⠦⠚⠀⢀⣴⡇⠀⡇⠀⠀      ██║  ██║██║███████║   ██║       ║" -ForegroundColor Cyan
-    Write-Host "║   ⡼⠀⠀⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠙⠃⠀⣧⠀      ██║  ██║██║██╔══██║   ██║       ║" -ForegroundColor Cyan
-    Write-Host "║  ⣀⡠⠤⢴⡷⠤⢤⡤⠤⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣹⠀      ██████╔╝██║██║  ██║   ██║       ║" -ForegroundColor Cyan
-    Write-Host "║   ⢸⡄⠙⢷⡀⠙⢦⡘⢧⣷⠚⠉⠉⠛⠒⣾⠉⠳⡄⠙⢦⡀⠈⠳⣄⠙⢾⡄  ╚═════╝ ╚═╝╚═╝  ╚═╝   ╚═╝   ║" -ForegroundColor Cyan
-    Write-Host "║   ⠸⡝⢧⡀⠙⢦⡝⠀⣠⣤⣤⠀⢹⠳⣄⠙⢦⡀⠉⠳⣄⠈⠑⢄⠈⠳⣼⠁                                ║" -ForegroundColor Cyan
-    Write-Host "║   ⠽⣄⠙⢦⡀⠙⣦⠞⠁⠀⠈⢻⠋⠀⠀⢣⡈⠳⣄⠙⢦⡀⠈⠳⣄⠀⠙⣶⣃⣀⣀⣀⣄                  ║" -ForegroundColor Cyan
-    Write-Host "║   ⣀⣀⣀⣀⣀⣀⣻⡶⣿⣦⣤⣿⣦⣤⠿⠟⠃⠀⠀⠀⠀⢸⠀⠀⠀⠀⠻⢦⣜⣷⣄⣻⣦⣀⣸⣷⠟⠃     ║" -ForegroundColor Cyan
-    Write-Host "║   ⠉⠉⠉⠉⠉⠉⢹⡁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣘⠀⠀⠀⠀⠀⠀⠈⠉⠙⠛⠛⠉⠩⢼⠒⠒⠲⠤⠤⠤║" -ForegroundColor Cyan
-    Write-Host "║   ⠀⠀⠀⠀⠀⠀⠀⠀⢳⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⠇⠀⠀⠀⠀⠀⠀⠀║" -ForegroundColor Cyan
-    Write-Host "║   ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⠢⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⠴⠃⠀⠀⠀⠀⠀⠀⠀⠀║" -ForegroundColor Cyan
-    Write-Host "║   ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠓⠢⠤⣀⣀⡀⠀⠀⠀⠀⠀⠀⠀⣀⣀⣀⡤⠤⠒⠊⠁⠀⠀⠀⠀⠀⠀⠀⠀║" -ForegroundColor Cyan
-    Write-Host "║   ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠉⠉⠉⠉⠉⠉⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀║" -ForegroundColor Cyan
-    Write-Host "║                                                                           ║" -ForegroundColor Cyan
-    Write-Host "║                         AI DEVELOPER TOOLKIT                              ║" -ForegroundColor Cyan
-    Write-Host "║                                                                           ║" -ForegroundColor Cyan
-    Write-Host "║        ┌─────────────────────────────────────────────────────────┐        ║" -ForegroundColor Cyan
-    Write-Host "║        │  Skills · Agents · Workflows · Tools · Commands         │        ║" -ForegroundColor Cyan
-    Write-Host "║        └─────────────────────────────────────────────────────────┘        ║" -ForegroundColor Cyan
-    Write-Host "║                                                                           ║" -ForegroundColor Cyan
-    Write-Host "╚═══════════════════════════════════════════════════════════════════════════╝" -ForegroundColor Cyan
-    Write-Host ""
-}
+$Bin   = Join-Path $env:LOCALAPPDATA "ia-dev-toolkit\bin"
+$Cache = Join-Path $env:LOCALAPPDATA "ia-dev-toolkit"
 
-function Print-Success {
-    param([string]$Message)
-    Write-Host "  ✅ $Message" -ForegroundColor Green
-}
+function Write-Ok($m)   { Write-Host "OK  $m" -ForegroundColor Green }
+function Write-Err($m)  { Write-Host "ERR $m" -ForegroundColor Red }
 
-function Print-Error {
-    param([string]$Message)
-    Write-Host "  ❌ $Message" -ForegroundColor Red
-}
+Write-Host ""
+Write-Host "                     AI DEVELOPER TOOLKIT" -ForegroundColor Cyan
+Write-Host "        Skills - Agents - Workflows - Tools - Commands" -ForegroundColor Cyan
+Write-Host ""
 
-function Print-Info {
-    param([string]$Message)
-    Write-Host "  ℹ️  $Message" -ForegroundColor Yellow
-}
+# 1. Requisitos
+Write-Host "Verificando requisitos previos..."
+$py = Get-Command python -ErrorAction SilentlyContinue
+if (-not $py) { $py = Get-Command python3 -ErrorAction SilentlyContinue }
+if (-not $py) { Write-Err "Python no encontrado. Instalalo y reintenta."; exit 1 }
+Write-Ok ("Python encontrado: " + (& $py.Source --version))
 
-function Print-Warning {
-    param([string]$Message)
-    Write-Host "  ⚠️  $Message" -ForegroundColor Yellow
-}
+# 2. Descargar CLI (tarball, 1 request)
+Write-Host "Instalando diat..."
+$tmp = Join-Path $env:TEMP ("diat-" + [guid]::NewGuid().ToString("N"))
+New-Item -ItemType Directory -Path $tmp -Force | Out-Null
+try {
+    $url = "https://codeload.github.com/$Owner/$Repo/tar.gz/$Ref"
+    $tgz = Join-Path $tmp "repo.tar.gz"
+    Invoke-WebRequest -Uri $url -OutFile $tgz -UseBasicParsing
+    tar -xzf $tgz -C $tmp
 
-# ============================================
-# VALIDACIONES
-# ============================================
-function Check-Prerequisites {
-    Write-Host "🔍 Verificando requisitos previos..." -ForegroundColor White
-    Write-Host ""
-
-    # Verificar Python
-    $pythonCmd = $null
-    if (Get-Command python3 -ErrorAction SilentlyContinue) {
-        $pythonCmd = "python3"
-    } elseif (Get-Command python -ErrorAction SilentlyContinue) {
-        $pythonCmd = "python"
-    } else {
-        Print-Error "Python no está instalado"
-        Print-Info "Instala Python 3.8+ desde: https://www.python.org/downloads/"
-        return $false
+    # La carpeta raiz extraida se descubre (robusto ante refs con '/')
+    $root = Get-ChildItem -Path $tmp -Directory | Select-Object -First 1
+    $src = Join-Path $root.FullName $CliDir
+    if (-not (Test-Path (Join-Path $src "diat"))) {
+        Write-Err "No se encontro el CLI en el repo ($CliDir)."; exit 1
     }
 
-    $pythonVersion = & $pythonCmd --version 2>&1
-    Print-Success "Python encontrado: $pythonVersion"
-
-    Write-Host ""
-    return $true
+    New-Item -ItemType Directory -Path $Bin -Force | Out-Null
+    Copy-Item (Join-Path $src "diat")     (Join-Path $Bin "diat")     -Force
+    Copy-Item (Join-Path $src "diat.bat") (Join-Path $Bin "diat.bat") -Force
+    $pkgDst = Join-Path $Bin "diatlib"
+    if (Test-Path $pkgDst) { Remove-Item $pkgDst -Recurse -Force }
+    Copy-Item (Join-Path $src "diatlib") $pkgDst -Recurse -Force
+    Write-Ok "diat instalado"
+}
+finally {
+    Remove-Item $tmp -Recurse -Force -ErrorAction SilentlyContinue
 }
 
-# ============================================
-# INSTALACIÓN
-# ============================================
-function Install-Diat {
-    Write-Host "📦 Instalando diat..." -ForegroundColor White
-    Write-Host ""
-
-    # Crear directorio
-    Print-Info "Creando directorio $BIN_PATH..."
-    New-Item -ItemType Directory -Force -Path $BIN_PATH | Out-Null
-    Print-Success "Directorio creado: $BIN_PATH"
-
-    # Descargar diat
-    Print-Info "Descargando diat desde GitHub..."
-    try {
-        Invoke-WebRequest -Uri $DIAT_URL -OutFile "$BIN_PATH\diat" -ErrorAction Stop
-        Print-Success "diat descargado en $BIN_PATH\diat"
-    } catch {
-        Print-Error "Error al descargar diat"
-        Print-Info "Verifica tu conexión a internet"
-        return $false
-    }
-
-    # Crear wrapper .bat
-    Print-Info "Creando comando diat.bat..."
-    $diatBat = "$BIN_PATH\diat.bat"
-
-    @'
-@echo off
-set PYTHON_CMD=python3
-where python3 >nul 2>&1 || set PYTHON_CMD=python
-
-set DIAT_PATH=%LOCALAPPDATA%\ia-dev-toolkit\bin\diat
-
-if exist "%DIAT_PATH%" (
-    %PYTHON_CMD% "%DIAT_PATH%" %*
-) else (
-    echo ❌ Error: No se encontró diat
-    echo    Ejecuta el script de instalación nuevamente
-    exit /b 1
-)
-'@ | Out-File -FilePath $diatBat -Encoding ASCII
-
-    Print-Success "Comando diat.bat creado en $BIN_PATH"
-
-    # Agregar al PATH si no está
-    Print-Info "Verificando PATH..."
-    $currentPath = [Environment]::GetEnvironmentVariable("Path", "User")
-
-    if ($currentPath -notlike "*$BIN_PATH*") {
-        [Environment]::SetEnvironmentVariable("Path", "$BIN_PATH;$currentPath", "User")
-        $env:Path = "$BIN_PATH;$env:Path"
-        Print-Success "PATH actualizado"
-    } else {
-        Print-Info "PATH ya contiene el directorio"
-    }
-
-    Write-Host ""
-    return $true
+# 3. Garantizar PATH (usuario; idempotente)
+Write-Host "Verificando PATH..."
+$userPath = [Environment]::GetEnvironmentVariable("Path", "User")
+if ($null -eq $userPath) { $userPath = "" }
+$parts = $userPath.Split(';') | Where-Object { $_ -ne "" }
+if ($parts -notcontains $Bin) {
+    $new = ($parts + $Bin) -join ';'
+    [Environment]::SetEnvironmentVariable("Path", $new, "User")
+    Write-Ok "PATH configurado"
+} else {
+    Write-Ok "PATH ya configurado"
 }
 
-# ============================================
-# RESUMEN FINAL
-# ============================================
-function Print-Summary {
-    Write-Host ""
-    Write-Host "╔═══════════════════════════════════════════════════════════════╗" -ForegroundColor Green
-    Write-Host "║                                                               ║" -ForegroundColor Green
-    Write-Host "║   ✅ IA DEV TOOLKIT INSTALADO CORRECTAMENTE                   ║" -ForegroundColor Green
-    Write-Host "║                                                               ║" -ForegroundColor Green
-    Write-Host "╚═══════════════════════════════════════════════════════════════╝" -ForegroundColor Green
-    Write-Host ""
-    Write-Host "   📍 Ubicación:  $BIN_PATH\diat" -ForegroundColor White
-    Write-Host ""
-    Write-Host "   🚀 Comandos disponibles:" -ForegroundColor Cyan
-    Write-Host ""
-    Write-Host "      diat                     Ver comandos disponibles"
-    Write-Host "      diat --install            Instalar componentes"
-    Write-Host "      diat --help               Ver ayuda"
-    Write-Host ""
-    Write-Host "   ⚠️  IMPORTANTE: Reinicia la terminal para usar el comando 'diat'" -ForegroundColor Yellow
-    Write-Host ""
-}
-
-# ============================================
-# EJECUCIÓN PRINCIPAL
-# ============================================
-Print-Banner
-
-if (-not (Check-Prerequisites)) {
-    Write-Host ""
-    Print-Error "No se cumplen los requisitos previos. Instalación cancelada."
-    exit 1
-}
-
-if (-not (Install-Diat)) {
-    Write-Host ""
-    Print-Error "La instalación falló."
-    exit 1
-}
-
-Print-Summary
+Write-Host ""
+Write-Host "======================================================" -ForegroundColor Green
+Write-Host "  DIAT - IA DEV TOOLKIT INSTALADO CORRECTAMENTE" -ForegroundColor Green
+Write-Host "======================================================" -ForegroundColor Green
+Write-Host ""
+Write-Host "Comandos: diat | diat --install | diat --help"
+Write-Host ""
+Write-Host "IMPORTANTE: abre una terminal nueva para que tome efecto." -ForegroundColor Yellow
+Write-Host ""

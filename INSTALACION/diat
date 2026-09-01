@@ -1,1069 +1,312 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-╔═══════════════════════════════════════════════════════════════╗
-║                    diat — IA Dev Toolkit CLI                  ║
-║   Comando principal para gestionar skills, agents, workflows  ║
-╚═══════════════════════════════════════════════════════════════╝
+"""diat — CLI del instalador modular ia-dev-toolkit (DIAT).
 
 Uso:
-    diat                          # Modo interactivo (instalar)
-    diat "/ruta/proyecto"         # Instalar en proyecto específico
-    diat --help                   # Mostrar ayuda
-    diat --list                   # Listar componentes disponibles
-    diat --version                # Mostrar versión actual
-    diat --update                 # Actualizar toolkit
-    diat --check                  # Verificar requisitos del sistema
-    diat --status "/ruta"         # Mostrar estado de instalación
-    diat --no-update-check        # No verificar actualizaciones
+    diat                      Ver comandos disponibles
+    diat --help   / --h       Ayuda detallada
+    diat --version / --v      Versión actual
+    diat --install [/ruta]    Instalar componentes (proyecto o global)
+    diat --update  [/ruta]    Actualizar componentes
+    diat --status  [/ruta]    Estado del sistema o de un proyecto
+    diat --list               Proyectos con componentes instalados
+    diat --uninstall          Desinstalar
 """
 
 import os
 import sys
-import subprocess
-import platform
 from pathlib import Path
 
-# ============================================
-# CONFIGURACIÓN
-# ============================================
-TOOLKIT_NAME = "ia-dev-toolkit"
-UPDATE_CHECK_INTERVAL = 86400  # 24 horas en segundos
-
-# ============================================
-# FUNCIONES DE ACTUALIZACIÓN AUTOMÁTICA
-# ============================================
-
-def get_installed_version_file():
-    """Obtener ruta del archivo que guarda la versión instalada."""
-    return Path.home() / ".local" / "share" / TOOLKIT_NAME / ".installed_version"
-
-
-def get_installed_version():
-    """Obtener versión instalada desde archivo local."""
-    version_file = get_installed_version_file()
-    if version_file.exists():
-        return version_file.read_text().strip()
-    # Si no hay archivo, la versión instalada es la remota (recién instalado)
-    return get_remote_version() or "0.0.0"
-
-
-def save_installed_version(version):
-    """Guardar versión instalada en archivo local."""
-    version_file = get_installed_version_file()
-    version_file.parent.mkdir(parents=True, exist_ok=True)
-    version_file.write_text(version)
-
-
-def get_update_check_file():
-    """Obtener ruta del archivo de timestamp de verificación."""
-    return Path.home() / ".local" / "share" / TOOLKIT_NAME / ".last_update_check"
-
-
-def should_check_for_updates():
-    """Verificar si es hora de comprobar actualizaciones."""
-    check_file = get_update_check_file()
-    if not check_file.exists():
-        return True
-
-    try:
-        import time
-        last_check = float(check_file.read_text().strip())
-        return (time.time() - last_check) > UPDATE_CHECK_INTERVAL
-    except Exception:
-        return True
-
-
-def save_update_check_timestamp():
-    """Guardar timestamp de la última verificación."""
-    import time
-    check_file = get_update_check_file()
-    check_file.parent.mkdir(parents=True, exist_ok=True)
-    check_file.write_text(str(time.time()))
-
-
-def get_remote_version():
-    """Obtener versión remota desde GitHub API."""
-    try:
-        import urllib.request
-        import json
-
-        url = "https://api.github.com/repos/JavierDevCol/ia-dev-toolkit/tags"
-        req = urllib.request.Request(url, headers={"User-Agent": "diat-cli"})
-        response = urllib.request.urlopen(req, timeout=5)
-        tags = json.loads(response.read())
-
-        if tags:
-            return tags[0]["name"].lstrip("v")
-    except Exception:
-        pass
-    return None
-
-
-def compare_versions(local, remote):
-    """Comparar versiones semánticas. Retorna: 1 si remote > local, 0 si iguales, -1 si local > remote."""
-    try:
-        local_parts = [int(x) for x in local.split(".")]
-        remote_parts = [int(x) for x in remote.split(".")]
-
-        for l, r in zip(local_parts, remote_parts):
-            if r > l:
-                return 1
-            elif l > r:
-                return -1
-
-        if len(remote_parts) > len(local_parts):
-            return 1
-        elif len(local_parts) > len(remote_parts):
-            return -1
-
-        return 0
-    except Exception:
-        return 0
-
-
-def check_for_updates(silent=False):
-    """Verificar si hay actualizaciones disponibles."""
-    if "--no-update-check" in sys.argv:
-        return
-
-    if not should_check_for_updates():
-        return
-
-    if not silent:
-        print("🔍 Verificando actualizaciones...")
-
-    remote_version = get_remote_version()
-    save_update_check_timestamp()
-
-    if not remote_version:
-        if not silent:
-            print("  ⚠️  No se pudo verificar versión remota")
-        return
-
-    installed_version = get_installed_version()
-    comparison = compare_versions(installed_version, remote_version)
-
-    if comparison == 1:
-        print(f"\n  🆕 Nueva versión disponible: {remote_version} (actual: {installed_version})")
-        print(f"  📥 Ejecuta 'diat --update' para actualizar\n")
-    elif not silent:
-        print(f"  ✅ Versión actual: {installed_version} (última disponible)")
-
-
-def auto_update():
-    """Actualizar automáticamente diat sin interacción del usuario."""
-    remote_version = get_remote_version()
-    if not remote_version:
-        return False
-
-    installed_version = get_installed_version()
-    comparison = compare_versions(installed_version, remote_version)
-    if comparison != 1:
-        return False
-
-    print(f"🔄 Auto-actualizando de {installed_version} a {remote_version}...")
-
-    diat_path = Path(__file__).resolve()
-    diat_url = "https://raw.githubusercontent.com/JavierDevCol/ia-dev-toolkit/main/INSTALACION/diat"
-
-    try:
-        import urllib.request
-
-        # Descargar nueva versión
-        req = urllib.request.Request(diat_url, headers={"User-Agent": "diat-cli"})
-        response = urllib.request.urlopen(req, timeout=30)
-        new_diat = response.read()
-
-        # Guardar backup
-        backup_path = diat_path.with_suffix(".bak")
-        backup_path.write_bytes(diat_path.read_bytes())
-
-        # Actualizar
-        diat_path.write_bytes(new_diat)
-        diat_path.chmod(0o755)
-
-        # Guardar versión instalada
-        save_installed_version(remote_version)
-        print(f"✅ diat actualizado a v{remote_version}")
-        return True
-    except Exception as e:
-        print(f"⚠️  Error al auto-actualizar: {e}")
-        return False
-
-# ============================================
-# FUNCIONES DE UTILIDAD
-# ============================================
-
-def print_banner():
-    print("""
-╔═══════════════════════════════════════════════════════════════════════════╗
-║                                                                           ║
-║   ⢠⢤⡀⠀⠀⠀⠀⢀⠏⠀⠹⣄⠀⠀⠀⠀⠀⢀⡴⠋⢳⠀⠀⠀⠀      ██████╗ ██╗ █████╗ ████████╗   ║
-║   ⡼⠀⢠⠀⠈⢣⡀⡼⠀⢠⠀⠈⢣⡀⠀⠀⡴⠋⠀⡀⠘⡆⠀⠀⠀      ██╔══██╗██║██╔══██╗╚══██╔══╝   ║
-║   ⢠⠃⠀⣼⣷⠀⠀⠙⠒⠚⠛⠛⠛⠓⠒⠦⠚⠀⢀⣴⡇⠀⡇⠀⠀      ██║  ██║██║███████║   ██║       ║
-║   ⡼⠀⠀⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠙⠃⠀⣧⠀      ██║  ██║██║██╔══██║   ██║       ║
-║  ⣀⡠⠤⢴⡷⠤⢤⡤⠤⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣹⠀      ██████╔╝██║██║  ██║   ██║       ║
-║   ⢸⡄⠙⢷⡀⠙⢦⡘⢧⣷⠚⠉⠉⠛⠒⣾⠉⠳⡄⠙⢦⡀⠈⠳⣄⠙⢾⡄  ╚═════╝ ╚═╝╚═╝  ╚═╝   ╚═╝   ║
-║   ⠸⡝⢧⡀⠙⢦⡝⠀⣠⣤⣤⠀⢹⠳⣄⠙⢦⡀⠉⠳⣄⠈⠑⢄⠈⠳⣼⠁                                ║
-║   ⠽⣄⠙⢦⡀⠙⣦⠞⠁⠀⠈⢻⠋⠀⠀⢣⡈⠳⣄⠙⢦⡀⠈⠳⣄⠀⠙⣶⣃⣀⣀⣀⣄                  ║
-║   ⣀⣀⣀⣀⣀⣀⣻⡶⣿⣦⣤⣿⣦⣤⠿⠟⠃⠀⠀⠀⠀⢸⠀⠀⠀⠀⠻⢦⣜⣷⣄⣻⣦⣀⣸⣷⠟⠃     ║
-║   ⠉⠉⠉⠉⠉⠉⢹⡁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣘⠀⠀⠀⠀⠀⠀⠈⠉⠙⠛⠛⠉⠩⢼⠒⠒⠲⠤⠤⠤║
-║   ⠀⠀⠀⠀⠀⠀⠀⠀⢳⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⠇⠀⠀⠀⠀⠀⠀⠀║
-║   ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⠢⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⠴⠃⠀⠀⠀⠀⠀⠀⠀⠀║
-║   ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠓⠢⠤⣀⣀⡀⠀⠀⠀⠀⠀⠀⠀⣀⣀⣀⡤⠤⠒⠊⠁⠀⠀⠀⠀⠀⠀⠀⠀║
-║   ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠉⠉⠉⠉⠉⠉⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀║
-║                                                                           ║
-║                         AI DEVELOPER TOOLKIT                              ║
-║                                                                           ║
-║        ┌─────────────────────────────────────────────────────────┐        ║
-║        │  Skills · Agents · Workflows · Tools · Commands         │        ║
-║        └─────────────────────────────────────────────────────────┘        ║
-║                                                                           ║
-╚═══════════════════════════════════════════════════════════════════════════╝
-    """)
-
-
-def print_help():
-    print(f"""
-📖 USO:
-    diat [RUTA]              Instalar en proyecto específico
-    diat                     Mostrar comandos disponibles
-    diat --help              Mostrar esta ayuda
-    diat --list              Listar componentes disponibles
-    diat --version           Mostrar versión actual
-    diat --update            Actualizar toolkit
-    diat --check             Verificar requisitos del sistema
-    diat --status [RUTA]     Mostrar estado de instalación
-    diat --install [RUTA]    Instalar componentes en proyecto
-    diat --alma [RUTA]       Instalar personalidad del agente
-    diat --uninstall         Desinstalar ia-dev-toolkit
-    diat --non-interactive   Modo no interactivo para CI/CD
-    diat --no-update-check   No verificar actualizaciones automáticamente
-
-📍 EJEMPLOS:
-    diat --install                    # Instalar en ruta actual
-    diat --install /home/user/proy    # Instalar en ruta específica
-    diat --non-interactive --install  # Instalar sin interacción (CI/CD)
-    diat --list                       # Listar componentes
-    diat --status /home/user/proy     # Ver estado
-
-📦 COMPONENTES:
-    Skills      — Capacidades de IA para tareas específicas
-    Agents      — Agentes especializados (PO, Arquitecto, Dev)
-    Workflows   — Flujos de trabajo estructurados
-    Tools       — Herramientas auxiliares
-    Config      — Configuración SAC del proyecto
-    """)
-
-
-def get_version():
-    """Obtener versión desde Git Tags (GitHub API). Fallback a hardcodeado."""
-    try:
-        import urllib.request
-        import json
-
-        url = "https://api.github.com/repos/JavierDevCol/ia-dev-toolkit/tags"
-        req = urllib.request.Request(url, headers={"User-Agent": "diat-cli"})
-        response = urllib.request.urlopen(req, timeout=5)
-        tags = json.loads(response.read())
-
-        if tags:
-            return tags[0]["name"].lstrip("v")
-    except Exception:
-        pass
-
-    return VERSION
-
-
-def print_version():
-    version = get_installed_version()
-    print(f"diat v{version} ({TOOLKIT_NAME})")
-
-
-def get_script_directory():
-    return Path(__file__).parent.absolute()
-
-
-def get_root_directory():
-    return get_script_directory().parent
-
-
-def get_temp_repo_path():
-    if platform.system() == "Windows":
-        local_app_data = os.environ.get("LOCALAPPDATA")
-        if local_app_data:
-            return Path(local_app_data) / "ia-dev-toolkit"
-        return Path.home() / "AppData" / "Local" / "ia-dev-toolkit"
-    return Path.home() / ".local" / "share" / "ia-dev-toolkit"
-
-
-def get_installations_file():
-    """Obtener ruta del archivo de instalaciones."""
-    return get_temp_repo_path() / "instalacion.json"
-
-
-def load_installations():
-    """Cargar instalaciones desde JSON."""
-    import json
-    installations_file = get_installations_file()
-    if not installations_file.exists():
-        return []
-    try:
-        data = json.loads(installations_file.read_text(encoding="utf-8"))
-        return data.get("installations", [])
-    except Exception:
-        return []
-
-
-def save_installation(project_path, platform_dir, components):
-    """Guardar una instalación en el JSON."""
-    import json
-    from datetime import datetime
-
-    installations_file = get_installations_file()
-    installations_file.parent.mkdir(parents=True, exist_ok=True)
-
-    installations = load_installations()
-
-    existing_idx = None
-    for i, inst in enumerate(installations):
-        if inst["project_path"] == str(project_path):
-            existing_idx = i
-            break
-
-    new_install = {
-        "project_path": str(project_path),
-        "platform": platform_dir,
-        "installed_at": datetime.now().isoformat(),
-        "components": components
-    }
-
-    if existing_idx is not None:
-        installations[existing_idx] = new_install
-    else:
-        installations.append(new_install)
-
-    data = {
-        "version": get_installed_version(),
-        "last_update": datetime.now().isoformat(),
-        "installations": installations
-    }
-    installations_file.write_text(json.dumps(data, indent=2), encoding="utf-8")
-
-
-def update_installations_version(version):
-    """Actualizar versión en todas las instalaciones."""
-    import json
-    from datetime import datetime
-
-    installations_file = get_installations_file()
-    if not installations_file.exists():
-        return
-
-    try:
-        data = json.loads(installations_file.read_text(encoding="utf-8"))
-        data["version"] = version
-        data["last_update"] = datetime.now().isoformat()
-        installations_file.write_text(json.dumps(data, indent=2), encoding="utf-8")
-    except Exception:
-        pass
-
-
-def reinstall_components(installation, cache_path):
-    """Reinstalar componentes desde cache al proyecto."""
-    import shutil
-    project_path = Path(installation["project_path"])
-    platform_dir = installation.get("platform", ".opencode")
-    components = installation.get("components", {})
-
-    if not project_path.exists():
-        print(f"  ⚠️  Proyecto no encontrado: {project_path}")
-        return False
-
-    installed = {"tools": 0, "commands": 0, "skills": 0}
-
-    # Tools
-    cache_tools = cache_path / "tools"
-    project_tools = project_path / platform_dir / "tools"
-    if cache_tools.exists():
-        project_tools.mkdir(parents=True, exist_ok=True)
-        for item in cache_tools.iterdir():
-            if item.is_file() and item.suffix in (".ts", ".js", ".py", ".sh"):
-                dst = project_tools / item.name
-                if not dst.exists():
-                    shutil.copy2(item, dst)
-                    installed["tools"] += 1
-            elif item.is_dir() and item.name == "scripts":
-                scripts_dst = project_tools / "scripts"
-                scripts_dst.mkdir(exist_ok=True)
-                for script in item.iterdir():
-                    if script.is_file() and script.suffix in (".ts", ".js", ".py", ".sh"):
-                        dst = scripts_dst / script.name
-                        if not dst.exists():
-                            shutil.copy2(script, dst)
-                            installed["tools"] += 1
-
-    # Commands
-    cache_commands = cache_path / "commands"
-    project_commands = project_path / platform_dir / "commands"
-    if cache_commands.exists():
-        project_commands.mkdir(parents=True, exist_ok=True)
-        for item in cache_commands.iterdir():
-            if item.is_file() and item.suffix == ".md":
-                dst = project_commands / item.name
-                if not dst.exists():
-                    shutil.copy2(item, dst)
-                    installed["commands"] += 1
-
-    # Skills (symlinks)
-    cache_skills = cache_path / "skills"
-    project_skills = project_path / platform_dir / "skills"
-    if cache_skills.exists() and project_skills.exists():
-        for item in cache_skills.iterdir():
-            if item.is_dir():
-                dst = project_skills / item.name
-                if not dst.exists():
-                    dst.symlink_to(item)
-                    installed["skills"] += 1
-
-    total = sum(installed.values())
-    if total > 0:
-        print(f"  ✅ Instalados: {installed['tools']} tools, {installed['commands']} commands, {installed['skills']} skills")
-    else:
-        print(f"  ✅ Todos los componentes están actualizados")
-
-    return True
-
-
-def ensure_instalar():
-    """Asegurar que instalar.py existe localmente, descargar si no."""
-    script_dir = get_script_directory()
-    instalar_path = script_dir / "instalar.py"
-
-    # Siempre descargar desde GitHub para obtener la versión más reciente
-    print("📥 Descargando instalar.py...")
-    import urllib.request
-
-    instalar_url = "https://raw.githubusercontent.com/JavierDevCol/ia-dev-toolkit/main/INSTALACION/instalar.py"
-
-    try:
-        # Crear directorio si no existe
-        script_dir.mkdir(parents=True, exist_ok=True)
-
-        # Descargar
-        req = urllib.request.Request(instalar_url, headers={"User-Agent": "diat-cli"})
-        response = urllib.request.urlopen(req, timeout=30)
-        content = response.read()
-
-        # Guardar
-        instalar_path.write_bytes(content)
-        print("✅ instalar.py descargado")
-        return str(script_dir)
-    except Exception as e:
-        print(f"❌ Error al descargar instalar.py: {e}")
-
-        # Fallback: usar versión local si existe
-        if instalar_path.exists():
-            print("⚠️  Usando versión local de instalar.py")
-            return str(script_dir)
+# Hacer importable el paquete diatlib (está junto a este script, en el bin)
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from diatlib import __version__
+from diatlib import paths, github, deps, registro, instalar, update, entorno
+from diatlib import menu
+from diatlib import ui
+
+PLATFORM_DEFAULT = ".opencode"
+SAC_SKILLS = ["analizar-calidad-codigo", "ejecutar-plan", "init-reglas-arquitectonicas",
+              "planificar-hu", "refinar-hu", "registrar-hallazgo"]
+
+
+# ============================================================
+# CACHE
+# ============================================================
+def ensure_cache():
+    """Garantiza que el cache tenga componentes actualizados. Devuelve la ruta o None."""
+    remote_sha = github.get_remote_sha()
+    cache = paths.get_cache_dir()
+    have = (cache / "skills").exists()
+    if remote_sha and (registro.get_installed_sha() != remote_sha or not have):
+        ui.print_info("Descargando componentes...")
+        try:
+            cache = github.download_and_stage()
+        except github.DownloadError as e:
+            ui.print_error(str(e))
+            return None
+        registro.save_installed_sha(remote_sha)
+    elif not have:
+        ui.print_error("No hay componentes en cache y no hay conexión.")
         return None
+    return cache
 
 
-# ============================================
-# COMANDOS
-# ============================================
-
-def cmd_list():
-    """Listar todos los componentes disponibles."""
-    root_dir = get_root_directory()
-
-    # Si no hay repo local, usar cache
-    if not (root_dir / "skills").exists():
-        root_dir = get_temp_repo_path()
-        if not root_dir.exists():
-            print("❌ No se encontró el toolkit. Ejecuta `diat --update` primero.")
-            return
-
-    print(f"\n{'═' * 70}")
-    print(f"  📦 COMPONENTES DISPONIBLES")
-    print(f"{'═' * 70}")
-
-    # Skills
-    skills_dir = root_dir / "skills"
-    if skills_dir.exists():
-        skills = [d.name for d in skills_dir.iterdir() if d.is_dir() and (d / "SKILL.md").exists()]
-        print(f"\n  🔧 SKILLS ({len(skills)}):")
-        for s in sorted(skills):
-            print(f"     → {s}")
-
-    # Agents
-    agents_dir = root_dir / "agents"
-    if agents_dir.exists():
-        agents = [f.stem for f in agents_dir.glob("*.md")]
-        print(f"\n  👤 AGENTES ({len(agents)}):")
-        for a in sorted(agents):
-            print(f"     → {a}")
-
-    # Workflows
-    workflows_dir = root_dir / "workflows"
-    if workflows_dir.exists():
-        workflows = [d.name for d in workflows_dir.iterdir() if d.is_dir() and (d / "workflow.md").exists()]
-        print(f"\n  📋 WORKFLOWS ({len(workflows)}):")
-        for w in sorted(workflows):
-            print(f"     → {w}")
-
-    # Tools
-    tools_dir = root_dir / "tools"
-    if tools_dir.exists():
-        tools = []
-        for item in tools_dir.iterdir():
-            if item.is_file() and item.suffix in (".ts", ".js", ".py", ".sh"):
-                tools.append(item.stem)
-            elif item.is_dir():
-                for script in item.glob("*"):
-                    if script.is_file() and script.suffix in (".ts", ".js", ".py", ".sh"):
-                        tools.append(script.stem)
-        print(f"\n  🛠️  TOOLS ({len(tools)}):")
-        for t in sorted(set(tools)):
-            print(f"     → {t}")
-
-    print(f"\n{'═' * 70}")
+# ============================================================
+# --install
+# ============================================================
+def _submenu_seeds(ctype, catalog):
+    names = sorted(catalog.get(ctype, []))
+    if not names:
+        ui.print_warning(f"No hay {ctype} disponibles")
+        return []
+    options = [(n, n, "") for n in names]
+    sel = menu.multiselect(f"{ctype.upper()} DISPONIBLES", options)
+    return [(ctype, n) for n in (sel or [])]
 
 
-def cmd_check():
-    """Verificar requisitos del sistema."""
-    print(f"\n{'═' * 70}")
-    print(f"  🔍 VERIFICACIÓN DE REQUISITOS")
-    print(f"{'═' * 70}\n")
-
-    checks = [
-        ("Python 3", ["python3", "--version"], ["python", "--version"]),
-        ("Git", ["git", "--version"], None),
-        ("Node.js", ["node", "--version"], None),
+def _gather_seeds(catalog):
+    """Menú principal -> devuelve (seeds, with_config)."""
+    main_options = [
+        ("skills", "Skills", "Seleccionar skills específicas"),
+        ("agents", "Agents", "Seleccionar agentes específicos"),
+        ("workflows", "Workflows", "Workflows (+ tools + commands automáticos)"),
+        ("team_sac", "Team Dev SAC", "Skills SAC + Configuración"),
+        ("kit", "Kit Completo", "Agents + Skills + Workflows + Config"),
     ]
+    choice = menu.menu_select("INSTALADOR MODULAR — ia-dev-toolkit", main_options)
+    if choice is None:
+        return [], False
 
-    all_ok = True
-    for name, cmd, alt_cmd in checks:
-        try:
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
-            if result.returncode == 0:
-                version = result.stdout.strip().split("\n")[0]
-                print(f"  ✅ {name}: {version}")
-            elif alt_cmd:
-                result = subprocess.run(alt_cmd, capture_output=True, text=True, timeout=10)
-                if result.returncode == 0:
-                    version = result.stdout.strip().split("\n")[0]
-                    print(f"  ✅ {name}: {version}")
-                else:
-                    print(f"  ❌ {name}: No encontrado")
-                    all_ok = False
-            else:
-                print(f"  ❌ {name}: No encontrado")
-                all_ok = False
-        except (subprocess.SubprocessError, FileNotFoundError):
-            print(f"  ❌ {name}: No encontrado")
-            all_ok = False
+    if choice in ("skills", "agents", "workflows"):
+        return _submenu_seeds(choice, catalog), False
 
-    # Verificar espacio en disco
-    try:
-        import shutil
-        total, used, free = shutil.disk_usage("/")
-        free_mb = free // (1024 * 1024)
-        if free_mb > 100:
-            print(f"  ✅ Espacio libre: {free_mb} MB")
-        else:
-            print(f"  ⚠️  Espacio libre: {free_mb} MB (recomendado: >100MB)")
-    except Exception:
-        print(f"  ℹ️  Espacio en disco: No verificable")
+    if choice == "team_sac":
+        seeds = [("skills", s) for s in SAC_SKILLS if s in catalog.get("skills", set())]
+        return seeds, True
 
-    print(f"\n{'═' * 70}")
-    if all_ok:
-        print(f"  ✅ Todos los requisitos básicos están cumplidos")
+    if choice == "kit":
+        print(f"\n  Se instalará TODO: "
+              f"{len(catalog.get('agents',[]))} agents, {len(catalog.get('skills',[]))} skills, "
+              f"{len(catalog.get('workflows',[]))} workflows + config")
+        if input("  ¿Continuar? (s/N): ").strip().lower() != "s":
+            return [], False
+        seeds = ([("agents", n) for n in catalog.get("agents", [])] +
+                 [("skills", n) for n in catalog.get("skills", [])] +
+                 [("workflows", n) for n in catalog.get("workflows", [])])
+        return seeds, True
+
+    return [], False
+
+
+def cmd_install(argv):
+    ui.print_banner()
+
+    # Destino: ruta explícita o instalación global por agente
+    args = [a for a in argv if not a.startswith("-")]
+    if args:
+        project = Path(args[0]).resolve()
+        platform = PLATFORM_DEFAULT
     else:
-        print(f"  ⚠️  Algunos requisitos no están cumplidos")
-    print(f"{'═' * 70}\n")
-
-
-def cmd_status(project_path=None):
-    """Mostrar estado de instalación en un proyecto."""
-    if not project_path:
-        if len(sys.argv) > 2:
-            project_path = Path(sys.argv[2])
-        else:
-            print("❌ Especifica la ruta del proyecto: diat --status /ruta/proyecto")
-            return
-
-    project_path = Path(project_path)
-    if not project_path.exists():
-        print(f"❌ La ruta no existe: {project_path}")
-        return
-
-    print(f"\n{'═' * 70}")
-    print(f"  📊 ESTADO DE INSTALACIÓN")
-    print(f"  📍 {project_path}")
-    print(f"{'═' * 70}\n")
-
-    # Detectar plataforma
-    platform_dir = None
-    for pdir in [".opencode", ".claude", ".agent"]:
-        if (project_path / pdir).exists():
-            platform_dir = pdir
-            break
-
-    if platform_dir:
-        print(f"  ✅ Plataforma: {platform_dir}")
-
-        # Skills
-        skills_path = project_path / platform_dir / "skills"
-        if skills_path.exists():
-            skills = [d.name for d in skills_path.iterdir() if d.is_symlink() or d.is_dir()]
-            print(f"\n  📦 Skills instaladas ({len(skills)}):")
-            for s in sorted(skills):
-                link = "→" if (skills_path / s).is_symlink() else " "
-                print(f"     {link} {s}")
-        else:
-            print(f"\n  📦 Skills: No instaladas")
-
-        # Agents
-        agents_path = project_path / platform_dir / "agents"
-        if agents_path.exists():
-            agents = [f.stem for f in agents_path.glob("*.md")]
-            print(f"\n  👤 Agentes instalados ({len(agents)}):")
-            for a in sorted(agents):
-                print(f"     → {a}")
-        else:
-            print(f"\n  👤 Agentes: No instalados")
-
-        # Tools
-        tools_path = project_path / platform_dir / "tools"
-        if tools_path.exists():
-            tools = [f.stem for f in tools_path.glob("*") if f.is_file()]
-            print(f"\n  🛠️  Tools instalados ({len(tools)}):")
-            for t in sorted(tools):
-                print(f"     → {t}")
-        else:
-            print(f"\n  🛠️  Tools: No instalados")
-    else:
-        print(f"  ⚠️  No se detectó plataforma (.opencode/.claude/.agent)")
-
-    # SAC Config
-    sac_path = project_path / ".SAC"
-    if sac_path.exists():
-        print(f"\n  ✅ Configuración SAC: Instalada")
-        config_files = list((sac_path / "config").glob("*.yaml")) if (sac_path / "config").exists() else []
-        print(f"     → {len(config_files)} archivos de configuración")
-
-        # Workflows
-        workflows_path = sac_path / "workflows"
-        if workflows_path.exists():
-            workflows = [d.name for d in workflows_path.iterdir() if d.is_dir()]
-            print(f"\n  📋 Workflows instalados ({len(workflows)}):")
-            for w in sorted(workflows):
-                print(f"     → {w}")
-        else:
-            print(f"\n  📋 Workflows: No instalados")
-    else:
-        print(f"\n  ⚠️  Configuración SAC: No instalada")
-
-    print(f"\n{'═' * 70}\n")
-
-
-def cmd_update():
-    """Actualizar el toolkit y reinstalar en proyectos registrados."""
-    print_banner()
-
-    # 1. Obtener versión remota
-    remote_version = get_remote_version()
-
-    # 2. Actualizar CLI diat
-    print(f"  📦 Actualizando CLI diat...")
-    diat_path = Path(__file__).resolve()
-    diat_url = "https://raw.githubusercontent.com/JavierDevCol/ia-dev-toolkit/main/INSTALACION/diat"
-
-    try:
-        import urllib.request
-        req = urllib.request.Request(diat_url, headers={"User-Agent": "diat-cli"})
-        response = urllib.request.urlopen(req, timeout=30)
-        new_diat = response.read()
-
-        backup_path = diat_path.with_suffix(".bak")
-        backup_path.write_bytes(diat_path.read_bytes())
-
-        diat_path.write_bytes(new_diat)
-        diat_path.chmod(0o755)
-        print(f"  ✅ CLI diat actualizado")
-    except Exception as e:
-        print(f"  ⚠️  No se pudo actualizar diat: {e}")
-
-    # 3. Guardar versión instalada
-    if remote_version:
-        save_installed_version(remote_version)
-        print(f"  📌 Versión instalada: {remote_version}")
-
-    # 4. Actualizar cache de componentes (SIN borrar el registro ni metadatos)
-    temp_repo_path = get_temp_repo_path()
-    if temp_repo_path.exists():
-        print(f"\n  🗑️  Eliminando cache anterior (preservando registro)...")
-        import shutil
-        for name in ("skills", "agents", "workflows", "tools", "commands", "config"):
-            comp = temp_repo_path / name
-            if comp.exists():
-                shutil.rmtree(comp)
-
-    instalar_dir = ensure_instalar()
-    if not instalar_dir:
-        print(f"\n  ❌ No se pudo obtener instalar.py")
-        return
-
-    sys.path.insert(0, instalar_dir)
-    try:
-        from instalar import download_from_github
-        result = download_from_github(temp_repo_path)
-        if result:
-            print(f"\n  ✅ Componentes descargados")
-        else:
-            print(f"\n  ❌ Error al descargar componentes")
-            return
-    except Exception as e:
-        print(f"\n  ❌ Error: {e}")
-        return
-
-    # 5. Reinstalar en proyectos registrados
-    installations = load_installations()
-
-    if not installations:
-        print(f"\n  ℹ️  No hay instalaciones registradas")
-        print(f"     Ejecuta `diat --install /ruta/proyecto` para registrar")
-    else:
-        print(f"\n  📋 Reinstalando en {len(installations)} proyecto(s) registrado(s)...")
-
-        for inst in installations:
-            project_path = Path(inst["project_path"])
-            if project_path.exists():
-                print(f"\n  📦 {project_path}...")
-                reinstall_components(inst, temp_repo_path)
-            else:
-                print(f"\n  ⚠️  Proyecto no encontrado: {project_path}")
-
-    # 6. Actualizar versión en instalacion.json
-    if remote_version:
-        update_installations_version(remote_version)
-
-    print(f"\n{'═' * 70}")
-    print(f"  ✅ ACTUALIZACIÓN COMPLETADA")
-    print(f"{'═' * 70}")
-    print(f"\n  ⚠️  Reinicia la terminal o ejecuta: diat --version\n")
-
-
-def cmd_install():
-    """Instalar componentes en un proyecto."""
-    non_interactive = "--non-interactive" in sys.argv or "-ni" in sys.argv
-
-    # Determinar ruta
-    if len(sys.argv) > 2 and not sys.argv[2].startswith("-"):
-        project_path = Path(sys.argv[2]).resolve()
-    else:
-        # Sin ruta — instalación global
-        print_banner()
-        print(f"  ⚠️  No se especificó ruta. Los componentes se instalarán")
-        print(f"     globalmente en ~/.local/share/ia-dev-toolkit/\n")
-
-        print(f"  ¿En qué agente trabajas?\n")
-        print(f"    [1] OpenCode")
-        print(f"    [2] Claude Code")
-        print(f"    [3] Gemini CLI")
-        print(f"    [4] Codex")
-        print(f"    [5] Otro\n")
-
+        ui.print_warning("Sin ruta: instalación global según el agente.")
+        print("\n    [1] OpenCode\n    [2] Claude Code\n    [3] Gemini CLI\n    [4] Codex\n")
         choice = input("  Selección: ").strip()
-
         if choice == "1":
-            project_path = Path.home() / ".opencode"
-            print(f"\n  ℹ️  OpenCode seleccionado")
-        elif choice in ["2", "3", "4", "5"]:
-            print(f"\n  ⚠️  Implementación en curso. Disculpa las molestias.")
+            project, platform = Path.home(), ".opencode"
+            ui.print_info("OpenCode seleccionado")
+        elif choice in ("2", "3", "4"):
+            ui.print_warning("Implementación en curso para ese agente.")
             return
         else:
-            print(f"  ❌ Selección inválida")
+            ui.print_error("Selección inválida")
             return
 
-    print(f"\n{'═' * 70}")
-    print(f"  📦 INSTALAR COMPONENTES")
-    print(f"  📍 Ruta: {project_path}")
-    print(f"{'═' * 70}\n")
+    cache = ensure_cache()
+    if not cache:
+        return
 
-    if not project_path.exists():
-        if non_interactive:
-            project_path.mkdir(parents=True, exist_ok=True)
-            print(f"  ✅ Directorio creado: {project_path}")
+    catalog = github.scan_components(cache)
+    try:
+        deps.validate_dependencies(catalog)
+    except deps.DependencyError as e:
+        ui.print_error(str(e))
+        return
+
+    seeds, with_config = _gather_seeds(catalog)
+    if not seeds and not with_config:
+        ui.print_info("Nada seleccionado. Cancelado.")
+        return
+
+    # Ofrecer opcionales del nivel superior
+    offered = deps.collect_optional(seeds)
+    opt_options = [(f"{t}:{n}", n, f"opcional ({t})")
+                   for t, names in offered.items() for n in names]
+    if opt_options:
+        extra = menu.multiselect("¿INSTALAR TAMBIÉN? (opcionales)", opt_options)
+        for key in (extra or []):
+            t, n = key.split(":", 1)
+            seeds.append((t, n))
+
+    selection = _seeds_to_dict(seeds, with_config)
+    installed = instalar.install_seeds(seeds, cache, project, platform, with_config=with_config)
+
+    remote_sha = registro.get_installed_sha()
+    registro.save_installation(project, platform, selection, installed, remote_sha)
+
+    ui.print_success(f"Instalado en {project / platform}")
+    print(f"     {sum(len(v) for v in installed.values() if isinstance(v, list))} componentes")
+
+
+def _seeds_to_dict(seeds, with_config):
+    d = {}
+    for t, n in seeds:
+        d.setdefault(t, [])
+        if n not in d[t]:
+            d[t].append(n)
+    if with_config:
+        d["config"] = True
+    return d
+
+
+# ============================================================
+# --status  (sistema o proyecto)
+# ============================================================
+def cmd_status(argv):
+    args = [a for a in argv if not a.startswith("-")]
+    if args:
+        _status_project(Path(args[0]).resolve())
+    else:
+        _status_system()
+
+
+def _status_system():
+    ui.print_banner()
+    print("  🔍 Estado del sistema DIAT\n")
+    print(f"  Python:  {sys.version.split()[0]}")
+    cache = paths.get_cache_dir()
+    print(f"  Cache:   {cache}  {'✅' if cache.exists() else '❌ no existe'}")
+
+    bin_dir = paths.get_bin_path()
+    if entorno.is_bin_on_path():
+        print(f"  PATH:    ✅ configurado ({bin_dir})")
+    else:
+        print(f"  PATH:    ⚠️  {bin_dir} no está en PATH — reparando...")
+        entorno.ensure_bin_on_path()
+        print(f"  PATH:    ✅ reparado")
+
+    local_sha = registro.get_installed_sha()
+    remote_sha = github.get_remote_sha()
+    if remote_sha is None:
+        print("  Repo:    ⚠️  sin conexión")
+    elif local_sha == remote_sha:
+        print(f"  Repo:    ✅ al día ({(local_sha or '?')[:7]})")
+    else:
+        print(f"  Repo:    ⚠️  hay actualización ({(local_sha or '?')[:7]} → {remote_sha[:7]})")
+    print(f"\n  Proyectos registrados: {len(registro.load_installations())}")
+
+
+def _status_project(project):
+    ui.print_banner()
+    inst = registro.find_installation(project)
+    if inst is None:
+        ui.print_info(f"{project} no tiene componentes DIAT registrados.")
+        return
+    print(f"  📦 Estado de {project}\n")
+    print(f"     Plataforma:  {inst['platform']}")
+    print(f"     Instalado:   {inst['installed_at']}")
+    local_sha, remote_sha = inst.get("sha"), github.get_remote_sha()
+    if remote_sha and local_sha == remote_sha:
+        estado = "✅ al día"
+    elif remote_sha:
+        estado = f"⚠️  desactualizado ({(local_sha or '?')[:7]} → {remote_sha[:7]})"
+    else:
+        estado = "⚠️  sin conexión"
+    print(f"     Estado:      {estado}\n")
+    comps = inst.get("components", {})
+    for ctype in ("agents", "workflows", "skills", "tools", "commands"):
+        names = comps.get(ctype, [])
+        if names:
+            print(f"     {ctype} ({len(names)}): {', '.join(names)}")
+    if comps.get("config"):
+        print("     config: ✅")
+
+
+# ============================================================
+# --list
+# ============================================================
+def cmd_list():
+    ui.print_banner()
+    installs = registro.load_installations()
+    if not installs:
+        ui.print_info("No hay instalaciones registradas.")
+        print("     Usa `diat --install /ruta/proyecto` para empezar.")
+        return
+    remote_sha = github.get_remote_sha()
+    print(f"  📋 {len(installs)} proyecto(s) con DIAT:\n")
+    for inst in installs:
+        path = inst["project_path"]
+        comps = inst.get("components", {})
+        total = sum(len(v) for v in comps.values() if isinstance(v, list))
+        if not Path(path).exists():
+            flag = "❌ no encontrado"
+        elif remote_sha and inst.get("sha") == remote_sha:
+            flag = "✅ al día"
+        elif remote_sha:
+            flag = "⚠️  desactualizado"
         else:
-            create = input(f"  La ruta no existe. ¿Crearla? (s/N): ").strip().lower()
-            if create != 's':
-                print("❌ Instalación cancelada")
-                return
-            project_path.mkdir(parents=True, exist_ok=True)
-
-    instalar_dir = ensure_instalar()
-    if not instalar_dir:
-        print("❌ No se pudo obtener instalar.py")
-        return
-
-    sys.path.insert(0, instalar_dir)
-    from instalar import main as install_main
-    sys.argv = ["instalar.py", str(project_path)]
-    install_main()
+            flag = "•"
+        print(f"  {flag}  {path}")
+        print(f"        {total} componentes · {inst['platform']} · {inst['installed_at'][:10]}")
+    print()
 
 
-def cmd_alma():
-    """Instalar personalidad del agente."""
-    # Determinar ruta
-    if len(sys.argv) > 2 and not sys.argv[2].startswith("-"):
-        project_path = Path(sys.argv[2]).resolve()
+# ============================================================
+# --uninstall  (ruta = proyecto · sin ruta = todo DIAT)
+# ============================================================
+def cmd_uninstall(argv):
+    from diatlib import desinstalar
+    ui.print_banner()
+    args = [a for a in argv if not a.startswith("-")]
+    if args:
+        desinstalar.uninstall_project(Path(args[0]).resolve())
     else:
-        project_path = Path.cwd().resolve()
-
-    print(f"\n{'═' * 70}")
-    print(f"  🧠 ALMA — Personalidad del Agente")
-    print(f"  📍 Ruta: {project_path}")
-    print(f"{'═' * 70}\n")
-
-    # Verificar que la ruta existe
-    if not project_path.exists():
-        print(f"❌ La ruta no existe: {project_path}")
-        return
-
-    # Obtener instalar.py
-    instalar_dir = ensure_instalar()
-    if not instalar_dir:
-        print("❌ No se pudo obtener instalar.py")
-        return
-
-    # Importar y ejecutar install_alma
-    sys.path.insert(0, instalar_dir)
-    from instalar import install_alma
-
-    # Determinar root_dir (donde está ALMA.md)
-    # Buscar en cache primero
-    cache_dir = get_temp_repo_path()
-    if cache_dir.exists() and (cache_dir / "ALMA.md").exists():
-        root_dir = cache_dir
-    else:
-        # Buscar en directorio del script
-        script_dir = Path(instalar_dir)
-        if (script_dir / "ALMA.md").exists():
-            root_dir = script_dir
-        elif (script_dir.parent / "ALMA.md").exists():
-            root_dir = script_dir.parent
-        else:
-            print("❌ No se encontró ALMA.md")
-            print("   Ejecuta `diat --update` primero")
-            return
-
-    install_alma(project_path, root_dir)
+        desinstalar.uninstall_global()
 
 
-def cmd_uninstall():
-    """Desinstalar ia-dev-toolkit del sistema."""
-    print(f"\n{'═' * 70}")
-    print(f"  🗑️  DESINSTALAR IA DEV TOOLKIT")
-    print(f"{'═' * 70}\n")
-
-    # Determinar rutas según plataforma
-    if platform.system() == "Windows":
-        local_app_data = os.environ.get("LOCALAPPDATA")
-        if local_app_data:
-            diat_path = Path(local_app_data) / "ia-dev-toolkit" / "bin" / "diat"
-            diat_bat = Path(local_app_data) / "ia-dev-toolkit" / "bin" / "diat.bat"
-            toolkit_home = Path(local_app_data) / "ia-dev-toolkit"
-        else:
-            print_error("No se pudo determinar LOCALAPPDATA")
-            return
-    else:
-        diat_path = Path.home() / ".local" / "bin" / "diat"
-        toolkit_home = Path.home() / ".local" / "share" / "ia-dev-toolkit"
-
-    # Mostrar qué se eliminará
-    print(f"  Se eliminarán los siguientes elementos:\n")
-
-    items_to_remove = []
-    if platform.system() == "Windows":
-        if diat_path.exists():
-            print(f"    📄 {diat_path}")
-            items_to_remove.append(diat_path)
-        if diat_bat.exists():
-            print(f"    📄 {diat_bat}")
-            items_to_remove.append(diat_bat)
-    else:
-        if diat_path.exists():
-            print(f"    📄 {diat_path}")
-            items_to_remove.append(diat_path)
-
-    if toolkit_home.exists():
-        print(f"    📁 {toolkit_home}/")
-        items_to_remove.append(toolkit_home)
-
-    if not items_to_remove:
-        print(f"    ℹ️  No se encontraron elementos para eliminar")
-        return
-
-    print(f"\n  ⚠️  Esta acción no se puede deshacer\n")
-
-    confirm = input("  ¿Continuar con la desinstalación? (s/N): ").strip().lower()
-    if confirm != 's':
-        print(f"\n  ℹ️  Desinstalación cancelada")
-        return
-
-    print(f"\n  🗑️  Desinstalando...\n")
-
-    # Eliminar elementos
-    import shutil
-    for item in items_to_remove:
-        try:
-            if item.is_file() or item.is_symlink():
-                item.unlink()
-                print_success(f"Eliminado: {item}")
-            elif item.is_dir():
-                shutil.rmtree(item)
-                print_success(f"Eliminado: {item}/")
-        except Exception as e:
-            print_error(f"Error al eliminar {item}: {e}")
-
-    # Limpiar PATH (solo en Linux/Mac)
-    if platform.system() != "Windows":
-        print(f"\n  ℹ️  Limpiando PATH en archivos de shell...")
-        for shell_rc in [Path.home() / ".bashrc", Path.home() / ".zshrc", Path.home() / ".bash_profile"]:
-            if shell_rc.exists():
-                try:
-                    content = shell_rc.read_text(encoding="utf-8")
-                    if "# ia-dev-toolkit" in content:
-                        # Crear backup
-                        backup = shell_rc.with_suffix(".bak")
-                        backup.write_text(content, encoding="utf-8")
-
-                        # Eliminar líneas
-                        lines = content.split("\n")
-                        new_lines = [line for line in lines if "# ia-dev-toolkit" not in line and 'export PATH="$HOME/.local/bin:$PATH"' not in line]
-                        shell_rc.write_text("\n".join(new_lines), encoding="utf-8")
-
-                        print_success(f"Limpiado: {shell_rc} (backup: {backup})")
-                except Exception as e:
-                    print_warning(f"No se pudo limpiar {shell_rc}: {e}")
-
-    print(f"\n{'═' * 70}")
-    print(f"  ✅ IA DEV TOOLKIT DESINSTALADO CORRECTAMENTE")
-    print(f"{'═' * 70}")
-    print(f"\n  📍 Para reinstalar:")
-    print(f"     curl -fsSL https://raw.githubusercontent.com/JavierDevCol/ia-dev-toolkit/main/INSTALACION/bootstrap/install.sh | bash")
-    print(f"\n  ⚠️  Reinicia la terminal para aplicar los cambios\n")
+# ============================================================
+# ayuda / versión / dispatch
+# ============================================================
+def cmd_help():
+    print(__doc__)
 
 
-# ============================================
-# MAIN
-# ============================================
-
-def show_menu():
-    """Mostrar menú de comandos disponibles."""
-    version = get_installed_version()
-    print(f"""
-╔═══════════════════════════════════════════════════════════════╗
-║                    diat — IA Dev Toolkit CLI v{version}         ║
-╚═══════════════════════════════════════════════════════════════╝
-
-Comandos disponibles:
-
-  diat --help              Mostrar ayuda detallada
-  diat --version           Mostrar versión actual
-  diat --check             Verificar requisitos del sistema
-  diat --install [/ruta]   Instalar componentes en proyecto
-  diat --update [/ruta]    Actualizar componentes en proyecto
-  diat --status [/ruta]    Mostrar estado de instalación
-  diat --list              Listar componentes en cache
-  diat --alma [/ruta]      Instalar personalidad del agente
-  diat --uninstall         Desinstalar ia-dev-toolkit
-  diat --no-update-check   No verificar actualizaciones
-
-Ejemplos:
-  diat --install                    # Instalar en ruta actual
-  diat --install /home/user/proy    # Instalar en ruta específica
-  diat --update                     # Actualizar ruta actual
-  diat --update /home/user/proy     # Actualizar ruta específica
-""")
+def cmd_version():
+    print(f"DIAT — ia-dev-toolkit v{__version__}")
 
 
 def main():
-    # Verificar actualizaciones al inicio (silencioso, cada 24h)
-    check_for_updates(silent=True)
-
-    # Sin argumentos → mostrar menú de comandos
-    if len(sys.argv) == 1:
-        print_banner()
-        show_menu()
+    argv = sys.argv[1:]
+    if not argv:
+        cmd_help()
         return
-
-    # Verificar flag --non-interactive
-    non_interactive = "--non-interactive" in sys.argv or "-ni" in sys.argv
-    if non_interactive:
-        sys.argv.remove("--non-interactive") if "--non-interactive" in sys.argv else sys.argv.remove("-ni")
-
-    # Procesar argumentos
-    arg = sys.argv[1]
-
-    if arg in ("--help", "-h"):
-        print_banner()
-        print_help()
-
-    elif arg in ("--version", "-v"):
-        print_version()
-
-    elif arg in ("--list", "-l"):
-        print_banner()
+    cmd, rest = argv[0], argv[1:]
+    if cmd in ("--help", "--h", "-h"):
+        cmd_help()
+    elif cmd in ("--version", "--v", "-v"):
+        cmd_version()
+    elif cmd in ("--install", "--i", "-i"):
+        cmd_install(rest)
+    elif cmd in ("--update", "--u", "-u"):
+        update.cmd_update()
+    elif cmd in ("--status", "-s"):
+        cmd_status(rest)
+    elif cmd in ("--list", "-l"):
         cmd_list()
-
-    elif arg in ("--check", "-c"):
-        print_banner()
-        cmd_check()
-
-    elif arg in ("--update", "-u"):
-        print_banner()
-        cmd_update()
-
-    elif arg in ("--status", "-s"):
-        print_banner()
-        cmd_status()
-
-    elif arg in ("--install", "-i"):
-        print_banner()
-        cmd_install()
-
-    elif arg in ("--alma", "-a"):
-        print_banner()
-        cmd_alma()
-
-    elif arg in ("--uninstall", "-U"):
-        print_banner()
-        cmd_uninstall()
-
-    elif arg.startswith("-"):
-        print(f"❌ Opción desconocida: {arg}")
-        print(f"   Usa `diat --help` para ver las opciones disponibles")
-        sys.exit(1)
-
+    elif cmd in ("--uninstall",):
+        cmd_uninstall(rest)
     else:
-        # Asumir que es una ruta → instalar
-        instalar_dir = ensure_instalar()
-        if not instalar_dir:
-            print("❌ No se pudo obtener instalar.py")
-            sys.exit(1)
-        sys.path.insert(0, instalar_dir)
-        from instalar import main as install_main
-        sys.argv = [sys.argv[0]] + sys.argv[1:]  # Pasar ruta como argumento
-        install_main()
+        ui.print_error(f"Comando desconocido: {cmd}")
+        cmd_help()
 
 
 if __name__ == "__main__":
-    try:
-        main()
-    except KeyboardInterrupt:
-        print("\n\n  Operación cancelada por el usuario.")
-        sys.exit(0)
+    main()

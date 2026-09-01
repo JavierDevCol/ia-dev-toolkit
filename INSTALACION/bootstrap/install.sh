@@ -1,198 +1,120 @@
-#!/bin/bash
-# ============================================
-# ia-dev-toolkit — Instalador Bootstrap para Linux/Mac
-# ============================================
+#!/usr/bin/env bash
 #
-# Uso:
+# Bootstrap de DIAT (ia-dev-toolkit) para Linux / macOS.
+# Descarga el CLI y lo deja invocable como `diat`.
+#
 #   curl -fsSL https://raw.githubusercontent.com/JavierDevCol/ia-dev-toolkit/main/INSTALACION/bootstrap/install.sh | bash
 #
-# O descargando primero:
-#   curl -o install.sh https://raw.githubusercontent.com/JavierDevCol/ia-dev-toolkit/main/INSTALACION/bootstrap/install.sh
-#   chmod +x install.sh
-#   ./install.sh
-#
+set -euo pipefail
 
-set -e
+OWNER="JavierDevCol"
+REPO="ia-dev-toolkit"
+REF="main"
+CLI_DIR="INSTALACION"
 
-# ============================================
-# CONFIGURACIÓN
-# ============================================
-DIAT_URL="https://raw.githubusercontent.com/JavierDevCol/ia-dev-toolkit/main/INSTALACION/diat"
-BIN_PATH="$HOME/.local/bin"
+BIN="$HOME/.local/bin"
+CACHE="$HOME/.local/share/ia-dev-toolkit"
 
-# ============================================
-# COLORES
-# ============================================
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-CYAN='\033[0;36m'
-WHITE='\033[1;37m'
-NC='\033[0m'
+CYAN='\033[0;36m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; RED='\033[0;31m'; NC='\033[0m'
 
-# ============================================
-# FUNCIONES DE UTILIDAD
-# ============================================
 print_banner() {
     echo ""
-    echo -e "${CYAN}⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⢤⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀${NC}"
-    echo -e "${CYAN}⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⠏⠀⠹⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⡴⠋⢳⠀⠀⠀⠀⠀⠀⠀⠀⠀${NC}"
-    echo -e "${CYAN}⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡼⠀⢠⠀⠈⢣⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡴⠋⠀⡀⠘⡆⠀⠀⠀⠀⠀⠀⠀⠀${NC}"
-    echo -e "${CYAN}⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⠃⠀⣼⣷⠀⠀⠙⠒⠚⠛⠛⠛⠛⠛⠓⠒⠒⠦⠚⠀⢀⣴⡇⠀⡇⠀⠀⠀⠀⠀⠀⠀⠀${NC}"
-    echo -e "${CYAN}⠀⠀⠀⠀⠀⠀⠀⠀⠀⡼⠀⠀⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠙⠃⠀⣧⠀⠀⠀⠀⠀⠀⠀⠀${NC}"
-    echo -e "${CYAN}⠀⠀⠀⠀⠀⣀⡠⠤⢴⡷⠤⢤⡤⠤⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣹⠀⠀⠀⠀⠀⠀⠀⠀${NC}"
-    echo -e "${CYAN}⠀⠀⠀⢠⢾⣅⠙⢦⡀⠙⢦⡀⠙⢦⡈⠻⣕⢦⡀⠀⠀⠀⠀⠀⠀⣠⠴⢶⡋⠙⠫⣍⠙⢯⡉⠙⢯⡲⣄⠀⠀⠀⠀${NC}"
-    echo -e "${CYAN}⠀⠀⠀⢸⡄⠙⢷⡀⠙⢦⡀⠙⢦⡀⠙⢦⡘⢧⣷⠚⠉⠉⠛⠒⣾⠉⠳⡄⠙⢦⡀⠈⠳⣄⠉⠢⣄⠙⢾⡄⠀⠀⠀${NC}"
-    echo -e "${CYAN}⠀⠀⠀⠸⡝⢧⡀⠙⢦⡀⠙⢦⡀⠙⢦⡀⠙⢦⡝⠀⣠⣤⣤⠀⢹⠳⣄⠙⢦⡀⠉⠳⣄⠈⠑⢄⠈⠳⣼⠁⠀⠀⠀${NC}"
-    echo -e "${CYAN}⠁⠒⠒⠦⠽⣄⠙⢦⡀⠙⢦⡀⠙⢷⣄⠙⣦⠞⠁⠀⠈⢻⠋⠀⠀⢣⡈⠳⣄⠙⢦⡀⠈⠳⣄⠀⠙⣶⣃⣀⣀⣀⣄${NC}"
-    echo -e "${CYAN}⣀⣀⣀⣀⣀⣀⣻⡶⣿⣦⣤⣿⣦⣤⠿⠟⠃⠀⠀⠀⠀⢸⠀⠀⠀⠀⠻⢦⣜⣷⣄⣻⣦⣀⣸⣷⠟⠃⠀⠀⠀⠀⠀${NC}"
-    echo -e "${CYAN}⠉⠉⠉⠉⠉⠉⢹⡁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣘⠀⠀⠀⠀⠀⠀⠈⠉⠙⠛⠛⠉⠩⢼⠒⠒⠲⠤⠤⠤⠀${NC}"
-    echo -e "${CYAN}⠀⠀⠀⠀⠀⠀⠀⢳⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⠇⠀⠀⠀⠀⠀⠀⠀${NC}"
-    echo -e "${CYAN}⠀⠀⠀⠀⠀⠀⠀⠀⠙⠢⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⠴⠃⠀⠀⠀⠀⠀⠀⠀⠀${NC}"
-    echo -e "${CYAN}⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠓⠢⠤⣀⣀⡀⠀⠀⠀⠀⠀⠀⠀⣀⣀⣀⡤⠤⠒⠊⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀${NC}"
-    echo -e "${CYAN}⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠉⠉⠉⠉⠉⠉⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀${NC}"
-    echo ""
     echo -e "${CYAN}                         AI DEVELOPER TOOLKIT${NC}"
-    echo ""
     echo -e "${CYAN}        ┌─────────────────────────────────────────────────────────┐${NC}"
     echo -e "${CYAN}        │  Skills · Agents · Workflows · Tools · Commands         │${NC}"
     echo -e "${CYAN}        └─────────────────────────────────────────────────────────┘${NC}"
     echo ""
 }
 
-print_success() {
-    echo -e "  ${GREEN}✅ $1${NC}"
-}
-
-print_error() {
-    echo -e "  ${RED}❌ $1${NC}"
-}
-
-print_info() {
-    echo -e "  ${YELLOW}ℹ️  $1${NC}"
-}
-
-print_warning() {
-    echo -e "  ${YELLOW}⚠️  $1${NC}"
-}
-
-# ============================================
-# VALIDACIONES
-# ============================================
-check_prerequisites() {
-    echo -e "${WHITE}🔍 Verificando requisitos previos...${NC}"
-    echo ""
-
-    if command -v python3 &> /dev/null; then
-        PYTHON_CMD="python3"
-    elif command -v python &> /dev/null; then
-        PYTHON_CMD="python"
-    else
-        print_error "Primero instala Python"
-        print_info "Descárgalo desde: https://www.python.org/downloads/"
-        return 1
-    fi
-
-    PYTHON_VERSION=$($PYTHON_CMD --version 2>&1)
-    print_success "Python encontrado: $PYTHON_VERSION"
-
-    echo ""
-    return 0
-}
-
-# ============================================
-# INSTALACIÓN
-# ============================================
-install_diat() {
-    echo -e "${WHITE}📦 Instalando diat...${NC}"
-    echo ""
-
-    print_info "Creando directorio de instalación..."
-    mkdir -p "$BIN_PATH"
-    print_success "Directorio creado"
-
-    print_info "Descargando diat desde GitHub..."
-    if ! curl -fsSL "$DIAT_URL" -o "$BIN_PATH/diat" 2>/dev/null; then
-        print_error "Error al descargar diat"
-        print_info "Verifica tu conexión a internet"
-        return 1
-    fi
-
-    chmod +x "$BIN_PATH/diat"
-    print_success "diat instalado"
-
-    # Guardar versión instalada
-    print_info "Guardando versión..."
-    REMOTE_VERSION=$(curl -fsSL "https://api.github.com/repos/JavierDevCol/ia-dev-toolkit/tags" 2>/dev/null | grep -o '"name": "v[^"]*"' | head -1 | cut -d'"' -f4 | tr -d 'v')
-    if [ -n "$REMOTE_VERSION" ]; then
-        VERSION_DIR="$HOME/.local/share/ia-dev-toolkit"
-        mkdir -p "$VERSION_DIR"
-        echo "$REMOTE_VERSION" > "$VERSION_DIR/.installed_version"
-        print_success "Versión $REMOTE_VERSION guardada"
-    fi
-
-    print_info "Verificando PATH..."
-    SHELL_RC=""
-    if [ -n "$ZSH_VERSION" ] || [ -f "$HOME/.zshrc" ]; then
-        SHELL_RC="$HOME/.zshrc"
-    elif [ -f "$HOME/.bashrc" ]; then
-        SHELL_RC="$HOME/.bashrc"
-    elif [ -f "$HOME/.bash_profile" ]; then
-        SHELL_RC="$HOME/.bash_profile"
-    fi
-
-    if [ -n "$SHELL_RC" ]; then
-        if grep -q ".local/bin" "$SHELL_RC" 2>/dev/null; then
-            sed -i '/# ia-dev-toolkit/d;/export PATH="\$HOME\/.local\/bin:\$PATH"/d' "$SHELL_RC"
-        fi
-        echo "" >> "$SHELL_RC"
-        echo "# ia-dev-toolkit" >> "$SHELL_RC"
-        echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$SHELL_RC"
-        print_success "PATH configurado"
-    fi
-    export PATH="$BIN_PATH:$PATH"
-
-    echo ""
-    return 0
-}
-
-# ============================================
-# RESUMEN FINAL
-# ============================================
-print_summary() {
-    echo ""
-    echo -e "${GREEN}╔═══════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${GREEN}║                                                               ║${NC}"
-    echo -e "${GREEN}║   ✅ IA DEV TOOLKIT INSTALADO CORRECTAMENTE                   ║${NC}"
-    echo -e "${GREEN}║                                                               ║${NC}"
-    echo -e "${GREEN}╚═══════════════════════════════════════════════════════════════╝${NC}"
-    echo ""
-    echo -e "   ${CYAN}🚀 Comandos disponibles:${NC}"
-    echo ""
-    echo -e "      diat                     Ver comandos disponibles"
-    echo -e "      diat --install            Instalar componentes"
-    echo -e "      diat --help               Ver ayuda"
-    echo ""
-    echo -e "   ${YELLOW}⚠️  IMPORTANTE: Reinicia la terminal o ejecuta:${NC}"
-    echo -e "      ${WHITE}source ~/.bashrc${NC}  (o ~/.zshrc)"
-    echo ""
-}
-
-# ============================================
-# EJECUCIÓN PRINCIPAL
-# ============================================
+# ------------------------------------------------------------
+# 1. Requisitos
+# ------------------------------------------------------------
 print_banner
+echo "🔍 Verificando requisitos previos..."
+echo ""
+if ! command -v python3 >/dev/null 2>&1; then
+    echo -e "${RED}❌ Python 3 no encontrado. Instálalo y reintenta.${NC}"
+    exit 1
+fi
+echo -e "${GREEN}✅ Python encontrado: $(python3 --version)${NC}"
+echo ""
 
-if ! check_prerequisites; then
-    echo ""
-    print_error "No se cumplen los requisitos previos. Instalación cancelada."
+# ------------------------------------------------------------
+# 2. Descargar CLI (tarball, 1 request)
+# ------------------------------------------------------------
+echo "📦 Instalando diat..."
+TMP="$(mktemp -d)"
+trap 'rm -rf "$TMP"' EXIT
+
+URL="https://codeload.github.com/$OWNER/$REPO/tar.gz/$REF"
+if command -v curl >/dev/null 2>&1; then
+    curl -fsSL "$URL" | tar -xz -C "$TMP"
+else
+    wget -qO- "$URL" | tar -xz -C "$TMP"
+fi
+
+# La carpeta raíz extraída se descubre (robusto ante refs con '/')
+ROOT="$(find "$TMP" -mindepth 1 -maxdepth 1 -type d | head -1)"
+SRC="$ROOT/$CLI_DIR"
+if [ ! -f "$SRC/diat" ]; then
+    echo -e "${RED}❌ No se encontró el CLI en el repo ($CLI_DIR).${NC}"
     exit 1
 fi
 
-if ! install_diat; then
-    echo ""
-    print_error "La instalación falló."
-    exit 1
-fi
+mkdir -p "$BIN"
+cp "$SRC/diat" "$BIN/diat"
+[ -f "$SRC/diat.bat" ] && cp "$SRC/diat.bat" "$BIN/diat.bat"
+rm -rf "$BIN/diatlib"
+cp -r "$SRC/diatlib" "$BIN/diatlib"
+chmod +x "$BIN/diat"
+echo -e "${GREEN}✅ diat instalado${NC}"
 
-print_summary
+VER="$(python3 "$BIN/diat" --version 2>/dev/null || echo '?')"
+echo -e "${GREEN}✅ $VER${NC}"
+
+# ------------------------------------------------------------
+# 3. Garantizar PATH (idempotente; siempre se garantiza)
+# ------------------------------------------------------------
+echo -e "${CYAN}ℹ️  Verificando PATH...${NC}"
+
+add_path_block() {
+    local rc="$1"
+    touch "$rc"
+    if grep -q '# >>> diat >>>' "$rc" 2>/dev/null; then
+        return
+    fi
+    {
+        echo ''
+        echo '# >>> diat >>>'
+        echo "case \":\$PATH:\" in"
+        echo "  *\":$BIN:\"*) ;;"
+        echo "  *) export PATH=\"$BIN:\$PATH\" ;;"
+        echo 'esac'
+        echo '# <<< diat <<<'
+    } >> "$rc"
+}
+
+case "${SHELL:-}" in
+    *zsh)  add_path_block "$HOME/.zshrc" ;;
+    *bash) add_path_block "$HOME/.bashrc" ;;
+esac
+add_path_block "$HOME/.profile"           # red de seguridad login shells
+echo -e "${GREEN}✅ PATH configurado${NC}"
+echo ""
+
+# ------------------------------------------------------------
+# 4. Éxito
+# ------------------------------------------------------------
+echo -e "${GREEN}╔═══════════════════════════════════════════════════════════════╗${NC}"
+echo -e "${GREEN}║   ✅ DIAT - IA DEV TOOLKIT INSTALADO CORRECTAMENTE            ║${NC}"
+echo -e "${GREEN}╚═══════════════════════════════════════════════════════════════╝${NC}"
+echo ""
+echo "🚀 Comandos disponibles:"
+echo ""
+echo "   diat                Ver comandos disponibles"
+echo "   diat --install      Instalar componentes"
+echo "   diat --help         Ver ayuda"
+echo ""
+echo -e "${YELLOW}⚠️  IMPORTANTE: Reinicia la terminal o ejecuta:${NC}"
+echo "   source ~/.zshrc   (o ~/.bashrc / ~/.profile)"
+echo ""
