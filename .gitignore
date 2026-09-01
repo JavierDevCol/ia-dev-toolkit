@@ -21,3 +21,6 @@ SPIKE/
 tests/e2e/tmp/
 AGENTS.md
 docker-opencode/
+
+__pycache__/
+*.pyc

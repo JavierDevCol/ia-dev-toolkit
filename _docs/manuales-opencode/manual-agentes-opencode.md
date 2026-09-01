@@ -1,7 +1,7 @@
 # Manual de Agentes OpenCode - Análisis Detallado
 
 > **Fuente:** [https://opencode.ai/docs/es/agents/](https://opencode.ai/docs/es/agents/)
-> **Fecha de análisis:** 27 de junio de 2026
+> **Fecha de análisis:** 31 de agosto de 2026
 > **Propósito:** Guía de referencia para la creación, configuración y uso de agentes y subagentes en OpenCode.
 
 ---
@@ -13,11 +13,11 @@
 3. [Agentes Integrados](#3-agentes-integrados)
 4. [Subagentes Integrados](#4-subagentes-integrados)
 5. [Agentes del Sistema](#5-agentes-del-sistema)
-6. [Configuración de Agentes](#6-configuración-de-agentes)
-7. [Opciones de Configuración](#7-opciones-de-configuración)
-8. [Creación de Agentes Personalizados](#8-creación-de-agentes-personalizados)
-9. [Casos de Uso](#9-casos-de-uso)
-10. [Buenas Prácticas](#10-buenas-prácticas)
+6. [Uso](#6-uso)
+7. [Configuración](#7-configuración)
+8. [Opciones de Configuración](#8-opciones-de-configuración)
+9. [Crear Agentes](#9-crear-agentes)
+10. [Casos de Uso](#10-casos-de-uso)
 11. [Ejemplos Prácticos](#11-ejemplos-prácticos)
 
 ---
@@ -26,12 +26,9 @@
 
 ### ¿Qué es un agente en OpenCode?
 
-Un **agente** es un asistente de IA especializado que se puede configurar para tareas y flujos de trabajo específicos. Cada agente tiene:
+Un **agente** es un asistente de IA especializado que se puede configurar para tareas y flujos de trabajo específicos. Le permite crear herramientas enfocadas con indicaciones, modelos y acceso a herramientas personalizados.
 
-- **Indicaciones personalizadas** (prompt): Define el comportamiento y propósito del agente.
-- **Modelo asignado**: Puede usar un modelo diferente al global.
-- **Acceso a herramientas**: Controla qué operaciones puede realizar.
-- **Permisos**: Gestiona qué acciones requieren aprobación.
+**Consejo:** Utilice el agente del plan para analizar el código y revisar sugerencias sin realizar ningún cambio en el código.
 
 ### Diferencia entre Agente y Subagente
 
@@ -54,6 +51,7 @@ Son los asistentes principales con los que interactúas directamente. Se puede n
 - Manejan la conversación principal del usuario.
 - Tienen acceso a herramientas según sus permisos configurados.
 - Pueden invocar subagentes para tareas especializadas.
+- OpenCode viene con dos agentes principales integrados: **Build** y **Plan**.
 
 ### 2.2 Subagentes (`mode: subagent`)
 
@@ -64,10 +62,7 @@ Son asistentes especializados que los agentes primarios pueden invocar para tare
 - Pueden crear sus propias sesiones secundarias.
 - Se pueden ocultar del menú de autocompletar con `hidden: true`.
 - Se pueden invocar programáticamente a través de la herramienta Tarea.
-
-### 2.3 Modo `all`
-
-Si no se especifica `mode`, el valor predeterminado es `all`, lo que permite al agente funcionar tanto como primario como subagente.
+- OpenCode viene con tres subagentes integrados: **General**, **Explore** y **Scout**.
 
 ---
 
@@ -75,35 +70,18 @@ Si no se especifica `mode`, el valor predeterminado es `all`, lo que permite al 
 
 ### 3.1 Build
 
-```json
-{
-  "mode": "primary",
-  "description": "Agente principal predeterminado con todas las herramientas habilitadas"
-}
-```
-
 - **Modo:** `primary`
-- **Propósito:** Trabajo de desarrollo completo con acceso total.
-- **Herramientas:** Todas habilitadas (write, edit, bash, etc.)
-- **Uso:** Desarrollo estándar donde se necesita acceso completo a archivos y comandos.
+- **Propósito:** Agente principal predeterminado con todas las herramientas habilitadas.
+- **Uso:** Trabajo de desarrollo completo donde se necesita acceso completo a archivos y comandos.
 
 ### 3.2 Plan
 
-```json
-{
-  "mode": "primary",
-  "description": "Agente restringido para planificación y análisis"
-}
-```
-
 - **Modo:** `primary`
-- **Propósito:** Análisis y planificación sin realizar cambios.
-- **Herramientas:** Restringidas (file edits y bash configurados en `ask`).
+- **Propósito:** Agente restringido para planificación y análisis.
 - **Uso:** Cuando se desea que LLM analice código, sugiera cambios o cree planes sin modificaciones reales.
-
-**Configuración predeterminada de permisos:**
-- `file edits`: ask
-- `bash`: ask
+- **Configuración predeterminada:**
+  - `file edits`: ask
+  - `bash`: ask
 
 ---
 
@@ -111,40 +89,25 @@ Si no se especifica `mode`, el valor predeterminado es `all`, lo que permite al 
 
 ### 4.1 General
 
-```json
-{
-  "mode": "subagent",
-  "description": "Agente de uso general para investigar preguntas complejas"
-}
-```
-
+- **Modo:** `subagent`
+- **Propósito:** Agente de uso general para investigar preguntas complejas y ejecutar tareas de varios pasos.
 - **Acceso:** Completo a herramientas (excepto tareas pendientes).
 - **Uso:** Ejecutar varias unidades de trabajo en paralelo.
 - **Ejemplo de invocación:** `@general ayúdame a buscar esta función`
 
 ### 4.2 Explore
 
-```json
-{
-  "mode": "subagent",
-  "description": "Agente rápido y de solo lectura para explorar bases de código"
-}
-```
-
+- **Modo:** `subagent`
+- **Propósito:** Agente rápido y de solo lectura para explorar bases de código.
 - **Acceso:** Solo lectura. No se pueden modificar archivos.
 - **Uso:** Buscar archivos por patrones, buscar palabras clave, responder preguntas sobre el código.
 
 ### 4.3 Scout
 
-```json
-{
-  "mode": "subagent",
-  "description": "Agente de solo lectura para investigar documentación externa"
-}
-```
-
+- **Modo:** `subagent`
+- **Propósito:** Agente de solo lectura para investigar documentación externa y dependencias.
 - **Acceso:** Solo lectura.
-- **Uso:** Clonar repositorios de dependencias, inspeccionar código fuente de librerías, contrastar código local con implementaciones upstream.
+- **Uso:** Clonar repositorios de dependencias, inspeccionar código fuente de librerías, contrastar código local con implementaciones upstream sin modificar tu espacio de trabajo.
 
 ---
 
@@ -152,17 +115,42 @@ Si no se especifica `mode`, el valor predeterminado es `all`, lo que permite al 
 
 Estos agentes son ocultos y se ejecutan automáticamente. No se pueden seleccionar en la interfaz de usuario.
 
-| Agente | Función |
-|--------|---------|
-| **Compactación** | Compacta contextos largos en resúmenes más pequeños. Se ejecuta automáticamente. |
-| **Título** | Genera títulos de sesión cortos. Se ejecuta automáticamente. |
-| **Resumen** | Crea resúmenes de sesiones. Se ejecuta automáticamente. |
+| Agente | Modo | Función |
+|--------|------|---------|
+| **Compactación** | `primary` | Compacta contextos largos en resúmenes más pequeños. Se ejecuta automáticamente. |
+| **Título** | `primary` | Genera títulos de sesión cortos. Se ejecuta automáticamente. |
+| **Resumen** | `primary` | Crea resúmenes de sesiones. Se ejecuta automáticamente. |
 
 ---
 
-## 6. Configuración de Agentes
+## 6. Uso
 
-### 6.1 Configuración JSON
+### 6.1 Agentes Primarios
+
+Usa la tecla **Tab** para recorrerlos durante una sesión. También puedes usar su combinación de teclas `switch_agent` configurada.
+
+### 6.2 Subagentes
+
+Los subagentes se pueden invocar:
+
+1. **Automáticamente** por agentes principales para tareas especializadas según sus descripciones.
+2. Manualmente **@ mencionando** un subagente en tu mensaje:
+   ```
+   @general help me search for this function
+   ```
+
+### 6.3 Navegación entre Sesiones
+
+Cuando los subagentes crean sus propias sesiones secundarias, puedes navegar entre la sesión principal y todas las sesiones secundarias usando:
+
+- **<Leader>+Right** (o `session_child_cycle`) para avanzar: padre → hijo1 → hijo2 → … → padre
+- **<Leader>+Left** (o `session_child_cycle_reverse`) para retroceder: padre ← hijo1 ← hijo2 ← … ← padre
+
+---
+
+## 7. Configuración
+
+### 7.1 Configuración JSON
 
 Los agentes se definen en el archivo `opencode.json` bajo la clave `agent`:
 
@@ -203,7 +191,7 @@ Los agentes se definen en el archivo `opencode.json` bajo la clave `agent`:
 }
 ```
 
-### 6.2 Configuración Markdown
+### 7.2 Configuración Markdown
 
 Los agentes se definen como archivos `.md` en:
 - **Global:** `~/.config/opencode/agents/`
@@ -236,9 +224,9 @@ Proporciona comentarios constructivos sin hacer cambios directos.
 
 ---
 
-## 7. Opciones de Configuración
+## 8. Opciones de Configuración
 
-### 7.1 Descripción (`description`) - **Obligatoria**
+### 8.1 Descripción (`description`) - **Obligatoria**
 
 Breve descripción de lo que hace el agente y cuándo usarlo.
 
@@ -252,7 +240,7 @@ Breve descripción de lo que hace el agente y cuándo usarlo.
 }
 ```
 
-### 7.2 Temperatura (`temperature`)
+### 8.2 Temperatura (`temperature`)
 
 Controla la aleatoriedad y creatividad de las respuestas.
 
@@ -276,7 +264,7 @@ Controla la aleatoriedad y creatividad de las respuestas.
 }
 ```
 
-### 7.3 Pasos Máximos (`steps`)
+### 8.3 Pasos Máximos (`steps`)
 
 Controla el número máximo de iteraciones antes de responder solo con texto.
 
@@ -296,7 +284,7 @@ Controla el número máximo de iteraciones antes de responder solo con texto.
 
 **Precaución:** Si no se establece, el agente continuará iterando hasta que el modelo decida detenerse o el usuario interrumpa.
 
-### 7.4 Deshabilitar (`disable`)
+### 8.4 Deshabilitar (`disable`)
 
 ```json
 {
@@ -306,7 +294,7 @@ Controla el número máximo de iteraciones antes de responder solo con texto.
 }
 ```
 
-### 7.5 Indicación (`prompt`)
+### 8.5 Indicación (`prompt`)
 
 Especifica un archivo de aviso del sistema personalizado:
 
@@ -322,7 +310,7 @@ Especifica un archivo de aviso del sistema personalizado:
 
 **Nota:** La ruta es relativa a donde se encuentra el archivo de configuración.
 
-### 7.6 Modelo (`model`)
+### 8.6 Modelo (`model`)
 
 Anula el modelo para un agente específico. Formato: `provider/model-id`.
 
@@ -340,7 +328,7 @@ Anula el modelo para un agente específico. Formato: `provider/model-id`.
 - Agentes primarios: usan el modelo global configurado.
 - Subagentes: usan el modelo del agente primario que los invocó.
 
-### 7.7 Herramientas (`tools`)
+### 8.7 Herramientas (`tools`)
 
 Controla qué herramientas están disponibles. Se pueden usar comodines:
 
@@ -360,7 +348,7 @@ Controla qué herramientas están disponibles. Se pueden usar comodines:
 
 **Nota:** La configuración específica del agente anula la configuración global.
 
-### 7.8 Permisos (`permission`)
+### 8.8 Permisos (`permission`)
 
 Gestiona acciones con tres niveles:
 - `"ask"`: Solicitar aprobación antes de ejecutar.
@@ -410,13 +398,13 @@ Gestiona acciones con tres niveles:
 
 **Regla importante:** Las reglas se evalúan en orden y la **última regla coincidente gana**.
 
-### 7.9 Modo (`mode`)
+### 8.9 Modo (`mode`)
 
 - `primary`: Solo agente primario.
 - `subagent`: Solo subagente.
 - `all` (predeterminado): Puede funcionar como ambos.
 
-### 7.10 Oculto (`hidden`)
+### 8.10 Oculto (`hidden`)
 
 Oculta subagentes del menú de autocompletar `@`:
 
@@ -433,7 +421,7 @@ Oculta subagentes del menú de autocompletar `@`:
 
 **Nota:** Solo aplica para agentes con `mode: subagent`. El modelo aún puede invocar agentes ocultos a través de la herramienta Tarea si los permisos lo permiten.
 
-### 7.11 Permisos de Tarea (`permission.task`)
+### 8.11 Permisos de Tarea (`permission.task`)
 
 Controla qué subagentes puede invocar un agente:
 
@@ -456,7 +444,7 @@ Controla qué subagentes puede invocar un agente:
 
 **Comportamiento:** Cuando se establece en `deny`, el subagente se elimina de la descripción de la herramienta Tarea.
 
-### 7.12 Color (`color`)
+### 8.12 Color (`color`)
 
 Personaliza la apariencia visual del agente:
 
@@ -471,7 +459,7 @@ Personaliza la apariencia visual del agente:
 
 **Opciones:** Color hexadecimal o temas: `primary`, `secondary`, `accent`, `success`, `warning`, `error`, `info`.
 
-### 7.13 Top P (`top_p`)
+### 8.13 Top P (`top_p`)
 
 Alternativa a la temperatura para controlar la diversidad de respuestas. Rango: 0.0 - 1.0.
 
@@ -483,7 +471,7 @@ Alternativa a la temperatura para controlar la diversidad de respuestas. Rango: 
 }
 ```
 
-### 7.14 Opciones Adicionales
+### 8.14 Opciones Adicionales
 
 Cualquier otra opción se pasa directamente al proveedor como opciones de modelo:
 
@@ -502,9 +490,9 @@ Cualquier otra opción se pasa directamente al proveedor como opciones de modelo
 
 ---
 
-## 8. Creación de Agentes Personalizados
+## 9. Crear Agentes
 
-### 8.1 Usando el Comando Interactivo
+### 9.1 Usando el Comando Interactivo
 
 ```bash
 opencode agent create
@@ -517,7 +505,7 @@ Este comando interactivo:
 4. Permite seleccionar a qué herramientas puede acceder el agente.
 5. Crea un archivo Markdown con la configuración.
 
-### 8.2 Creación Manual
+### 9.2 Creación Manual
 
 #### Opción A: Archivo JSON en `opencode.json`
 
@@ -553,7 +541,7 @@ Enfócate en:
 
 ---
 
-## 9. Casos de Uso
+## 10. Casos de Uso
 
 | Caso de Uso | Agente Recomendado | Configuración Sugerida |
 |-------------|--------------------|------------------------|
@@ -565,41 +553,6 @@ Enfócate en:
 | Auditoría de seguridad | Security (personalizado) | Solo lectura |
 | Investigación externa | Scout | Solo lectura, acceso a repositorios externos |
 | Exploración de código | Explore | Solo lectura, búsqueda rápida |
-
----
-
-## 10. Buenas Prácticas
-
-### 10.1 Selección de Modelos
-
-- Usa modelos más rápidos (ej. Haiku) para tareas de planificación.
-- Usa modelos más capaces (ej. Sonnet) para implementación compleja.
-- Define el modelo por agente para optimizar costos y rendimiento.
-
-### 10.2 Gestión de Permisos
-
-- Usa `deny` para agentes de solo lectura (Plan, Review).
-- Usa `ask` para agentes que necesitan aprobación en operaciones sensibles.
-- Configura permisos específicos por comando bash para mayor control.
-- Coloca el comodín `*` primero y las reglas específicas después.
-
-### 10.3 Temperatura
-
-- **Análisis/Planificación:** 0.0 - 0.2
-- **Desarrollo general:** 0.3 - 0.5
-- **Creatividad/Exploración:** 0.6 - 1.0
-
-### 10.4 Organización
-
-- Usa archivos Markdown para agentes por proyecto (`.opencode/agents/`).
-- Usa archivos JSON para configuración global.
-- Nombra los archivos descriptivamente (ej. `code-review.md`, `security-audit.md`).
-
-### 10.5 Subagentes
-
-- Oculta subagentes internos con `hidden: true`.
-- Usa `permission.task` para controlar qué subagentes puede invocar cada agente.
-- Aprovecha la navegación entre sesiones con `<Leader>+Right/Left`.
 
 ---
 
@@ -742,4 +695,4 @@ Enfócate en:
 ---
 
 *Manual generado a partir de la documentación oficial de OpenCode.*
-*Última actualización de la fuente: 26 de junio de 2026.*
+*Última actualización de la fuente: 31 de agosto de 2026.*
