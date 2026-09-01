@@ -338,6 +338,18 @@ def get_temp_repo_path():
     return base_path
 
 
+def get_data_dir():
+    """Directorio base de datos DIAT, compartido con el CLI `diat`.
+    El registro instalacion.json vive AQUÍ (base), NO dentro de repo/.
+    Debe coincidir con get_temp_repo_path() de `diat`."""
+    if platform.system() == "Windows":
+        local_app_data = os.environ.get("LOCALAPPDATA")
+        if local_app_data:
+            return Path(local_app_data) / "ia-dev-toolkit"
+        return Path.home() / "AppData" / "Local" / "ia-dev-toolkit"
+    return Path.home() / ".local" / "share" / "ia-dev-toolkit"
+
+
 # ============================================
 # FUNCIONES DE VERIFICACIÓN DE REQUISITOS
 # ============================================
@@ -1286,7 +1298,7 @@ def save_installation(project_path, platform_dir, components):
     import json
     from datetime import datetime
 
-    installations_dir = get_temp_repo_path()
+    installations_dir = get_data_dir()  # registro en la base, compartido con el CLI `diat`
     installations_dir.mkdir(parents=True, exist_ok=True)
     installations_file = installations_dir / "instalacion.json"
 

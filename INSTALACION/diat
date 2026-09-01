@@ -701,12 +701,15 @@ def cmd_update():
         save_installed_version(remote_version)
         print(f"  📌 Versión instalada: {remote_version}")
 
-    # 4. Actualizar cache de componentes
+    # 4. Actualizar cache de componentes (SIN borrar el registro ni metadatos)
     temp_repo_path = get_temp_repo_path()
     if temp_repo_path.exists():
-        print(f"\n  🗑️  Eliminando cache anterior...")
+        print(f"\n  🗑️  Eliminando cache anterior (preservando registro)...")
         import shutil
-        shutil.rmtree(temp_repo_path)
+        for name in ("skills", "agents", "workflows", "tools", "commands", "config"):
+            comp = temp_repo_path / name
+            if comp.exists():
+                shutil.rmtree(comp)
 
     instalar_dir = ensure_instalar()
     if not instalar_dir:
