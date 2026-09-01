@@ -22,12 +22,30 @@ $BIN_PATH = "$env:LOCALAPPDATA\ia-dev-toolkit\bin"
 # ============================================
 function Print-Banner {
     Write-Host ""
-    Write-Host "╔═══════════════════════════════════════════════════════════════╗" -ForegroundColor Cyan
-    Write-Host "║                                                               ║" -ForegroundColor Cyan
-    Write-Host "║   🛠️  ia-dev-toolkit — Instalador Bootstrap para Windows        ║" -ForegroundColor Cyan
-    Write-Host "║   Skills · Agents · Workflows · Tools · Config                ║" -ForegroundColor Cyan
-    Write-Host "║                                                               ║" -ForegroundColor Cyan
-    Write-Host "╚═══════════════════════════════════════════════════════════════╝" -ForegroundColor Cyan
+    Write-Host "╔═══════════════════════════════════════════════════════════════════════════╗" -ForegroundColor Cyan
+    Write-Host "║                                                                           ║" -ForegroundColor Cyan
+    Write-Host "║   ⢠⢤⡀⠀⠀⠀⠀⢀⠏⠀⠹⣄⠀⠀⠀⠀⠀⢀⡴⠋⢳⠀⠀⠀⠀      ██████╗ ██╗ █████╗ ████████╗   ║" -ForegroundColor Cyan
+    Write-Host "║   ⡼⠀⢠⠀⠈⢣⡀⡼⠀⢠⠀⠈⢣⡀⠀⠀⡴⠋⠀⡀⠘⡆⠀⠀⠀      ██╔══██╗██║██╔══██╗╚══██╔══╝   ║" -ForegroundColor Cyan
+    Write-Host "║   ⢠⠃⠀⣼⣷⠀⠀⠙⠒⠚⠛⠛⠛⠓⠒⠦⠚⠀⢀⣴⡇⠀⡇⠀⠀      ██║  ██║██║███████║   ██║       ║" -ForegroundColor Cyan
+    Write-Host "║   ⡼⠀⠀⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠙⠃⠀⣧⠀      ██║  ██║██║██╔══██║   ██║       ║" -ForegroundColor Cyan
+    Write-Host "║  ⣀⡠⠤⢴⡷⠤⢤⡤⠤⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣹⠀      ██████╔╝██║██║  ██║   ██║       ║" -ForegroundColor Cyan
+    Write-Host "║   ⢸⡄⠙⢷⡀⠙⢦⡘⢧⣷⠚⠉⠉⠛⠒⣾⠉⠳⡄⠙⢦⡀⠈⠳⣄⠙⢾⡄  ╚═════╝ ╚═╝╚═╝  ╚═╝   ╚═╝   ║" -ForegroundColor Cyan
+    Write-Host "║   ⠸⡝⢧⡀⠙⢦⡝⠀⣠⣤⣤⠀⢹⠳⣄⠙⢦⡀⠉⠳⣄⠈⠑⢄⠈⠳⣼⠁                                ║" -ForegroundColor Cyan
+    Write-Host "║   ⠽⣄⠙⢦⡀⠙⣦⠞⠁⠀⠈⢻⠋⠀⠀⢣⡈⠳⣄⠙⢦⡀⠈⠳⣄⠀⠙⣶⣃⣀⣀⣀⣄                  ║" -ForegroundColor Cyan
+    Write-Host "║   ⣀⣀⣀⣀⣀⣀⣻⡶⣿⣦⣤⣿⣦⣤⠿⠟⠃⠀⠀⠀⠀⢸⠀⠀⠀⠀⠻⢦⣜⣷⣄⣻⣦⣀⣸⣷⠟⠃     ║" -ForegroundColor Cyan
+    Write-Host "║   ⠉⠉⠉⠉⠉⠉⢹⡁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣘⠀⠀⠀⠀⠀⠀⠈⠉⠙⠛⠛⠉⠩⢼⠒⠒⠲⠤⠤⠤║" -ForegroundColor Cyan
+    Write-Host "║   ⠀⠀⠀⠀⠀⠀⠀⠀⢳⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⠇⠀⠀⠀⠀⠀⠀⠀║" -ForegroundColor Cyan
+    Write-Host "║   ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⠢⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⠴⠃⠀⠀⠀⠀⠀⠀⠀⠀║" -ForegroundColor Cyan
+    Write-Host "║   ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠓⠢⠤⣀⣀⡀⠀⠀⠀⠀⠀⠀⠀⣀⣀⣀⡤⠤⠒⠊⠁⠀⠀⠀⠀⠀⠀⠀⠀║" -ForegroundColor Cyan
+    Write-Host "║   ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠉⠉⠉⠉⠉⠉⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀║" -ForegroundColor Cyan
+    Write-Host "║                                                                           ║" -ForegroundColor Cyan
+    Write-Host "║                         AI DEVELOPER TOOLKIT                              ║" -ForegroundColor Cyan
+    Write-Host "║                                                                           ║" -ForegroundColor Cyan
+    Write-Host "║        ┌─────────────────────────────────────────────────────────┐        ║" -ForegroundColor Cyan
+    Write-Host "║        │  Skills · Agents · Workflows · Tools · Commands         │        ║" -ForegroundColor Cyan
+    Write-Host "║        └─────────────────────────────────────────────────────────┘        ║" -ForegroundColor Cyan
+    Write-Host "║                                                                           ║" -ForegroundColor Cyan
+    Write-Host "╚═══════════════════════════════════════════════════════════════════════════╝" -ForegroundColor Cyan
     Write-Host ""
 }
 
