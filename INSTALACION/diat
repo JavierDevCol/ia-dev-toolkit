@@ -196,14 +196,31 @@ def auto_update():
 # ============================================
 
 def print_banner():
-    version = get_installed_version()
-    print(f"""
-╔═══════════════════════════════════════════════════════════════╗
-║                                                               ║
-║   🛠️  diat — IA Dev Toolkit CLI v{version}                    ║
-║   Skills · Agents · Workflows · Tools · Config                ║
-║                                                               ║
-╚═══════════════════════════════════════════════════════════════╝
+    print("""
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                                                                           ║
+║   ⢠⢤⡀⠀⠀⠀⠀⢀⠏⠀⠹⣄⠀⠀⠀⠀⠀⢀⡴⠋⢳⠀⠀⠀⠀      ██████╗ ██╗ █████╗ ████████╗   ║
+║   ⡼⠀⢠⠀⠈⢣⡀⡼⠀⢠⠀⠈⢣⡀⠀⠀⡴⠋⠀⡀⠘⡆⠀⠀⠀      ██╔══██╗██║██╔══██╗╚══██╔══╝   ║
+║   ⢠⠃⠀⣼⣷⠀⠀⠙⠒⠚⠛⠛⠛⠓⠒⠦⠚⠀⢀⣴⡇⠀⡇⠀⠀      ██║  ██║██║███████║   ██║       ║
+║   ⡼⠀⠀⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠙⠃⠀⣧⠀      ██║  ██║██║██╔══██║   ██║       ║
+║  ⣀⡠⠤⢴⡷⠤⢤⡤⠤⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣹⠀      ██████╔╝██║██║  ██║   ██║       ║
+║   ⢸⡄⠙⢷⡀⠙⢦⡘⢧⣷⠚⠉⠉⠛⠒⣾⠉⠳⡄⠙⢦⡀⠈⠳⣄⠙⢾⡄  ╚═════╝ ╚═╝╚═╝  ╚═╝   ╚═╝   ║
+║   ⠸⡝⢧⡀⠙⢦⡝⠀⣠⣤⣤⠀⢹⠳⣄⠙⢦⡀⠉⠳⣄⠈⠑⢄⠈⠳⣼⠁                                ║
+║   ⠽⣄⠙⢦⡀⠙⣦⠞⠁⠀⠈⢻⠋⠀⠀⢣⡈⠳⣄⠙⢦⡀⠈⠳⣄⠀⠙⣶⣃⣀⣀⣀⣄                  ║
+║   ⣀⣀⣀⣀⣀⣀⣻⡶⣿⣦⣤⣿⣦⣤⠿⠟⠃⠀⠀⠀⠀⢸⠀⠀⠀⠀⠻⢦⣜⣷⣄⣻⣦⣀⣸⣷⠟⠃     ║
+║   ⠉⠉⠉⠉⠉⠉⢹⡁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣘⠀⠀⠀⠀⠀⠀⠈⠉⠙⠛⠛⠉⠩⢼⠒⠒⠲⠤⠤⠤║
+║   ⠀⠀⠀⠀⠀⠀⠀⠀⢳⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⠇⠀⠀⠀⠀⠀⠀⠀║
+║   ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⠢⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⠴⠃⠀⠀⠀⠀⠀⠀⠀⠀║
+║   ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠓⠢⠤⣀⣀⡀⠀⠀⠀⠀⠀⠀⠀⣀⣀⣀⡤⠤⠒⠊⠁⠀⠀⠀⠀⠀⠀⠀⠀║
+║   ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠉⠉⠉⠉⠉⠉⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀║
+║                                                                           ║
+║                         AI DEVELOPER TOOLKIT                              ║
+║                                                                           ║
+║        ┌─────────────────────────────────────────────────────────┐        ║
+║        │  Skills · Agents · Workflows · Tools · Commands         │        ║
+║        └─────────────────────────────────────────────────────────┘        ║
+║                                                                           ║
+╚═══════════════════════════════════════════════════════════════════════════╝
     """)
 
 
@@ -276,9 +293,147 @@ def get_temp_repo_path():
     if platform.system() == "Windows":
         local_app_data = os.environ.get("LOCALAPPDATA")
         if local_app_data:
-            return Path(local_app_data) / TOOLKIT_NAME / "repo"
-        return Path.home() / "AppData" / "Local" / TOOLKIT_NAME / "repo"
-    return Path.home() / ".local" / "share" / TOOLKIT_NAME / "repo"
+            return Path(local_app_data) / "ia-dev-toolkit"
+        return Path.home() / "AppData" / "Local" / "ia-dev-toolkit"
+    return Path.home() / ".local" / "share" / "ia-dev-toolkit"
+
+
+def get_installations_file():
+    """Obtener ruta del archivo de instalaciones."""
+    return get_temp_repo_path() / "instalacion.json"
+
+
+def load_installations():
+    """Cargar instalaciones desde JSON."""
+    import json
+    installations_file = get_installations_file()
+    if not installations_file.exists():
+        return []
+    try:
+        data = json.loads(installations_file.read_text(encoding="utf-8"))
+        return data.get("installations", [])
+    except Exception:
+        return []
+
+
+def save_installation(project_path, platform_dir, components):
+    """Guardar una instalación en el JSON."""
+    import json
+    from datetime import datetime
+
+    installations_file = get_installations_file()
+    installations_file.parent.mkdir(parents=True, exist_ok=True)
+
+    installations = load_installations()
+
+    existing_idx = None
+    for i, inst in enumerate(installations):
+        if inst["project_path"] == str(project_path):
+            existing_idx = i
+            break
+
+    new_install = {
+        "project_path": str(project_path),
+        "platform": platform_dir,
+        "installed_at": datetime.now().isoformat(),
+        "components": components
+    }
+
+    if existing_idx is not None:
+        installations[existing_idx] = new_install
+    else:
+        installations.append(new_install)
+
+    data = {
+        "version": get_installed_version(),
+        "last_update": datetime.now().isoformat(),
+        "installations": installations
+    }
+    installations_file.write_text(json.dumps(data, indent=2), encoding="utf-8")
+
+
+def update_installations_version(version):
+    """Actualizar versión en todas las instalaciones."""
+    import json
+    from datetime import datetime
+
+    installations_file = get_installations_file()
+    if not installations_file.exists():
+        return
+
+    try:
+        data = json.loads(installations_file.read_text(encoding="utf-8"))
+        data["version"] = version
+        data["last_update"] = datetime.now().isoformat()
+        installations_file.write_text(json.dumps(data, indent=2), encoding="utf-8")
+    except Exception:
+        pass
+
+
+def reinstall_components(installation, cache_path):
+    """Reinstalar componentes desde cache al proyecto."""
+    import shutil
+    project_path = Path(installation["project_path"])
+    platform_dir = installation.get("platform", ".opencode")
+    components = installation.get("components", {})
+
+    if not project_path.exists():
+        print(f"  ⚠️  Proyecto no encontrado: {project_path}")
+        return False
+
+    installed = {"tools": 0, "commands": 0, "skills": 0}
+
+    # Tools
+    cache_tools = cache_path / "tools"
+    project_tools = project_path / platform_dir / "tools"
+    if cache_tools.exists():
+        project_tools.mkdir(parents=True, exist_ok=True)
+        for item in cache_tools.iterdir():
+            if item.is_file() and item.suffix in (".ts", ".js", ".py", ".sh"):
+                dst = project_tools / item.name
+                if not dst.exists():
+                    shutil.copy2(item, dst)
+                    installed["tools"] += 1
+            elif item.is_dir() and item.name == "scripts":
+                scripts_dst = project_tools / "scripts"
+                scripts_dst.mkdir(exist_ok=True)
+                for script in item.iterdir():
+                    if script.is_file() and script.suffix in (".ts", ".js", ".py", ".sh"):
+                        dst = scripts_dst / script.name
+                        if not dst.exists():
+                            shutil.copy2(script, dst)
+                            installed["tools"] += 1
+
+    # Commands
+    cache_commands = cache_path / "commands"
+    project_commands = project_path / platform_dir / "commands"
+    if cache_commands.exists():
+        project_commands.mkdir(parents=True, exist_ok=True)
+        for item in cache_commands.iterdir():
+            if item.is_file() and item.suffix == ".md":
+                dst = project_commands / item.name
+                if not dst.exists():
+                    shutil.copy2(item, dst)
+                    installed["commands"] += 1
+
+    # Skills (symlinks)
+    cache_skills = cache_path / "skills"
+    project_skills = project_path / platform_dir / "skills"
+    if cache_skills.exists() and project_skills.exists():
+        for item in cache_skills.iterdir():
+            if item.is_dir():
+                dst = project_skills / item.name
+                if not dst.exists():
+                    dst.symlink_to(item)
+                    installed["skills"] += 1
+
+    total = sum(installed.values())
+    if total > 0:
+        print(f"  ✅ Instalados: {installed['tools']} tools, {installed['commands']} commands, {installed['skills']} skills")
+    else:
+        print(f"  ✅ Todos los componentes están actualizados")
+
+    return True
 
 
 def ensure_instalar():
@@ -515,12 +670,10 @@ def cmd_status(project_path=None):
 
 
 def cmd_update():
-    """Actualizar el toolkit y el CLI diat desde GitHub."""
-    print(f"\n{'═' * 70}")
-    print(f"  🔄 ACTUALIZANDO IA DEV TOOLKIT")
-    print(f"{'═' * 70}\n")
+    """Actualizar el toolkit y reinstalar en proyectos registrados."""
+    print_banner()
 
-    # 1. Obtener versión remota antes de actualizar
+    # 1. Obtener versión remota
     remote_version = get_remote_version()
 
     # 2. Actualizar CLI diat
@@ -534,11 +687,9 @@ def cmd_update():
         response = urllib.request.urlopen(req, timeout=30)
         new_diat = response.read()
 
-        # Guardar backup
         backup_path = diat_path.with_suffix(".bak")
         backup_path.write_bytes(diat_path.read_bytes())
 
-        # Actualizar
         diat_path.write_bytes(new_diat)
         diat_path.chmod(0o755)
         print(f"  ✅ CLI diat actualizado")
@@ -557,7 +708,6 @@ def cmd_update():
         import shutil
         shutil.rmtree(temp_repo_path)
 
-    # Importar y ejecutar descarga
     instalar_dir = ensure_instalar()
     if not instalar_dir:
         print(f"\n  ❌ No se pudo obtener instalar.py")
@@ -568,11 +718,34 @@ def cmd_update():
         from instalar import download_from_github
         result = download_from_github(temp_repo_path)
         if result:
-            print(f"\n  ✅ Componentes actualizados")
+            print(f"\n  ✅ Componentes descargados")
         else:
-            print(f"\n  ❌ Error al actualizar componentes")
+            print(f"\n  ❌ Error al descargar componentes")
+            return
     except Exception as e:
         print(f"\n  ❌ Error: {e}")
+        return
+
+    # 5. Reinstalar en proyectos registrados
+    installations = load_installations()
+
+    if not installations:
+        print(f"\n  ℹ️  No hay instalaciones registradas")
+        print(f"     Ejecuta `diat --install /ruta/proyecto` para registrar")
+    else:
+        print(f"\n  📋 Reinstalando en {len(installations)} proyecto(s) registrado(s)...")
+
+        for inst in installations:
+            project_path = Path(inst["project_path"])
+            if project_path.exists():
+                print(f"\n  📦 {project_path}...")
+                reinstall_components(inst, temp_repo_path)
+            else:
+                print(f"\n  ⚠️  Proyecto no encontrado: {project_path}")
+
+    # 6. Actualizar versión en instalacion.json
+    if remote_version:
+        update_installations_version(remote_version)
 
     print(f"\n{'═' * 70}")
     print(f"  ✅ ACTUALIZACIÓN COMPLETADA")
@@ -582,24 +755,43 @@ def cmd_update():
 
 def cmd_install():
     """Instalar componentes en un proyecto."""
-    # Verificar modo no interactivo
     non_interactive = "--non-interactive" in sys.argv or "-ni" in sys.argv
 
     # Determinar ruta
     if len(sys.argv) > 2 and not sys.argv[2].startswith("-"):
         project_path = Path(sys.argv[2]).resolve()
     else:
-        project_path = Path.cwd().resolve()
+        # Sin ruta — instalación global
+        print_banner()
+        print(f"  ⚠️  No se especificó ruta. Los componentes se instalarán")
+        print(f"     globalmente en ~/.local/share/ia-dev-toolkit/\n")
+
+        print(f"  ¿En qué agente trabajas?\n")
+        print(f"    [1] OpenCode")
+        print(f"    [2] Claude Code")
+        print(f"    [3] Gemini CLI")
+        print(f"    [4] Codex")
+        print(f"    [5] Otro\n")
+
+        choice = input("  Selección: ").strip()
+
+        if choice == "1":
+            project_path = Path.home() / ".opencode"
+            print(f"\n  ℹ️  OpenCode seleccionado")
+        elif choice in ["2", "3", "4", "5"]:
+            print(f"\n  ⚠️  Implementación en curso. Disculpa las molestias.")
+            return
+        else:
+            print(f"  ❌ Selección inválida")
+            return
 
     print(f"\n{'═' * 70}")
     print(f"  📦 INSTALAR COMPONENTES")
     print(f"  📍 Ruta: {project_path}")
     print(f"{'═' * 70}\n")
 
-    # Verificar que la ruta existe
     if not project_path.exists():
         if non_interactive:
-            # En modo no interactivo, crear automáticamente
             project_path.mkdir(parents=True, exist_ok=True)
             print(f"  ✅ Directorio creado: {project_path}")
         else:
@@ -609,13 +801,11 @@ def cmd_install():
                 return
             project_path.mkdir(parents=True, exist_ok=True)
 
-    # Obtener instalar.py
     instalar_dir = ensure_instalar()
     if not instalar_dir:
         print("❌ No se pudo obtener instalar.py")
         return
 
-    # Ejecutar instalador
     sys.path.insert(0, instalar_dir)
     from instalar import main as install_main
     sys.argv = ["instalar.py", str(project_path)]

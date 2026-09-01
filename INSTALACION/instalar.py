@@ -149,13 +149,79 @@ COMMAND_DESCRIPTIONS = {
     "workflow-sac": "Ejecutar workflow SAC fase por fase",
 }
 
-# Dependencias de componentes: qué tools y commands se instalan automáticamente
+# Sistema de dependencias unificado
 COMPONENT_DEPENDENCIES = {
     "workflows": {
-        "tools": ["workflow-sac", "workflow-discover"],
-        "commands": ["workflow-sac"],
+        "definir-vision-producto": {
+            "requires": {"tools": [], "commands": [], "skills": [], "plugins": []},
+            "optional": {"skills": ["tomar-contexto"]}
+        },
+        "definir-arquitectura-solucion": {
+            "requires": {"tools": ["workflow-sac", "workflow-discover"], "commands": ["workflow-sac"], "skills": [], "plugins": []},
+            "optional": {"skills": ["crear-adr"]}
+        },
+        "gestionar-backlog-roadmap": {
+            "requires": {"tools": ["workflow-sac", "workflow-discover"], "commands": ["workflow-sac"], "skills": [], "plugins": []},
+            "optional": {"skills": ["sincronizar-backlog"]}
+        }
+    },
+    "agents": {
+        "PO": {
+            "requires": {"skills": ["refinar-hu", "validar-hu"], "tools": [], "commands": [], "plugins": []},
+            "optional": {"skills": ["sincronizar-backlog", "planificar-hu"]}
+        },
+        "ARQUITECTO-SOFTWARE": {
+            "requires": {"skills": ["crear-adr", "init-reglas-arquitectonicas"], "tools": [], "commands": [], "plugins": []},
+            "optional": {"skills": ["analizar-calidad-codigo"]}
+        },
+        "ARQUITECTO-DEVOPS": {
+            "requires": {"skills": [], "tools": [], "commands": [], "plugins": []},
+            "optional": {"skills": ["tomar-contexto"]}
+        },
+        "DESARROLLADOR": {
+            "requires": {"skills": ["git-branch-commit"], "tools": [], "commands": [], "plugins": []},
+            "optional": {"skills": ["analizar-calidad-codigo"]}
+        }
+    },
+    "skills": {
+        "validar-ca": {
+            "requires": {"skills": ["planificar-hu"], "workflows": [], "tools": [], "commands": [], "plugins": []},
+            "optional": {"skills": ["registrar-hallazgo"]}
+        },
+        "ejecutar-plan": {
+            "requires": {"skills": ["planificar-hu"], "workflows": [], "tools": [], "commands": [], "plugins": []},
+            "optional": {}
+        },
+        "planificar-hu": {
+            "requires": {"skills": ["tomar-contexto"], "workflows": [], "tools": [], "commands": [], "plugins": []},
+            "optional": {}
+        },
+        "refinar-hu": {
+            "requires": {"skills": ["tomar-contexto"], "workflows": [], "tools": [], "commands": [], "plugins": []},
+            "optional": {}
+        }
     }
 }
+
+
+def resolve_dependencies(component_type, component_name, installed_components):
+    """Resolver todas las dependencias de un componente."""
+    deps = COMPONENT_DEPENDENCIES.get(component_type, {}).get(component_name, {})
+    required = deps.get("requires", {})
+    optional = deps.get("optional", {})
+
+    missing = {
+        "tools": [t for t in required.get("tools", [])
+                  if t not in installed_components.get("tools", [])],
+        "commands": [c for c in required.get("commands", [])
+                     if c not in installed_components.get("commands", [])],
+        "skills": [s for s in required.get("skills", [])
+                   if s not in installed_components.get("skills", [])],
+        "plugins": [p for p in required.get("plugins", [])
+                    if p not in installed_components.get("plugins", [])]
+    }
+
+    return missing, optional
 
 # Dependencias de skills
 SKILL_DEPENDENCIES = {
@@ -1199,8 +1265,63 @@ def main():
         else:
             print_error("Opción inválida")
 
+    # Guardar registro de instalación
+    from datetime import datetime
+    components = {
+        "skills": installed_skills,
+        "agents": installed_agents,
+        "workflows": installed_workflows,
+        "tools": installed_tools,
+        "commands": installed_commands,
+        "config": sac_config_installed
+    }
+    save_installation(project_path, skills_target.parent.name, components)
+
     print_summary(project_path, installed_skills, installed_agents, installed_workflows, installed_tools, sac_config_installed)
     return True
+
+
+def save_installation(project_path, platform_dir, components):
+    """Guardar una instalación en instalacion.json."""
+    import json
+    from datetime import datetime
+
+    installations_dir = get_temp_repo_path()
+    installations_dir.mkdir(parents=True, exist_ok=True)
+    installations_file = installations_dir / "instalacion.json"
+
+    installations = []
+    if installations_file.exists():
+        try:
+            data = json.loads(installations_file.read_text(encoding="utf-8"))
+            installations = data.get("installations", [])
+        except Exception:
+            installations = []
+
+    existing_idx = None
+    for i, inst in enumerate(installations):
+        if inst["project_path"] == str(project_path):
+            existing_idx = i
+            break
+
+    new_install = {
+        "project_path": str(project_path),
+        "platform": platform_dir,
+        "installed_at": datetime.now().isoformat(),
+        "components": components
+    }
+
+    if existing_idx is not None:
+        installations[existing_idx] = new_install
+    else:
+        installations.append(new_install)
+
+    data = {
+        "version": "0.5.1",
+        "last_update": datetime.now().isoformat(),
+        "installations": installations
+    }
+    installations_file.write_text(json.dumps(data, indent=2), encoding="utf-8")
 
 
 def ensure_repo_available():
@@ -1408,10 +1529,27 @@ def download_from_github(dest_path):
         except Exception:
             print_warning("No se encontró carpeta workflows")
 
+        # 7. Descargar commands (sin filtro, como tools)
+        print_info("Descargando commands...")
+        commands_count = 0
+        try:
+            commands_items = github_api_get(f"{api_base}/commands")
+            if isinstance(commands_items, list):
+                (dest_path / "commands").mkdir(parents=True, exist_ok=True)
+                for item in commands_items:
+                    if item["type"] == "file" and item["name"].endswith(".md"):
+                        content = github_api_get_raw(item["download_url"])
+                        (dest_path / "commands" / item["name"]).write_bytes(content)
+                        commands_count += 1
+                        print_success(item["name"])
+        except Exception:
+            print_warning("No se encontró carpeta commands")
+
         # Resumen
         print_info(f"Resumen: {skills_ready}/{skills_total} skills, "
                    f"{agents_ready}/{agents_total} agents, "
-                   f"{workflows_ready}/{workflows_total} workflows")
+                   f"{workflows_ready}/{workflows_total} workflows, "
+                   f"{commands_count} commands")
 
         return dest_path
 
