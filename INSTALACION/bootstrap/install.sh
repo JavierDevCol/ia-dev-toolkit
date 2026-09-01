@@ -35,30 +35,28 @@ NC='\033[0m'
 # ============================================
 print_banner() {
     echo ""
-    echo -e "${CYAN}╔═══════════════════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${CYAN}║                                                                           ║${NC}"
-    echo -e "${CYAN}║   ⢠⢤⡀⠀⠀⠀⠀⢀⠏⠀⠹⣄⠀⠀⠀⠀⠀⢀⡴⠋⢳⠀⠀⠀⠀      ██████╗ ██╗ █████╗ ████████╗   ║${NC}"
-    echo -e "${CYAN}║   ⡼⠀⢠⠀⠈⢣⡀⡼⠀⢠⠀⠈⢣⡀⠀⠀⡴⠋⠀⡀⠘⡆⠀⠀⠀      ██╔══██╗██║██╔══██╗╚══██╔══╝   ║${NC}"
-    echo -e "${CYAN}║   ⢠⠃⠀⣼⣷⠀⠀⠙⠒⠚⠛⠛⠛⠓⠒⠦⠚⠀⢀⣴⡇⠀⡇⠀⠀      ██║  ██║██║███████║   ██║       ║${NC}"
-    echo -e "${CYAN}║   ⡼⠀⠀⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠙⠃⠀⣧⠀      ██║  ██║██║██╔══██║   ██║       ║${NC}"
-    echo -e "${CYAN}║  ⣀⡠⠤⢴⡷⠤⢤⡤⠤⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣹⠀      ██████╔╝██║██║  ██║   ██║       ║${NC}"
-    echo -e "${CYAN}║   ⢸⡄⠙⢷⡀⠙⢦⡘⢧⣷⠚⠉⠉⠛⠒⣾⠉⠳⡄⠙⢦⡀⠈⠳⣄⠙⢾⡄  ╚═════╝ ╚═╝╚═╝  ╚═╝   ╚═╝   ║${NC}"
-    echo -e "${CYAN}║   ⠸⡝⢧⡀⠙⢦⡝⠀⣠⣤⣤⠀⢹⠳⣄⠙⢦⡀⠉⠳⣄⠈⠑⢄⠈⠳⣼⠁                                ║${NC}"
-    echo -e "${CYAN}║   ⠽⣄⠙⢦⡀⠙⣦⠞⠁⠀⠈⢻⠋⠀⠀⢣⡈⠳⣄⠙⢦⡀⠈⠳⣄⠀⠙⣶⣃⣀⣀⣀⣄                  ║${NC}"
-    echo -e "${CYAN}║   ⣀⣀⣀⣀⣀⣀⣻⡶⣿⣦⣤⣿⣦⣤⠿⠟⠃⠀⠀⠀⠀⢸⠀⠀⠀⠀⠻⢦⣜⣷⣄⣻⣦⣀⣸⣷⠟⠃     ║${NC}"
-    echo -e "${CYAN}║   ⠉⠉⠉⠉⠉⠉⢹⡁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣘⠀⠀⠀⠀⠀⠀⠈⠉⠙⠛⠛⠉⠩⢼⠒⠒⠲⠤⠤⠤║${NC}"
-    echo -e "${CYAN}║   ⠀⠀⠀⠀⠀⠀⠀⠀⢳⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⠇⠀⠀⠀⠀⠀⠀⠀║${NC}"
-    echo -e "${CYAN}║   ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⠢⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⠴⠃⠀⠀⠀⠀⠀⠀⠀⠀║${NC}"
-    echo -e "${CYAN}║   ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠓⠢⠤⣀⣀⡀⠀⠀⠀⠀⠀⠀⠀⣀⣀⣀⡤⠤⠒⠊⠁⠀⠀⠀⠀⠀⠀⠀⠀║${NC}"
-    echo -e "${CYAN}║   ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠉⠉⠉⠉⠉⠉⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀║${NC}"
-    echo -e "${CYAN}║                                                                           ║${NC}"
-    echo -e "${CYAN}║                         AI DEVELOPER TOOLKIT                              ║${NC}"
-    echo -e "${CYAN}║                                                                           ║${NC}"
-    echo -e "${CYAN}║        ┌─────────────────────────────────────────────────────────┐        ║${NC}"
-    echo -e "${CYAN}║        │  Skills · Agents · Workflows · Tools · Commands         │        ║${NC}"
-    echo -e "${CYAN}║        └─────────────────────────────────────────────────────────┘        ║${NC}"
-    echo -e "${CYAN}║                                                                           ║${NC}"
-    echo -e "${CYAN}╚═══════════════════════════════════════════════════════════════════════════╝${NC}"
+    echo -e "${CYAN}⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⢤⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀${NC}"
+    echo -e "${CYAN}⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⠏⠀⠹⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⡴⠋⢳⠀⠀⠀⠀⠀⠀⠀⠀⠀${NC}"
+    echo -e "${CYAN}⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡼⠀⢠⠀⠈⢣⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡴⠋⠀⡀⠘⡆⠀⠀⠀⠀⠀⠀⠀⠀${NC}"
+    echo -e "${CYAN}⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⠃⠀⣼⣷⠀⠀⠙⠒⠚⠛⠛⠛⠛⠛⠓⠒⠒⠦⠚⠀⢀⣴⡇⠀⡇⠀⠀⠀⠀⠀⠀⠀⠀${NC}"
+    echo -e "${CYAN}⠀⠀⠀⠀⠀⠀⠀⠀⠀⡼⠀⠀⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠙⠃⠀⣧⠀⠀⠀⠀⠀⠀⠀⠀${NC}"
+    echo -e "${CYAN}⠀⠀⠀⠀⠀⣀⡠⠤⢴⡷⠤⢤⡤⠤⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣹⠀⠀⠀⠀⠀⠀⠀⠀${NC}"
+    echo -e "${CYAN}⠀⠀⠀⢠⢾⣅⠙⢦⡀⠙⢦⡀⠙⢦⡈⠻⣕⢦⡀⠀⠀⠀⠀⠀⠀⣠⠴⢶⡋⠙⠫⣍⠙⢯⡉⠙⢯⡲⣄⠀⠀⠀⠀${NC}"
+    echo -e "${CYAN}⠀⠀⠀⢸⡄⠙⢷⡀⠙⢦⡀⠙⢦⡀⠙⢦⡘⢧⣷⠚⠉⠉⠛⠒⣾⠉⠳⡄⠙⢦⡀⠈⠳⣄⠉⠢⣄⠙⢾⡄⠀⠀⠀${NC}"
+    echo -e "${CYAN}⠀⠀⠀⠸⡝⢧⡀⠙⢦⡀⠙⢦⡀⠙⢦⡀⠙⢦⡝⠀⣠⣤⣤⠀⢹⠳⣄⠙⢦⡀⠉⠳⣄⠈⠑⢄⠈⠳⣼⠁⠀⠀⠀${NC}"
+    echo -e "${CYAN}⠁⠒⠒⠦⠽⣄⠙⢦⡀⠙⢦⡀⠙⢷⣄⠙⣦⠞⠁⠀⠈⢻⠋⠀⠀⢣⡈⠳⣄⠙⢦⡀⠈⠳⣄⠀⠙⣶⣃⣀⣀⣀⣄${NC}"
+    echo -e "${CYAN}⣀⣀⣀⣀⣀⣀⣻⡶⣿⣦⣤⣿⣦⣤⠿⠟⠃⠀⠀⠀⠀⢸⠀⠀⠀⠀⠻⢦⣜⣷⣄⣻⣦⣀⣸⣷⠟⠃⠀⠀⠀⠀⠀${NC}"
+    echo -e "${CYAN}⠉⠉⠉⠉⠉⠉⢹⡁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣘⠀⠀⠀⠀⠀⠀⠈⠉⠙⠛⠛⠉⠩⢼⠒⠒⠲⠤⠤⠤⠀${NC}"
+    echo -e "${CYAN}⠀⠀⠀⠀⠀⠀⠀⢳⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⠇⠀⠀⠀⠀⠀⠀⠀${NC}"
+    echo -e "${CYAN}⠀⠀⠀⠀⠀⠀⠀⠀⠙⠢⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⠴⠃⠀⠀⠀⠀⠀⠀⠀⠀${NC}"
+    echo -e "${CYAN}⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠓⠢⠤⣀⣀⡀⠀⠀⠀⠀⠀⠀⠀⣀⣀⣀⡤⠤⠒⠊⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀${NC}"
+    echo -e "${CYAN}⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠉⠉⠉⠉⠉⠉⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀${NC}"
+    echo ""
+    echo -e "${CYAN}                         AI DEVELOPER TOOLKIT${NC}"
+    echo ""
+    echo -e "${CYAN}        ┌─────────────────────────────────────────────────────────┐${NC}"
+    echo -e "${CYAN}        │  Skills · Agents · Workflows · Tools · Commands         │${NC}"
+    echo -e "${CYAN}        └─────────────────────────────────────────────────────────┘${NC}"
     echo ""
 }
 
@@ -90,8 +88,8 @@ check_prerequisites() {
     elif command -v python &> /dev/null; then
         PYTHON_CMD="python"
     else
-        print_error "Python no está instalado"
-        print_info "Instala Python 3.8+ desde: https://www.python.org/downloads/"
+        print_error "Primero instala Python"
+        print_info "Descárgalo desde: https://www.python.org/downloads/"
         return 1
     fi
 
@@ -143,19 +141,16 @@ install_diat() {
         SHELL_RC="$HOME/.bash_profile"
     fi
 
-    if [[ ":$PATH:" != *":$BIN_PATH:"* ]]; then
-        if [ -n "$SHELL_RC" ]; then
-            if ! grep -q ".local/bin" "$SHELL_RC" 2>/dev/null; then
-                echo "" >> "$SHELL_RC"
-                echo "# ia-dev-toolkit" >> "$SHELL_RC"
-                echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$SHELL_RC"
-                print_success "PATH configurado"
-            fi
+    if [ -n "$SHELL_RC" ]; then
+        if grep -q ".local/bin" "$SHELL_RC" 2>/dev/null; then
+            sed -i '/# ia-dev-toolkit/d;/export PATH="\$HOME\/.local\/bin:\$PATH"/d' "$SHELL_RC"
         fi
-        export PATH="$BIN_PATH:$PATH"
-    else
-        print_info "PATH ya configurado"
+        echo "" >> "$SHELL_RC"
+        echo "# ia-dev-toolkit" >> "$SHELL_RC"
+        echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$SHELL_RC"
+        print_success "PATH configurado"
     fi
+    export PATH="$BIN_PATH:$PATH"
 
     echo ""
     return 0
