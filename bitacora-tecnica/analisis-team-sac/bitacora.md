@@ -2,7 +2,7 @@
 - **ID:** 2026-09-02-analisis-team-sac
 - **Fecha inicio:** 2026-09-02 00:21
 - **Última actualización:** 2026-09-02 00:21
-- **Estado:** En progreso (para retomar mañana)
+- **Estado:** ✅ Cerrada — decisiones tomadas (Team SAC expandido e implementado; agentes sin deps por ahora; sub-agentes pausados en gap-instalador-sub-agentes).
 - **Rama de Trabajo:** `main`
 - **Tags:** `team-sac`, `dependencias`, `grafo`, `sub-agentes`, `analisis`
 - **Ambiente:** Local
@@ -104,10 +104,10 @@ duras/reales. Falta decidir si crece para reflejar las relaciones de la sección
 (sub-agentes, agentes↔skills). Análisis documentado; decisiones pendientes.
 
 ### Pendientes
-- [ ] Decidir si `skills → sub-agentes validador-*` entra al grafo (y cómo mapearlo).
-- [ ] Definir el set canónico de "skills SAC" (¿6 o más?).
-- [ ] Decidir criterio para `agentes → skills` (invocación estricta vs rol funcional).
-- [ ] Conectar con el gap de instalación de `prompts-sub-agentes/`.
+- [~] PAUSADO: los sub-agentes se difieren a la bitácora gap-instalador-sub-agentes (no entran al grafo por ahora).
+- [x] HECHO: set SAC expandido al ciclo de vida completo (12 skills; +validar-hu, tomar-contexto, sincronizar-backlog, crear-adr, git-branch-commit, bitacora-tecnica). Implementado en diat.
+- [x] DECIDIDO: agentes SIN deps de skills por ahora (no las invocan literalmente); revisar si en el futuro las invocan.
+- [~] Sub-agentes (instalación + posible dep) quedan en gap-instalador-sub-agentes (pausado).
 
 ### Bloqueantes
 - Ninguno técnico. Son decisiones de diseño del grafo.

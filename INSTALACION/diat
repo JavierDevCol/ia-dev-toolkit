@@ -25,8 +25,15 @@ from diatlib import menu
 from diatlib import ui
 
 PLATFORM_DEFAULT = ".opencode"
-SAC_SKILLS = ["analizar-calidad-codigo", "ejecutar-plan", "init-reglas-arquitectonicas",
-              "planificar-hu", "refinar-hu", "registrar-hallazgo"]
+# Skills de la metodología SAC (ciclo de vida de HU + arquitectura/calidad + soporte).
+# Nota: validar-ca entra por dependencia de ejecutar-plan.
+SAC_SKILLS = [
+    "tomar-contexto",                                              # contexto del proyecto
+    "refinar-hu", "validar-hu", "planificar-hu", "ejecutar-plan",  # ciclo de vida de HU
+    "sincronizar-backlog", "registrar-hallazgo",                   # backlog y hallazgos
+    "init-reglas-arquitectonicas", "crear-adr", "analizar-calidad-codigo",  # arquitectura/calidad
+    "git-branch-commit", "bitacora-tecnica",                       # soporte dev
+]
 
 
 # ============================================================
