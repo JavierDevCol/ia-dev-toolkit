@@ -49,6 +49,21 @@ COMPONENT_LAYOUT = {
     "plugins":   ("file", ".md"),
 }
 
+# Runtime del sistema SAC (workflows + config + artifacts). Agnóstico al agente.
+SAC_DIR = ".SAC"
+
+
+def component_dest(ctype, project, platform):
+    """Directorio destino de un tipo de componente DENTRO del proyecto.
+    - workflows -> .SAC/workflows (runtime SAC; lo lee la tool workflow-sac).
+    - skills/agents/tools/commands -> plataforma del agente (.opencode).
+    (config se instala aparte en .SAC/config vía install_sac_config.)"""
+    project = Path(project)
+    if ctype == "workflows":
+        return project / SAC_DIR / "workflows"
+    return project / platform / ctype
+
+
 # ============================================================
 # RUTAS
 # ============================================================

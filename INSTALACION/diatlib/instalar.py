@@ -19,7 +19,7 @@ def install_component(ctype, name, cache, project, platform):
     """Copia un componente del cache al proyecto. Sobrescribe siempre.
     La forma (carpeta vs archivo) y la extensión salen de COMPONENT_LAYOUT."""
     cache, project = Path(cache), Path(project)
-    dest_base = project / platform / ctype
+    dest_base = paths.component_dest(ctype, project, platform)   # workflows -> .SAC/, resto -> .opencode/
     dest_base.mkdir(parents=True, exist_ok=True)
     kind, spec = paths.COMPONENT_LAYOUT[ctype]         # dir: marcador · file: extensión
 
@@ -44,43 +44,42 @@ def install_component(ctype, name, cache, project, platform):
 # CONFIG SAC  (instalación + resolución de placeholders + entrevista)
 # ============================================================
 def install_sac_config(cache, project, platform, interactive=True):
-    """Instala la config SAC.
+    """Instala la config SAC en .SAC/config/ (runtime SAC, agnóstico al agente).
     - Si ya existe (CONFIG_USER.yaml presente): preserva, no reprocesa.
-    - Si es nueva: copia, resuelve {project-root} en CONFIG_SYSTEM.yaml y
+    - Si es nueva: copia los .yaml, resuelve {project-root} en CONFIG_SYSTEM.yaml y
       entrevista para rellenar CONFIG_USER.yaml.
+    (mcp-servers.json NO va aquí: es config de opencode/MCP, se maneja aparte.)
     Devuelve True si había config para instalar, False si no."""
-    src = Path(cache) / "config"
+    src = Path(cache) / "config" / "config"            # los .yaml del sistema SAC
     if not src.exists():
         return False
     project = Path(project)
-    dst = project / platform / "config"
+    dst = project / paths.SAC_DIR / "config"           # -> <proyecto>/.SAC/config/
 
-    already = bool(list(dst.rglob("CONFIG_USER.yaml"))) if dst.exists() else False
+    already = (dst / "CONFIG_USER.yaml").exists()
 
     # Copiar SOLO archivos nuevos (preserva respuestas previas)
     dst.mkdir(parents=True, exist_ok=True)
-    for f in src.rglob("*"):
-        if f.is_file():
-            target = dst / f.relative_to(src)
-            if target.exists():
-                continue
-            target.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(f, target)
+    for f in src.iterdir():
+        if f.is_file() and not (dst / f.name).exists():
+            shutil.copy2(f, dst / f.name)
 
     if already:
         return True                                    # ya configurado: preservar
 
     # 1. Resolver {project-root} en CONFIG_SYSTEM.yaml
-    for sysf in dst.rglob("CONFIG_SYSTEM.yaml"):
-        txt = sysf.read_text(encoding="utf-8")
-        sysf.write_text(txt.replace("{project-root}", str(project)), encoding="utf-8")
+    sysf = dst / "CONFIG_SYSTEM.yaml"
+    if sysf.exists():
+        sysf.write_text(sysf.read_text(encoding="utf-8").replace(
+            "{project-root}", str(project)), encoding="utf-8")
 
     # 2. Entrevista -> rellenar CONFIG_USER.yaml
-    answers = _ask_project_config(project, interactive)
-    for userf in dst.rglob("CONFIG_USER.yaml"):
+    userf = dst / "CONFIG_USER.yaml"
+    if userf.exists():
+        answers = _ask_project_config(project, interactive)
         _fill_config_user(userf, answers)
-    print_success(f"Config SAC lista (usuario: {answers['nombre']}, "
-                  f"proyecto: {answers['proyecto']}, idioma: {answers['idioma']})")
+        print_success(f"Config SAC lista en .SAC/config/ (usuario: {answers['nombre']}, "
+                      f"proyecto: {answers['proyecto']}, idioma: {answers['idioma']})")
     return True
 
 
