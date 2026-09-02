@@ -22,8 +22,10 @@ def reinstall_components(installation, cache, dependencies=None):
              if isinstance(names, list) for n in names]
     with_config = bool(selection.get("config"))
 
+    # interactive=False: en --update no se re-entrevista (config ya respondida se preserva)
     return instalar.install_seeds(seeds, cache, project, platform,
-                                  with_config=with_config, dependencies=dependencies)
+                                  with_config=with_config, dependencies=dependencies,
+                                  interactive=False)
 
 
 def cmd_update():
