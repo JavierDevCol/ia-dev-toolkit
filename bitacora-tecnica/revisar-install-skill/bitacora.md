@@ -2,7 +2,7 @@
 - **ID:** 2026-08-27-revisar-install-skill
 - **Fecha inicio:** 2026-08-27
 - **Última actualización:** 2026-08-27
-- **Estado:** En progreso
+- **Estado:** ✅ Cerrada — fixes de instalación resueltos (assets raíz compartidos + excluir _archived; commit 533f880). Ítems restantes (cuenta plantillas en README, metadata compatibility, fix 4 user-level) son mejoras menores/separadas.
 - **Rama de Trabajo:** `main`
 - **Tags:** `instalador`, `skills`
 - **Ambiente:** Local
@@ -42,7 +42,7 @@ Se determinó que el instalador oficial es `INSTALACION/instalar.py`. El `instal
 ### Pendientes
 - [x] Eliminar `install-skill.sh` de la raíz (respaldo en EVIDENCIAS/)
 - [x] Depurar `config/plantillas/` (11 activas) + `CONFIG_SYSTEM.yaml` limpio
-- [ ] Aplicar fix 1+2+3 a `INSTALACION/instalar.py` (excluir `_archived`, copiar assets raíz, limpiar obsoletos)
+- [x] Aplicar fix 1+2+3 a `INSTALACION/diatlib/instalar.py` — HECHO: fix 2 (assets raíz compartidos, install_shared_skill_assets), fix 1 (excluir _archived), fix 3 (uninstall v2 limpia obsoletos).
 - [ ] Actualizar `INSTALACION/README.md` (cuenta de plantillas/plantillas SAC desactualizada)
 - [ ] Opcional: fix 4 (instalar a `~/.config/opencode/skills/`)
 - [ ] Definir metadata `compatibility:` para skills activas (categorización REAL en menú)
