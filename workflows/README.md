@@ -105,6 +105,71 @@ La tool **entrega y rastrea**; el agente **ejecuta** el markdown. Estado en `.SA
 
 **Flujo recomendado:** `read` → repetir[ `next` → `execute` → (aprobación) → `approve` ] → `status`.
 
+### Qué acciones tocan el estado
+
+El estado vive en `.SAC/workflow-state/<workflow>.state.json`.
+
+| Acción | ¿Escribe estado? | Qué cambia |
+|--------|:---:|-----------|
+| `list`, `read`, `read_phase`, `next`, `status` | ❌ (solo lee) | — |
+| `execute` | ✅ | `current_phase` = fase; `phases[fase].status = in_progress`. Si `gate: auto`, además `= approved`. |
+| `approve` | ✅ | `phases[fase].status = approved` + `approved_at`. |
+| `reset` | ✅ | reinicia todo el estado. |
+
+> Clave: **`next` NO modifica el estado** — solo lee el manifiesto + el estado y te dice cuál sigue. El estado avanza con `execute` (in_progress) y `approve` (approved).
+
+---
+
+## Ejemplo paso a paso (con el estado)
+
+Workflow `ejemplo` con 3 fases: `uno.md` (approval), `dos.md` (approval), `tres.md` (**auto**).
+
+```
+Agente                         Tool                      .SAC/workflow-state/ejemplo.state.json
+──────                         ────                      ──────────────────────────────────────
+1. read ejemplo         ──►    (devuelve workflow.md)    (sin cambios)
+
+2. next ejemplo         ──►    "(1/3) uno.md"            (sin cambios) — next solo LEE
+
+3. execute uno.md       ──►    inyecta fase + pide OK    current_phase: uno.md
+                                                          phases.uno.md: { status: in_progress }
+
+4. (usuario aprueba)
+   approve uno.md        ──►    "aprobada"                phases.uno.md: { status: approved, approved_at }
+
+5. next ejemplo         ──►    "(2/3) dos.md"            (sin cambios)
+
+6. execute dos.md       ──►    gate: uno.md ✅ → inyecta  current_phase: dos.md
+                                                          phases.dos.md: { status: in_progress }
+
+7. approve dos.md       ──►    "aprobada"                phases.dos.md: { status: approved }
+
+8. next ejemplo         ──►    "(3/3) tres.md [auto]"    (sin cambios)
+
+9. execute tres.md      ──►    gate: dos.md ✅ → inyecta  phases.tres.md: { status: in_progress }
+                               fase AUTO: se auto-aprueba → phases.tres.md: { status: approved }
+                                                          (no requiere approve del usuario)
+
+10. next ejemplo        ──►    "✅ completo (3/3)"        (sin cambios)
+```
+
+**Snapshot final** de `ejemplo.state.json`:
+```json
+{
+  "workflow": "ejemplo",
+  "started_at": "2026-09-02T…",
+  "current_phase": "tres.md",
+  "phases": {
+    "uno.md":  { "status": "approved", "started_at": "…", "approved_at": "…" },
+    "dos.md":  { "status": "approved", "started_at": "…", "approved_at": "…" },
+    "tres.md": { "status": "approved", "started_at": "…", "approved_at": "…" }
+  }
+}
+```
+
+Si en el paso 6 intentaras `execute tres.md` sin aprobar `dos.md`, la tool responde:
+`⛔ No puedes ejecutar 'tres.md': la fase anterior 'dos.md' (…) no está aprobada.`
+
 ---
 
 ## Crear un workflow nuevo
