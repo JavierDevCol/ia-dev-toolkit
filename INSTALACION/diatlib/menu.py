@@ -7,7 +7,7 @@ ANSI en Windows, redibuja en el sitio y cae a menú numérico si no hay TTY.
 import os
 import sys
 
-from .ui import CYAN, WHITE, DIM, NC, enable_ansi_windows
+from .ui import CYAN, WHITE, DIM, GREEN, NC, enable_ansi_windows
 
 # Constantes de tecla
 UP, DOWN, SPACE, ENTER, QUIT, CHAR, OTHER = (
@@ -89,15 +89,18 @@ def multiselect(title, options, preselected=None):
     cursor, prev = 0, 0
 
     def frame():
-        out = ["", f"{CYAN}{'═'*70}{NC}", f"  📦 {title}", f"{CYAN}{'═'*70}{NC}"]
+        out = ["", f"{CYAN}{'═'*70}{NC}",
+               f"  📦 {title}   {GREEN}({len(selected)} seleccionada/s){NC}",
+               f"{CYAN}{'═'*70}{NC}"]
         for i, (val, label, desc) in enumerate(options):
-            mark = "[X]" if val in selected else "[ ]"
+            mark = f"{GREEN}[X]{NC}" if val in selected else "[ ]"
             if i == cursor:
-                out.append(f"{WHITE}❯ {mark}  {label:<32}{NC} — {desc}")
+                out.append(f"{WHITE}❯{NC} {mark} {WHITE}{label:<30}{NC} {DIM}{desc}{NC}")
             else:
-                out.append(f"  {mark}  {label:<32} {DIM}— {desc}{NC}")
+                out.append(f"  {mark} {label:<30} {DIM}{desc}{NC}")
         out.append(f"{CYAN}{'─'*70}{NC}")
-        out.append("  [ESPACIO] toggle · ↑↓ mover · [T] todas · [N] ninguna · [V] volver")
+        out.append(f"  [ESPACIO] marcar · ↑↓ mover · [T] todas · [N] ninguna · "
+                   f"{GREEN}[ENTER] instalar{NC} · [V] volver")
         return out
 
     sys.stdout.write(HIDE)
@@ -145,7 +148,7 @@ def menu_select(title, options):
             else:
                 out.append(f"  {label:<20} {DIM}— {desc}{NC}")
         out.append(f"{CYAN}{'─'*60}{NC}")
-        out.append("  ↑↓ mover · [ESPACIO] seleccionar · [Q] salir")
+        out.append(f"  ↑↓ mover · {GREEN}[ENTER] elegir{NC} · [Q] salir")
         return out
 
     sys.stdout.write(HIDE)

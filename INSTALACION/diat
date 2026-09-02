@@ -55,17 +55,21 @@ def ensure_cache():
 # --install
 # ============================================================
 def _submenu_seeds(ctype, catalog):
+    """Devuelve lista de seeds, o None si el usuario eligió Volver/Salir."""
     names = sorted(catalog.get(ctype, []))
     if not names:
         ui.print_warning(f"No hay {ctype} disponibles")
-        return []
+        return None
     options = [(n, n, "") for n in names]
     sel = menu.multiselect(f"{ctype.upper()} DISPONIBLES", options)
-    return [(ctype, n) for n in (sel or [])]
+    if sel is None:                     # Volver / salir del submenú
+        return None
+    return [(ctype, n) for n in sel]
 
 
 def _gather_seeds(catalog):
-    """Menú principal -> devuelve (seeds, with_config)."""
+    """Menú principal en bucle. Devuelve (seeds, with_config).
+    V/Volver regresa aquí; solo Q en el menú principal cancela."""
     main_options = [
         ("skills", "Skills", "Seleccionar skills específicas"),
         ("agents", "Agents", "Seleccionar agentes específicos"),
@@ -73,29 +77,35 @@ def _gather_seeds(catalog):
         ("team_sac", "Team Dev SAC", "Skills SAC + Configuración"),
         ("kit", "Kit Completo", "Agents + Skills + Workflows + Config"),
     ]
-    choice = menu.menu_select("INSTALADOR MODULAR — ia-dev-toolkit", main_options)
-    if choice is None:
-        return [], False
+    while True:
+        choice = menu.menu_select("INSTALADOR MODULAR — ia-dev-toolkit", main_options)
+        if choice is None:
+            return [], False                        # salir del instalador
 
-    if choice in ("skills", "agents", "workflows"):
-        return _submenu_seeds(choice, catalog), False
+        if choice in ("skills", "agents", "workflows"):
+            seeds = _submenu_seeds(choice, catalog)
+            if seeds is None:                       # Volver -> re-menú
+                continue
+            if not seeds:                           # ENTER sin marcar nada -> re-menú
+                ui.print_info("No marcaste nada. Volviendo al menú...")
+                continue
+            return seeds, False
 
-    if choice == "team_sac":
-        seeds = [("skills", s) for s in SAC_SKILLS if s in catalog.get("skills", set())]
-        return seeds, True
+        if choice == "team_sac":
+            seeds = [("skills", s) for s in SAC_SKILLS if s in catalog.get("skills", set())]
+            return seeds, True
 
-    if choice == "kit":
-        print(f"\n  Se instalará TODO: "
-              f"{len(catalog.get('agents',[]))} agents, {len(catalog.get('skills',[]))} skills, "
-              f"{len(catalog.get('workflows',[]))} workflows + config")
-        if input("  ¿Continuar? (s/N): ").strip().lower() != "s":
-            return [], False
-        seeds = ([("agents", n) for n in catalog.get("agents", [])] +
-                 [("skills", n) for n in catalog.get("skills", [])] +
-                 [("workflows", n) for n in catalog.get("workflows", [])])
-        return seeds, True
-
-    return [], False
+        if choice == "kit":
+            print(f"\n  Se instalará TODO: "
+                  f"{len(catalog.get('agents',[]))} agents, "
+                  f"{len(catalog.get('skills',[]))} skills, "
+                  f"{len(catalog.get('workflows',[]))} workflows + config")
+            if input("  ¿Continuar? (s/N): ").strip().lower() != "s":
+                continue                            # volver al menú, no cancelar
+            seeds = ([("agents", n) for n in catalog.get("agents", [])] +
+                     [("skills", n) for n in catalog.get("skills", [])] +
+                     [("workflows", n) for n in catalog.get("workflows", [])])
+            return seeds, True
 
 
 def cmd_install(argv):
