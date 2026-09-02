@@ -123,14 +123,18 @@ function executePhase(workflowsDir: string, stateDir: string, workflow: string, 
   const stateFile = path.join(stateDir, `${workflow}.state.json`)
   const state = loadState(stateFile)
 
-  // GATE: no ejecutar una fase si alguna fase ANTERIOR (según workflow.md) no está aprobada
-  const order = getPhaseOrder(workflowsDir, workflow)
-  const idx = order.indexOf(phase)
+  const phases = getPhases(workflowsDir, workflow)
+  const idx = phases.findIndex(p => p.file === phase)
+  const meta: Phase = idx >= 0 ? phases[idx] : { file: phase }
+
+  // GATE: no ejecutar una fase si alguna fase ANTERIOR no está aprobada
   if (idx > 0) {
     for (let i = 0; i < idx; i++) {
-      if (state.phases[order[i]]?.status !== "approved") {
-        return `⛔ No puedes ejecutar '${phase}': la fase anterior '${order[i]}' no está aprobada.\n` +
-          `Ejecútala y apruébala primero → workflow-sac action=execute workflow=${workflow} phase=${order[i]}`
+      const prev = phases[i]
+      if (state.phases[prev.file]?.status !== "approved") {
+        return `⛔ No puedes ejecutar '${phase}': la fase anterior '${prev.file}'` +
+          `${prev.title ? ` (${prev.title})` : ""} no está aprobada.\n` +
+          `Ejecútala primero → workflow-sac action=execute workflow=${workflow} phase=${prev.file}`
       }
     }
   }
@@ -143,9 +147,23 @@ function executePhase(workflowsDir: string, stateDir: string, workflow: string, 
     started_at: new Date().toISOString()
   }
 
-  saveState(stateFile, state)
+  // `pre`: instrucción de comportamiento a inyectar ANTES del contenido de la fase
+  const body = meta.pre ? `> **Antes de esta fase:** ${meta.pre}\n\n${content}` : content
+  const heading = meta.title ? `## Fase: ${meta.title} (${phase})` : `## Fase: ${phase}`
+  const outNote = meta.output ? `\n\n*Salida esperada: ${meta.output}*` : ""
 
-  return `## Fase: ${phase}\n\n${content}\n\n---\n*Para aprobar: workflow-sac action=approve workflow=${workflow} phase=${phase}*`
+  let footer: string
+  if (meta.gate === "auto") {
+    // Fase automática: se aprueba sin pausa del usuario
+    state.phases[phase].status = "approved"
+    state.phases[phase].approved_at = new Date().toISOString()
+    footer = "*Fase automática (gate: auto): aprobada sin pausa. Usa next para continuar.*"
+  } else {
+    footer = `*Para aprobar: workflow-sac action=approve workflow=${workflow} phase=${phase}*`
+  }
+
+  saveState(stateFile, state)
+  return `${heading}\n\n${body}${outNote}\n\n---\n${footer}`
 }
 
 function approvePhase(stateDir: string, workflow: string, phase: string): string {
@@ -193,36 +211,72 @@ function resetWorkflow(stateDir: string, workflow: string): string {
   return `Progreso de '${workflow}' reiniciado.`
 }
 
-// Secuencia canónica de fases: las referencias ./fases/<archivo> en el ORDEN en que
-// aparecen en workflow.md. Independiente de cómo se llamen los archivos.
-function getPhaseOrder(workflowsDir: string, workflow: string): string[] {
+type Phase = { file: string; title?: string; gate?: string; output?: string; pre?: string }
+
+// Secuencia canónica de fases. Fuente de verdad: el manifiesto `phases:` del
+// frontmatter de workflow.md. Si no existe, cae al modo legacy (refs ./fases/ en prosa).
+function getPhases(workflowsDir: string, workflow: string): Phase[] {
   const wfFile = path.join(workflowsDir, workflow, "workflow.md")
   if (!fs.existsSync(wfFile)) return []
   const content = fs.readFileSync(wfFile, "utf-8")
-  const order: string[] = []
+
+  const manifest = parsePhasesManifest(content)
+  if (manifest.length > 0) return manifest
+
+  // Fallback legacy: ./fases/<archivo> en el ORDEN que aparecen en el body.
+  const phases: Phase[] = []
   const seen = new Set<string>()
   for (const m of content.matchAll(/\.\/fases\/([A-Za-z0-9_]+\.md)/g)) {
-    const file = m[1]
-    if (!seen.has(file)) { seen.add(file); order.push(file) }
+    if (!seen.has(m[1])) { seen.add(m[1]); phases.push({ file: m[1] }) }
   }
-  return order
+  return phases
 }
 
-// Devuelve la primera fase no aprobada (según el orden) con su nombre de archivo exacto.
-function nextPhase(workflowsDir: string, stateDir: string, workflow: string): string {
-  const order = getPhaseOrder(workflowsDir, workflow)
-  if (order.length === 0) {
-    return `No se encontraron fases (./fases/*.md) en el workflow.md de '${workflow}'`
-  }
-  const state = loadState(path.join(stateDir, `${workflow}.state.json`))
-  for (let i = 0; i < order.length; i++) {
-    const phase = order[i]
-    if (state.phases[phase]?.status !== "approved") {
-      return `Siguiente fase (${i + 1}/${order.length}): ${phase} — estado: ${state.phases[phase]?.status || "pendiente"}\n` +
-        `Ejecuta → workflow-sac action=execute workflow=${workflow} phase=${phase}`
+// Parser línea a línea del bloque `phases:` del frontmatter (sin dependencia de YAML).
+function parsePhasesManifest(content: string): Phase[] {
+  const fm = content.match(/^---\n([\s\S]*?)\n---/)
+  if (!fm) return []
+  const phases: Phase[] = []
+  let inPhases = false
+  let cur: Phase | null = null
+  for (const raw of fm[1].split("\n")) {
+    if (/^phases:\s*$/.test(raw)) { inPhases = true; continue }
+    if (!inPhases) continue
+    if (/^[^\s#-]/.test(raw)) break                       // otra clave top-level → fin del bloque
+    const item = raw.match(/^\s*-\s*file:\s*(.+?)\s*$/)
+    if (item) { cur = { file: item[1] }; phases.push(cur); continue }
+    const kv = raw.match(/^\s+([a-zA-Z_]+):\s*(.+?)\s*$/)
+    if (kv && cur) {
+      let v = kv[2]
+      if ((v[0] === '"' && v.endsWith('"')) || (v[0] === "'" && v.endsWith("'"))) v = v.slice(1, -1)
+      ;(cur as any)[kv[1]] = v
     }
   }
-  return `✅ Todas las fases de '${workflow}' están aprobadas (${order.length}/${order.length}). Workflow completo.`
+  return phases
+}
+
+function getPhaseOrder(workflowsDir: string, workflow: string): string[] {
+  return getPhases(workflowsDir, workflow).map(p => p.file)
+}
+
+// Devuelve la primera fase no aprobada (según el orden) con su nombre de archivo exacto,
+// su título y su gate (según el manifiesto).
+function nextPhase(workflowsDir: string, stateDir: string, workflow: string): string {
+  const phases = getPhases(workflowsDir, workflow)
+  if (phases.length === 0) {
+    return `No se encontraron fases en el workflow.md de '${workflow}'`
+  }
+  const state = loadState(path.join(stateDir, `${workflow}.state.json`))
+  for (let i = 0; i < phases.length; i++) {
+    const p = phases[i]
+    if (state.phases[p.file]?.status !== "approved") {
+      const gateNote = p.gate === "auto" ? " [auto]" : ""
+      return `Siguiente fase (${i + 1}/${phases.length}): ${p.file}` +
+        `${p.title ? ` — "${p.title}"` : ""}${gateNote} — estado: ${state.phases[p.file]?.status || "pendiente"}\n` +
+        `Ejecuta → workflow-sac action=execute workflow=${workflow} phase=${p.file}`
+    }
+  }
+  return `✅ Todas las fases de '${workflow}' están aprobadas (${phases.length}/${phases.length}). Workflow completo.`
 }
 
 function loadState(stateFile: string): any {
