@@ -3,15 +3,21 @@ import fs from "fs"
 import path from "path"
 
 export default tool({
-  description: `Gestiona workflows SAC. Acciones:
+  description: `Gestiona workflows SAC (ejecución fase por fase con gates). Acciones:
 - list: listar workflows disponibles desde .SAC/workflows/
-- read: leer workflow.md completo
+- read: leer workflow.md completo (pipeline y gates)
 - read_phase: leer una fase específica
 - next: obtener la siguiente fase pendiente (según el orden de workflow.md). Úsalo en vez de adivinar el nombre del archivo
-- execute: inyectar contexto de fase en el agente (lazy loading). Valida que las fases anteriores estén aprobadas
-- approve: marcar fase como aprobada
+- execute: inyectar el contexto de una fase en el agente (lazy loading). Bloquea si una fase anterior no está aprobada
+- approve: marcar una fase como aprobada
 - status: ver progreso del workflow
-- reset: reiniciar progreso`,
+- reset: reiniciar progreso
+
+Flujo para EJECUTAR un workflow completo:
+1) read  → conocer el pipeline y sus gates.
+2) Repetir: next → execute (la fase EXACTA que devolvió next) → presentar al usuario → approve tras su OK.
+3) Terminar cuando next indique que todas las fases están aprobadas.
+NO adivines el nombre del archivo de fase: usa SIEMPRE next. execute rechaza si te saltas el orden.`,
 
   args: {
     action: tool.schema.enum([
