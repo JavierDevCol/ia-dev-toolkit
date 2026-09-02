@@ -74,8 +74,8 @@ def _gather_seeds(catalog):
         ("skills", "Skills", "Seleccionar skills específicas"),
         ("agents", "Agents", "Seleccionar agentes específicos"),
         ("workflows", "Workflows", "Workflows (+ tools + commands automáticos)"),
-        ("team_sac", "Team Dev SAC", "Skills SAC + Configuración"),
-        ("kit", "Kit Completo", "Agents + Skills + Workflows + Config"),
+        ("team_sac", "Team Dev SAC", "Stack SAC: agentes + workflows + skills SAC + config"),
+        ("kit", "Kit Completo", "TODO el repo (incl. skills sueltas) + config"),
     ]
     while True:
         choice = menu.menu_select("INSTALADOR MODULAR — ia-dev-toolkit", main_options)
@@ -92,7 +92,11 @@ def _gather_seeds(catalog):
             return seeds, False
 
         if choice == "team_sac":
-            seeds = [("skills", s) for s in SAC_SKILLS if s in catalog.get("skills", set())]
+            # Stack SAC coherente: el equipo (agentes) + su flujo (workflows) +
+            # las skills de la metodología SAC + config.
+            seeds = ([("agents", a) for a in catalog.get("agents", set())] +
+                     [("workflows", w) for w in catalog.get("workflows", set())] +
+                     [("skills", s) for s in SAC_SKILLS if s in catalog.get("skills", set())])
             return seeds, True
 
         if choice == "kit":
