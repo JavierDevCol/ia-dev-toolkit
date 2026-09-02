@@ -38,11 +38,10 @@ ready: true
    - Generar `./artifacts/ADR/ADR-004-devops-y-comunicacion.md` al ser aprobado.
 
 5. **FASE 5: Consolidación de Gobierno y Entrega de Blueprint (Architecture Governance Output)**:
-   - Sintetizar **únicamente las decisiones aprobadas en los ADRs 001 al 004**.
-   - Generar el Blueprint Maestro usando `./templates/blueprint_arquitectura.md` ➔ `./artifacts/blueprint_arquitectura.md`
-   - Generar la auditoría usando `./templates/auditoria_well_architected.md` ➔ `./artifacts/auditoria_well_architected.md`
+   - Seguir instrucciones según `./fases/cinco.md`
+   - Sintetizar **únicamente las decisiones aprobadas en los ADRs 001 al 004**, generando el Blueprint Maestro y la Auditoría Well-Architected en `./artifacts/`.
 
 6. **FASE 6: Validación Cruzada y Calidad por Sub-Agente Auditor**:
-   - Ejecutar la instrucción contenida en `./fases/cinco.md`.
+   - Ejecutar la instrucción contenida en `./fases/seis.md`.
    - Un sub-agente independiente audita la trazabilidad exacta entre `./artifacts/ADR/` y los documentos `./artifacts/blueprint_arquitectura.md` y `./artifacts/auditoria_well_architected.md`.
    - Si se detectan inconsistencias o ausencias, aplica las correcciones quirúrgicas de forma automática.
