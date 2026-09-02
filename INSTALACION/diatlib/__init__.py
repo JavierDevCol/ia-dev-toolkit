@@ -1,3 +1,3 @@
 """diatlib — lógica del instalador modular ia-dev-toolkit (DIAT) v2."""
 
-__version__ = "0.8.0"
+__version__ = "0.8.1"
