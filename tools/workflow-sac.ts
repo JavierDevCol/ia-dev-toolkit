@@ -3,18 +3,25 @@ import fs from "fs"
 import path from "path"
 
 export default tool({
-  description: `Gestiona workflows SAC. Acciones:
+  description: `Gestiona workflows SAC (ejecución fase por fase con gates). Acciones:
 - list: listar workflows disponibles desde .SAC/workflows/
-- read: leer workflow.md completo
+- read: leer workflow.md completo (pipeline y gates)
 - read_phase: leer una fase específica
-- execute: inyectar contexto de fase en el agente (lazy loading)
-- approve: marcar fase como aprobada
+- next: obtener la siguiente fase pendiente (según el orden de workflow.md). Úsalo en vez de adivinar el nombre del archivo
+- execute: inyectar el contexto de una fase en el agente (lazy loading). Bloquea si una fase anterior no está aprobada
+- approve: marcar una fase como aprobada
 - status: ver progreso del workflow
-- reset: reiniciar progreso`,
+- reset: reiniciar progreso
+
+Flujo para EJECUTAR un workflow completo:
+1) read  → conocer el pipeline y sus gates.
+2) Repetir: next → execute (la fase EXACTA que devolvió next) → presentar al usuario → approve tras su OK.
+3) Terminar cuando next indique que todas las fases están aprobadas.
+NO adivines el nombre del archivo de fase: usa SIEMPRE next. execute rechaza si te saltas el orden.`,
 
   args: {
     action: tool.schema.enum([
-      "list", "read", "read_phase", "execute", "approve", "status", "reset"
+      "list", "read", "read_phase", "next", "execute", "approve", "status", "reset"
     ]).describe("Acción a ejecutar"),
 
     workflow: tool.schema.string().optional()
@@ -44,6 +51,10 @@ export default tool({
       case "read_phase":
         if (!args.workflow || !args.phase) return "Error: workflow and phase required"
         return readPhase(workflowsDir, args.workflow, args.phase)
+
+      case "next":
+        if (!args.workflow) return "Error: workflow name required"
+        return nextPhase(workflowsDir, stateDir, args.workflow)
 
       case "execute":
         if (!args.workflow || !args.phase) return "Error: workflow and phase required"
@@ -112,6 +123,18 @@ function executePhase(workflowsDir: string, stateDir: string, workflow: string, 
   const stateFile = path.join(stateDir, `${workflow}.state.json`)
   const state = loadState(stateFile)
 
+  // GATE: no ejecutar una fase si alguna fase ANTERIOR (según workflow.md) no está aprobada
+  const order = getPhaseOrder(workflowsDir, workflow)
+  const idx = order.indexOf(phase)
+  if (idx > 0) {
+    for (let i = 0; i < idx; i++) {
+      if (state.phases[order[i]]?.status !== "approved") {
+        return `⛔ No puedes ejecutar '${phase}': la fase anterior '${order[i]}' no está aprobada.\n` +
+          `Ejecútala y apruébala primero → workflow-sac action=execute workflow=${workflow} phase=${order[i]}`
+      }
+    }
+  }
+
   state.started_at = state.started_at || new Date().toISOString()
   state.current_phase = phase
   state.phases[phase] = {
@@ -168,6 +191,38 @@ function resetWorkflow(stateDir: string, workflow: string): string {
   }
   saveState(stateFile, state)
   return `Progreso de '${workflow}' reiniciado.`
+}
+
+// Secuencia canónica de fases: las referencias ./fases/<archivo> en el ORDEN en que
+// aparecen en workflow.md. Independiente de cómo se llamen los archivos.
+function getPhaseOrder(workflowsDir: string, workflow: string): string[] {
+  const wfFile = path.join(workflowsDir, workflow, "workflow.md")
+  if (!fs.existsSync(wfFile)) return []
+  const content = fs.readFileSync(wfFile, "utf-8")
+  const order: string[] = []
+  const seen = new Set<string>()
+  for (const m of content.matchAll(/\.\/fases\/([A-Za-z0-9_]+\.md)/g)) {
+    const file = m[1]
+    if (!seen.has(file)) { seen.add(file); order.push(file) }
+  }
+  return order
+}
+
+// Devuelve la primera fase no aprobada (según el orden) con su nombre de archivo exacto.
+function nextPhase(workflowsDir: string, stateDir: string, workflow: string): string {
+  const order = getPhaseOrder(workflowsDir, workflow)
+  if (order.length === 0) {
+    return `No se encontraron fases (./fases/*.md) en el workflow.md de '${workflow}'`
+  }
+  const state = loadState(path.join(stateDir, `${workflow}.state.json`))
+  for (let i = 0; i < order.length; i++) {
+    const phase = order[i]
+    if (state.phases[phase]?.status !== "approved") {
+      return `Siguiente fase (${i + 1}/${order.length}): ${phase} — estado: ${state.phases[phase]?.status || "pendiente"}\n` +
+        `Ejecuta → workflow-sac action=execute workflow=${workflow} phase=${phase}`
+    }
+  }
+  return `✅ Todas las fases de '${workflow}' están aprobadas (${order.length}/${order.length}). Workflow completo.`
 }
 
 function loadState(stateFile: string): any {
