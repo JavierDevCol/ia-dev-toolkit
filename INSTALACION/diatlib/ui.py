@@ -73,9 +73,10 @@ _BANNER_ART = [
 
 
 def print_banner():
+    indent = " " * 15                      # centra el arte (ancho 43) bajo título/recuadro
     print()
     for line in _BANNER_ART:
-        print(f"{CYAN}{line}{NC}")
+        print(f"{CYAN}{indent}{line}{NC}")
     print()
     print(f"{CYAN}                         AI DEVELOPER TOOLKIT{NC}")
     print()
