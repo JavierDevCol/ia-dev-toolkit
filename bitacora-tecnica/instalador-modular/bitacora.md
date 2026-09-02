@@ -2,7 +2,7 @@
 - **ID:** 2026-08-27-instalador-modular
 - **Fecha inicio:** 2026-08-27 17:30
 - **Última actualización:** 2026-08-28 01:00
-- **Estado:** En progreso
+- **Estado:** ✅ Cerrada (superada por el rewrite v2 — release v0.8.1; todos los pendientes implementados)
 - **Rama de Trabajo:** `main`
 - **Tags:** `instalador`, `modular`, `workflows`, `tools`, `checkboxes`, `diat`, `cli`
 - **Ambiente:** Local

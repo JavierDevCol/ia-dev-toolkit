@@ -1,6 +1,7 @@
 # Bitácora: Pruebas E2E Skills SAC
 
 > **Fecha:** 2026-08-27
+> **Estado:** ✅ Cerrada — tests E2E creados en tests/e2e/ (mejoras futuras = backlog opcional)
 > **Sesión:** Pruebas punto a punto del pipeline de skills SAC
 > **Objetivo:** Verificar que las skills funcionan correctamente de punta a punta, validando transiciones de estado, prerequisitos y detección por filesystem.
 

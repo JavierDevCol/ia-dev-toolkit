@@ -1,7 +1,7 @@
 # Sesión: Workflows — Investigación + Custom Tool
 - **ID:** 2026-08-26-spike-workflows-opencode-claudecode
 - **Fecha:** 2026-08-26 19:00 → 2026-08-27 01:15
-- **Estado:** Tool funcional — pendiente commit + revisar instalador
+- **Estado:** ✅ Cerrada (tool ya en main; workflow-discover resultó sin uso y se quitó del grafo en v0.8.x)
 - **Tags:** `spike`, `workflows`, `opencode`, `custom-tool`
 
 ## Decisiones Clave
