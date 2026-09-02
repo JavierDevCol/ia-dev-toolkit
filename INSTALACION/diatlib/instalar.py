@@ -30,7 +30,7 @@ def install_component(ctype, name, cache, project, platform):
             return False
         if dst.exists():
             shutil.rmtree(dst)
-        shutil.copytree(src, dst)
+        shutil.copytree(src, dst, ignore=shutil.ignore_patterns("_archived"))  # excluye obsoletas
     else:                                              # agents(.md)/tools(.ts)/commands(.md)
         src, dst = cache / ctype / f"{name}{spec}", dest_base / f"{name}{spec}"
         if not src.exists():
@@ -126,6 +126,31 @@ def _fill_config_user(path, answers):
 
 
 # ============================================================
+# ASSETS RAÍZ COMPARTIDOS DE SKILLS
+# ============================================================
+def install_shared_skill_assets(cache, project, platform):
+    """Copia los assets RAÍZ compartidos de skills/ (memory_skill.json, references/…)
+    a la raíz de skills del proyecto. Varias skills los referencian como
+    `$SKILL_DIR/../memory_skill.json`; sin ellos, esas skills se rompen al instalarse aisladas.
+    memory_skill.json se PRESERVA si ya existe (guarda estado de runtime)."""
+    src = Path(cache) / "skills"
+    if not src.exists():
+        return
+    dst = Path(project) / platform / "skills"
+    dst.mkdir(parents=True, exist_ok=True)
+    for item in src.iterdir():
+        if item.is_dir() and (item / "SKILL.md").exists():
+            continue                                    # es una skill, no un asset compartido
+        target = dst / item.name
+        if target.exists():
+            continue                                    # preservar (p.ej. memory_skill.json con estado)
+        if item.is_file():
+            shutil.copy2(item, target)
+        elif item.is_dir():
+            shutil.copytree(item, target)
+
+
+# ============================================================
 # INSTALACIÓN DE SEEDS
 # ============================================================
 def install_seeds(seeds, cache, project, platform, with_config=False,
@@ -137,6 +162,8 @@ def install_seeds(seeds, cache, project, platform, with_config=False,
     for ctype, cname in order:
         if install_component(ctype, cname, cache, project, platform):
             installed.setdefault(ctype, []).append(cname)
+    if installed.get("skills"):
+        install_shared_skill_assets(cache, project, platform)   # memory_skill.json, references/…
     if with_config:
         if install_sac_config(cache, project, platform, interactive=interactive):
             installed["config"] = True

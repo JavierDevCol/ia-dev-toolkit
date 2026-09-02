@@ -61,6 +61,21 @@ def uninstall_project(project_path):
             if uninstall_component(ctype, n, project, platform):
                 removed += 1
 
+    # Assets raíz compartidos de skills (memory_skill.json, references/…): quitarlos
+    # solo si ya NO queda ninguna skill instalada.
+    if comps.get("skills"):
+        skills_dir = paths.component_dest("skills", project, platform)
+        if skills_dir.exists():
+            has_skills = any((d / "SKILL.md").exists()
+                             for d in skills_dir.iterdir() if d.is_dir())
+            if not has_skills:
+                for item in list(skills_dir.iterdir()):
+                    if item.is_file():
+                        item.unlink()
+                    else:
+                        shutil.rmtree(item)
+                    removed += 1
+
     # config: se borra completa (decisión de alcance). Vive en .SAC/config/.
     cfg = project / paths.SAC_DIR / "config"
     if comps.get("config") and cfg.exists():
