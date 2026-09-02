@@ -14,7 +14,7 @@ from .ui import print_success, print_warning, print_info
 def uninstall_component(ctype, name, project, platform):
     """Elimina un componente instalado del proyecto. Devuelve True si borró algo."""
     kind, spec = paths.COMPONENT_LAYOUT.get(ctype, ("dir", None))
-    base = Path(project) / platform / ctype
+    base = paths.component_dest(ctype, project, platform)   # workflows -> .SAC/, resto -> .opencode/
     if kind == "dir":
         target = base / name
         if target.exists():
@@ -29,15 +29,17 @@ def uninstall_component(ctype, name, project, platform):
 
 
 def _cleanup_empty(project, platform):
-    """Elimina carpetas de tipo vacías y la del agente si queda vacía."""
-    plat = Path(project) / platform
-    if not plat.exists():
-        return
-    for d in list(plat.iterdir()):
-        if d.is_dir() and not any(d.iterdir()):
-            d.rmdir()
-    if plat.exists() and not any(plat.iterdir()):
-        plat.rmdir()
+    """Elimina carpetas de tipo vacías y las raíces (.opencode / .SAC) si quedan vacías.
+    Nunca borra dirs con datos del usuario (artifacts, HUs, estado): solo si están vacías."""
+    project = Path(project)
+    for base in (project / platform, project / paths.SAC_DIR):
+        if not base.exists():
+            continue
+        for d in list(base.iterdir()):
+            if d.is_dir() and not any(d.iterdir()):
+                d.rmdir()
+        if base.exists() and not any(base.iterdir()):
+            base.rmdir()
 
 
 def uninstall_project(project_path):
@@ -59,8 +61,8 @@ def uninstall_project(project_path):
             if uninstall_component(ctype, n, project, platform):
                 removed += 1
 
-    # config: se borra completa (decisión de alcance)
-    cfg = project / platform / "config"
+    # config: se borra completa (decisión de alcance). Vive en .SAC/config/.
+    cfg = project / paths.SAC_DIR / "config"
     if comps.get("config") and cfg.exists():
         shutil.rmtree(cfg)
         removed += 1
