@@ -18,89 +18,40 @@ class DependencyError(Exception):
 # ============================================================
 # GRAFO DE DEPENDENCIAS
 # ============================================================
+# Grafo reconstruido auditando el CONTENIDO REAL de los componentes.
+# Criterio: solo dependencias REALES —invocación explícita en los pasos, o
+# necesidad de plataforma para ejecutar—. Las relaciones temáticas del plan
+# original (agentes→skills, prerequisitos navegacionales, opcionales) se eliminaron
+# por no tener evidencia de invocación.
 COMPONENT_DEPENDENCIES = {
-    # Workflows -> dependencies
+    # Workflows -> requieren el command + la tool workflow-sac para poder ejecutarse
+    # con el mecanismo /workflow-sac (leer, activar y llevar el estado del workflow).
     "workflows": {
         "definir-vision-producto": {
-            "requires": {"tools": [], "commands": [], "skills": [], "plugins": []},
-            "optional": {"skills": ["tomar-contexto"]},
+            "requires": {"tools": ["workflow-sac"], "commands": ["workflow-sac"]},
+            "optional": {},
         },
         "definir-arquitectura-solucion": {
-            "requires": {"tools": ["workflow-sac", "workflow-discover"],
-                         "commands": ["workflow-sac"], "skills": [], "plugins": []},
-            "optional": {"skills": ["crear-adr"]},
+            "requires": {"tools": ["workflow-sac"], "commands": ["workflow-sac"]},
+            "optional": {},
         },
         "gestionar-backlog-roadmap": {
-            "requires": {"tools": ["workflow-sac", "workflow-discover"],
-                         "commands": ["workflow-sac"], "skills": [], "plugins": []},
-            "optional": {"skills": ["sincronizar-backlog"]},
+            "requires": {"tools": ["workflow-sac"], "commands": ["workflow-sac"]},
+            "optional": {},
         },
     },
-    # Agents -> dependencies
-    "agents": {
-        "PO": {
-            "requires": {"skills": ["refinar-hu", "validar-hu"],
-                         "tools": [], "commands": [], "plugins": []},
-            "optional": {"skills": ["sincronizar-backlog", "planificar-hu"]},
-        },
-        "ARQUITECTO-SOFTWARE": {
-            "requires": {"skills": ["crear-adr", "init-reglas-arquitectonicas"],
-                         "tools": [], "commands": [], "plugins": []},
-            "optional": {"skills": ["analizar-calidad-codigo"]},
-        },
-        "ARQUITECTO-DEVOPS": {
-            "requires": {"skills": [], "tools": [], "commands": [], "plugins": []},
-            "optional": {"skills": ["tomar-contexto"]},
-        },
-        "DESARROLLADOR": {
-            "requires": {"skills": ["git-branch-commit"],
-                         "tools": [], "commands": [], "plugins": []},
-            "optional": {"skills": ["analizar-calidad-codigo"]},
-        },
-    },
-    # Skills -> dependencies
+
+    # Skills -> única invocación real skill→skill encontrada en el contenido.
     "skills": {
-        "validar-ca": {
-            "requires": {"skills": ["planificar-hu"], "workflows": [],
-                         "tools": [], "commands": [], "plugins": []},
-            "optional": {"skills": ["registrar-hallazgo"]},
-        },
+        # ejecutar-plan (paso 6) delega en la skill validar-ca (>validar_ca).
         "ejecutar-plan": {
-            "requires": {"skills": ["planificar-hu"], "workflows": [],
-                         "tools": [], "commands": [], "plugins": []},
-            "optional": {},
-        },
-        "sincronizar-backlog": {
-            "requires": {"skills": [], "workflows": [],
-                         "tools": [], "commands": [], "plugins": []},
-            "optional": {},
-        },
-        "planificar-hu": {
-            "requires": {"skills": ["tomar-contexto"], "workflows": [],
-                         "tools": [], "commands": [], "plugins": []},
-            "optional": {},
-        },
-        "refinar-hu": {
-            "requires": {"skills": ["tomar-contexto"], "workflows": [],
-                         "tools": [], "commands": [], "plugins": []},
-            "optional": {},
-        },
-        "analizar-calidad-codigo": {
-            "requires": {"skills": [], "workflows": [],
-                         "tools": [], "commands": [], "plugins": []},
-            "optional": {},
-        },
-        "bitacora-tecnica": {
-            "requires": {"skills": [], "workflows": [],
-                         "tools": [], "commands": [], "plugins": []},
-            "optional": {},
-        },
-        "git-branch-commit": {
-            "requires": {"skills": [], "workflows": [],
-                         "tools": [], "commands": [], "plugins": []},
+            "requires": {"skills": ["validar-ca"]},
             "optional": {},
         },
     },
+
+    # Agentes: sin dependencias (no invocan skills/workflows por nombre).
+    # Resto de skills: sin dependencias (las referencias eran navegacionales).
 }
 
 
