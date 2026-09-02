@@ -2,7 +2,7 @@
 - **ID:** 2026-08-31-diat-update-fix
 - **Fecha inicio:** 2026-08-31 18:00
 - **Última actualización:** 2026-08-31 18:30
-- **Estado:** Pendiente de implementación
+- **Estado:** ✅ Cerrada — resuelto por el instalador v2 (commands se instalan vía tarball; --update reinstala los proyectos registrados). Confirmado por el usuario.
 - **Rama de Trabajo:** `main`
 - **Tags:** `diat`, `update`, `installer`, `commands`, `tools`, `auto-install`
 - **Ambiente:** Local (squad-skills → ~/.local/bin/)
