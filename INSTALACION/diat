@@ -146,10 +146,13 @@ def cmd_install(argv):
         ui.print_info("Nada seleccionado. Cancelado.")
         return
 
-    # Ofrecer opcionales del nivel superior
+    # Ofrecer solo opcionales que NO estén ya incluidas en lo que se instalará
+    # (p. ej. en "Kit Completo" todas las skills ya entran, así que no se ofrece nada)
+    _, already = deps.resolve_closure(seeds)
     offered = deps.collect_optional(seeds)
     opt_options = [(f"{t}:{n}", n, f"opcional ({t})")
-                   for t, names in offered.items() for n in names]
+                   for t, names in offered.items() for n in names
+                   if n not in already.get(t, [])]
     if opt_options:
         extra = menu.multiselect("¿INSTALAR TAMBIÉN? (opcionales)", opt_options)
         for key in (extra or []):
