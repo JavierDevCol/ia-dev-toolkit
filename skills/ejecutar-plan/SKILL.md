@@ -7,7 +7,7 @@ ready: true
 # Ejecutar Plan
 
 ## Overview
-Implementa el plan de una HU actualizando Plan.md en tiempo real, aplicando reglas arquitectónicas, creando rama Git y validando criterios de aceptación con un sub-agente.
+Implementa el plan de una HU actualizando Plan.md en tiempo real, aplicando reglas arquitectónicas, creando rama Git y validando criterios de aceptación con la skill `validar-ca` (ejecutada como sub-agente).
 
 ## When to Use
 - Una HU tiene Estado = `PENDIENTE` en Plan.md y el usuario pide implementarla.
@@ -60,7 +60,7 @@ digraph ejecutarplan {
 3. **Resolver modo:** validar combinaciones (`completo` + `--auto_commit` prohibido; `task_id` requiere `task_especifica`). Ver degradación en Quick Reference.
 4. **Preparar entorno:** cargar reglas, preguntar rama base (main/develop/otra), crear `feature/[ID-HU]-[desc]`, y `git stash` si hay cambios sin commit. Detectar framework de tests.
 5. **Ejecutar:** por cada fase/task, EDITAR Plan.md (`[PENDIENTE]`→`[EN_PROGRESO]`→`[EJECUTADA]` y `- [ ]`→`- [X]`) en cada transición. Aplicar reglas arquitectónicas. Commit por task: `feat([ID-HU]-TASK-N): …`. Máximo 2 reintentos por tarea; fallo → DETENER.
-6. **Validar CAs:** delegar a sub-agente `validar_ca`. Si FAIL → DETENER.
+6. **Validar CAs:** delegar en un sub-agente que ejecute la skill `validar-ca` (`>validar_ca`). Si FAIL → DETENER.
 7. **Commit final:** solo al completar TODA la HU: `feat([ID-HU]): implementación completa de [título]`.
 8. **Finalizar:** Plan.md → `COMPLETADO`, Tracking.md → `FINALIZADO`. En `task_especifica` con tasks pendientes, NO completar la HU.
 
