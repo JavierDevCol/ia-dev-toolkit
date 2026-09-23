@@ -4,6 +4,7 @@
 .env
 opencode.json
 .opencode/
+.claude/
 
 config_consultas.json
 .tmp.driveupload/
