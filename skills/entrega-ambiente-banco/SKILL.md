@@ -70,6 +70,8 @@ START: User requests release handoff
 
 ## Implementation
 
+**Carpeta de salida:** usar `output_folder` global de `memory_skill.json` (`$SKILL_DIR/../memory_skill.json`) como base para todas las rutas de entrega (`{output_folder}/entrega_release/...`). Si es `null` o el archivo no existe, preguntar al usuario la carpeta y persistirla en `output_folder`.
+
 Mostrar menú principal (`references/menus.txt`) y esperar selección.
 
 ### Opción 1: Entregar release desde DEVELOP
@@ -77,11 +79,11 @@ Mostrar menú principal (`references/menus.txt`) y esperar selección.
 **Cuándo:** La feature ya está integrada a develop mediante PR aprobado. Sigue §3.2 del manual.
 
 1. **Verificar develop:** `git fetch origin`, verificar existencia, mostrar último commit, confirmar pipeline OK
-2. **Release notes:** `git checkout develop && git pull`, obtener tag anterior, generar `git log <TAG>..HEAD --oneline --no-merges > release-notes.md`, guardar en `entrega_release/{nombre_repo}/{version}/`
+2. **Release notes:** `git checkout develop && git pull`, obtener tag anterior, generar `git log <TAG>..HEAD --oneline --no-merges > release-notes.md`, guardar en `{output_folder}/entrega_release/{nombre_repo}/{version}/`
 3. **Crear/actualizar release/vX.Y.Z:** Validar tag inexistente, buscar si rama existe, crear con `--ff-only` o crear nueva desde develop, push
 4. **Validar mismo commit:** `git rev-parse develop` vs `git rev-parse release/vX.Y.Z` — deben coincidir
 5. **Checklist de entrega** (`references/checklist-entrega.txt`): Mostrar checklist, items ⚠️ requieren skills externas (`pr-config-audit`, `ado-pipeline-analyzer`)
-6. **Resumen final:** Mostrar y guardar en `entrega_release/{nombre_repo}/{version}/RESUMEN_ENTREGA_release ({nombre_repo}).txt`
+6. **Resumen final:** Mostrar y guardar en `{output_folder}/entrega_release/{nombre_repo}/{version}/RESUMEN_ENTREGA_release ({nombre_repo}).txt`
 
 ### Opción 2: Entregar release desde feature/fix/hotfix
 
@@ -101,7 +103,7 @@ Ver `references/flujo-hotfix.sh` para flujo bash completo.
 1. Preguntar ambiente (PRU/PREPRO/PRO), versión afectada, descripción
 2. Validar tag: `git tag -l "vX.Y.Z-ambiente"`
 3. Ejecutar flujo: hotfix branch → fix → merge develop → nuevo release/vX.Y.Z+1 → limpiar hotfix branch
-4. Resumen y guardar en `entrega_release/{nombre_repo}/vX.Y.Z+1/RESUMEN_ENTREGA_hotfix ({nombre_repo}).txt`
+4. Resumen y guardar en `{output_folder}/entrega_release/{nombre_repo}/vX.Y.Z+1/RESUMEN_ENTREGA_hotfix ({nombre_repo}).txt`
 
 #### 2c: ajuste RC post-entrega en DES (§3.2.1)
 
@@ -109,7 +111,7 @@ Ver `references/flujo-rc.sh` para flujo bash completo.
 
 1. Preguntar versión activa, descripción del ajuste, número de RCs existentes
 2. Ejecutar flujo: fix sobre release/vX.Y.Z → back-merge develop → crear rama RC efímera
-3. Resumen y guardar en `entrega_release/{nombre_repo}/vX.Y.Z/RESUMEN_ENTREGA_rc ({nombre_repo}).txt`
+3. Resumen y guardar en `{output_folder}/entrega_release/{nombre_repo}/vX.Y.Z/RESUMEN_ENTREGA_rc ({nombre_repo}).txt`
 
 ## Quick Reference
 

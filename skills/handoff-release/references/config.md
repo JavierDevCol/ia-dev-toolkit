@@ -18,12 +18,6 @@ Buscar `memory_skill.json` con `glob **/memory_skill.json`. Si no existe, crear 
 | `branch_format` | `release/vX.Y.Z` | Formato ramas release |
 | `tag_format` | `vX.Y.Z-{env}` | Formato tags |
 
-## Memoria (`memory`)
-
-| Campo | Default | Descripción |
-|-------|---------|-------------|
-| `last_release` | `null` | Última versión release |
-
 ## Editar configuración
 
 1. Mostrar configuración actual (ambientes, responsables, formatos).

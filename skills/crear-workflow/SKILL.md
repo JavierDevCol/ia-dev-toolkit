@@ -13,7 +13,7 @@ Asistente interactivo para generar workflows con estructura canónica (workflow.
 - El usuario pide "crear un workflow", "definir un flujo con fases" o "estructurar un proceso repetible".
 - Necesita generar fases y plantillas de artefactos de forma consistente.
 
-**Cuándo NO usar:** para documentar código, usar git-doc-sync; para convenciones de commits, usar git-branch-commit.
+**Cuándo NO usar:** para convenciones de commits, usar git-branch-commit.
 
 ## Implementation
 

@@ -14,9 +14,7 @@
       "branch_format": "release/vX.Y.Z",
       "tag_format": "vX.Y.Z-{env}"
     },
-    "memory": {
-      "last_release": null
-    }
+    "memory": {}
   },
   "ado": {
     "config": {
@@ -37,16 +35,5 @@
       }
     },
     "memory": {}
-  },
-  "git-doc-sync": {
-    "config": {
-      "default_mode": "interactive",
-      "required_branches": [],
-      "version": "1.0.0"
-    },
-    "memory": {
-      "inventory": [],
-      "last_access": ""
-    }
   }
 }
