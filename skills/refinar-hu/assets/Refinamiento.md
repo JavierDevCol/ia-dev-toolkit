@@ -124,27 +124,8 @@
 
 ---
 
-## Aprobación
-
-<!-- Generado por >validar_hu al aprobar -->
-
-| Campo | Valor |
-|-------|-------|
-| **Estado** | ✅ Aprobada |
-| **Aprobado por** | Arquitecto Onad |
-| **Fecha aprobación** | [FECHA_ISO_8601] |
-| **Nivel validación** | [basico \| completo \| exhaustivo] |
-| **Notas** | [Resumen de validación] |
-
-### Directrices de Planificación
-
-- **Fases sugeridas:** [Estilo arquitectónico y orden recomendado]
-- **Componentes clave:** [Componentes a crear/modificar]
-- **Dependencias entre HUs:** [HUs que deben completarse antes]
-- **Riesgos a mitigar:** [Riesgos detectados durante validación]
-- **Notas adicionales:** [ADRs relevantes, patrones recomendados]
-
----
+<!-- La sección "## Aprobación" NO se crea aquí: un refinamiento recién creado no puede
+     nacer aprobado. La agrega >validar_hu al emitir veredicto APROBADA. -->
 
 ## Historial
 
