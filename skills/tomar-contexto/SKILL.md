@@ -1,6 +1,6 @@
 ---
 name: tomar-contexto
-description: Use when .SAC/workspace.md is missing, outdated, or context is needed before refining HUs, planning, or DevOps diagnostics.
+description: Use when {archivos.workspace} (workspace.md) is missing, outdated, or context is needed before refining HUs, planning, or DevOps diagnostics.
 ready: true
 ---
 
@@ -10,12 +10,12 @@ ready: true
 Genera el contexto del proyecto (workspace, scorecard, diagramas y archivos de artifacts) detectando tecnología, arquitectura y DevOps a partir de la configuración del sistema.
 
 ## When to Use
-- No existe `.SAC/workspace.md` o el contexto tiene más de 7 días.
+- No existe `{archivos.workspace}` (workspace.md) o el contexto tiene más de 7 días.
 - El usuario solicita analizar o inicializar un proyecto (mono o multi-proyecto).
 - Se requiere contexto previo para refinar HUs, planificar o diagnosticar DevOps.
 
 **Cuándo NO usar:**
-- `.SAC/workspace.md` existe Y tiene < 7 días Y usuario no pidió regenerar.
+- `{archivos.workspace}` existe Y tiene < 7 días Y usuario no pidió regenerar.
 - Usuario solo quiere editar un archivo existente (usar skill específica).
 - Ya se ejecutó `tomar_contexto` en esta sesión (evitar duplicar).
 
@@ -34,16 +34,20 @@ digraph workspace_detection {
     MODO_MULTI [label="MODO_MULTI\n(múltiples proyectos)" style=filled fillcolor=lightblue];
     subcarpetas [label="¿2+ subcarpetas\ncon marcadores?" shape=diamond];
     preguntar [label="Preguntar al usuario\n[1] Mono / [2] Multi" style=filled fillcolor=lightyellow];
-    error [label="Error: Sin proyecto\ndetectable" style=filled fillcolor=lightcoral];
-    
+    ruta_ok [label="¿Ruta del\nproyecto correcta?" shape=diamond];
+    basico [label="Generar contexto básico\n(Confianza: Bajo, sin inventar stack)" style=filled fillcolor=lightyellow];
+    error [label="Error: verificar\nruta del proyecto" style=filled fillcolor=lightcoral];
+
     start -> count [label="1+ encontrado"];
     start -> subcarpetas [label="0 en raíz"];
     count -> MODO_UNICO [label="= 1"];
     count -> multi_root [label="2+"];
     multi_root -> MODO_MULTI;
     subcarpetas -> MODO_MULTI [label="Sí"];
-    subcarpetas -> preguntas [label="1 subcarpeta"];
-    subcarpetas -> error [label="0 subcarpetas"];
+    subcarpetas -> preguntar [label="1 subcarpeta"];
+    subcarpetas -> ruta_ok [label="0 subcarpetas"];
+    ruta_ok -> error [label="No"];
+    ruta_ok -> basico [label="Sí, confirmada"];
 }
 ```
 
@@ -53,7 +57,8 @@ digraph workspace_detection {
 | Monorepo raíz | 2+ | N/A | MODO_MULTI |
 | Monorepo anidado | 0 | 2+ | MODO_MULTI |
 | Ambiguo | 0 | 1 | Preguntar |
-| Sin proyecto | 0 | 0 | Error |
+| Sin proyecto, ruta correcta | 0 | 0 | Generar contexto básico (Confianza: Bajo) |
+| Sin proyecto, ruta incorrecta | 0 | 0 | Error: verificar ruta |
 
 ## Implementation
 
@@ -84,7 +89,8 @@ digraph workspace_detection {
 ## Common Mistakes
 | Error | Causa | Solución |
 |-------|-------|----------|
-| Sin archivos detectables | Proyecto vacío/ruta incorrecta | Verificar ruta; generar contexto básico |
+| Sin archivos detectables, ruta confirmada correcta | Proyecto realmente vacío | Generar contexto básico: Confianza Bajo, stack "Por definir", sin inventar lenguaje/framework |
+| Sin archivos detectables, ruta incorrecta | Se ejecutó fuera de la raíz del proyecto | Verificar ruta y reintentar |
 | No se detectó proyecto | Sin marcadores | Ejecutar desde la raíz |
 | Proyecto no encontrado | Nombre erróneo (multi) | Listar sin `--nombre_proyecto` |
 | Ya existe contexto | Sin `--force` | [R] regenerar o [U] usar existente |

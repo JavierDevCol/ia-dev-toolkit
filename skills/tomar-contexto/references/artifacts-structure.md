@@ -34,15 +34,15 @@ Usar las rutas cargadas de `CONFIG_SYSTEM` / `CONFIG_USER`:
 **Mono-Proyecto:**
 ```
 ✅ WORKSPACE CONFIGURADO (Mono-Proyecto)
-📁 .SAC/workspace.md
-📁 .SAC/artifacts/contextos/contexto_proyecto.md
+📁 {archivos.workspace}
+📁 {contextos_folder}/contexto_proyecto.md
 📊 Scorecard: Arq X/10 | Stack X/10 | Test X/10 | DevOps X/10 | Docs X/10
 ```
 
 **Multi-Proyecto:**
 ```
 ✅ WORKSPACE CONFIGURADO (Multi-Proyecto)
-📁 .SAC/workspace.md
-📁 .SAC/artifacts/contextos/ (N contextos generados)
+📁 {archivos.workspace}
+📁 {contextos_folder}/ (N contextos generados)
 📊 Scorecard Global: X/10
 ```
