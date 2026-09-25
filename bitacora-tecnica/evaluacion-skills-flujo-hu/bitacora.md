@@ -1,8 +1,8 @@
 # Sesión: Evaluación y corrección del flujo HU (validar-hu, validar-ca, tomar-contexto, sincronizar-backlog)
 - **ID:** 2026-09-25-evaluacion-skills-flujo-hu
 - **Fecha inicio:** 2026-09-24 (continuada 2026-09-25)
-- **Última actualización:** 2026-09-25 01:55
-- **Estado:** En progreso
+- **Última actualización:** 2026-09-25 02:20
+- **Estado:** Completado (4/4 skills corregidas y medidas)
 - **Rama de Trabajo:** `refactor-validar-hu-veredicto-siempre`
 - **Tags:** `evaluar-skill`, `validar-hu`, `validar-ca`, `tomar-contexto`, `sincronizar-backlog`, `regresion-cruzada`
 - **Ambiente:** Local
@@ -26,6 +26,8 @@ sobre-ingeniería o contratos ambiguos: `validar-hu`, `validar-ca`, `tomar-conte
   - `7699046` — refactor(validar-hu): emitir veredicto siempre y firmar con usuario
   - `ef4a2d2` — refactor(validar-ca): evaluar todos los CA y no marcar PARCIAL como cumplido
   - `58702f0` — fix(tomar-contexto): rutas reales de workspace y contexto, sin ambigüedad en 0 marcadores
+  - `d8bde88` — docs(bitacora): registro de esta sesión (versión intermedia)
+  - `010e906` — fix(sincronizar-backlog): deducir [B] Bloqueada desde Bloqueo de Validación sin Plan.md
 
 - **`validar-hu`** (medido en 3 iteraciones, ~40 runs aislados total):
   - Defecto encontrado: el gate de ambigüedades pausaba el flujo ANTES de emitir
@@ -67,23 +69,34 @@ sobre-ingeniería o contratos ambiguos: `validar-hu`, `validar-ca`, `tomar-conte
     contexto en mono usó el patrón de multi-proyecto; y en el caso "contexto ya
     generado hoy" se decidió unilateralmente no regenerar sin preguntar `[U]/[R]`.
 
-- **`sincronizar-backlog`** (1 iteración, 16 runs) — **SOLO EVALUADA, fix pendiente**:
-  - Resultado: pass_rate con skill **0.944** vs sin skill **1.000** (delta
-    **−0.056**, la skill resta valor). Tokens 1.10x, tiempo 1.00x.
+- **`sincronizar-backlog`** (2 iteraciones — evaluada, corregida y re-medida):
+  - Medición inicial (16 runs): pass_rate con skill **0.944** vs sin skill
+    **1.000** (delta **−0.056**, la skill restaba valor). Tokens 1.10x, tiempo 1.00x.
   - **Causa raíz confirmada con evidencia (regresión cruzada entre skills de esta
     misma sesión):** la tabla "Reglas de Deducción de Estados" de
-    `sincronizar-backlog` solo deduce `[B] Bloqueada` desde `Plan.md Estado =
+    `sincronizar-backlog` solo deducía `[B] Bloqueada` desde `Plan.md Estado =
     BLOQUEADO`. Pero el fix de `validar-hu` (commit `7699046`, esta misma sesión)
     hace que una HU bloqueada en validación **nunca llegue a tener `Plan.md`** —
     queda en `Refinamiento.md` con `## Bloqueo de Validación`, sin planificar.
-    `sincronizar-backlog` no tiene regla para ese caso.
+    `sincronizar-backlog` no tenía regla para ese caso.
   - Confirmado en fixture dedicado (`eval-2`, HU con `## Bloqueo de Validación`
-    real, sin `Plan.md`): las 2 corridas CON skill dejaron el estado en `[R]` y
-    reportaron `✅ SINCRONIZADA` (el bloqueo solo se menciona en el chat, no en el
+    real, sin `Plan.md`): las 2 corridas CON skill dejaban el estado en `[R]` y
+    reportaban `✅ SINCRONIZADA` (el bloqueo solo se mencionaba en el chat, no en el
     archivo persistido). Las 2 corridas SIN skill, sin que nadie lo pidiera,
-    escribieron `[R] 🚫 Bloqueada` directamente en la tabla del backlog — visible
+    escribían `[R] 🚫 Bloqueada` directamente en la tabla del backlog — visible
     para cualquiera que abra el archivo después. La regla explícita de la skill
-    produjo el peor resultado de los dos.
+    producía el peor resultado de los dos.
+  - **Fix aplicado** (commit `010e906`): `[B] Bloqueada` ahora se deduce también
+    desde `## Bloqueo de Validación` sin `## Aprobación`, sin requerir `Plan.md`
+    (regla explícita: "`[B]` no requiere `Plan.md`"); ajustada la regla de `[R]`
+    para excluir ese caso; corregido el patrón de extracción del paso 3 (tabla
+    real `## Índice Rápido`, no `### [ID-HU]: [Título]`); relabeled el nodo
+    ambiguo del flowchart.
+  - **Re-medido** (solo `eval-2/with_skill`, único caso que ejercita el defecto —
+    `eval-1/3/4` y toda la rama `without_skill` reutilizados sin cambios): pass_rate
+    con skill 0.944 → **1.000**, a la par de sin skill (antes perdía por −0.056).
+    Confirmado que `[B]` se persiste directamente en el Índice Rápido en las 2
+    corridas post-fix.
   - Hallazgo lateral (no afecta el delta, falla igual en ambas variantes):
     ninguna representa "HUÉRFANA" con un símbolo propio en la tabla — con skill
     queda `[ ]` (indistinguible de un pendiente legítimo), sin skill se elimina
@@ -101,46 +114,37 @@ sobre-ingeniería o contratos ambiguos: `validar-hu`, `validar-ca`, `tomar-conte
 - `skills/validar-ca/evals/`
 - `skills/tomar-contexto/evals/`
 - `skills/sincronizar-backlog/evals/` — incluye `README.md` con el detalle completo
-  del hallazgo `[B] Bloqueada` y la comparación de tablas persistidas
+  del hallazgo `[B] Bloqueada`, `benchmark-v1-skill-original.json` (medición previa
+  al fix) y `benchmark.json` (post-fix)
 
 ## Estado Actual
 
-3 de las 4 skills evaluadas están corregidas, medidas y commiteadas en
-`refactor-validar-hu-veredicto-siempre`. `sincronizar-backlog` está evaluada,
-con causa raíz identificada y evidencia reproducible (4/4 corridas consistentes en
-ambos sentidos), pero **el fix todavía no se aplicó**.
+Las 4 skills evaluadas están corregidas, medidas y commiteadas en
+`refactor-validar-hu-veredicto-siempre` (5 commits: 4 fixes + 1 doc). Rama con push
+hecho, sincronizada con `origin`.
 
 ### Pendientes
-- [ ] Aplicar fix a `sincronizar-backlog/SKILL.md`: agregar `## Bloqueo de
-      Validación` (sin `Plan.md`) como regla de deducción para `[B] Bloqueada`
-      en la tabla de Reglas de Deducción; hacer visible el bloqueo directamente
-      en el Índice Rápido persistido (como hizo la rama sin skill), no solo en
-      el reporte del chat.
-- [ ] Corregir el patrón de extracción del paso 3 (`### [ID-HU]: [Título]` →
-      formato tabla real) — no causó fallo pero es una instrucción incorrecta.
-- [ ] Re-medir `sincronizar-backlog` tras el fix (16 runs) para confirmar que el
-      delta pasa a positivo.
-- [ ] Commit + push del fix de `sincronizar-backlog`.
 - [ ] Decidir si abrir PR de `refactor-validar-hu-veredicto-siempre` contra `main`
       (4 skills tocadas: validar-hu, validar-ca, tomar-contexto,
       sincronizar-backlog) o mantener commits separados.
-- [ ] Hallazgo lateral de "HUÉRFANA" sin símbolo propio en la tabla — no
-      priorizado, evaluar si vale la pena una cuarta iteración.
+- [ ] Hallazgo lateral de "HUÉRFANA" sin símbolo propio en la tabla del backlog
+      (`sincronizar-backlog`) — no priorizado, evaluar si vale la pena una
+      cuarta iteración. Falla igual con y sin skill, no afecta el delta medido.
 
 ### Bloqueantes
 - Ninguno.
 
 ### Tests
-- [x] Evaluación con skill (`evaluar-skill`): OK para validar-hu, validar-ca,
-      tomar-contexto (pass_rate 1.000 en las 3). sincronizar-backlog pendiente
-      de re-medir tras el fix.
+- [x] Evaluación con skill (`evaluar-skill`): pass_rate 1.000 en las 4 skills
+      (validar-hu, validar-ca, tomar-contexto, sincronizar-backlog).
 
 ## Próxima Sesión
 
-1. Aplicar el fix de `sincronizar-backlog` (regla `[B]` desde `## Bloqueo de
-   Validación`, marca visible en el Índice Rápido).
-2. Re-ejecutar los 16 runs de la comparación con/sin skill para confirmar el
-   delta positivo antes de dar por cerrada la skill.
-3. Commit (`fix(sincronizar-backlog): ...`) en la misma rama
-   `refactor-validar-hu-veredicto-siempre` y push.
-4. Revisar si hace falta abrir el PR contra `main` con las 4 skills juntas.
+1. Decidir si abrir el PR contra `main` con las 4 skills juntas o dejarlas en
+   commits separados en la rama.
+2. Si se abre PR: título y cuerpo deben resumir el patrón común encontrado en
+   las 4 skills — gates/reglas que impedían llegar al paso de persistencia o
+   dejaban sin cobertura un estado válido — y el hallazgo de regresión cruzada
+   entre `validar-hu` y `sincronizar-backlog` como ejemplo de por qué medir
+   con `evaluar-skill` después de cualquier cambio de contrato entre skills
+   que se consumen entre sí.
