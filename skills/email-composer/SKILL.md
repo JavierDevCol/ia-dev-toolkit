@@ -2,6 +2,7 @@
 name: email-composer
 license: MIT
 description: "Use to generate the HTML content of an outgoing email, color-coded by type (laboral, comunicado, urgente). Content-only — sending or draft creation is handled by a separate skill or tool."
+ready: true
 tags: [email, html, templates, compose]
 ---
 
