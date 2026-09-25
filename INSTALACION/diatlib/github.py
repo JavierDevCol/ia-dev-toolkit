@@ -5,6 +5,7 @@ de 60/h de la API). Se extrae, se copian solo los componentes al cache y el CLI 
 y se descarta el resto. Todo el filtrado/escaneo ocurre en disco, sin red.
 """
 
+import json
 import os
 import shutil
 import tarfile
@@ -86,6 +87,36 @@ def get_remote_sha(owner=None, repo=None, ref=None):
             return r.read().decode().strip()
     except Exception:
         return None
+
+
+def get_remote_version(owner=None, repo=None):
+    """Tag semver más alto del repo (ej. '0.11.0', sin 'v'), o None sin conexión/tags.
+    Fuente única de verdad para la versión mostrada — nunca hardcodeada en el CLI."""
+    owner = owner or paths.OWNER
+    repo = repo or paths.REPO
+    url = f"https://api.github.com/repos/{owner}/{repo}/tags?per_page=100"
+    req = urllib.request.Request(url, headers={
+        "Accept": "application/vnd.github+json",
+        "User-Agent": "diat-cli",
+    })
+    try:
+        with urllib.request.urlopen(req, timeout=30) as r:
+            tags = json.loads(r.read().decode())
+    except Exception:
+        return None
+
+    def parse(name):
+        parts = name.lstrip("v").split(".")
+        try:
+            return tuple(int(p) for p in parts)
+        except ValueError:
+            return None
+
+    versions = [(parse(t["name"]), t["name"].lstrip("v")) for t in tags if "name" in t]
+    versions = [v for v in versions if v[0] is not None]
+    if not versions:
+        return None
+    return max(versions, key=lambda v: v[0])[1]
 
 
 # ============================================================

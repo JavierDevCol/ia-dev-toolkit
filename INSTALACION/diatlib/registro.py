@@ -70,7 +70,7 @@ def _write(installations, sha):
     f = paths.get_installations_file()
     f.parent.mkdir(parents=True, exist_ok=True)
     data = {
-        "version": __version__,
+        "version": get_installed_version() or __version__,
         "sha": sha,
         "last_update": datetime.now().isoformat(),
         "installations": installations,
@@ -91,3 +91,18 @@ def save_installed_sha(sha):
     f = paths.get_sha_file()
     f.parent.mkdir(parents=True, exist_ok=True)
     f.write_text(sha, encoding="utf-8")
+
+
+# ============================================================
+# VERSIÓN CACHEADA (tag real del repo, nunca hardcodeada)
+# ============================================================
+def get_installed_version():
+    """Tag de versión cacheado (ej. '0.11.0'), o None si nunca se corrió --update."""
+    f = paths.get_version_file()
+    return f.read_text(encoding="utf-8").strip() if f.exists() else None
+
+
+def save_installed_version(version):
+    f = paths.get_version_file()
+    f.parent.mkdir(parents=True, exist_ok=True)
+    f.write_text(version, encoding="utf-8")

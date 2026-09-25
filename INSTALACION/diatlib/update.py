@@ -37,6 +37,10 @@ def cmd_update():
         ui.print_error("No se pudo obtener la versión remota. Abortando.")
         return
 
+    remote_version = github.get_remote_version()
+    if remote_version:
+        registro.save_installed_version(remote_version)
+
     installations = registro.load_installations()
 
     # Descargar snapshot SOLO si el repo cambió (refresca componentes + CLI en bin)

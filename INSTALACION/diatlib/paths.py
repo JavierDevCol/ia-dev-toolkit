@@ -94,3 +94,8 @@ def get_installations_file():
 def get_sha_file():
     """Ruta del archivo con el SHA del repo cacheado."""
     return get_cache_dir() / ".sha"
+
+
+def get_version_file():
+    """Ruta del archivo con el tag de versión cacheado (ej. '0.11.0')."""
+    return get_cache_dir() / ".version"

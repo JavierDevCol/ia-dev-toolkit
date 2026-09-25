@@ -19,7 +19,6 @@ from pathlib import Path
 # Hacer importable el paquete diatlib (está junto a este script, en el bin)
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from diatlib import __version__
 from diatlib import paths, github, deps, registro, instalar, update, entorno
 from diatlib import menu
 from diatlib import ui
@@ -304,7 +303,11 @@ def cmd_help():
 
 
 def cmd_version():
-    print(f"DIAT — ia-dev-toolkit v{__version__}")
+    version = registro.get_installed_version()
+    if version:
+        print(f"DIAT — ia-dev-toolkit v{version}")
+    else:
+        print("DIAT — ia-dev-toolkit (versión desconocida, ejecuta `diat --update`)")
 
 
 def main():
