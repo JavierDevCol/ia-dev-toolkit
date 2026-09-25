@@ -1,8 +1,8 @@
 ---
 name: planificar-hu
 description: >
-  Usa esta skill cuando una HU esté en estado [A] Aprobada y necesite un
-  plan de implementación antes de ejecutar.
+  Use when a HU is in [A] Aprobada state and needs an implementation plan
+  before execution.
 ready: true
 ---
 
@@ -24,8 +24,8 @@ Genera un plan técnico de implementación a partir de una HU aprobada, alineado
 
 ### 1. Configuración y carga
 
-- Leer `.SAC/config/CONFIG_SYSTEM.yaml` → `artifacts.hu_folder`, `plantillas.hu.plan`, etc.
-- Cargar `HU.md`, extraer `Tipo`. **Bug** → leer `RefinamientoBug.md`; **Funcional** → leer `Refinamiento.md`, verificar `## Aprobación` con `✅ Aprobada`.
+- Leer `.SAC/config/CONFIG_SYSTEM.yaml` → `artifacts.hu_folder`.
+- Cargar `HU.md`, extraer `Tipo`. **Bug**: si existe `RefinamientoBug.md` (creado por `>registrar_hallazgo`), leerlo; si no existe, leer `Refinamiento.md` (el bug se refinó vía `>refinar_hu`). **Funcional** → leer `Refinamiento.md`. En ambos casos, verificar `## Aprobación` con `✅ Aprobada`.
 - Cargar contexto del proyecto, HUs relacionadas, componentes reutilizables.
 
 ### 2. Ambigüedades y fases
