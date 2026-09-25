@@ -32,43 +32,35 @@ digraph validar_hu {
   bug_check [label="Bug\nCrítica?", shape=diamond, style=filled, fillcolor="#F5A623"];
   basic [label="nivel_validacion\n= basico", shape=box, style=filled, fillcolor="#BD10E0", fontcolor=white];
 
-  sub1 [label="Sub-agente 1\nAmbigüedades", shape=box, style=filled, fillcolor="#7BC67E"];
-  sub2 [label="Sub-agente 2\nSMART + Cobertura", shape=box, style=filled, fillcolor="#7BC67E"];
-  sub3 [label="Sub-agente 3\nTrazabilidad CA", shape=box, style=filled, fillcolor="#7BC67E"];
-
-  consolidate [label="Consolidar\nresultados", shape=box, style=filled, fillcolor="#50E3C2"];
-  ambiguity [label="Ambigüedades\ndetectadas?", shape=diamond, style=filled, fillcolor="#F5A623"];
-  pause [label="PAUSAR\nesperar respuestas", shape=box, style=filled, fillcolor="#D0021B", fontcolor=white];
-
-  arch [label="Validar\narquitectura + ADR", shape=box, style=filled, fillcolor="#7BC67E"];
   deps [label="Clasificar\ndependencias", shape=box, style=filled, fillcolor="#7BC67E"];
   blocking [label="Dependencia\nbloqueante?", shape=diamond, style=filled, fillcolor="#F5A623"];
 
+  ca [label="Validar CA\nSMART + cobertura\n+ ambigüedades", shape=box, style=filled, fillcolor="#7BC67E"];
+  arch [label="Validar\narquitectura + ADR", shape=box, style=filled, fillcolor="#7BC67E"];
+
   verdict [label="Veredicto", shape=diamond, style=filled, fillcolor="#F5A623"];
   approved [label="APROBADA\n[A]", shape=box, style=filled, fillcolor="#7ED321"];
-  adjustments [label="AJUSTES\n[R] + observaciones", shape=box, style=filled, fillcolor="#F8E71C"];
+  adjustments [label="AJUSTES\n[R] + observaciones\n+ preguntas abiertas", shape=box, style=filled, fillcolor="#F8E71C"];
   blocked [label="BLOQUEADA\n[B]", shape=box, style=filled, fillcolor="#D0021B", fontcolor=white];
+
+  persist [label="Persistir\nRefinamiento + backbone", shape=box, style=filled, fillcolor="#50E3C2"];
 
   start -> load -> bug_check;
   bug_check -> basic [label="Sí"];
-  bug_check -> sub1 [label="No"];
-  basic -> sub1;
+  bug_check -> deps [label="No"];
+  basic -> deps;
 
-  sub1 -> consolidate;
-  sub2 -> consolidate;
-  sub3 -> consolidate;
+  deps -> blocking;
+  blocking -> blocked [label="Sí (corto circuito)"];
+  blocking -> ca [label="No"];
 
-  consolidate -> ambiguity;
-  ambiguity -> pause [label="Sí"];
-  ambiguity -> arch [label="No"];
+  ca -> arch -> verdict;
+  verdict -> approved [label="Sin hallazgos"];
+  verdict -> adjustments [label="Ambigüedades\no hallazgos"];
 
-  arch -> deps -> blocking;
-  blocking -> blocked [label="Sí"];
-  blocking -> verdict [label="No"];
-
-  verdict -> approved [label="APROBADA"];
-  verdict -> adjustments [label="AJUSTES"];
-  verdict -> blocked [label="BLOQUEADA"];
+  approved -> persist;
+  adjustments -> persist;
+  blocked -> persist;
 }
 ```
 
@@ -78,27 +70,63 @@ digraph validar_hu {
 
 Leer config, `HU.md`, `Refinamiento.md`, contexto del proyecto, ADR si `ADR_Ref` definido. Bug Crítica → `nivel_validacion='basico'` automático.
 
-### 2. Validación CA (sub-agentes paralelos)
+Leer también `CONFIG_USER.yaml` (ruta en `archivos.config_user`) y tomar `usuario.nombre` → **`{{usuario.nombre}}`**, necesario para firmar el veredicto en el paso 5. Si está vacío o el archivo no existe, omitir el sufijo de la firma; no inventar un nombre.
 
-**Sub-agente 1:** Ambigüedades → `SIN_AMBIGÜEDADES` / `CON_AMBIGÜEDADES` + preguntas.
-**Sub-agente 2:** SMART + Cobertura (error, validación, performance).
-**Sub-agente 3** (Particionada): Trazabilidad CA padre → CA granular Task.
+### 2. Dependencias y viabilidad (corto circuito)
 
-Consolidar → ambigüedades → **PAUSAR** y esperar respuestas.
+Clasificar cada impedimento declarado en el refinamiento o detectable en el backbone:
 
-### 3. Validación arquitectónica y ADR
+| Etiqueta | Qué es |
+|----------|--------|
+| `DEPENDENCIA_HU` | Otra HU que no está terminada |
+| `DEPENDENCIA_EXTERNA` | Sistema o equipo fuera del alcance |
+| `DECISION_PENDIENTE` | Definición de negocio sin resolver |
+| `RECURSO_NO_DISPONIBLE` | Credencial, ambiente o dato que no existe todavía |
 
-Delegar a sub-agente: separación de responsabilidades, boundaries, coherencia técnica, ADRs. Detectar contradicciones con ADR referenciado.
+**Si hay al menos una bloqueante → veredicto `BLOQUEADA` directo, saltar a paso 5.** No importa qué tan claros sean los CA: una HU que depende de algo inexistente no se planifica. Usar siempre la etiqueta explícita al reportar.
 
-### 4. Dependencias y viabilidad
+### 3. Validación de CA
 
-Clasificar: `DEPENDENCIA_HU`, `DEPENDENCIA_EXTERNA`, `DECISION_PENDIENTE`, `RECURSO_NO_DISPONIBLE`. Bloqueante → **BLOQUEADA**.
+En una sola pasada, sin sub-agentes:
+
+- **SMART:** cada CA específico, medible, alcanzable, relevante y temporal.
+- **Cobertura:** casos de error, validación de entrada y performance.
+- **Ambigüedades:** términos sin umbral ("rápido", "adecuadamente"). Se registran como **observaciones con preguntas abiertas**, no interrumpen el flujo.
+- **Trazabilidad** (solo si Particionada): CA padre → CA granular de cada Task.
+
+**No pausar aquí.** Toda HU real tiene ambigüedades; detenerse en ellas impide emitir veredicto.
+
+### 4. Validación arquitectónica y ADR
+
+Separación de responsabilidades, boundaries, coherencia técnica. Detectar contradicciones con el ADR referenciado en `ADR_Ref`.
 
 ### 5. Veredicto y persistencia
 
-**APROBADA:** `## Aprobación` en Refinamiento.md → backbone `[R] → [A]`.
-**AJUSTES:** `## Feedback de Validación` con observaciones pendientes.
-**BLOQUEADA:** `## Bloqueo de Validación` → backbone `[R] → [B]`.
+Siempre se emite veredicto y siempre se persiste. Un solo veredicto por ejecución:
+
+| Condición | Veredicto |
+|-----------|-----------|
+| Dependencia bloqueante (paso 2) | `BLOQUEADA` |
+| Hallazgos de CA o arquitectura, o ambigüedades abiertas | `AJUSTES` |
+| Sin hallazgos | `APROBADA` |
+
+| Veredicto | Sección en Refinamiento.md | Backbone |
+|-----------|---------------------------|----------|
+| APROBADA | `## Aprobación` | `[R] → [A]` |
+| AJUSTES | `## Feedback de Validación` (observaciones + preguntas abiertas) | sigue en `[R]` |
+| BLOQUEADA | `## Bloqueo de Validación` (dependencias etiquetadas) | `[R] → [B]` |
+
+**Nunca escribir un rechazo dentro de `## Aprobación`.** Esa sección significa aprobada; un veredicto negativo guardado ahí hace que la HU se lea como aprobada más adelante.
+
+Toda sección lleva el mismo bloque de firma, con el rol del validador y el nombre del usuario:
+
+```
+> **Validador:** Arquitecto - {{usuario.nombre}}
+> **Fecha:** {{fecha}}
+> **Siguiente:** >[skill] [ID-HU]
+```
+
+Sin `{{usuario.nombre}}` configurado, la línea queda `> **Validador:** Arquitecto`.
 
 ```
 ✅ HU APROBADA: [ID-HU] → >planificar_hu [ID-HU]
@@ -119,7 +147,6 @@ Clasificar: `DEPENDENCIA_HU`, `DEPENDENCIA_EXTERNA`, `DECISION_PENDIENTE`, `RECU
 | APROBADA | `[A] Aprobada` | `>planificar_hu [ID-HU]` |
 | AJUSTES | `[R] + observaciones` | `>refinar_hu [ID-HU]` |
 | BLOQUEADA | `[B] Bloqueada` | Resolver → revalidar |
-| RECHAZADA | `[B] Bloqueada` | Requiere rediseño |
 
 ## Common Mistakes
 

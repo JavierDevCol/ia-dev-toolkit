@@ -5,7 +5,7 @@
 opencode.json
 .opencode/
 .claude/
-
+evals/
 config_consultas.json
 .tmp.driveupload/
 
