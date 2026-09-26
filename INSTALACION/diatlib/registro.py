@@ -6,6 +6,8 @@ Esquema (por instalación):
   - sha        = SHA del repo al instalar. Permite saltar proyectos ya al día.
 
 El registro vive en el cache base (paths.get_installations_file), a salvo de --update.
+Reinstalar sobre un proyecto ya registrado FUSIONA selection/components con lo previo
+(no reemplaza): instalar una skill nueva no debe des-trackear lo ya instalado antes.
 """
 
 import json
@@ -37,10 +39,32 @@ def find_installation(project_path, installations=None):
     return next((i for i in installations if i["project_path"] == target), None)
 
 
+def _merge_dict(old, new):
+    """Fusiona {tipo: [nombres]} (u otros valores, ej. config=True) sin perder lo previo.
+    Listas se unen sin duplicar; valores no-lista nuevos ganan (si no vienen, se preservan)."""
+    merged = dict(old)
+    for k, v in new.items():
+        if isinstance(v, list) and isinstance(merged.get(k), list):
+            merged[k] = merged[k] + [x for x in v if x not in merged[k]]
+        else:
+            merged[k] = v
+    return merged
+
+
 def save_installation(project_path, platform_dir, selection, components, sha):
-    """Guarda/actualiza una instalación con seeds (selection), resueltos y sha."""
+    """Guarda/actualiza una instalación con seeds (selection), resueltos y sha.
+    Si el proyecto ya estaba registrado, fusiona con la selección/componentes previos
+    en vez de reemplazarlos (instalar algo nuevo no debe des-trackear lo anterior)."""
     project_path = str(Path(project_path).resolve())   # normaliza (symlinks, relativas)
     installations = load_installations()
+
+    idx = next((i for i, x in enumerate(installations)
+                if x["project_path"] == str(project_path)), None)
+
+    if idx is not None:
+        prev = installations[idx]
+        selection = _merge_dict(prev.get("selection", {}), selection)
+        components = _merge_dict(prev.get("components", {}), components)
 
     new_install = {
         "project_path": str(project_path),
@@ -51,8 +75,6 @@ def save_installation(project_path, platform_dir, selection, components, sha):
         "components": components,
     }
 
-    idx = next((i for i, x in enumerate(installations)
-                if x["project_path"] == str(project_path)), None)
     if idx is not None:
         installations[idx] = new_install
     else:
