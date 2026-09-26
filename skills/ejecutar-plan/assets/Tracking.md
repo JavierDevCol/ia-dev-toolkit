@@ -7,6 +7,8 @@
 | **HU** | [ID-HU] |
 | **Inicio** | [FECHA_ISO_8601] |
 | **Estado** | [EN_PROGRESO \| FINALIZADO \| ERROR] |
+| **Modo ejecución** | [completo \| fase_por_fase \| tarea_por_tarea \| task_por_task \| task_especifica] |
+| **Rama de trabajo** | [nombre-rama] |
 | **Progreso** | [X]% ([Y]/[Z] tareas) |
 | **Sección actual** | [N]/[M] - [Nombre sección] |
 | **Última actualización** | [FECHA_ISO_8601] |
