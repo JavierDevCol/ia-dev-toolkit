@@ -3,6 +3,8 @@
 reinstall_components re-resuelve las seeds (selection) contra el catálogo nuevo, de
 modo que si un componente ganó una dependencia entre versiones, esa dep se instala.
 cmd_update descarga solo si el repo cambió y salta proyectos ya al día (por sha).
+Con ruta explícita, restringe la actualización a esa instalación (debe estar
+registrada; si no, dirige a `diat --install`) en vez de recorrer todo el registro.
 """
 
 from datetime import datetime
@@ -28,9 +30,13 @@ def reinstall_components(installation, cache, dependencies=None):
                                   interactive=False)
 
 
-def cmd_update():
-    """Actualiza CLI + cache y reinstala en los proyectos registrados."""
+def cmd_update(argv=None):
+    """Actualiza CLI + cache. Sin ruta: reinstala en todos los proyectos registrados.
+    Con ruta: reinstala solo en esa instalación (debe estar registrada)."""
     ui.print_banner()
+
+    args = [a for a in (argv or []) if not a.startswith("-")]
+    target_path = Path(args[0]).resolve() if args else None
 
     remote_sha = github.get_remote_sha()
     if not remote_sha:
@@ -42,6 +48,13 @@ def cmd_update():
         registro.save_installed_version(remote_version)
 
     installations = registro.load_installations()
+
+    if target_path is not None and not any(
+        Path(i["project_path"]) == target_path for i in installations
+    ):
+        ui.print_error(f"'{target_path}' no está registrado en DIAT. "
+                       f"Usa `diat --install {target_path}` primero.")
+        return
 
     # Descargar snapshot SOLO si el repo cambió (refresca componentes + CLI en bin)
     if registro.get_installed_sha() != remote_sha:
@@ -66,6 +79,8 @@ def cmd_update():
     updated = skipped = missing = 0
     for inst in installations:
         project = Path(inst["project_path"])
+        if target_path is not None and project != target_path:
+            continue
         if not project.exists():
             ui.print_warning(f"Proyecto no encontrado: {project}")
             missing += 1

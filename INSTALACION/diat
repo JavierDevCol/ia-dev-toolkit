@@ -323,7 +323,7 @@ def main():
     elif cmd in ("--install", "--i", "-i"):
         cmd_install(rest)
     elif cmd in ("--update", "--u", "-u"):
-        update.cmd_update()
+        update.cmd_update(rest)
     elif cmd in ("--status", "-s"):
         cmd_status(rest)
     elif cmd in ("--list", "-l"):
