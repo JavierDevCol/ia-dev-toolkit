@@ -58,13 +58,27 @@ Genera diagramas Mermaid correctos y consistentes aplicando estándares técnico
 | Rosa | Sec/Auth/Seguridad | `#FF69B426` | `rgba(255, 105, 180, 0.15)` |
 | Rojo | Error/Crítico | `#FF000026` | `rgba(255, 0, 0, 0.15)` |
 
+### Estilo de Flechas (contraste + grosor)
+
+Sin esto, las flechas quedan finas y de bajo contraste en al menos un modo de color (medido: light usa negro sin grosor fijo, dark usa `lightgrey` — aún más fino en state diagrams). Mecanismo distinto por tipo — ver `references/rules.md` para el detalle y el porqué de `#888888`:
+
+| Tipo | Dónde va | Sintaxis |
+|------|----------|----------|
+| Flowchart | Al final del bloque | `linkStyle default stroke:#888,stroke-width:2px` |
+| State | Primera línea (`%%{init}%%`) | `%%{init: {'themeVariables': {'transitionColor':'#888888'}}}%%` — **`linkStyle` rompe el parseo acá** |
+| Sequence | Primera línea (`%%{init}%%`) | `%%{init: {'themeVariables': {'signalColor':'#888888'}}}%%` |
+
+Si hay Técnica Nodo Fantasma en flowchart: agregar `linkStyle N stroke:none` para el índice del link `~~~` invisible — `linkStyle default` lo vuelve visible si no se excluye.
+
 ### Checklist Pre-Renderizado
 
 - [ ] No contiene etiquetas HTML
 - [ ] Formato de color correcto según tipo (HEX vs RGBA)
 - [ ] Transparencia 0.15 en todos los fondos
 - [ ] `color:#fff` en estilos de flowchart
-- [ ] Si hay subgraphs anidados → Técnica Nodo Fantasma aplicada
+- [ ] Flechas con color+grosor explícito (ver tabla arriba) — nunca el default
+- [ ] Si hay subgraphs anidados → Técnica Nodo Fantasma aplicada + link fantasma excluido del `linkStyle default`
+- [ ] Sequence: ningún participante se llama `Actor` (colisiona con la keyword reservada)
 
 **Reglas de color:** Flowchart/State → HEX con Alpha (`#RRGGBBAA`). Sequence → RGBA (`rect rgba(...)`). `rgba()` ROMPE flowcharts.
 
@@ -72,4 +86,7 @@ Genera diagramas Mermaid correctos y consistentes aplicando estándares técnico
 
 - `rgba()` en flowcharts → usar HEX con alpha en su lugar
 - Sin `color:#fff` → texto desaparece sobre fondos de color
+- Flechas sin `linkStyle`/`themeVariables` → quedan finas y de bajo contraste en dark mode
+- `linkStyle` en `stateDiagram-v2` → rompe el parseo; usar `themeVariables.transitionColor`
+- Participante `Actor` en sequence → colisiona con la keyword reservada, rompe el parseo
 - VS Code requiere extensión para preview (GitHub/GitLab/Azure DevOps/Notion soportan nativamente)

@@ -89,6 +89,7 @@ El formato de color depende del tipo de diagrama:
 **Ejemplo completo:**
 
 ```mermaid
+%%{init: {'themeVariables': {'signalColor':'#888888'}}}%%
 sequenceDiagram
     autonumber
     rect rgba(0, 150, 255, 0.15)
@@ -102,6 +103,8 @@ sequenceDiagram
         C-->>A: Resultado
     end
 ```
+
+**Cuidado con nombres reservados:** `Actor` y `actor` colisionan con la palabra clave `actor` (usada para declarar actores explícitos) y rompen el parseo. Usar nombres como `Cliente`, `Usuario`, `A`/`B`/`C`, etc. — nunca `Actor` como nombre de participante.
 
 ### Flowchart
 
@@ -127,6 +130,7 @@ graph TD
     style A fill:#0096FF26,stroke:#0096FF,color:#fff
     style C fill:#00FF7F26,stroke:#00FF7F,color:#fff
     style D fill:#FF000026,stroke:#FF0000,color:#fff
+    linkStyle default stroke:#888,stroke-width:2px
 ```
 
 ### State Diagram
@@ -140,6 +144,7 @@ graph TD
 **Ejemplo completo:**
 
 ```mermaid
+%%{init: {'themeVariables': {'transitionColor':'#888888','transitionLabelColor':'#888888'}}}%%
 stateDiagram-v2
     [*] --> Pendiente
     Pendiente --> EnProceso: iniciar
@@ -148,6 +153,8 @@ stateDiagram-v2
     Error --> Pendiente: reintentar
     Completado --> [*]
 ```
+
+**`linkStyle` NO es válido en `stateDiagram-v2`** (rompe el parseo) — a diferencia de flowchart, el color/grosor de transición se controla vía `themeVariables` en el `%%{init}%%`.
 
 ### C4 Component
 
@@ -184,7 +191,41 @@ graph TD
     end
     style HijoA fill:#0096FF26,stroke:#0096FF,color:#fff
     style HijoB fill:#FFA50026,stroke:#FFA500,color:#fff
+    linkStyle default stroke:#888,stroke-width:2px
+    linkStyle 0 stroke:none
 ```
+
+**Ojo con `linkStyle default` + Nodo Fantasma:** `linkStyle default` aplica a TODOS los links, incluido el link invisible `sep ~~~ HijoA` (índice 0, por orden de aparición) — si no se lo excluye explícitamente con `linkStyle 0 stroke:none` (después de `linkStyle default`), el spacer se vuelve visible como una línea gris gruesa. El índice depende del orden en que se declaran los links en el código fuente, no de la posición visual.
+
+## Estilo de Flechas/Líneas (Contraste y Grosor)
+
+**Problema real medido:** sin estilo explícito, las flechas quedan finas y con bajo contraste
+en al menos un modo de color. Verificado renderizando con `@mermaid-js/mermaid-cli`:
+
+| Diagrama | Tema light (default) | Tema dark |
+|----------|----------------------|-----------|
+| Flowchart | `stroke:#000000`, sin `stroke-width` explícito | `stroke:lightgrey`, sin `stroke-width` |
+| State | `stroke:#000000, width:2` | `stroke:lightgrey, width:1` (más fino que en light) |
+| Sequence | `stroke:#28253D, width:1.5` | (no medido, mismo patrón esperado) |
+
+**Fix por tipo de diagrama** (el mecanismo es distinto en cada uno — no hay una única sintaxis que sirva para los tres):
+
+**Flowchart/Nested:** `linkStyle` (índice o `default`), al final del bloque:
+```
+linkStyle default stroke:#888,stroke-width:2px
+```
+
+**State:** `linkStyle` **rompe el parseo** de `stateDiagram-v2` — usar `themeVariables` en el `%%{init}%%`, primera línea del bloque:
+```
+%%{init: {'themeVariables': {'transitionColor':'#888888','transitionLabelColor':'#888888'}}}%%
+```
+
+**Sequence:** mismo mecanismo que state (`themeVariables`, no `linkStyle`), variable `signalColor`. El grosor de las líneas de mensaje (`messageLine`) no tiene una variable de tema simple para controlarlo — solo el color:
+```
+%%{init: {'themeVariables': {'signalColor':'#888888'}}}%%
+```
+
+**Por qué `#888888`:** gris medio, visible tanto sobre fondo claro como oscuro sin necesitar detectar el modo activo (el mismo trade-off de la transparencia 0.15 en los fondos). Si un renderer específico da poco contraste, subir a `#aaaaaa` (sobre fondo oscuro) o `#666666` (sobre fondo claro).
 
 ## Compatibilidad y Renderizado
 
@@ -219,3 +260,5 @@ graph TD
 4. 📦 Subgraphs anidados → Técnica Nodo Fantasma
 5. 🌓 Siempre transparencia 0.15 para dark/light mode
 6. ✏️ Siempre `color:#fff` en estilos para legibilidad
+7. ➡️ Flechas siempre con color+grosor explícito — nunca dejar el default (fino/bajo contraste en al menos un modo): `linkStyle default` en flowchart, `themeVariables.transitionColor` en state, `themeVariables.signalColor` en sequence
+8. 🚫 Nunca nombrar un participante `Actor` en sequence — colisiona con la keyword reservada

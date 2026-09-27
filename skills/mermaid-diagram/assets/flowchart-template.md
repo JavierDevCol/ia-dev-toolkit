@@ -10,4 +10,5 @@ graph TD
     style A fill:#0096FF26,stroke:#0096FF,color:#fff
     style C fill:#00FF7F26,stroke:#00FF7F,color:#fff
     style D fill:#FF000026,stroke:#FF0000,color:#fff
+    linkStyle default stroke:#888,stroke-width:2px
 ```

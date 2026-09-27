@@ -12,4 +12,6 @@ graph TD
     end
     style HijoA fill:#0096FF26,stroke:#0096FF,color:#fff
     style HijoB fill:#FFA50026,stroke:#FFA500,color:#fff
+    linkStyle default stroke:#888,stroke-width:2px
+    linkStyle 0 stroke:none
 ```
