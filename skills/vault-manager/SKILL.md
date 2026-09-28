@@ -23,28 +23,32 @@ Gestiona operaciones sobre HashiCorp Vault: autenticación, lectura/escritura de
 
 ## Prerequisites
 
-1. Verificar CLI: `vault --version`
-2. Si no está instalado → informar al usuario y detener.
+1. Verificar CLI: `vault --version`. Si no está instalado → informar al usuario y detener.
+2. Verificar que `VAULT_ADDR` esté en el entorno — **siempre requerida**, sin importar el método de autenticación. Si falta, ver paso 2 de Autenticación.
 
 ## Implementation
 
 ### Autenticación
 
-> **Seguridad:** Nunca pasar credenciales en línea de comandos. El historial de shell y procesos puede exponer passwords.
+> **Seguridad:** Las credenciales viven **solo en variables de entorno del proceso**, nunca en un archivo (`.env` u otro) ni en el chat. El agente verifica que existan — nunca pide su valor por chat, nunca lo escribe en un comando ni lo imprime. Si el usuario las pega en el chat igual, no repetirlas en la respuesta.
 
-1. Buscar archivo `.env` en la raíz del proyecto o ruta indicada por el usuario.
-2. Leer `VAULT_USER` y `VAULT_PASS` del `.env`.
-3. Autenticar usando input interactivo:
+1. **Verificar variables de entorno** (nunca imprimir sus valores, solo confirmar presencia con algo como `[ -n "$VAULT_TOKEN" ] && echo set`):
+   - `VAULT_ADDR` — siempre requerida.
+   - Método preferido — `VAULT_TOKEN`.
+   - Método alternativo — `VAULT_USER` + `VAULT_PASS` (solo si no hay `VAULT_TOKEN`).
+2. **Si falta `VAULT_ADDR`, o no hay ninguna combinación de auth completa:** decirle al usuario exactamente qué falta y darle el/los comando(s) `export` como plantilla (sin valor), para que los ejecute él mismo en su terminal:
    ```bash
-   vault login -method=userpass username="$VAULT_USER"
+   export VAULT_ADDR="https://vault.tuempresa.com:8200"
+   export VAULT_TOKEN="tu-token"
+   # — o, si el método es userpass —
+   export VAULT_USER="tu-usuario"
+   export VAULT_PASS="tu-password"
    ```
-   Vault solicitará la contraseña de forma interactiva.
-4. Alternativa no interactiva: leer la contraseña por **stdin** (`password=-`), nunca como argumento expandido:
-   ```bash
-   vault login -method=userpass username="$VAULT_USER" password=- <<< "$VAULT_PASS"
-   ```
-   **Nunca** `password="$VAULT_PASS"` como argumento — el shell expande la variable a texto plano en el `argv` del proceso antes de ejecutar, visible para cualquier otro usuario de la máquina vía `ps aux` o `/proc/[pid]/cmdline` mientras el comando corre. Eso es exactamente la exposición "por proceso" que esta misma regla de seguridad dice evitar — pasarla como argumento (aunque venga de una variable) no la evita, sea o no la contraseña literal en el texto del comando.
-5. Si la autenticación falla → informar error y detener.
+   Pedirle que confirme cuando estén exportadas, y volver al paso 1.
+3. **Autenticar según lo disponible** (token tiene prioridad — no requiere `vault login`):
+   - **Token:** usar directo. Validar con `vault token lookup` (confirma validez, no expone el valor).
+   - **Userpass:** `vault login -method=userpass username="$VAULT_USER" password=- <<< "$VAULT_PASS"` — **nunca** `password="$VAULT_PASS"` como argumento expandido: el shell lo vuelca en texto plano al `argv` del proceso, visible vía `ps aux`/`/proc/[pid]/cmdline` mientras corre, igual de expuesto que escribir la contraseña literal.
+4. Si la autenticación falla → informar error y detener.
 
 ### Comandos comunes
 
@@ -69,6 +73,7 @@ Pedir al usuario que copie el output. Cada entrada contiene: `remote_address`, `
 | Tarea | Comando / Acción |
 |-------|-----------------|
 | Verificar CLI | `vault --version` |
+| Verificar token existente | `vault token lookup` |
 | Login interactivo | `vault login -method=userpass username=USER` |
 | Login no interactivo | `vault login -method=userpass username="$VAULT_USER" password=- <<< "$VAULT_PASS"` |
 | Leer secreto | `vault kv get [path]` |
@@ -80,5 +85,6 @@ Pedir al usuario que copie el output. Cada entrada contiene: `remote_address`, `
 
 - **Credenciales en línea de comandos:** Nunca usar `password=MI_PASS` ni `password="$VAULT_PASS"` como argumento — en ambos casos el shell deja el valor en texto plano en el `argv` del proceso (visible vía `ps aux`/`/proc/[pid]/cmdline`), no solo en el historial. Usar input interactivo o `password=- <<< "$VAULT_PASS"` (stdin).
 - **Token expirado:** Si un comando falla con error de autenticación, re-autenticar antes de reintentar.
-- **`.env` mal formateado:** Debe ser `VAULT_USER=usuario` y `VAULT_PASS=contraseña` (sin espacios alrededor de `=`).
-- **Mostrar VAULT_PASS:** Nunca imprimir la contraseña en pantalla ni en logs.
+- **`VAULT_ADDR` no seteada:** `vault` cae por defecto a `https://127.0.0.1:8200` sin avisar — falla con "connection refused" sin explicar por qué. Verificarla siempre, incluso si ya hay token o userpass.
+- **Usar userpass habiendo `VAULT_TOKEN`:** El token tiene prioridad — no pedir/usar usuario y contraseña si ya hay un token en el entorno.
+- **Pedir o mostrar credenciales:** Nunca preguntar "¿cuál es tu contraseña/token?" por chat, ni escribir su valor en un comando, ni imprimirlo en pantalla o logs. Solo verificar que la variable de entorno exista.
