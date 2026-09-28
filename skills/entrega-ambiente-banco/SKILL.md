@@ -83,7 +83,7 @@ Mostrar menú principal (`references/menus.txt`) y esperar selección.
 3. **Release notes:** `git checkout develop && git pull`, usar el tag anterior del paso 2, generar `git log <TAG>..HEAD --oneline --no-merges > release-notes.md`, guardar en `{output_folder}/entrega_release/{nombre_repo}/{version}/`
 4. **Crear/actualizar release/vX.Y.Z:** Validar tag inexistente, buscar si rama existe, crear con `--ff-only` o crear nueva desde develop, push
 5. **Validar mismo commit:** `git rev-parse develop` vs `git rev-parse release/vX.Y.Z` — deben coincidir
-6. **Checklist de entrega** (`references/checklist-entrega.txt`): Mostrar checklist, items ⚠️ requieren skills externas (`env-config-audit`, `ado-pipeline-analyzer`)
+6. **Checklist de entrega** (`references/checklist-entrega.txt`): Mostrar checklist **sustituyendo `vX.Y.Z` por la versión real** de esta entrega en todas las líneas (incluida la de `env-config-audit`) antes de mostrarlo — nunca dejar el placeholder literal. Items ⚠️ requieren skills externas (`env-config-audit`, `ado-pipeline-analyzer`)
 7. **Resumen final:** Mostrar y guardar en `{output_folder}/entrega_release/{nombre_repo}/{version}/RESUMEN_ENTREGA_release ({nombre_repo}).txt`
 
 ### Opción 2: Entregar release desde feature/fix/hotfix
@@ -93,7 +93,7 @@ Mostrar sub-menú (`references/menus.txt`). Determinar sub-flujo:
 #### 2a: feature/fix → develop
 
 1. Preguntar nombre de rama y versión, validar existencia
-2. Informar sobre `@env-config-audit` para CONFIG_ENTORNO_PR
+2. Informar sobre `env-config-audit`, con el comando ya armado y listo para copiar (sustituir `<rama>` por el nombre real): `@env-config-audit sobre el diff develop..<rama>` — **no** reutilizar el diff de la Opción 1 (`develop..release/vX.Y.Z`), acá todavía no existe ningún `release/vX.Y.Z`
 3. Crear PR desde `<rama>` → `develop` (título sugerido: "Release vX.Y.Z — <descripción>")
 4. Instrucciones: aprobar PR, luego re-ejecutar Opción 1
 
@@ -104,16 +104,20 @@ Ver `references/flujo-hotfix.sh` para flujo bash completo.
 1. Preguntar ambiente (PRU/PREPRO/PRO), versión afectada, descripción
 2. Validar tag: `git tag -l "vX.Y.Z-ambiente"`
 3. **Estado de promoción de vX.Y.Z (informativo — nunca bloquea):** mismo chequeo que Opción 1 paso 2 (`vX.Y.Z`, `-pru`, `-prepro`, `-pro`). Mostrar y continuar — un hotfix es por definición urgente, no puede esperar a que termine de promoverse.
-4. Ejecutar flujo: hotfix branch → fix → merge develop → nuevo release/vX.Y.Z+1 → limpiar hotfix branch
-5. Resumen y guardar en `{output_folder}/entrega_release/{nombre_repo}/vX.Y.Z+1/RESUMEN_ENTREGA_hotfix ({nombre_repo}).txt`
+4. Crear hotfix branch desde el tag del ambiente afectado, aplicar el fix
+5. Informar sobre `env-config-audit`, con el comando ya armado (sustituir `<hotfix>` por el nombre real): `@env-config-audit sobre el diff develop..hotfix/<hotfix>` — correrlo acá, sobre el fix en sí, antes de mergear a develop
+6. Merge a develop → nuevo release/vX.Y.Z+1 → limpiar hotfix branch
+7. Resumen y guardar en `{output_folder}/entrega_release/{nombre_repo}/vX.Y.Z+1/RESUMEN_ENTREGA_hotfix ({nombre_repo}).txt`
 
 #### 2c: ajuste RC post-entrega en DES (§3.2.1)
 
 Ver `references/flujo-rc.sh` para flujo bash completo.
 
 1. Preguntar versión activa, descripción del ajuste, número de RCs existentes
-2. Ejecutar flujo: fix sobre release/vX.Y.Z → back-merge develop → crear rama RC efímera
-3. Resumen y guardar en `{output_folder}/entrega_release/{nombre_repo}/vX.Y.Z/RESUMEN_ENTREGA_rc ({nombre_repo}).txt`
+2. Aplicar el fix sobre release/vX.Y.Z (la rama sigue viva)
+3. Informar sobre `env-config-audit`, con el comando ya armado (sustituir `<vX.Y.Z-rc.N-1>` por el tag del RC anterior si existe, o `<vX.Y.Z>` si es el primer ajuste): `@env-config-audit sobre el diff <vX.Y.Z-rc.N-1 o vX.Y.Z>..release/vX.Y.Z` — el ajuste es el commit nuevo sobre la misma rama, no un diff entre dos ramas distintas. Correrlo acá, antes del back-merge
+4. Back-merge a develop → crear rama RC efímera
+5. Resumen y guardar en `{output_folder}/entrega_release/{nombre_repo}/vX.Y.Z/RESUMEN_ENTREGA_rc ({nombre_repo}).txt`
 
 ## Quick Reference
 
