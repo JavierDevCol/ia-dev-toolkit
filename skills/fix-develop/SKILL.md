@@ -79,11 +79,11 @@ Verificar que NO existe release branch activo (`git branch -a | grep release/`).
 
 **Reglas:** Bug en develop = fix en develop (no crear release branch). Bug en feature = fix en la misma feature. Si hay release branch activo → `fix-release`. Verificar que fix no rompe otras features. Push directo falla → crear PR.
 
-**Skills:** `fix-release` · `entrega-ambiente-banco` · `pr-config-audit` · `ado-pipeline-analyzer`
+**Skills:** `fix-release` · `entrega-ambiente-banco` · `env-config-audit` · `ado-pipeline-analyzer`
 
 ## Common Mistakes
 
 - **Usar esta skill post-entrega:** Si el release ya fue entregado, usar `fix-release`.
 - **Push directo a develop protegida:** Crear PR `bugfix/WA2-xxx → develop`.
 - **Fix causado por otro merge:** `git log develop --oneline -20` para identificar commit culpable.
-- **Fix con cambio de config:** Ejecutar `@pr-config-audit` después.
+- **Fix con cambio de config:** Ejecutar `@env-config-audit` después.

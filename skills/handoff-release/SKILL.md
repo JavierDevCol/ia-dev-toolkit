@@ -74,11 +74,11 @@ Hotfix post-entrega o ajustes RC → usar `fix-release`.
 
 **Reglas:** develop y release/vX.Y.Z = mismo commit antes del handoff (usar `--ff-only`). Versionamiento semántico. PR a staging lo crea deployer. No exponer tokens. Si `--ff-only` falla → detener.
 
-**Skills:** `pr-config-audit` (manualmente)
+**Skills:** `env-config-audit` (manualmente)
 
 ## Common Mistakes
 
 - **develop y release no coinciden:** Verificar con `git rev-parse`. No forzar merge.
 - **Release sin verificar pipeline:** Detener si pipeline no pasó.
 - **Olvidar back-merge:** Todo fix en release debe propagarse a develop.
-- **pr-config-audit:** Esta skill no lo ejecuta. Ejecutar manualmente.
+- **env-config-audit:** Esta skill no lo ejecuta. Ejecutar manualmente.

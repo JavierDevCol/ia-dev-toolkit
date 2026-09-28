@@ -73,4 +73,4 @@
 
 ---
 
-*Documento generado con project-setup-docs skill — {{DATE}}*
+*Documento generado con env-config-audit skill — {{DATE}}*

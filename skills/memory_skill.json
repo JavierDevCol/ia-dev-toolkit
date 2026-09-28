@@ -23,7 +23,7 @@
     },
     "memory": {}
   },
-  "pr-config-audit": {
+  "env-config-audit": {
     "config": {
       "name_repo_source": "pr_remote",
       "name_ms_source": "same_as_repo",

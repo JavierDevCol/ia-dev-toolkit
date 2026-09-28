@@ -1,5 +1,5 @@
 ---
-name: pr-config-audit
+name: env-config-audit
 description: Usa esta skill cuando necesites auditar variables de entorno, colas o secretos en un PR, commit o rama — al revisar un pull request, incorporar un microservicio, o mapear variables a Variable Groups ADO vs Vault.
 ready: true
 ---

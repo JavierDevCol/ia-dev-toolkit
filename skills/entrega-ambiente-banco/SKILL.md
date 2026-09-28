@@ -82,7 +82,7 @@ Mostrar menú principal (`references/menus.txt`) y esperar selección.
 2. **Release notes:** `git checkout develop && git pull`, obtener tag anterior, generar `git log <TAG>..HEAD --oneline --no-merges > release-notes.md`, guardar en `{output_folder}/entrega_release/{nombre_repo}/{version}/`
 3. **Crear/actualizar release/vX.Y.Z:** Validar tag inexistente, buscar si rama existe, crear con `--ff-only` o crear nueva desde develop, push
 4. **Validar mismo commit:** `git rev-parse develop` vs `git rev-parse release/vX.Y.Z` — deben coincidir
-5. **Checklist de entrega** (`references/checklist-entrega.txt`): Mostrar checklist, items ⚠️ requieren skills externas (`pr-config-audit`, `ado-pipeline-analyzer`)
+5. **Checklist de entrega** (`references/checklist-entrega.txt`): Mostrar checklist, items ⚠️ requieren skills externas (`env-config-audit`, `ado-pipeline-analyzer`)
 6. **Resumen final:** Mostrar y guardar en `{output_folder}/entrega_release/{nombre_repo}/{version}/RESUMEN_ENTREGA_release ({nombre_repo}).txt`
 
 ### Opción 2: Entregar release desde feature/fix/hotfix
@@ -92,7 +92,7 @@ Mostrar sub-menú (`references/menus.txt`). Determinar sub-flujo:
 #### 2a: feature/fix → develop
 
 1. Preguntar nombre de rama y versión, validar existencia
-2. Informar sobre `@pr-config-audit` para CONFIG_ENTORNO_PR
+2. Informar sobre `@env-config-audit` para CONFIG_ENTORNO_PR
 3. Crear PR desde `<rama>` → `develop` (título sugerido: "Release vX.Y.Z — <descripción>")
 4. Instrucciones: aprobar PR, luego re-ejecutar Opción 1
 
@@ -147,12 +147,12 @@ Ver `references/flujo-rc.sh` para flujo bash completo.
 | RC branches no efímeras | Se crean para PR a des, se eliminan después del merge |
 | Merge directo a main/des en hotfix | Primero develop, luego crear release |
 | Generar release-notes incremental | Siempre desde cero con `git log <TAG>..HEAD` |
-| No generar CONFIG_ENTORNO_PR | Ejecutar `@pr-config-audit` manualmente por separado |
+| No generar CONFIG_ENTORNO_PR | Ejecutar `@env-config-audit` manualmente por separado |
 | `--ff-only` forzado | Si falla, hay commits propios en release — detener |
 
 ## Skills complementarias (NO las ejecuta esta skill)
 
 | Skill | Qué hace | Cuándo ejecutarla |
 |-------|----------|-------------------|
-| `pr-config-audit` | Genera CONFIG_ENTORNO_PR_*.md analizando el diff | Checklist opción 1, 2a, 2b, 2c |
+| `env-config-audit` | Genera CONFIG_ENTORNO_PR_*.md analizando el diff | Checklist opción 1, 2a, 2b, 2c |
 | `ado-pipeline-analyzer` | Valida build, tests, cobertura, DAST, SonarQube | Checklist opción 1 |

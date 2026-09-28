@@ -13,7 +13,7 @@ CHECKLIST DE ENTREGA — Handoff vX.Y.Z
 [⚠] SonarQube Quality Gate passed
      → Ejecuta /ado-pipeline-analyzer para verificar
 [⚠] CONFIG_ENTORNO_PR generado
-     → Ejecuta /pr-config-audit sobre diff develop..release/vX.Y.Z
+     → Ejecuta /env-config-audit sobre diff develop..release/vX.Y.Z
 [ ] Artefactos listos para entregar al banco
 
-NOTA: Las skills ´pr-config-audit´ y ´ado-pipeline-analyzer´, se recomienda ejecutar en el mismo chat.
+NOTA: Las skills ´env-config-audit´ y ´ado-pipeline-analyzer´, se recomienda ejecutar en el mismo chat.
