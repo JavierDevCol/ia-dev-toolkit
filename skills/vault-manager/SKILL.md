@@ -24,7 +24,7 @@ Gestiona operaciones sobre HashiCorp Vault: autenticación, lectura/escritura de
 ## Prerequisites
 
 1. Verificar CLI: `vault --version`. Si no está instalado → informar al usuario y detener.
-2. Verificar que `VAULT_ADDR` esté en el entorno — **siempre requerida**, sin importar el método de autenticación. Si falta, ver paso 2 de Autenticación.
+2. Verificar que `VAULT_ADDR` esté en el entorno — **siempre requerida**, sin importar el método de autenticación. Si falta, avisar y confirmar con el usuario (ver paso 2 de Autenticación) — nunca asumir el default local en silencio.
 
 ## Implementation
 
@@ -36,19 +36,22 @@ Gestiona operaciones sobre HashiCorp Vault: autenticación, lectura/escritura de
    - `VAULT_ADDR` — siempre requerida.
    - Método preferido — `VAULT_TOKEN`.
    - Método alternativo — `VAULT_USER` + `VAULT_PASS` (solo si no hay `VAULT_TOKEN`).
-2. **Si falta `VAULT_ADDR`, o no hay ninguna combinación de auth completa:** decirle al usuario exactamente qué falta y darle el/los comando(s) `export` como plantilla (sin valor), para que los ejecute él mismo en su terminal:
+2. **Si falta `VAULT_ADDR`:** no asumir nada — avisar explícitamente que sin esa variable `vault` va a intentar conectarse a un servidor **local** (`https://127.0.0.1:8200`, default del propio CLI) y pedir confirmación:
+   > No detecto `VAULT_ADDR` en el entorno. Sin esa variable, `vault` va a intentar conectarse a un servidor local (`https://127.0.0.1:8200`). ¿Es correcto (tenés un Vault local corriendo), o me das la URL real del servidor?
+   - Si confirma que el local es intencional → continuar sin pedir el export.
+   - Si no, o si no está seguro → dar `export VAULT_ADDR="https://vault.tuempresa.com:8200"` como plantilla y pedir que lo ejecute.
+3. **Si no hay ninguna combinación de auth completa** (ni `VAULT_TOKEN` ni `VAULT_USER`+`VAULT_PASS`): dar el/los `export` correspondientes como plantilla:
    ```bash
-   export VAULT_ADDR="https://vault.tuempresa.com:8200"
    export VAULT_TOKEN="tu-token"
    # — o, si el método es userpass —
    export VAULT_USER="tu-usuario"
    export VAULT_PASS="tu-password"
    ```
    Pedirle que confirme cuando estén exportadas, y volver al paso 1.
-3. **Autenticar según lo disponible** (token tiene prioridad — no requiere `vault login`):
+4. **Autenticar según lo disponible** (token tiene prioridad — no requiere `vault login`):
    - **Token:** usar directo. Validar con `vault token lookup` (confirma validez, no expone el valor).
    - **Userpass:** `vault login -method=userpass username="$VAULT_USER" password=- <<< "$VAULT_PASS"` — **nunca** `password="$VAULT_PASS"` como argumento expandido: el shell lo vuelca en texto plano al `argv` del proceso, visible vía `ps aux`/`/proc/[pid]/cmdline` mientras corre, igual de expuesto que escribir la contraseña literal.
-4. Si la autenticación falla → informar error y detener.
+5. Si la autenticación falla → informar error y detener.
 
 ### Comandos comunes
 
@@ -85,6 +88,6 @@ Pedir al usuario que copie el output. Cada entrada contiene: `remote_address`, `
 
 - **Credenciales en línea de comandos:** Nunca usar `password=MI_PASS` ni `password="$VAULT_PASS"` como argumento — en ambos casos el shell deja el valor en texto plano en el `argv` del proceso (visible vía `ps aux`/`/proc/[pid]/cmdline`), no solo en el historial. Usar input interactivo o `password=- <<< "$VAULT_PASS"` (stdin).
 - **Token expirado:** Si un comando falla con error de autenticación, re-autenticar antes de reintentar.
-- **`VAULT_ADDR` no seteada:** `vault` cae por defecto a `https://127.0.0.1:8200` sin avisar — falla con "connection refused" sin explicar por qué. Verificarla siempre, incluso si ya hay token o userpass.
+- **Asumir el default local de `VAULT_ADDR` en silencio:** si no está seteada, `vault` cae a `https://127.0.0.1:8200` sin avisar. No proceder sin más — avisar al usuario de ese fallback y pedirle que confirme si es intencional o dé la URL real (ver Autenticación paso 2). Verificar siempre, incluso si ya hay token o userpass.
 - **Usar userpass habiendo `VAULT_TOKEN`:** El token tiene prioridad — no pedir/usar usuario y contraseña si ya hay un token en el entorno.
 - **Pedir o mostrar credenciales:** Nunca preguntar "¿cuál es tu contraseña/token?" por chat, ni escribir su valor en un comando, ni imprimirlo en pantalla o logs. Solo verificar que la variable de entorno exista.
