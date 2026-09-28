@@ -79,11 +79,12 @@ Mostrar menú principal (`references/menus.txt`) y esperar selección.
 **Cuándo:** La feature ya está integrada a develop mediante PR aprobado. Sigue §3.2 del manual.
 
 1. **Verificar develop:** `git fetch origin`, verificar existencia, mostrar último commit, confirmar pipeline OK
-2. **Release notes:** `git checkout develop && git pull`, obtener tag anterior, generar `git log <TAG>..HEAD --oneline --no-merges > release-notes.md`, guardar en `{output_folder}/entrega_release/{nombre_repo}/{version}/`
-3. **Crear/actualizar release/vX.Y.Z:** Validar tag inexistente, buscar si rama existe, crear con `--ff-only` o crear nueva desde develop, push
-4. **Validar mismo commit:** `git rev-parse develop` vs `git rev-parse release/vX.Y.Z` — deben coincidir
-5. **Checklist de entrega** (`references/checklist-entrega.txt`): Mostrar checklist, items ⚠️ requieren skills externas (`env-config-audit`, `ado-pipeline-analyzer`)
-6. **Resumen final:** Mostrar y guardar en `{output_folder}/entrega_release/{nombre_repo}/{version}/RESUMEN_ENTREGA_release ({nombre_repo}).txt`
+2. **Estado de promoción de la versión anterior (informativo — nunca bloquea):** hallar el tag anterior más reciente (mismo hallazgo que reutiliza el paso 3) y verificar `vX.Y.Z` (DES), `vX.Y.Z-pru`, `vX.Y.Z-prepro`, `vX.Y.Z-pro`. Mostrar cuáles existen y cuáles faltan. **Nunca detener el flujo por esto** — el ritmo de promoción del banco (DES→PRU→PREPRO→PRO) es independiente de que CEIBA prepare el siguiente release, y un hotfix urgente (Opción 2b) no puede esperar a que la versión anterior termine de promoverse. Es solo visibilidad, útil mientras el deploy siga disparado por rama y no por tag (el tagging real aún puede estar incompleto).
+3. **Release notes:** `git checkout develop && git pull`, usar el tag anterior del paso 2, generar `git log <TAG>..HEAD --oneline --no-merges > release-notes.md`, guardar en `{output_folder}/entrega_release/{nombre_repo}/{version}/`
+4. **Crear/actualizar release/vX.Y.Z:** Validar tag inexistente, buscar si rama existe, crear con `--ff-only` o crear nueva desde develop, push
+5. **Validar mismo commit:** `git rev-parse develop` vs `git rev-parse release/vX.Y.Z` — deben coincidir
+6. **Checklist de entrega** (`references/checklist-entrega.txt`): Mostrar checklist, items ⚠️ requieren skills externas (`env-config-audit`, `ado-pipeline-analyzer`)
+7. **Resumen final:** Mostrar y guardar en `{output_folder}/entrega_release/{nombre_repo}/{version}/RESUMEN_ENTREGA_release ({nombre_repo}).txt`
 
 ### Opción 2: Entregar release desde feature/fix/hotfix
 
@@ -102,8 +103,9 @@ Ver `references/flujo-hotfix.sh` para flujo bash completo.
 
 1. Preguntar ambiente (PRU/PREPRO/PRO), versión afectada, descripción
 2. Validar tag: `git tag -l "vX.Y.Z-ambiente"`
-3. Ejecutar flujo: hotfix branch → fix → merge develop → nuevo release/vX.Y.Z+1 → limpiar hotfix branch
-4. Resumen y guardar en `{output_folder}/entrega_release/{nombre_repo}/vX.Y.Z+1/RESUMEN_ENTREGA_hotfix ({nombre_repo}).txt`
+3. **Estado de promoción de vX.Y.Z (informativo — nunca bloquea):** mismo chequeo que Opción 1 paso 2 (`vX.Y.Z`, `-pru`, `-prepro`, `-pro`). Mostrar y continuar — un hotfix es por definición urgente, no puede esperar a que termine de promoverse.
+4. Ejecutar flujo: hotfix branch → fix → merge develop → nuevo release/vX.Y.Z+1 → limpiar hotfix branch
+5. Resumen y guardar en `{output_folder}/entrega_release/{nombre_repo}/vX.Y.Z+1/RESUMEN_ENTREGA_hotfix ({nombre_repo}).txt`
 
 #### 2c: ajuste RC post-entrega en DES (§3.2.1)
 
@@ -149,6 +151,7 @@ Ver `references/flujo-rc.sh` para flujo bash completo.
 | Generar release-notes incremental | Siempre desde cero con `git log <TAG>..HEAD` |
 | No generar CONFIG_ENTORNO_PR | Ejecutar `@env-config-audit` manualmente por separado |
 | `--ff-only` forzado | Si falla, hay commits propios en release — detener |
+| Bloquear la entrega por tags de promoción faltantes | El chequeo de Opción 1 paso 2 / 2b paso 3 es informativo, nunca un gate — bloquearlo frenaría un hotfix urgente por el ritmo del banco, que es independiente de CEIBA |
 
 ## Skills complementarias (NO las ejecuta esta skill)
 
