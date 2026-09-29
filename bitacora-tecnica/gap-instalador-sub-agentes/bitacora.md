@@ -1,8 +1,8 @@
 # Sesión: Gap del instalador — sub-agentes validadores no se instalan
 - **ID:** 2026-09-01-gap-instalador-sub-agentes
 - **Fecha inicio:** 2026-09-01 23:06
-- **Última actualización:** 2026-09-01 23:06
-- **Estado:** Pausado (anotado para retomar)
+- **Última actualización:** 2026-09-29
+- **Estado:** ✅ Cerrada — no se retoma. Análisis de los 6 prompts (2026-09-29) confirmó que 5 de 6 validadores ya fueron probados (directa o conceptualmente) vía `evaluar-skill` y descartados por datos: `validar-hu` eliminó la delegación en sub-agentes (`validador-ambiguedades`, `validador-smart-cobertura`, `validador-trazabilidad`, `validador-arquitectonica`) y midió mejor resultado en una sola pasada (pass_rate 0.738→1.000, tokens 1.45x→1.05x, tiempo 2.07x→0.61x); `validador-calidad` es redundante con la lógica propia de `validar-ca`. Solo `validador-compilacion` quedaba como candidato tentativo, y no justifica por sí solo resolver el gap de instalación (COMPONENT_DIRS + path mismatch `./prompts/`). Decisión: no vale la pena, se cierra sin implementar.
 - **Rama de Trabajo:** `main`
 - **Tags:** `instalador`, `sub-agentes`, `opencode`, `deps`
 - **Ambiente:** Local
@@ -63,14 +63,10 @@ dependencias real, fix de opcionales, aclaración de ejecutar-plan, release v0.8
 está mergeado en `main` y funcionando.
 
 ### Pendientes
-- [ ] Decidir el **destino de instalación** de los sub-agentes (p. ej. `.opencode/`
-      con la estructura `prompts/` que el JSON espera, o el equivalente por agente).
-- [ ] Hacer que `diat --install` instale `prompts-sub-agentes/` + `opencode-model.json`
-      (¿añadir a `COMPONENT_DIRS`? ¿mecanismo aparte por ser config de opencode?).
-- [ ] **Corregir el path** `./prompts/` del JSON vs. archivos sueltos: o mover los
-      `.md` a `prompts-sub-agentes/prompts/`, o ajustar el `{file:...}` del JSON, o
-      resolverlo en el momento de instalar (reubicar a la estructura correcta).
-- [ ] Verificar que tras instalar, opencode resuelve los `{file:...}` correctamente.
+- [x] Decidir el **destino de instalación** de los sub-agentes — no aplica, no se instalan.
+- [x] Hacer que `diat --install` instale `prompts-sub-agentes/` + `opencode-model.json` — descartado.
+- [x] Corregir el path `./prompts/` del JSON — descartado, sin uso previsto.
+- [x] Verificar resolución de `{file:...}` en opencode — no aplica.
 
 ### Bloqueantes
 - Ninguno técnico. Es una decisión de diseño pausada a propósito.
@@ -84,6 +80,6 @@ está mergeado en `main` y funcionando.
 No aplica (no se ha tocado código para este gap; solo se documentó).
 
 ## Próxima Sesión
-1. Decidir dónde y cómo se instalan los sub-agentes (destino + estructura `prompts/`).
-2. Implementar la instalación en el flujo de `diat` (staging + copia).
-3. Corregir el path `./prompts/` del `opencode-model.json` y validar E2E con opencode.
+Ninguna. Cerrada sin implementar — ver decisión 2026-09-29 arriba. Si en el futuro
+surge un caso de uso real y medible para `validador-compilacion` (el único candidato
+no descartado por datos), reabrir con una bitácora nueva en vez de retomar esta.
