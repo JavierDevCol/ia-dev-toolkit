@@ -163,3 +163,5 @@ Ver `references/flujo-rc.sh` para flujo bash completo.
 |-------|----------|-------------------|
 | `env-config-audit` | Genera CONFIG_ENTORNO_PR_*.md analizando el diff | Checklist opción 1, 2a, 2b, 2c |
 | `ado-pipeline-analyzer` | Valida build, tests, cobertura, DAST, SonarQube | Checklist opción 1 |
+| `analizar-seguridad` | Auditoría estática (SAST) de todo lo que se va a promover | Checklist opción 1, `scope=project` |
+| `analizar-calidad-codigo` | Code smells y violaciones arquitectónicas del release completo | Checklist opción 1, `scope=project` |

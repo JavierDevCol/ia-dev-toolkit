@@ -14,6 +14,11 @@ CHECKLIST DE ENTREGA — Handoff vX.Y.Z
      → Ejecuta /ado-pipeline-analyzer para verificar
 [⚠] CONFIG_ENTORNO_PR generado
      → Ejecuta /env-config-audit sobre diff develop..release/vX.Y.Z
+[⚠] Auditoría de seguridad estática (SAST) ejecutada
+     → Ejecuta /analizar-seguridad scope=project sobre release/vX.Y.Z
+[⚠] Calidad de código verificada
+     → Ejecuta /analizar-calidad-codigo scope=project sobre release/vX.Y.Z
 [ ] Artefactos listos para entregar al banco
 
-NOTA: Las skills ´env-config-audit´ y ´ado-pipeline-analyzer´, se recomienda ejecutar en el mismo chat.
+NOTA: Las skills ´env-config-audit´, ´ado-pipeline-analyzer´, ´analizar-seguridad´ y
+´analizar-calidad-codigo´ se recomienda ejecutar en el mismo chat.

@@ -52,7 +52,10 @@ digraph handoffrelease {
 2. **Release notes:** `git log <TAG_ANTERIOR>..HEAD --oneline --no-merges > release-notes.md`. Guardar en `entrega_release/{repo}/{version}/`.
 3. **Crear release/vX.Y.Z:** Si no existe → `git checkout -b release/vX.Y.Z` desde develop. Si existe → `git merge --ff-only develop` (si falla → detener).
 4. **Validar mismo commit:** `git rev-parse develop` vs `git rev-parse release/vX.Y.Z`. Si difieren → detener.
-5. **Checklist y resumen:** Guardar en `RESUMEN_ENTREGA_release ({repo}).txt`.
+5. **Checklist y resumen:** informar sobre `env-config-audit`, `analizar-seguridad` y
+   `analizar-calidad-codigo` (`scope=project` sobre `release/vX.Y.Z`) — ninguna la
+   ejecuta esta skill, correrlas manualmente antes de entregar. Guardar en
+   `RESUMEN_ENTREGA_release ({repo}).txt`.
 
 ### Opción 2 — Release desde feature/fix
 
@@ -74,11 +77,11 @@ Hotfix post-entrega o ajustes RC → usar `fix-release`.
 
 **Reglas:** develop y release/vX.Y.Z = mismo commit antes del handoff (usar `--ff-only`). Versionamiento semántico. PR a staging lo crea deployer. No exponer tokens. Si `--ff-only` falla → detener.
 
-**Skills:** `env-config-audit` (manualmente)
+**Skills:** `env-config-audit`, `analizar-seguridad`, `analizar-calidad-codigo` (manualmente)
 
 ## Common Mistakes
 
 - **develop y release no coinciden:** Verificar con `git rev-parse`. No forzar merge.
 - **Release sin verificar pipeline:** Detener si pipeline no pasó.
 - **Olvidar back-merge:** Todo fix en release debe propagarse a develop.
-- **env-config-audit:** Esta skill no lo ejecuta. Ejecutar manualmente.
+- **env-config-audit / analizar-seguridad / analizar-calidad-codigo:** Esta skill no las ejecuta. Ejecutarlas manualmente.

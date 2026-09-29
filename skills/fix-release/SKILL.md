@@ -58,6 +58,8 @@ El equipo pide cambios. Release branch `release/vX.Y.Z` sigue vivo.
 
 **Config (obligatorio si aplica):** Si el fix agrega variables, colas, secretos o configuración Vault, ejecutar `env-config-audit` sobre el diff (rama fix vs `develop`) y generar `CONFIG-ENTORNO-PR` **antes** de la entrega. Adjuntar ese documento al PR.
 
+**Seguridad y calidad (obligatorio si aplica):** Si el fix toca autenticación, control de acceso, entrada de usuario, criptografía o endpoints, ejecutar `analizar-seguridad` y `analizar-calidad-codigo` con `scope=commits` (rama fix vs `develop`) **antes** de la entrega.
+
 ### Opción 2 — Hotfix en PRU/PREPRO/PRO
 
 Nuevo release con PATCH incrementado.
@@ -68,6 +70,8 @@ Nuevo release con PATCH incrementado.
 4. Limpiar hotfix branch.
 
 **Config (obligatorio si aplica):** Si el hotfix agrega variables, colas, secretos o configuración Vault, ejecutar `env-config-audit` sobre el diff (rama hotfix vs `develop`) y generar `CONFIG-ENTORNO-PR` **antes** de delegar la entrega a `entrega-ambiente-banco`.
+
+**Seguridad y calidad (obligatorio si aplica):** Si el hotfix toca autenticación, control de acceso, entrada de usuario, criptografía o endpoints, ejecutar `analizar-seguridad` y `analizar-calidad-codigo` con `scope=commits` (rama hotfix vs `develop`) **antes** de delegar la entrega.
 
 ### Opción 3 — Hotfix en DES
 
@@ -84,7 +88,7 @@ Igual que Opción 1 (Ajuste RC).
 
 **Reglas:** RC = rama efímera (eliminar después del merge). Rama base viva durante ciclo RC. Hotfix merge a develop PRIMERO. Hotfix = nuevo release (incrementar PATCH). Flujo completo: develop → entornos de validación → despliegue → producción. No crear tags (los genera el equipo de despliegue). Back-merge siempre. develop protegida → PR.
 
-**Skills:** `entrega-ambiente-banco` · `env-config-audit` · `ado-pipeline-analyzer`
+**Skills:** `entrega-ambiente-banco` · `env-config-audit` · `ado-pipeline-analyzer` · `analizar-seguridad` · `analizar-calidad-codigo`
 
 ## Common Mistakes
 
@@ -93,3 +97,4 @@ Igual que Opción 1 (Ajuste RC).
 - **Tag RC vs final:** El equipo de despliegue taggea `vX.Y.Z-rc.1` al mergear RC; taggea `vX.Y.Z` (sin RC) como final.
 - **Saltar ambientes:** Hotfix pasa por TODOS los ambientes. No promover directamente a PRO.
 - **Omitir `env-config-audit`:** Si el fix toca variables/secretos/Vault y no se genera `CONFIG-ENTORNO-PR`, la config queda sin documentar en ADO Variable Groups / Vault. Ejecutarlo antes de entregar.
+- **Omitir `analizar-seguridad`/`analizar-calidad-codigo`:** Si el fix toca auth/control de acceso/inputs y no se corren, una vulnerabilidad o code smell introducido "urgente" llega igual a producción. Ejecutarlos antes de entregar.
