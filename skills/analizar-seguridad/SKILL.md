@@ -31,7 +31,7 @@ Revisa código mediante sub-agentes en paralelo para detectar vulnerabilidades d
 
 **Fase A — Análisis (sub-agentes en paralelo):**
 - **Sub-agente 1 (Entrada y Acceso):** prompt `assets/prompt-analisis-entrada-acceso.md` — inyección (SQL/NoSQL/comandos/LDAP), path traversal, XXE, XSS/CSRF, SSRF, open redirect, deserialización insegura, control de acceso roto (IDOR).
-- **Sub-agente 2 (Datos y Configuración):** prompt `assets/prompt-analisis-datos-configuracion.md` — autenticación/sesión rota, fallas criptográficas, exposición de datos sensibles, configuración insegura, dependencias con versiones vulnerables conocidas, logging/monitoreo insuficiente.
+- **Sub-agente 2 (Datos y Configuración):** prompt `assets/prompt-analisis-datos-configuracion.md` — autenticación/sesión rota, fallas criptográficas, exposición de datos sensibles, configuración insegura, dependencias con versiones vulnerables conocidas, manejo de excepciones no controladas (DoS por crash), logging/monitoreo insuficiente.
 - Ambos cargan `assets/catalogo-vulnerabilidades.md` como referencia común (categorías mapeadas a CWE y OWASP Top 10 2021).
 
 **Fase B — Consolidar:** unificar hallazgos de ambos sub-agentes, eliminar duplicados, ordenar por severidad (Crítica→Alta→Media→Baja) y mostrar la confianza (alta/media/baja) de cada uno.

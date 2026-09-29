@@ -95,6 +95,13 @@
 - **Remediación:** Actualizar a versión parchada, o correr `npm audit`/`pip-audit`/equivalente localmente.
 - **Severidad típica:** Variable (depende de la CVE).
 
+## Manejo de Excepciones No Controladas (DoS por crash)
+- **CWE:** CWE-248 (excepción no capturada), CWE-400 (consumo de recursos no controlado) · **OWASP:** A05:2021 (aledaño; no hay categoría dedicada en Top 10 2021)
+- **Indicador:** API que requiere callback/argumento obligatorio llamada como si devolviera Promise (ej. `await crypto.scrypt(...)` sin el callback que la función exige), o cualquier operación que lance una excepción síncrona dentro de un handler `async` sin `try/catch`, alcanzable con una request no autenticada. En Node ≥15 una excepción no capturada en una promesa rechazada sin manejar termina el proceso por defecto.
+- **Ejemplo vulnerable:** `const valid = await crypto.scrypt(password, user.salt, 64)` — `crypto.scrypt` es callback-only; sin callback lanza `TypeError` síncrono antes de calcular nada, y sin `try/catch` alrededor tumba el proceso con una sola petición.
+- **Remediación:** `try/catch` (o wrapper `asyncHandler`) alrededor de toda lógica async en handlers HTTP; usar la variante correcta de la API (`util.promisify(crypto.scrypt)` o `crypto.scryptSync`); no depender de que Node crashee "seguro" ante una excepción no manejada.
+- **Severidad típica:** Alta (DoS no autenticado con una sola request) — no reportar si el código sí envuelve la lógica en `try/catch` u otro manejo de errores.
+
 ## Logging y Monitoreo Insuficiente
 - **CWE:** CWE-778, CWE-532 (datos sensibles en logs) · **OWASP:** A09:2021
 - **Indicador:** Eventos de seguridad (login fallido, cambio de permisos, acceso a datos sensibles) sin registrar, o logs que incluyen datos sensibles (contraseñas, tokens) en texto plano.
