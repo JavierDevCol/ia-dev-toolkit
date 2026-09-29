@@ -1,0 +1,374 @@
+digraph flujo_skills_sac {
+  rankdir=LR;
+  node [fontname="Helvetica", fontsize=10, shape=box, style=filled];
+  edge [fontname="Helvetica", fontsize=9];
+
+  tomar_contexto [label="tomar-contexto", shape=oval, fillcolor="#4A90D9", fontcolor=white];
+  registrar_hallazgo [label="registrar-hallazgo\n(bug)", fillcolor="#F5A623"];
+  refinar_hu [label="refinar-hu\n(feature)", fillcolor="#7BC67E"];
+  refinada [label="[R] Refinada", shape=ellipse, fillcolor="#F8E71C"];
+  validar_hu [label="validar-hu", fillcolor="#7BC67E"];
+  bloqueada [label="BLOQUEADA", fillcolor="#D0021B", fontcolor=white];
+  aprobada [label="[A] Aprobada", shape=ellipse, fillcolor="#F8E71C"];
+  planificar_hu [label="planificar-hu", fillcolor="#7BC67E"];
+  planificada [label="[P] Planificada", shape=ellipse, fillcolor="#F8E71C"];
+  ejecutar_plan [label="ejecutar-plan", fillcolor="#7BC67E"];
+  validar_ca [label="validar-ca\n(granular por task +\nfinal integración/todos)", fillcolor="#50E3C2"];
+  detenido [label="DETENIDO\n(CA PARCIAL /\nNO CUMPLIDO)", fillcolor="#D0021B", fontcolor=white];
+  completada [label="[X] Completada", shape=ellipse, fillcolor="#7ED321"];
+  sincronizar_backlog [label="sincronizar-backlog", fillcolor="#7BC67E"];
+  fin [label="Backlog\nsincronizado", shape=oval, fillcolor="#4A90D9", fontcolor=white];
+
+  tomar_contexto -> refinar_hu;
+  tomar_contexto -> registrar_hallazgo [label="si es bug"];
+  refinar_hu -> refinada;
+  registrar_hallazgo -> refinada [label="crea Refinamiento.md"];
+  refinada -> validar_hu;
+  validar_hu -> bloqueada [label="dependencia\nbloqueante"];
+  validar_hu -> aprobada [label="CA claros"];
+  aprobada -> planificar_hu -> planificada -> ejecutar_plan;
+  ejecutar_plan -> validar_ca [label="por task\n(granular)"];
+  validar_ca -> ejecutar_plan [label="CUMPLIDO"];
+  ejecutar_plan -> validar_ca [label="al completar\ntodas las tasks"];
+  validar_ca -> detenido [label="PARCIAL /\nNO CUMPLIDO"];
+  validar_ca -> completada [label="todos\nCUMPLIDO"];
+  completada -> sincronizar_backlog -> fin;
+}
+
+
+// ============================================================
+// Diagramas específicos por skill (flujo interno de cada una).
+// No modifican flujo_skills_sac de arriba, solo lo detallan.
+// ============================================================
+
+// tomar-contexto — Fuente: skills/tomar-contexto/SKILL.md (Fases A/B/C
+// + flowchart "Detección de Workspace" ya existente, integrado aquí).
+digraph skill_tomar_contexto {
+  rankdir=LR;
+  node [fontname="Helvetica", fontsize=10, shape=box, style=filled];
+  edge [fontname="Helvetica", fontsize=9];
+
+  start [label="Iniciar", shape=oval, fillcolor="#4A90D9", fontcolor=white];
+  cargar_config [label="Cargar config\n+ plantillas propias"];
+  existe [label="¿Contexto existe\ny sin --force?", shape=diamond, fillcolor="#F5A623"];
+  preguntar_ur [label="[U] Usar /\n[R] Regenerar", fillcolor="#F8E71C"];
+  usa_existente [label="Usa contexto\nexistente", shape=oval, fillcolor="#4A90D9", fontcolor=white];
+
+  detectar_modo [label="Detectar modo\n(marcadores raíz/subcarpetas)", fillcolor="#F5A623", shape=diamond];
+  modo_unico [label="MODO_UNICO", fillcolor="#7ED321"];
+  modo_multi [label="MODO_MULTI", fillcolor="#50E3C2"];
+  preguntar_modo [label="Preguntar\n[1] Mono / [2] Multi", fillcolor="#F8E71C"];
+  basico [label="Contexto básico\n(Confianza: Bajo)", fillcolor="#F8E71C"];
+  error [label="Error: verificar\nruta del proyecto", fillcolor="#D0021B", fontcolor=white];
+
+  analizar [label="Analizar stack,\narquitectura, DevOps,\nScorecard 1-10"];
+  diagramas [label="Delegar diagramas\na sub-agente\nmermaid-diagram"];
+  crear_artifacts [label="Crear carpetas +\ncontexto (mono/multi)\n+ workspace.md"];
+  validar_usuario [label="[OK] / [EDITAR]", shape=diamond, fillcolor="#F5A623"];
+  fin [label="workspace.md\nlisto", shape=oval, fillcolor="#7ED321"];
+
+  start -> cargar_config -> existe;
+  existe -> preguntar_ur [label="Sí"];
+  existe -> detectar_modo [label="No"];
+  preguntar_ur -> usa_existente [label="[U]"];
+  preguntar_ur -> detectar_modo [label="[R]"];
+
+  detectar_modo -> modo_unico [label="1 marcador raíz"];
+  detectar_modo -> modo_multi [label="2+ raíz o\n2+ subcarpetas"];
+  detectar_modo -> preguntar_modo [label="1 subcarpeta\n(ambiguo)"];
+  detectar_modo -> basico [label="0 marcadores,\nruta confirmada"];
+  detectar_modo -> error [label="0 marcadores,\nruta incorrecta"];
+  preguntar_modo -> modo_unico;
+  preguntar_modo -> modo_multi;
+
+  modo_unico -> analizar;
+  modo_multi -> analizar;
+  basico -> crear_artifacts;
+  analizar -> diagramas -> crear_artifacts -> validar_usuario;
+  validar_usuario -> fin [label="OK"];
+  validar_usuario -> crear_artifacts [label="EDITAR"];
+}
+
+// refinar-hu — Fuente: skills/refinar-hu/SKILL.md (Implementation 1-4).
+digraph skill_refinar_hu {
+  rankdir=LR;
+  node [fontname="Helvetica", fontsize=10, shape=box, style=filled];
+  edge [fontname="Helvetica", fontsize=9];
+
+  start [label="Iniciar", shape=oval, fillcolor="#4A90D9", fontcolor=white];
+  modo [label="¿Carpeta HU\nexiste?", shape=diamond, fillcolor="#F5A623"];
+  nuevo [label="MODO_NUEVO", fillcolor="#7BC67E"];
+  ajuste [label="MODO_AJUSTE", fillcolor="#7BC67E"];
+  bug_check [label="¿Tipo = Bug?", shape=diamond, fillcolor="#F5A623"];
+  prepoblar [label="Pre-poblar:\narchivos afectados,\nCA base, Causa Raíz", fillcolor="#BD10E0", fontcolor=white];
+
+  complejidad [label="Clasificar\ncomplejidad", fillcolor="#F5A623", shape=diamond];
+  proponer_particion [label="¿Complejidad≥MEDIO\ny CA≥3 y SP≥8?\nProponer partición", fillcolor="#F8E71C"];
+
+  smart [label="Aplicar SMART\na cada CA"];
+  desglose [label="Desglose técnico\nvertical end-to-end"];
+
+  particionado [label="IDs por TASK-N\n(padre + hijas)", fillcolor="#50E3C2"];
+  plano [label="IDs UI-NN/API-NN\n(plano)", fillcolor="#50E3C2"];
+
+  estimar [label="Estimar SP\n+ riesgos"];
+  persistir [label="Persistir:\nbackbone [N/R]→[R]"];
+  fin [label="REFINAMIENTO\nCOMPLETADO", shape=oval, fillcolor="#7ED321"];
+
+  start -> modo;
+  modo -> nuevo [label="No"];
+  modo -> ajuste [label="Sí"];
+  nuevo -> bug_check;
+  ajuste -> bug_check;
+  bug_check -> prepoblar [label="Sí"];
+  bug_check -> complejidad [label="No"];
+  prepoblar -> complejidad;
+
+  complejidad -> proponer_particion;
+  proponer_particion -> particionado [label="acepta partición"];
+  proponer_particion -> plano [label="no particiona"];
+
+  particionado -> smart;
+  plano -> smart;
+  smart -> desglose -> estimar -> persistir -> fin;
+}
+
+// registrar-hallazgo — Fuente: skills/registrar-hallazgo/SKILL.md (Implementation 1-7).
+digraph skill_registrar_hallazgo {
+  rankdir=LR;
+  node [fontname="Helvetica", fontsize=10, shape=box, style=filled];
+  edge [fontname="Helvetica", fontsize=9];
+
+  start [label="Iniciar", shape=oval, fillcolor="#4A90D9", fontcolor=white];
+  cargar [label="Cargar config"];
+  recibir [label="Recibir hallazgo\n+ detectar proyecto"];
+  preguntas [label="Preguntar al usuario\n(una a la vez)"];
+
+  sub_codigo [label="Sub-agente:\nanálisis código", fillcolor="#50E3C2"];
+  sub_hus [label="Sub-agente:\nanálisis HUs", fillcolor="#50E3C2"];
+  comparar [label="Comparar\ny clasificar"];
+  sugerencia [label="Presentar sugerencia\n+ confianza", fillcolor="#F8E71C"];
+
+  confirma [label="¿Usuario\nconfirma?", shape=diamond, fillcolor="#F5A623"];
+  cancelado [label="Cancelado", fillcolor="#D0021B", fontcolor=white];
+
+  clasificacion [label="¿BUG o\nPENDIENTE?", shape=diamond, fillcolor="#F5A623"];
+  crear_bug [label="Crear BUG-NNN\n(RefinamientoBug.md)\nbacklog [P]", fillcolor="#7ED321"];
+  crear_pendiente [label="Crear entrada\nen pendientes", fillcolor="#7ED321"];
+
+  start -> cargar -> recibir -> preguntas;
+  preguntas -> sub_codigo;
+  preguntas -> sub_hus;
+  sub_codigo -> comparar;
+  sub_hus -> comparar;
+  comparar -> sugerencia -> confirma;
+  confirma -> cancelado [label="No"];
+  confirma -> clasificacion [label="Sí"];
+  clasificacion -> crear_bug [label="BUG"];
+  clasificacion -> crear_pendiente [label="PENDIENTE"];
+}
+
+// validar-hu — Fuente: skills/validar-hu/SKILL.md (flowchart oficial de la skill).
+digraph skill_validar_hu {
+  rankdir=LR;
+  node [fontname="Helvetica", fontsize=10];
+  edge [fontname="Helvetica", fontsize=9];
+
+  start [label="Iniciar", shape=oval, style=filled, fillcolor="#4A90D9", fontcolor=white];
+  load [label="Cargar config\ny fuentes", shape=box, style=filled, fillcolor="#7BC67E"];
+  bug_check [label="Bug\nCrítica?", shape=diamond, style=filled, fillcolor="#F5A623"];
+  basic [label="nivel_validacion\n= basico", shape=box, style=filled, fillcolor="#BD10E0", fontcolor=white];
+
+  deps [label="Clasificar\ndependencias", shape=box, style=filled, fillcolor="#7BC67E"];
+  blocking [label="Dependencia\nbloqueante?", shape=diamond, style=filled, fillcolor="#F5A623"];
+
+  ca [label="Validar CA\nSMART + cobertura\n+ ambigüedades", shape=box, style=filled, fillcolor="#7BC67E"];
+  arch [label="Validar\narquitectura + ADR", shape=box, style=filled, fillcolor="#7BC67E"];
+
+  verdict [label="Veredicto", shape=diamond, style=filled, fillcolor="#F5A623"];
+  approved [label="APROBADA\n[A]", shape=box, style=filled, fillcolor="#7ED321"];
+  adjustments [label="AJUSTES\n[R] + observaciones\n+ preguntas abiertas", shape=box, style=filled, fillcolor="#F8E71C"];
+  blocked [label="BLOQUEADA\n[B]", shape=box, style=filled, fillcolor="#D0021B", fontcolor=white];
+
+  persist [label="Persistir\nRefinamiento + backbone", shape=box, style=filled, fillcolor="#50E3C2"];
+
+  start -> load -> bug_check;
+  bug_check -> basic [label="Sí"];
+  bug_check -> deps [label="No"];
+  basic -> deps;
+
+  deps -> blocking;
+  blocking -> blocked [label="Sí (corto circuito)"];
+  blocking -> ca [label="No"];
+
+  ca -> arch -> verdict;
+  verdict -> approved [label="Sin hallazgos"];
+  verdict -> adjustments [label="Ambigüedades\no hallazgos"];
+
+  approved -> persist;
+  adjustments -> persist;
+  blocked -> persist;
+}
+
+// planificar-hu — Fuente: skills/planificar-hu/SKILL.md (Implementation 1-4).
+digraph skill_planificar_hu {
+  rankdir=LR;
+  node [fontname="Helvetica", fontsize=10, shape=box, style=filled];
+  edge [fontname="Helvetica", fontsize=9];
+
+  start [label="Iniciar", shape=oval, fillcolor="#4A90D9", fontcolor=white];
+  cargar [label="Cargar HU.md +\nRefinamiento/\nRefinamientoBug"];
+  aprobada [label="¿✅ Aprobada?", shape=diamond, fillcolor="#F5A623"];
+  error [label="Error: ejecutar\n>validar_hu primero", fillcolor="#D0021B", fontcolor=white];
+
+  ambiguedades [label="¿Ambigüedades\n(tech/rutas/decisiones)?", shape=diamond, fillcolor="#F5A623"];
+  pausar [label="PAUSAR", fillcolor="#D0021B", fontcolor=white];
+
+  fases [label="Seleccionar fases\nsegún arquitectura\n(Hexagonal/MVC/Capas/...)"];
+  diseno [label="Diseñar componentes,\ninterfaces, contratos"];
+
+  particionada [label="Modo Particionada:\nextraer tasks +\ndependencias", fillcolor="#50E3C2"];
+  plana [label="Modo Plano:\nordenar EJEC-01..N\npor dependencias", fillcolor="#50E3C2"];
+
+  generar [label="Generar Plan.md\n(+ Plan.md por task\nsi Particionada)"];
+  backbone [label="Backbone\n[A] → [P]"];
+  fin [label="PLAN GENERADO", shape=oval, fillcolor="#7ED321"];
+
+  start -> cargar -> aprobada;
+  aprobada -> error [label="No"];
+  aprobada -> ambiguedades [label="Sí"];
+  ambiguedades -> pausar [label="Sí"];
+  ambiguedades -> fases [label="No"];
+
+  fases -> diseno;
+  diseno -> particionada;
+  diseno -> plana;
+  particionada -> generar;
+  plana -> generar;
+  generar -> backbone -> fin;
+}
+
+// ejecutar-plan — Fuente: skills/ejecutar-plan/SKILL.md (Decision Flow oficial).
+digraph skill_ejecutar_plan {
+  rankdir=LR
+  node [fontname="Helvetica" fontsize=10]
+
+  start [label="HU PENDIENTE" shape=ellipse style=filled fillcolor="#4A90D9" fontcolor=white]
+  q1 [label="¿HU planificada\nen Plan.md?" shape=diamond style=filled fillcolor="#F5A623"]
+  stop [label="→ planificar_hu\nprimero" shape=box style=filled fillcolor="#D0021B" fontcolor=white]
+  q2 [label="¿Modo?" shape=diamond style=filled fillcolor="#F5A623"]
+  completo [label="completo\nTodo sin pausas" shape=box style=filled fillcolor="#7ED321"]
+  fase [label="fase_por_fase\nPausa entre fases" shape=box style=filled fillcolor="#7ED321"]
+  tarea [label="tarea_por_tarea\nPausa por tarea" shape=box style=filled fillcolor="#7ED321"]
+  task [label="task_por_task\nPausa entre tasks" shape=box style=filled fillcolor="#7ED321"]
+  especifica [label="task_especifica\n1 task (requiere --task_id)" shape=box style=filled fillcolor="#9B59B6"]
+  q3 [label="¿HU\nparticionada?" shape=diamond style=filled fillcolor="#F5A623"]
+  degr1 [label="⚠ Degrada a\ntask_por_task" shape=box style=filled fillcolor="#F5A623"]
+  err [label="⛔ Error\nHU plana" shape=box style=filled fillcolor="#D0021B" fontcolor=white]
+
+  start -> q1
+  q1 -> stop [label="No" color=red]
+  q1 -> q2 [label="Sí"]
+  q2 -> completo
+  q2 -> fase
+  q2 -> tarea
+  q2 -> task
+  q2 -> especifica
+  fase -> q3 [label="¿Particionada?"]
+  task -> q3 [label="¿Particionada?"]
+  q3 -> degr1 [label="No" color=orange]
+  q3 -> task [label="Sí"]
+  especifica -> q3
+  q3 -> err [label="No" color=red]
+  q3 -> especifica [label="Sí\n(requiere --task_id)"]
+}
+
+// validar-ca — Fuente: skills/validar-ca/SKILL.md (flowchart oficial de la skill).
+digraph skill_validar_ca {
+  rankdir=LR;
+  node [fontname="Helvetica", fontsize=10];
+  edge [fontname="Helvetica", fontsize=9];
+
+  start [label="Iniciar", shape=oval, style=filled, fillcolor="#4A90D9", fontcolor=white];
+  load [label="Cargar\nfuentes", shape=box, style=filled, fillcolor="#7BC67E"];
+  scope [label="Scope?", shape=diamond, style=filled, fillcolor="#F5A623"];
+
+  granular [label="CAs granulares\nde la task", shape=box, style=filled, fillcolor="#50E3C2"];
+  integration [label="CAs de\nintegración", shape=box, style=filled, fillcolor="#50E3C2"];
+  all [label="Todos\nlos CAs", shape=box, style=filled, fillcolor="#50E3C2"];
+
+  evaluate [label="Evaluar CADA CA\ncontra el código\n(sin detenerse)", shape=box, style=filled, fillcolor="#7BC67E"];
+  verdict [label="Veredicto\npor CA", shape=diamond, style=filled, fillcolor="#F5A623"];
+  ok [label="✅ CUMPLIDO\nmarca [X]", shape=box, style=filled, fillcolor="#7ED321"];
+  partial [label="⚠️ PARCIAL\ndeja [ ]", shape=box, style=filled, fillcolor="#F8E71C"];
+  fail [label="❌ NO CUMPLIDO\ndeja [ ]", shape=box, style=filled, fillcolor="#D0021B", fontcolor=white];
+
+  update_plan [label="Actualizar\nPlan.md", shape=box, style=filled, fillcolor="#7BC67E"];
+  task_done [label="TASK completa?", shape=diamond, style=filled, fillcolor="#F5A623"];
+  ca_candidate [label="CA integración\ncandidato [~]", shape=box, style=filled, fillcolor="#BD10E0", fontcolor=white];
+  confirm_scope [label="--scope\nintegracion?", shape=diamond, style=filled, fillcolor="#F5A623"];
+  hu_complete [label="HU completada\n[X]", shape=box, style=filled, fillcolor="#7ED321"];
+
+  update_ref [label="Actualizar\nRefinamiento.md", shape=box, style=filled, fillcolor="#7BC67E"];
+  report [label="Emitir reporte\ncon TODOS los CAs", shape=box, style=filled, fillcolor="#4A90D9", fontcolor=white];
+
+  start -> load -> scope;
+  scope -> granular [label="granulares"];
+  scope -> integration [label="integracion"];
+  scope -> all [label="todos"];
+
+  granular -> evaluate;
+  integration -> evaluate;
+  all -> evaluate;
+
+  evaluate -> verdict [label="por cada CA"];
+  verdict -> ok [label="cumple"];
+  verdict -> partial [label="cumple a medias"];
+  verdict -> fail [label="no cumple"];
+
+  ok -> update_plan;
+  partial -> update_plan;
+  fail -> update_plan;
+
+  update_plan -> task_done;
+  task_done -> ca_candidate [label="Sí"];
+  task_done -> update_ref [label="No"];
+  ca_candidate -> confirm_scope;
+  confirm_scope -> hu_complete [label="Sí"];
+  confirm_scope -> update_ref [label="No"];
+
+  update_ref -> report;
+  hu_complete -> report;
+}
+
+// sincronizar-backlog — Fuente: skills/sincronizar-backlog/SKILL.md (flowchart oficial de la skill).
+digraph skill_sincronizar_backlog {
+  rankdir=LR;
+  node [fontname="Helvetica", fontsize=10];
+  edge [fontname="Helvetica", fontsize=9];
+
+  start [label="Iniciar", shape=oval, style=filled, fillcolor="#4A90D9", fontcolor=white];
+  scan [label="Escanear\nartefactos", shape=box, style=filled, fillcolor="#7BC67E"];
+  plan_exists [label="Refinamiento:\n¿Aprobación /\nBloqueo / Plan.md?", shape=diamond, style=filled, fillcolor="#F5A623"];
+  plan_status [label="Estado\nPlan.md", shape=diamond, style=filled, fillcolor="#F5A623"];
+
+  pending [label="[ ] Pendiente\nSin refinamiento", shape=box, style=filled, fillcolor="#D0021B", fontcolor=white];
+  refined [label="[R] Refinada\nSin Aprobación", shape=box, style=filled, fillcolor="#BD10E0", fontcolor=white];
+  approved [label="[A] Aprobada\n✅ Aprobada", shape=box, style=filled, fillcolor="#4A90D9", fontcolor=white];
+  planned [label="[P] Planificada\nPENDIENTE", shape=box, style=filled, fillcolor="#50E3C2"];
+  running [label="[E] En Ejecución\nEN_PROGRESO", shape=box, style=filled, fillcolor="#F8E71C"];
+  done [label="[X] Completada\nCOMPLETADO", shape=box, style=filled, fillcolor="#7ED321"];
+  blocked [label="[B] Bloqueada\nBLOQUEADO", shape=box, style=filled, fillcolor="#D0021B", fontcolor=white];
+
+  start -> scan;
+  scan -> plan_exists;
+  plan_exists -> pending [label="No existe\nRefinamiento"];
+  plan_exists -> refined [label="Sin Aprobación,\nsin Bloqueo"];
+  plan_exists -> blocked [label="Con\n## Bloqueo de\nValidación"];
+  plan_exists -> approved [label="Con\n✅ Aprobada"];
+  plan_exists -> plan_status [label="Aprobada,\ncon Plan.md"];
+  plan_status -> planned [label="PENDIENTE"];
+  plan_status -> running [label="EN_PROGRESO"];
+  plan_status -> done [label="COMPLETADO"];
+  plan_status -> blocked [label="BLOQUEADO"];
+}
