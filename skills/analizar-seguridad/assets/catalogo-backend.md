@@ -1,6 +1,8 @@
-# Catálogo de Vulnerabilidades
+# Catálogo de Vulnerabilidades — Backend
 
-> Referencia común para los sub-agentes de análisis de seguridad. Mapeado a OWASP Top 10 (2021) y CWE, adaptado a revisión estática de código (sin ejecución). Cada hallazgo debe citar el CWE correspondiente para trazabilidad.
+> Referencia para el sub-agente de análisis Backend. Mapeado a OWASP Top 10 (2021) y CWE, adaptado a
+> revisión estática de código (sin ejecución). Cada hallazgo debe citar el CWE correspondiente para
+> trazabilidad. Ver también `catalogo-frontend.md` y `catalogo-devops.md` para esos dominios.
 
 ## Inyección (SQL/NoSQL/Comandos/LDAP)
 - **CWE:** CWE-89 (SQL), CWE-78 (Comandos OS), CWE-943 (NoSQL/LDAP) · **OWASP:** A03:2021
@@ -25,7 +27,7 @@
 
 ## XSS (Cross-Site Scripting)
 - **CWE:** CWE-79 · **OWASP:** A03:2021
-- **Indicador:** Input de usuario insertado en HTML/DOM sin sanitizar/escapar (`innerHTML`, `dangerouslySetInnerHTML`, `v-html`, render de plantillas sin auto-escape).
+- **Indicador:** Input de usuario insertado en HTML/DOM sin sanitizar/escapar (`innerHTML`, `dangerouslySetInnerHTML`, `v-html`, render de plantillas server-side sin auto-escape).
 - **Ejemplo vulnerable:** `element.innerHTML = req.query.name`
 - **Remediación:** Escapar output, usar APIs seguras (`textContent`), sanitizar con librería (DOMPurify), CSP.
 - **Severidad típica:** Alta.
@@ -57,17 +59,50 @@
 - **Severidad típica:** Crítica.
 
 ## Control de Acceso Roto (IDOR / Falta de Autorización)
-- **CWE:** CWE-639, CWE-862 · **OWASP:** A01:2021
+- **CWE:** CWE-639, CWE-862 · **OWASP:** A01:2021 · **OWASP API:** API1:2023 (BOLA)
 - **Indicador:** Endpoint usa un ID recibido del cliente para acceder a un recurso sin verificar que el usuario autenticado sea dueño/tenga permiso sobre ese recurso.
 - **Ejemplo vulnerable:** `GET /orders/:id` retorna la orden sin comparar `order.userId === session.userId`.
 - **Remediación:** Verificar ownership/rol en cada acceso a recurso, no confiar en IDs opacos como control de acceso.
 - **Severidad típica:** Crítica.
+
+## Mass Assignment / Autorización a Nivel de Propiedad (BOPLA)
+- **CWE:** CWE-915 (asignación masiva) · **OWASP:** A01:2021 · **OWASP API:** API3:2023 (fusiona el antiguo "Mass Assignment" con "Excessive Data Exposure": el problema de fondo es la falta de control de autorización a nivel de *propiedad*, no solo de objeto)
+- **Indicador:** El body completo del cliente se pasa sin whitelist a un ORM/update (`Model.update(req.body, ...)`), o un endpoint de lectura serializa el objeto completo del modelo (incluyendo campos internos como `passwordHash`, `role`, `internalNotes`) sin un DTO/proyección explícita.
+- **Ejemplo vulnerable:** `User.update(req.body, { where: { id: req.user.id } })` — el cliente puede incluir `role: "admin"` en el payload.
+- **Remediación:** Whitelist explícita de campos permitidos por endpoint (allowlist, nunca blocklist), DTOs/serializers que excluyan campos internos por defecto en vez de por excepción.
+- **Severidad típica:** Crítica (si el campo expuesto es de privilegio) a Media (si es solo de datos internos no sensibles).
+
+## Consumo de Recursos No Restringido (Rate Limiting / Paginación / Payload)
+- **CWE:** CWE-770 (asignación sin límites), CWE-400 · **OWASP API:** API4:2023
+- **Indicador:** Endpoint sin límite de tamaño de payload/upload, sin límite de paginación (`?limit=999999` retorna toda la tabla), sin rate-limiting en operaciones costosas (envío de email/SMS, exportes, búsquedas con wildcard), o sin timeout en llamadas a servicios externos.
+- **Remediación:** Límite de tamaño de body (`express.json({ limit: '100kb' })` o equivalente), paginación con tope máximo forzado en servidor (ignorar el `limit` del cliente si excede el máximo), rate-limiting por usuario/IP en operaciones costosas, timeouts explícitos.
+- **Severidad típica:** Alta (DoS/costo operacional) — distinta de "Manejo de Excepciones No Controladas" (esta es sobre ausencia de límites de uso legítimo llevado al extremo, no sobre una excepción no capturada).
+
+## Validación Insegura de JWT
+- **CWE:** CWE-347 (verificación de firma incorrecta) · **OWASP:** A07:2021
+- **Indicador:** `jwt.verify()` (o equivalente) llamado sin restringir `algorithms` (permite confusión de algoritmo RS256↔HS256, o el histórico bypass `alg: none`), sin validar `aud`/`iss` cuando la app acepta tokens de múltiples emisores/clientes, o validando solo la metadata del token sin verificar que la clave criptográfica referenciada (`kid`) sea una de las esperadas por el servidor (permite inyección de clave — CVE-2025-24976 es un ejemplo público de esta clase).
+- **Ejemplo vulnerable:** `jwt.verify(token, secret)` sin `{ algorithms: ['HS256'] }`.
+- **Remediación:** Siempre restringir `algorithms` a una whitelist explícita; validar `aud`/`iss`/`exp`/`nbf` según el modelo de la app; si se resuelve la clave dinámicamente por `kid`, validar el `kid` contra una lista conocida antes de usarlo, nunca confiar en el header del token para decidir qué clave/algoritmo usar.
+- **Severidad típica:** Crítica (bypass de autenticación).
 
 ## Autenticación y Gestión de Sesión Rota
 - **CWE:** CWE-287 (auth rota), CWE-613 (expiración de sesión), CWE-307 (falta de rate-limiting/lockout) · **OWASP:** A07:2021
 - **Indicador:** Contraseñas en texto plano o con hash débil (MD5/SHA1 sin salt), tokens de sesión predecibles, sesiones sin expiración, falta de rate-limiting en login.
 - **Remediación:** bcrypt/argon2 para contraseñas, tokens aleatorios largos, expiración e invalidación de sesión, rate-limiting/lockout.
 - **Severidad típica:** Crítica.
+
+## Prototype Pollution
+- **CWE:** CWE-1321 · **OWASP:** A08:2021 (aledaño; no tiene entrada dedicada en Top 10 2021)
+- **Indicador:** Merge/copia recursiva de un objeto controlado por el cliente (`req.body`, query params parseados) hacia otro objeto, sin excluir las claves `__proto__`, `constructor` o `prototype` (`for...in` genérico, librerías de merge sin protección, `JSON.parse` con reviver inseguro).
+- **Ejemplo vulnerable:** función `deepMerge` propia con `for (const k in source) { target[k] = ... }` recibiendo `req.body` directo.
+- **Remediación:** Excluir explícitamente `__proto__`/`constructor`/`prototype` en cualquier merge recursivo, usar `Object.create(null)` para objetos que solo almacenan datos, o una librería de merge con protección conocida contra pollution.
+- **Severidad típica:** Crítica (puede escalar a bypass de auth/lógica o RCE según qué consuma la propiedad contaminada).
+
+## GraphQL Inseguro
+- **CWE:** CWE-400 (introspección/batching sin límite), CWE-285 (autorización por campo ausente) · **OWASP:** A05:2021/A01:2021
+- **Indicador:** Introspección (`__schema`) habilitada en producción o accesible sin autenticación, sin límite de profundidad/complejidad de query (permite queries anidadas costosas), sin límite de batching (múltiples queries de máximo costo en una sola request evade rate-limiting basado en requests HTTP), resolvers que no repiten el chequeo de autorización a nivel de campo (un campo sensible resuelto sin verificar el rol del solicitante, aunque la query raíz sí esté protegida).
+- **Remediación:** Deshabilitar introspección en producción (o restringirla a usuarios autenticados/internos), límite de profundidad y de "costo" de query, límite de cantidad de operaciones por batch, autorización verificada en cada resolver de campo sensible, no solo en el query raíz.
+- **Severidad típica:** Alta (DoS vía queries costosas) a Crítica (si el bypass de autorización por campo expone datos sensibles).
 
 ## Fallas Criptográficas
 - **CWE:** CWE-327 (algoritmo débil), CWE-330 (aleatoriedad insegura) · **OWASP:** A02:2021
@@ -109,5 +144,5 @@
 - **Severidad típica:** Media.
 
 ## Fuera de Alcance (no cubierto por análisis estático)
-- **Insecure Design (A04:2021) y fallas de lógica de negocio** (ej. race conditions en flujos de pago, límites de negocio ausentes): requieren entender el dominio/threat model, no solo el código — señalar como sospecha si aparece, no como hallazgo confirmado.
-- **ReDoS (CWE-1333):** patrones regex catastróficos son detectables pero de alto falso-positivo sin probarlos — marcar `⚠️ Verificar manualmente` si se sospecha.
+- **Insecure Design (A04:2021) y fallas de lógica de negocio** (ej. race conditions en flujos de pago, límites de negocio ausentes): requieren entender el dominio/threat model, no solo el código — señalar como sospecha si aparece, no como hallazgo confirmado. Aplica a los 3 catálogos (backend/frontend/devops).
+- **ReDoS (CWE-1333):** patrones regex catastróficos son detectables pero de alto falso-positivo sin probarlos — marcar `⚠️ Verificar manualmente` si se sospecha. Aplica también a regex en código frontend.
