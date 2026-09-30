@@ -20,3 +20,4 @@ Flujo de trabajo para transformar una idea de negocio, necesidad o concepto en u
 3. **FASE 3: Atributos de Calidad y Restricciones**: Seguir instrucción en estricto orden según `./fases/tres_atributos_calidad.md`
 4. **Formato de Salida Obligatorio (Template-Driven Output)**:
    Entregar el artefacto generado aplicando la plantilla `./plantillas/vision_producto.md` y escribiendo directamente en la raíz del workspace en `./artifacts/vision_producto.md`.
+   Leer también `CONFIG_USER.yaml` (ruta en `archivos.config_user`) y tomar `usuario.nombre` → **`{{usuario.nombre}}`**, necesario para firmar el documento como Product Owner. Si está vacío o el archivo no existe, omitir el sufijo de la firma; no inventar un nombre.

@@ -26,7 +26,7 @@ Captura incidencias (bugs, mejoras, deuda técnica) mediante análisis paralelo 
 
 ## Implementation
 
-1. **Cargar config** → leer `.SAC/config/CONFIG_SYSTEM.yaml` para rutas
+1. **Cargar config** → leer `.SAC/config/CONFIG_SYSTEM.yaml` para rutas. Leer también `CONFIG_USER.yaml` (ruta en `archivos.config_user`) y tomar `usuario.nombre` → `{{usuario.nombre}}`, necesario para firmar el artefacto en el paso 7. Si está vacío o el archivo no existe, omitir el sufijo de la firma; no inventar un nombre.
 2. **Recibir hallazgo** → descripción del usuario + detectar proyecto + preguntar por evidencia (logs, stack traces)
 3. **Preguntas al usuario** → hacer UNA pregunta a la vez: afecta funcionalidad actual?, qué error observa?, cuándo ocurre?, qué HU relacionada?
 4. **Análisis paralelo** → ejecutar 2 sub-agentes simultáneamente:
@@ -37,6 +37,13 @@ Captura incidencias (bugs, mejoras, deuda técnica) mediante análisis paralelo 
 7. **Crear artefacto** → si acepta:
    - BUG: crear `{hu_folder}/BUG-NNN/`, copiar `{file:./assets/RefinamientoBug.md}` como `Refinamiento.md`, agregar en backlog con estado [P]
    - PENDIENTE: crear entrada en `{artifacts.pendientes}` con categoría y prioridad
+
+   Si `usuario.incluir_firma_en_documentos` es `true`, agregar al final del artefacto creado:
+   ```
+   > **Analista:** {{usuario.nombre}}
+   > **Fecha:** {{fecha}}
+   ```
+   Sin `usuario.nombre` configurado, la línea queda `> **Analista**`.
 
 ## Quick Reference
 

@@ -16,3 +16,8 @@ type: dependency_matrix
 
 ## Acciones de Desbloqueo Requeridas
 - La finalización de `STORY-ENABLER-01` por parte de DevOps habilitará la ejecución de `HU-101` en el siguiente Sprint.
+
+---
+
+> **Product Owner:** {{usuario.nombre}}
+> **Fecha:** {{fecha}}

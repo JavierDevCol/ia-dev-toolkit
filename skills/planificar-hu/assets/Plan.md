@@ -136,3 +136,5 @@ validado_por: ">validar_ca"
 > **Archivo:** `{{artifacts.hu_folder}}/[ID-HU]/Plan.md`
 > **Creado por:** `>planificar_hu`
 > **Actualizado por:** `>ejecutar_plan`
+> **Planificador:** ArchDev Pro - {{usuario.nombre}}
+> **Fecha:** {{fecha}}

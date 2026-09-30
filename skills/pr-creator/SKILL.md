@@ -27,6 +27,8 @@ Guided creation of Pull Requests in Azure DevOps with duplicate detection, branc
 
 Reads `project_repos`, `project_workitems`, `user_email` from `memory_skill.json` → `[ado].config.perfiles[perfil_activo]` (standalone).
 
+Also read `CONFIG_USER.yaml` (path in `archivos.config_user`) and take `usuario.nombre` → **`{{usuario.nombre}}`**, needed to sign the PR body in Phase C. If empty, the file doesn't exist, or `usuario.incluir_firma_en_documentos` is `false`, omit the signature line; never invent a name.
+
 ## Core Flow
 
 ```dot
@@ -61,6 +63,7 @@ Ensure `project_repos` is resolved. If missing, stop and inform user.
 - **Title:** Conventional Commits `type(scope): summary`. Validate or propose correction.
 - **Description:** Draft with Summary, Main Changes, Expected Commits, Validation, Breaking Changes, Work Items.
 - **Reviewers** and **Work Items:** Optional.
+- If `usuario.incluir_firma_en_documentos` is `true`, append to the description: `> **Generado por:** {{usuario.nombre}}`. Without `{{usuario.nombre}}` configured, omit this line entirely.
 
 ### Phase D — Duplicate check & preview
 

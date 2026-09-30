@@ -1,8 +1,16 @@
-digraph flujo_skills_sac {
+digraph flujo_team_sac {
   rankdir=LR;
   node [fontname="Helvetica", fontsize=10, shape=box, style=filled];
   edge [fontname="Helvetica", fontsize=9];
 
+  idea [label="Idea de negocio", shape=oval, fillcolor="#4A90D9", fontcolor=white];
+  definir_vision [label="definir-vision-producto\n(workflow)", fillcolor="#8E44AD", fontcolor=white];
+  definir_arquitectura [label="definir-arquitectura-solucion\n(workflow, 6 fases + ADRs)", fillcolor="#8E44AD", fontcolor=white];
+  consolidar_q [label="Fase 7:\n¿Consolidar\npropuesta?", shape=diamond, fillcolor="#F5A623"];
+  consolidador [label="Sub-agente\nconsolidador\n(crea scaffold real)", fillcolor="#BD10E0", fontcolor=white];
+  nota_sprint0 [label="consolidacion.md:\nscaffold pendiente,\nprimeras HU de Sprint 0", fillcolor="#F8E71C"];
+  gestionar_backlog [label="gestionar-backlog-roadmap\n(workflow)", fillcolor="#8E44AD", fontcolor=white];
+  iniciar_sprint [label="iniciar-sprint\n(materializa HU.md +\nbacklog_desarrollo.md)", fillcolor="#50E3C2"];
   tomar_contexto [label="tomar-contexto", shape=oval, fillcolor="#4A90D9", fontcolor=white];
   registrar_hallazgo [label="registrar-hallazgo\n(bug)", fillcolor="#F5A623"];
   refinar_hu [label="refinar-hu\n(feature)", fillcolor="#7BC67E"];
@@ -10,6 +18,7 @@ digraph flujo_skills_sac {
   validar_hu [label="validar-hu", fillcolor="#7BC67E"];
   bloqueada [label="BLOQUEADA", fillcolor="#D0021B", fontcolor=white];
   aprobada [label="[A] Aprobada", shape=ellipse, fillcolor="#F8E71C"];
+  priorizar_backlog [label="priorizar-backlog\n(orden real por\ndependencias + prioridad)", fillcolor="#9B59B6", fontcolor=white];
   planificar_hu [label="planificar-hu", fillcolor="#7BC67E"];
   planificada [label="[P] Planificada", shape=ellipse, fillcolor="#F8E71C"];
   ejecutar_plan [label="ejecutar-plan", fillcolor="#7BC67E"];
@@ -17,8 +26,15 @@ digraph flujo_skills_sac {
   detenido [label="DETENIDO\n(CA PARCIAL /\nNO CUMPLIDO)", fillcolor="#D0021B", fontcolor=white];
   completada [label="[X] Completada", shape=ellipse, fillcolor="#7ED321"];
   sincronizar_backlog [label="sincronizar-backlog", fillcolor="#7BC67E"];
-  fin [label="Backlog\nsincronizado", shape=oval, fillcolor="#4A90D9", fontcolor=white];
+  fin [label="Sprint cerrado", shape=oval, fillcolor="#4A90D9", fontcolor=white];
 
+  idea -> definir_vision -> definir_arquitectura -> consolidar_q;
+  consolidar_q -> consolidador [label="SI / CONSOLIDA"];
+  consolidar_q -> nota_sprint0 [label="NO"];
+  consolidador -> gestionar_backlog;
+  nota_sprint0 -> gestionar_backlog;
+  gestionar_backlog -> iniciar_sprint;
+  iniciar_sprint -> tomar_contexto;
   tomar_contexto -> refinar_hu;
   tomar_contexto -> registrar_hallazgo [label="si es bug"];
   refinar_hu -> refinada;
@@ -26,13 +42,16 @@ digraph flujo_skills_sac {
   refinada -> validar_hu;
   validar_hu -> bloqueada [label="dependencia\nbloqueante"];
   validar_hu -> aprobada [label="CA claros"];
-  aprobada -> planificar_hu -> planificada -> ejecutar_plan;
+  aprobada -> priorizar_backlog [label="todas las HU\ndel sprint en [A]/[P]"];
+  priorizar_backlog -> planificar_hu [label="en el orden\nsugerido"];
+  planificar_hu -> planificada -> ejecutar_plan;
   ejecutar_plan -> validar_ca [label="por task\n(granular)"];
   validar_ca -> ejecutar_plan [label="CUMPLIDO"];
   ejecutar_plan -> validar_ca [label="al completar\ntodas las tasks"];
   validar_ca -> detenido [label="PARCIAL /\nNO CUMPLIDO"];
   validar_ca -> completada [label="todos\nCUMPLIDO"];
   completada -> sincronizar_backlog -> fin;
+  fin -> iniciar_sprint [label="siguiente sprint", style=dashed];
 }
 
 
@@ -371,4 +390,72 @@ digraph skill_sincronizar_backlog {
   plan_status -> running [label="EN_PROGRESO"];
   plan_status -> done [label="COMPLETADO"];
   plan_status -> blocked [label="BLOQUEADO"];
+}
+
+// iniciar-sprint — Fuente: skills/iniciar-sprint/SKILL.md (Implementation 1-5).
+digraph skill_iniciar_sprint {
+  rankdir=LR;
+  node [fontname="Helvetica", fontsize=10, shape=box, style=filled];
+  edge [fontname="Helvetica", fontsize=9];
+
+  start [label="Iniciar", shape=oval, fillcolor="#4A90D9", fontcolor=white];
+  leer_roadmap [label="Leer backlog_roadmap.md\n(Sprint 🔵 En Curso)"];
+  extraer [label="Extraer HU/Story\nde su épica\n(EPIC-BUS / EPIC-ENABLER)"];
+  existe [label="¿Carpeta HU\nya existe?", shape=diamond, fillcolor="#F5A623"];
+  omitir [label="Omitir\n(ya inicializada)", fillcolor="#F8E71C"];
+  crear_hu [label="Crear artifacts/HU/[ID]/\n+ HU.md base\n(sin Refinamiento.md → [ ])", fillcolor="#7BC67E"];
+  matriz [label="Cruzar\ndependencies_matrix.md", fillcolor="#F5A623", shape=diamond];
+  advertencia [label="Marcar advertencia\n(bloqueada)\nse crea igual", fillcolor="#BD10E0", fontcolor=white];
+  backlog_dev [label="Generar/actualizar\nbacklog_desarrollo.md\n(edición quirúrgica)", fillcolor="#50E3C2"];
+  reporte [label="Reporte: creadas /\nomitidas / bloqueadas", shape=oval, fillcolor="#7ED321"];
+
+  start -> leer_roadmap -> extraer -> existe;
+  existe -> omitir [label="Sí"];
+  existe -> crear_hu [label="No"];
+  crear_hu -> matriz;
+  matriz -> advertencia [label="🔴 Bloqueado"];
+  matriz -> backlog_dev [label="🟢 Desbloqueado"];
+  advertencia -> backlog_dev;
+  omitir -> reporte;
+  backlog_dev -> reporte;
+}
+
+// priorizar-backlog — Fuente: skills/priorizar-backlog/SKILL.md (flowchart oficial de la skill).
+digraph skill_priorizar_backlog {
+  rankdir=LR;
+  node [fontname="Helvetica", fontsize=10];
+  edge [fontname="Helvetica", fontsize=9];
+
+  start [label="Iniciar", shape=oval, style=filled, fillcolor="#4A90D9", fontcolor=white];
+  cargar [label="Cargar backlog\ny candidatas\n[A] / [P]", shape=box, style=filled, fillcolor="#7BC67E"];
+  leer_dep [label="Leer tabla\nDependencias\npor HU", shape=box, style=filled, fillcolor="#7BC67E"];
+  tipo [label="¿Tipo =\nHU previa?", shape=diamond, style=filled, fillcolor="#F5A623"];
+  descartar [label="Advertencia\ninformativa\n(no bloquea)", shape=box, style=filled, fillcolor="#BD10E0", fontcolor=white];
+  resuelve [label="¿Referencia\nexiste en backlog?", shape=diamond, style=filled, fillcolor="#F5A623"];
+  externa [label="Dependencia externa /\nno verificable\n(advertencia)", shape=box, style=filled, fillcolor="#BD10E0", fontcolor=white];
+  completada [label="¿HU referenciada\nen [X] Completada?", shape=diamond, style=filled, fillcolor="#F5A623"];
+  resuelta [label="Dependencia resuelta\n(no bloquea)", shape=box, style=filled, fillcolor="#50E3C2"];
+  arista [label="Arista de\nbloqueo real", shape=box, style=filled, fillcolor="#D0021B", fontcolor=white];
+  grafo [label="Grafo completo", shape=box, style=filled, fillcolor="#7BC67E"];
+  ciclo [label="¿Hay ciclo?", shape=diamond, style=filled, fillcolor="#F5A623"];
+  manual [label="Excluir HUs\ndel ciclo →\nrevisión manual", shape=box, style=filled, fillcolor="#D0021B", fontcolor=white];
+  topo [label="Orden topológico +\ndesempate por Prioridad", shape=box, style=filled, fillcolor="#7ED321"];
+  reporte [label="Reporte final", shape=box, style=filled, fillcolor="#4A90D9", fontcolor=white];
+
+  start -> cargar -> leer_dep -> tipo;
+  tipo -> descartar [label="No"];
+  tipo -> resuelve [label="Sí"];
+  resuelve -> externa [label="No"];
+  resuelve -> completada [label="Sí"];
+  completada -> resuelta [label="Sí"];
+  completada -> arista [label="No"];
+  descartar -> grafo;
+  externa -> grafo;
+  resuelta -> grafo;
+  arista -> grafo;
+  grafo -> ciclo;
+  ciclo -> manual [label="Sí"];
+  ciclo -> topo [label="No"];
+  manual -> topo;
+  topo -> reporte;
 }

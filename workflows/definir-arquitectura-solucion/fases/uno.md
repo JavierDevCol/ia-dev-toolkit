@@ -20,10 +20,19 @@ Si `./artifacts/blueprint_arquitectura.md` o archivos en `./artifacts/ADR/` ya e
 3. **Punto de Interacción (Pausa Obligatoria):**
    - Presentar la recomendación técnica al usuario y esperar su aprobación o solicitud de ajuste.
 4. **Creación del ADR:**
-   - Una vez recibida la aprobación, instanciar la plantilla `./templates/adr_template.md` y guardar el archivo en `./artifacts/ADR/ADR-001-estilo-arquitectonico.md` con estado `Aprobado`.
+   - Una vez recibida la aprobación, instanciar la plantilla `./plantillas/adr_template.md` y guardar el archivo en `./artifacts/ADR/ADR-001-estilo-arquitectonico.md` con estado `Aprobado`.
 
 ---
 
 ## Entregable
 
 Documento formal `./artifacts/ADR/ADR-001-estilo-arquitectonico.md` generado tras recibir el visto bueno del usuario.
+
+Leer también `CONFIG_USER.yaml` (ruta en `archivos.config_user`) y tomar `usuario.nombre` → **`{{usuario.nombre}}`**, necesario para firmar el ADR. Si está vacío o el archivo no existe, omitir el sufijo de la firma; no inventar un nombre.
+
+Al final del ADR generado, agregar:
+
+> **Aprobado por:** Arquitecto - {{usuario.nombre}}
+> **Fecha:** {{fecha}}
+
+Sin `{{usuario.nombre}}` configurado, la línea queda `> **Aprobado por:** Arquitecto`.

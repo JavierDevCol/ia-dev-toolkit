@@ -127,6 +127,9 @@ Ver [CONTRIBUTING.md](CONTRIBUTING.md) para más detalles.
 ## Licencia
 
 Distribuído bajo la licencia [Tipo]. Ver `LICENSE` para más información.
+
+<!-- INCLUIR SI: usuario.incluir_firma_en_documentos=true y usuario.nombre no vacío -->
+> **Generado y revisado por:** {{usuario.nombre}}
 ```
 
 ## Ejemplo de Flujo

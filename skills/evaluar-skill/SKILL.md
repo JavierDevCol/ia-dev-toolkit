@@ -90,6 +90,8 @@ Para cada assertion, evaluar PASS/FAIL con evidencia concreta. Requerir evidenci
 
 Calcular métricas agregadas en `benchmark.json` (ver Quick Reference para estructura).
 
+Leer también `CONFIG_USER.yaml` (ruta en `archivos.config_user`) y tomar `usuario.nombre` → **`{{usuario.nombre}}`**, necesario para firmar el benchmark. Si `usuario.incluir_firma_en_documentos` es `false`, omitir el campo `meta`. Si el nombre está vacío o el archivo no existe, omitir `evaluador` dentro de `meta`; no inventar un nombre. Agregar a `benchmark.json` un campo `meta: { "evaluador": "{{usuario.nombre}}", "fecha": "{{fecha}}" }` junto a `run_summary`.
+
 ### Paso 7 — Iterar
 
 1. Identificar fallos en train set
@@ -112,6 +114,7 @@ Calcular métricas agregadas en `benchmark.json` (ver Quick Reference para estru
 
 ```json
 {
+  "meta": { "evaluador": "{{usuario.nombre}}", "fecha": "{{fecha}}" },
   "run_summary": {
     "with_skill": {
       "pass_rate": { "mean": 0.83, "stddev": 0.06 },

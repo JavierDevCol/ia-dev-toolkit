@@ -56,7 +56,12 @@ Preguntar tipo de registro: **[F]** Fin de sesión · **[C]** Checkpoint · **[D
 1. **Identificar tarea:** usar contexto o pedir descripción breve
 2. **Verificar si ya existe:** `ls bitacora-tecnica/[slug-tarea]/` → si existe, leer y agregar incrementalmente
 3. **Recopilar info:** archivos modificados (`git diff --name-only`), commits (`git log --oneline -5`), errores, decisiones, estado actual, pendientes
-4. **Generar registro:** crear o actualizar `bitacora.md` con la plantilla
+4. **Generar registro:** crear o actualizar `bitacora.md` con la plantilla. Leer `usuario.nombre` e `incluir_firma_en_documentos` de `CONFIG_USER.yaml` (ruta en `archivos.config_user`); si `incluir_firma_en_documentos` es `true`, agregar al final del registro:
+
+   > **Generado y revisado por:** {{usuario.nombre}}
+   > **Fecha:** {{fecha}}
+
+   Si `usuario.nombre` está vacío o el archivo no existe, omitir la línea completa; no inventar un nombre.
 5. **Guardar evidencias:** SQL, logs, configs en `EVIDENCIAS/`
 
 ### Al RETOMAR trabajo

@@ -17,7 +17,7 @@ Revisa código mediante sub-agentes en paralelo para detectar code smells y viol
 **Cuándo NO usar:** si el usuario solo quiere ejecutar tests; si no hay reglas y se prefiere configurarlas primero con `>init-reglas-arquitectonicas`.
 
 ## Implementation
-1. **Cargar configuración:** leer `.SAC/config/CONFIG_SYSTEM.yaml` (`archivos.reglas_arquitectonicas`) y `CONFIG_USER.yaml`. Mostrar scope/modo/archivos/reglas al usuario.
+1. **Cargar configuración:** leer `.SAC/config/CONFIG_SYSTEM.yaml` (`archivos.reglas_arquitectonicas`) y `CONFIG_USER.yaml`. Mostrar scope/modo/archivos/reglas al usuario. Tomar también `usuario.nombre` → `{{usuario.nombre}}`, necesario para firmar el reporte en el paso 5. Si está vacío o el archivo no existe, omitir el sufijo de la firma; no inventar un nombre.
 2. **Determinar archivos:**
    - `commits`: `git diff main..HEAD --name-only` (solo cambiados en rama).
    - `project`: escanear todo, excluyendo node_modules, .git, .SAC, build, dist, vendor.
@@ -50,7 +50,12 @@ Revisa código mediante sub-agentes en paralelo para detectar code smells y viol
 🐛 Code Smells: | # | Tipo | Archivo | Línea | Severidad | Solución |
 📐 Arquitectura: | # | Regla | Archivo | Línea | Violación |
 💡 Top 3 recomendaciones: 1… 2… 3…
+
+> **Auditor de Calidad:** {{usuario.nombre}}
+> **Fecha:** {{fecha}}
 ```
+Sin `usuario.nombre` configurado, la línea queda `> **Auditor de Calidad:**` (solo si `usuario.incluir_firma_en_documentos` es `true`).
+
 Sin hallazgos: `✅ Sin hallazgos — código cumple estándares`.
 
 ## Common Mistakes

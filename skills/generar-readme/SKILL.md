@@ -49,6 +49,12 @@ Genera READMEs profesionales validando la estructura del proyecto. Nunca genera 
 1. **Validar proyecto** — Verificar dependencias, licencia, tests, CI/CD, herramientas de calidad. Auto-detectar secciones.
 2. **Recopilar información** — Preguntar: nombre, descripción, instalación, uso, licencia, créditos.
 3. **Generar README** — Incluir obligatorias + auto-detectadas. Seguir template en references/readme-template.md.
+
+   Leer también `CONFIG_USER.yaml` (ruta en `archivos.config_user`) y tomar `usuario.nombre` e `incluir_firma_en_documentos`. Si `incluir_firma_en_documentos` es `true` y `usuario.nombre` no está vacío, agregar al final del README:
+   ```
+   > **Generado y revisado por:** {{usuario.nombre}}
+   ```
+   Si `usuario.nombre` está vacío, el archivo no existe, o `incluir_firma_en_documentos` es `false`, omitir la línea; no inventar un nombre.
 4. **Validar** — Completitud, comandos ejecutables, enlaces, badges funcionales.
 
 ## Escenarios Complejos

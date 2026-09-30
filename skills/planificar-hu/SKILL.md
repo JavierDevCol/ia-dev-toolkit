@@ -27,6 +27,7 @@ Genera un plan técnico de implementación a partir de una HU aprobada, alineado
 - Leer `.SAC/config/CONFIG_SYSTEM.yaml` → `artifacts.hu_folder`.
 - Cargar `HU.md`, extraer `Tipo`. **Bug**: si existe `RefinamientoBug.md` (creado por `>registrar_hallazgo`), leerlo; si no existe, leer `Refinamiento.md` (el bug se refinó vía `>refinar_hu`). **Funcional** → leer `Refinamiento.md`. En ambos casos, verificar `## Aprobación` con `✅ Aprobada`.
 - Cargar contexto del proyecto, HUs relacionadas, componentes reutilizables.
+- Leer también `CONFIG_USER.yaml` (ruta en `archivos.config_user`) y tomar `usuario.nombre` → **`{{usuario.nombre}}`**, necesario para firmar el plan en el paso 4. Si está vacío o el archivo no existe, omitir el sufijo de la firma; no inventar un nombre.
 
 ### 2. Ambigüedades y fases
 
@@ -54,6 +55,15 @@ Definir componentes, interfaces y contratos con rutas reales. Opcionalmente dise
 ### 4. Generación del plan
 
 Crear `{hu_folder}/[ID-HU]/Plan.md` desde `{file:./assets/Plan.md}`. Modo Particionada genera también `Plan.md` por task hija con sub-fases. Actualizar backbone `[A] → [P]`.
+
+Si `usuario.incluir_firma_en_documentos` es `true`, agregar al final del plan:
+
+```
+> **Planificador:** ArchDev Pro - {{usuario.nombre}}
+> **Fecha:** {{fecha}}
+```
+
+Sin `{{usuario.nombre}}` configurado, la línea queda `> **Planificador:** ArchDev Pro` (sin el sufijo).
 
 ```
 ✅ PLAN GENERADO: [ID-HU] | Modo: [Plano/Particionada] | Fases: [N] | Tareas: [M] | Est: [X]h

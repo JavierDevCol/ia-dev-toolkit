@@ -63,7 +63,7 @@ digraph workspace_detection {
 ## Implementation
 
 ### Fase A: Cargar y Confirmar
-1. Leer `.SAC/config/CONFIG_SYSTEM.yaml` (`artifacts_folder`, `hu_folder`, `contextos_folder`, `adr_folder`) y `CONFIG_USER.yaml` (idioma, overrides). Sin `.SAC/config/` → avisar "No hay instalación SAC".
+1. Leer `.SAC/config/CONFIG_SYSTEM.yaml` (`artifacts_folder`, `hu_folder`, `contextos_folder`, `adr_folder`) y `CONFIG_USER.yaml` (idioma, overrides, `usuario.nombre` → `{{usuario.nombre}}`, usado en la Fase C si `usuario.incluir_firma_en_documentos` es `true`). Sin `.SAC/config/` → avisar "No hay instalación SAC".
 2. Plantillas propias desde `{file:./assets/}` (backlog, contexto, workspace, lecciones_aprendidas, pendientes).
 3. Si existe contexto y no hay `--force` → preguntar [U] usar / [R] regenerar.
 4. Mostrar profundidad (`--profundidad_analisis`: basico/completo/exhaustivo) y proyectos detectados; esperar confirmación.
@@ -75,7 +75,7 @@ digraph workspace_detection {
 8. Delegar diagramas a sub-agente `mermaid-diagram` (estructura, clases, secuencia).
 
 ### Fase C: Generar y Validar
-9. Crear artifacts según `{file:references/artifacts-structure.md}`. Crear carpetas de sistema y archivos de contexto (mono: `contexto_proyecto.md` + `workspace.md`; multi: un contexto por proyecto + `workspace.md` Multi).
+9. Crear artifacts según `{file:references/artifacts-structure.md}`. Crear carpetas de sistema y archivos de contexto (mono: `contexto_proyecto.md` + `workspace.md`; multi: un contexto por proyecto + `workspace.md` Multi). Si `usuario.incluir_firma_en_documentos` es `true`, agregar al final de cada archivo generado: `> **Generado y revisado por:** {{usuario.nombre}}` y `> **Fecha:** {{fecha}}`. Sin `usuario.nombre` configurado, omitir esa línea.
 10. Validar documentos → preguntar [OK] / [EDITAR] antes de guardar.
 
 ## Quick Reference

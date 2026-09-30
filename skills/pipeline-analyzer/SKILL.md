@@ -33,6 +33,8 @@ Identifies the target build, fetches run metadata/changes/stages/logs, classifie
 
 Reads `project_name` (from `project_map.repos`/`pipelines`) and `base_reports_path` from `memory_skill.json` → `[ado].config.perfiles[perfil_activo]` (standalone).
 
+Leer también `CONFIG_USER.yaml` (ruta en `archivos.config_user`) y tomar `usuario.nombre` → **`{{usuario.nombre}}`**, necesario para firmar el reporte en la Fase D. Si está vacío, el archivo no existe, o `usuario.incluir_firma_en_documentos` es `false`, omitir la firma; no inventar un nombre.
+
 ## Core Flow
 
 ### Phase A — Identify build and scope

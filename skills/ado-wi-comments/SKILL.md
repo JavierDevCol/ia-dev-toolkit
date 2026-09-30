@@ -61,6 +61,14 @@ wit_update_work_item:
       value: "ettorres@bmm.com.co"
 ```
 
+**Firma [OPCIONAL]**
+
+Leer `usuario.nombre` e `incluir_firma_en_documentos` de `CONFIG_USER.yaml` (ruta en `archivos.config_user`). Si `incluir_firma_en_documentos` es `true` y `usuario.nombre` no está vacío, agregar al final del comentario, antes de publicarlo:
+
+> **Generado y revisado por:** {{usuario.nombre}}
+
+Si está vacío o el archivo no existe, omitir la línea; no inventar un nombre.
+
 ### Caso A: Comentarios de Entrega Formal
 
 | Campo | Regla |

@@ -85,14 +85,19 @@ digraph validar_ca {
 
 ## Implementation
 
-1. **Cargar config** → leer `.SAC/config/CONFIG_SYSTEM.yaml` para rutas
+1. **Cargar config** → leer `.SAC/config/CONFIG_SYSTEM.yaml` para rutas. Leer también `CONFIG_USER.yaml` (ruta en `archivos.config_user`) y tomar `usuario.nombre` → `{{usuario.nombre}}`, necesario para firmar el reporte en el paso 8. Si está vacío o el archivo no existe, omitir el sufijo de la firma; no inventar un nombre.
 2. **Cargar fuentes** → Refinamiento.md (CAs), Plan.md (estado), HU.md (modo)
 3. **Determinar CAs** → Plano: todos; Particionada: granulares/integración/todos
 4. **Evaluar cada CA** contra el código, con evidencia ejecutada cuando sea posible
 5. **Emitir un veredicto por CA** → `CUMPLIDO` / `PARCIAL` / `NO CUMPLIDO`
 6. **Actualizar Plan.md** → marcar checkbox según modo y scope
 7. **Actualizar Refinamiento.md** → marcar `[X]` **solo** en los CAs `CUMPLIDO`
-8. **Emitir reporte** con el resultado de **todos** los CAs evaluados
+8. **Emitir reporte** con el resultado de **todos** los CAs evaluados. Si `usuario.incluir_firma_en_documentos` es `true`, cerrar el reporte con:
+   ```
+   > **Validador:** {{usuario.nombre}}
+   > **Fecha:** {{fecha}}
+   ```
+   Sin `usuario.nombre` configurado, la línea queda `> **Validador**`.
 
 ### Qué decide el veredicto
 

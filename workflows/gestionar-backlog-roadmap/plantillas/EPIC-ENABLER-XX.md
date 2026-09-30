@@ -25,6 +25,7 @@ type: enabler_epic
 - **Rol:** As DevOps Engineer
 - **Necesidad:** [Acción concreta de IaC, CI/CD o Servidor]
 - **Para:** [Habilitar el entorno / automatización]
+- **Sprint Asignado:** `Sprint-N` (tentativo hasta que la Story esté `[R] Refinada`; confirmado después).
 - **Definition of Done (DoD):**
   - [ ] [Métrica de verificación 1]
   - [ ] [Métrica de verificación 2]
@@ -33,6 +34,12 @@ type: enabler_epic
 - **Rol:** As Software Developer
 - **Necesidad:** [Estructuras base, interfaces, modelos de BD]
 - **Para:** [Permitir la implementación de las HUs de negocio]
+- **Sprint Asignado:** `Sprint-N` (tentativo hasta que la Story esté `[R] Refinada`; confirmado después).
 - **Definition of Done (DoD):**
   - [ ] [Métrica de verificación 1]
   - [ ] [Métrica de verificación 2]
+
+---
+
+> **Product Owner:** {{usuario.nombre}}
+> **Fecha:** {{fecha}}

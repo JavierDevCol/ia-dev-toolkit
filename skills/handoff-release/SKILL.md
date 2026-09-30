@@ -57,6 +57,13 @@ digraph handoffrelease {
    ejecuta esta skill, correrlas manualmente antes de entregar. Guardar en
    `RESUMEN_ENTREGA_release ({repo}).txt`.
 
+   Leer también `CONFIG_USER.yaml` (ruta en `archivos.config_user`) y tomar `usuario.nombre`. Si `usuario.incluir_firma_en_documentos` es `true` y `usuario.nombre` no está vacío, cerrar el resumen con:
+   ```
+   > **Release Manager:** {{usuario.nombre}}
+   > **Fecha:** {{fecha}}
+   ```
+   Si está vacío, el archivo no existe, o la opción es `false`, la línea queda `> **Release Manager:**` sin sufijo; no inventar un nombre.
+
 ### Opción 2 — Release desde feature/fix
 
 Crear PR `<rama> → develop`. Instruir: una vez mergeado, re-ejecutar con Opción 1.

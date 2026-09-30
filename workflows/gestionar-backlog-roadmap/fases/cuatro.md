@@ -20,3 +20,10 @@ Organizar el backlog ordenado secuencialmente en un plan de Sprints acotado por 
 
 3. **Verificación de Regla Anti-Bloqueo:**
    - Ninguna HU de negocio puede ser programada en un Sprint $N$ si su Enabler bloqueante está en ese mismo Sprint $N$. El Enabler DEBE programarse en el Sprint $N-1$ o previo.
+
+## Registro de Sprints y Trazabilidad por HU
+
+- Completa la tabla **"Registro de Sprints"** de `backlog_roadmap.md` con fecha de inicio/fin de cada Sprint y su estado (`🔵 En Curso`, `⚪ Planificado`, `✅ Cerrado`). Solo un Sprint puede estar `🔵 En Curso`.
+- En la tabla de Priorización WSJF y en cada HU/Story (`EPIC-BUS-XX.MD`, `EPIC-ENABLER-XX.md`), registra el **Sprint Asignado**.
+- **Tentativo vs. Confirmado:** si la HU/Story aún no está `[R] Refinada` (según `refinar-hu`), el Sprint asignado es una propuesta (`Sprint-N (tentativo)`). Una vez refinada, se marca como confirmado y ya no se reordena salvo re-priorización explícita.
+- Al sincronizar (Delta Sync), respeta el Sprint confirmado de HUs ya refinadas/planificadas — solo reasigna Sprint a ítems que siguen `[N]` sin refinar.

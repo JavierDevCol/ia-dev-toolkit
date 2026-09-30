@@ -59,7 +59,7 @@ digraph sincronizar_backlog {
 
 ## Implementation
 
-1. **Cargar config** → leer `.SAC/config/CONFIG_SYSTEM.yaml` para rutas
+1. **Cargar config** → leer `.SAC/config/CONFIG_SYSTEM.yaml` para rutas. Leer también `CONFIG_USER.yaml` (ruta en `archivos.config_user`) y tomar `usuario.nombre` → `{{usuario.nombre}}`, usado en el paso 10 si `usuario.incluir_firma_en_documentos` es `true`. Si está vacío o el archivo no existe, omitir la línea de firma; no inventar un nombre.
 2. **Atajo resumen** → si `--resumen`: extraer Resumen/Índice y mostrar (sin escanear)
 3. **Cargar backlog** → extraer HUs de la tabla `## 📇 Índice Rápido` (`| ID | Título | Estado | Prioridad | Tipo | Proyecto | Tasks |`); filtrar por `--id_hu` / `--proyecto`
 4. **Escanear artefactos** → por cada HU: Refinamiento.md, Aprobación, Plan.md, carpetas TASK
@@ -68,7 +68,7 @@ digraph sincronizar_backlog {
 7. **Si `--dry_run`** → mostrar reporte y terminar
 8. **Confirmar** → si discrepancias y `--auto=false`, preguntar al usuario
 9. **Aplicar correcciones** → actualizar estados, campos, contadores
-10. **Regenerar Índice Rápido** → recorrer todas las HUs y reemplazar tabla
+10. **Regenerar Índice Rápido** → recorrer todas las HUs y reemplazar tabla. Si `usuario.incluir_firma_en_documentos` es `true`, actualizar al final del backlog: `> **Generado y revisado por:** {{usuario.nombre}}` y `> **Fecha:** {{fecha}}`. Sin `usuario.nombre` configurado, omitir esa línea.
 
 ## Quick Reference
 

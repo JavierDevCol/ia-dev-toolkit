@@ -53,6 +53,8 @@ digraph crearadr {
 
 ### 1. Reunir la decisión (preguntar solo lo que falte)
 
+Leer también `CONFIG_USER.yaml` (ruta en `archivos.config_user`) y tomar `usuario.nombre` → **`{{usuario.nombre}}`**, necesario para firmar el ADR en el paso 6. Si está vacío o el archivo no existe, omitir el sufijo de la firma; no inventar un nombre.
+
 Elicita estos 6 elementos antes de escribir:
 | Elemento | Pregunta |
 |---|---|
@@ -96,6 +98,13 @@ Orden estricto:
 - **Diagrama:** solo si aplica; si no, omítelo.
 
 ### 6. Guardar y reportar
+
+Si `usuario.incluir_firma_en_documentos` es `true`, agregar al final del ADR:
+
+> **Arquitecto:** {{usuario.nombre}}
+> **Fecha:** {{fecha}}
+
+Sin `usuario.nombre` configurado, la línea queda `> **Arquitecto:**`.
 
 Guarda el archivo, actualiza `memory_skill.json` si existe, y reporta:
 `✅ ADR NNNN: [título] | Formato: [formato] | Ruta: [ruta] | Estado: [estado]`

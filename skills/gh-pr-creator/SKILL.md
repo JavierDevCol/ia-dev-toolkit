@@ -67,6 +67,7 @@ digraph pr_flow {
 - **Title:** Conventional Commits `type(scope): summary`. Validate or propose correction.
 - **Body:** Draft with Summary, Main Changes, Expected Commits, Validation, Breaking Changes. To link issues, include `Closes #123` / `Fixes #123` in the body — GitHub auto-links and auto-closes on merge (there is no separate "link work item" API call, unlike ADO).
 - **Reviewers** and **linked issues**: optional.
+- **Firma:** Leer `CONFIG_USER.yaml` (ruta en `archivos.config_user`) y tomar `usuario.nombre`. Si `usuario.incluir_firma_en_documentos` es `true` y `usuario.nombre` no está vacío, agregar al final del body: `> **Generado y revisado por:** {{usuario.nombre}}`. Si está vacío, el archivo no existe, o la opción es `false`, omitir la línea; no inventar un nombre.
 
 ### Phase D — Duplicate check & preview
 

@@ -72,6 +72,15 @@ START: User requests release handoff
 
 **Carpeta de salida:** usar `output_folder` global de `memory_skill.json` (`$SKILL_DIR/../memory_skill.json`) como base para todas las rutas de entrega (`{output_folder}/entrega_release/...`). Si es `null` o el archivo no existe, preguntar al usuario la carpeta y persistirla en `output_folder`.
 
+Leer también `CONFIG_USER.yaml` (ruta en `archivos.config_user`) y tomar `usuario.nombre` → **`{{usuario.nombre}}`**, necesario para firmar los resúmenes de entrega. Si `usuario.incluir_firma_en_documentos` es `false`, omitir el bloque de firma. Si el nombre está vacío o el archivo no existe, omitir el sufijo de la firma; no inventar un nombre.
+
+Todo `RESUMEN_ENTREGA_*.txt` (Opción 1 paso 7, Opción 2b paso 7, Opción 2c paso 5) cierra con:
+```
+> **Release Manager:** {{usuario.nombre}}
+> **Fecha:** {{fecha}}
+```
+Sin `usuario.nombre` configurado, la línea queda `> **Release Manager:**`.
+
 Mostrar menú principal (`references/menus.txt`) y esperar selección.
 
 ### Opción 1: Entregar release desde DEVELOP

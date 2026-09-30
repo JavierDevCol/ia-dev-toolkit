@@ -42,4 +42,9 @@ Report file: `{base_reports_path}/PIPELINE-REPORT_{runId}.md`
 ## 5. Recommendations
 
 {suggested actions based on findings}
+
+> **Analista:** Pipeline Analyzer - {{usuario.nombre}}
+> **Fecha:** {fecha}
 ```
+
+Si `usuario.nombre` no está configurado (o `usuario.incluir_firma_en_documentos` es `false`), la línea queda `> **Analista:** Pipeline Analyzer` (sin el sufijo) u omitir la línea por completo.

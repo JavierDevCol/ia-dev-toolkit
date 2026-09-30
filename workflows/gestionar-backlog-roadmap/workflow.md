@@ -2,12 +2,6 @@
 name: gestionar-backlog-roadmap
 description: Genera y sincroniza el backlog técnico y funcional a partir de ADRs y Visión.
 ready: true
-output_config:
-  base_dir: "./docs/backlog" # Ruta raíz en el proyecto del usuario donde se creará el output
-  summary_file: "${base_dir}/SUMMARY.md"
-  enablers_dir: "${base_dir}/enablers"
-  epics_dir: "${base_dir}/epics"
-  matrix_file: "${base_dir}/dependencies-matrix.md"
 ---
 
 # Workflow: Sincronizar Backlog y Evolución Técnica (Delta Sync)
@@ -38,9 +32,11 @@ Flujo de trabajo para evaluar la evolución de un proyecto con artefactos previo
 3. **FASE 3: Re-evaluación de Dependencias y Ajuste WSJF**: Seguir instrucción en estricto orden según `./fases/tres.md`
 4. **FASE 4: Re-balanceo de Capacidad y Roadmap Ajustado**: Seguir instrucción en estricto orden según `./fases/cuatro.md`
 5. **Formato de Salida Obligatorio (Template-Driven Output)**:
-   Entregar los artefactos generados en la raíz del workspace del usuario (`./artifacts/`), aplicando de forma estricta las plantillas ubicadas en `./templates/` y respetando el atributo `target_path` definido en el Frontmatter YAML de cada una:
+   Entregar los artefactos generados en la raíz del workspace del usuario (`./artifacts/`), aplicando de forma estricta las plantillas ubicadas en `./plantillas/` y respetando el atributo `target_path` definido en el Frontmatter YAML de cada una (fuente de verdad de la ruta de salida — todas resuelven bajo `./artifacts/`):
 
-   - **Roadmap Ejecutivo / Resumen:** Aplicar `./templates/backlog_roadmap.md` ➔ Escribir en `./artifacts/backlog_roadmap.md`
-   - **Matriz de Dependencias:** Aplicar `./templates/dependencies_matrix.md` ➔ Escribir en `./artifacts/HU/dependencies_matrix.md`
-   - **Épicas e Historias Enablers:** Aplicar `./templates/enabler_epic.md` ➔ Escribir en `./artifacts/HU/enablers/EPIC-ENABLER-{{id}}.md`
-   - **Épicas e Historias de Negocio:** Aplicar `./templates/business_epic.md` ➔ Escribir en `./artifacts/HU/epics/EPIC-BUS-{{id}}.md`
+   - **Roadmap Ejecutivo / Resumen:** Aplicar `./plantillas/backlog_roadmap.md` ➔ Escribir en `./artifacts/backlog_roadmap.md`
+   - **Matriz de Dependencias:** Aplicar `./plantillas/dependencies_matrix.md` ➔ Escribir en `./artifacts/HU/dependencies_matrix.md`
+   - **Épicas e Historias Enablers:** Aplicar `./plantillas/EPIC-ENABLER-XX.md` ➔ Escribir en `./artifacts/HU/enablers/EPIC-ENABLER-{{id}}.md`
+   - **Épicas e Historias de Negocio:** Aplicar `./plantillas/EPIC-BUS-XX.MD` ➔ Escribir en `./artifacts/HU/epics/EPIC-BUS-{{id}}.md`
+
+   Leer también `CONFIG_USER.yaml` (ruta en `archivos.config_user`) y tomar `usuario.nombre` → **`{{usuario.nombre}}`**, necesario para firmar los artefactos generados como Product Owner. Si está vacío o el archivo no existe, omitir el sufijo de la firma; no inventar un nombre.

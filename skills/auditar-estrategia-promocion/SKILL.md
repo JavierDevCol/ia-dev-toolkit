@@ -71,6 +71,15 @@ estrategia (qué sumó, qué restó, qué cambiar para subir el score) y una rec
 top-1 explícita. Usar el `output_folder` global de `memory_skill.json` como ruta de
 salida; si es `null`, preguntar al usuario la carpeta y persistirla ahí.
 
+Leer también `usuario.nombre` de `CONFIG_USER.yaml` (ruta en `archivos.config_user`) y,
+si `usuario.incluir_firma_en_documentos` es `true`, agregar al final del archivo:
+
+> **Auditor:** {{usuario.nombre}}
+> **Fecha:** {{fecha}}
+
+Si `usuario.nombre` está vacío o el archivo no existe, omitir el sufijo (`> **Auditor:**`);
+no inventar un nombre.
+
 ## Quick Reference
 
 | Estrategia | Encaja cuando... |

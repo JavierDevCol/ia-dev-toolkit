@@ -43,7 +43,12 @@ Analiza un PR/diff y clasifica variables, colas y secretos por ámbito (pipeline
 
 **Fase D — Preview:** Mostrar resumen consolidado (ver `references/preview-example.md`). Solo incluir secciones con cambios.
 
-**Fase E — Generación:** Crear `CONFIG-ENTORNO-PR-{ID} ({nombre_ms}).md` según template `assets/template-CONFIG-ENTORNO-PR.md`.
+**Fase E — Generación:** Crear `CONFIG-ENTORNO-PR-{ID} ({nombre_ms}).md` según template `assets/template-CONFIG-ENTORNO-PR.md`. Leer también `CONFIG_USER.yaml` (ruta en `archivos.config_user`) y tomar `usuario.nombre` → **`{{usuario.nombre}}`**, necesario para firmar el documento. Si `usuario.incluir_firma_en_documentos` es `false`, omitir el bloque de firma. Si el nombre está vacío o el archivo no existe, omitir el sufijo de la firma; no inventar un nombre. Antes del pie `*Documento generado con env-config-audit skill*`, agregar:
+```
+> **Auditor:** {{usuario.nombre}}
+> **Fecha:** {{fecha}}
+```
+Sin `usuario.nombre` configurado, la línea queda `> **Auditor:**`.
 
 **Reglas obligatorias:**
 1. Solo documentar configuración — nada de setup, infra, deploy, health checks

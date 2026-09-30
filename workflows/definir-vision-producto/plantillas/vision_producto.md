@@ -133,3 +133,8 @@ type: product_vision
 | Product Owner | | | |
 | Tech Lead | | | |
 | Stakeholder | | | |
+
+---
+
+> **Autor:** Product Owner - {{usuario.nombre}}
+> **Fecha:** {{fecha}}

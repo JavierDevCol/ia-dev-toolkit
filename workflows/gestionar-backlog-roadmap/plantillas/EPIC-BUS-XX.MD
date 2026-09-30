@@ -21,6 +21,7 @@ type: business_epic
   - **Para** [Beneficio o valor esperado]
 
 - **Dependencia Técnica:** `STORY-ENABLER-XX` (Debe estar en `DONE` para iniciar).
+- **Sprint Asignado:** `Sprint-N` (tentativo hasta que la HU esté `[R] Refinada`; confirmado después).
 
 - **Criterios de Aceptación (BDD):**
   - **Escenario 1:** [Nombre del escenario principal]
@@ -32,3 +33,8 @@ type: business_epic
     - **Given** [Contexto inicial]
     - **When** [Acción realizada]
     - **Then** [Resultado esperado]
+
+---
+
+> **Product Owner:** {{usuario.nombre}}
+> **Fecha:** {{fecha}}

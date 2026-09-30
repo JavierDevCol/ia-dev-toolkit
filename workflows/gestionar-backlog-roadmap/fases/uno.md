@@ -7,6 +7,13 @@ Analizar la documentación técnica de entrada (ADRs, diagramas C4, esquemas de 
 - **Comparación Delta:** Antes de crear un nuevo Enabler, compara la entrada con el backlog existente.
 - **Evitar Duplicados:** Si el Enabler o decisión ya está registrado, márcalo como `EXISTENTE`. Solo genera `STORY-ENABLER-XXX` para componentes nuevos o modificados.
 
+## Scaffold Base: Verificar `consolidacion.md`
+
+Antes de clasificar Enablers, leer `./artifacts/consolidacion.md` (generado por la Fase 7 de `definir-arquitectura-solucion`), si existe:
+
+- **Si indica que la propuesta se consolidó (SI):** el scaffold base (estructura de carpetas, boilerplate del stack, esqueleto CI/CD/infra) ya está materializado en el repo. **No generar** `STORY-ENABLER-XXX` para eso — Sprint 0 cubre únicamente lo que quede más allá del scaffold (pipelines completos, IaC real, integraciones).
+- **Si indica que NO se consolidó (o el archivo no existe):** generar el/los `STORY-ENABLER-XXX` de scaffold base como las **primeras HU con máxima prioridad de Sprint 0** — el producto debe tener sus bases (carpetas, boilerplate, esqueleto CI/CD) resueltas desde el Sprint 0, antes que cualquier otro Enabler o HU de negocio.
+
 ## Reglas de Clasificación de Enablers
 
 

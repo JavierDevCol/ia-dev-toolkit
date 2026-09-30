@@ -27,6 +27,11 @@ phases:
     title: Validación Cruzada por Sub-Agente Auditor
     gate: auto
     pre: "Actúa como auditor independiente. NO reabras ni cambies decisiones ya aprobadas; solo verifica la trazabilidad exacta entre los ADRs y los documentos consolidados, y corrige inconsistencias de forma quirúrgica."
+  - file: siete.md
+    title: Consolidación Opcional de la Propuesta Arquitectónica
+    gate: approval
+    output: artifacts/consolidacion.md
+    pre: "Pregunta explícitamente '¿Consolidar propuesta arquitectónica?' y espera la respuesta antes de actuar. Si el usuario dice NO, no toques el filesystem — solo deja constancia en consolidacion.md de que el scaffold base debe entrar como Enablers de máxima prioridad en el Sprint 0."
 ---
 
 # Workflow: Definir / Sincronizar Arquitectura de Solución
@@ -50,13 +55,14 @@ Actúas como **arquitecto de soluciones colaborativo**. En cada fase:
 ```
 [Visión] ─► 1. NFRs & Estilo ─► 2. Patrones & BD ─► 3. Cloud & Seguridad
          ─► 4. DevOps & Comms ─► 5. Consolidación (Blueprint) ─► 6. Auditoría (auto)
+         ─► 7. ¿Consolidar propuesta? (SI: scaffold real / NO: queda para Sprint 0)
 ```
 
-Cada fase 1-4 produce su **ADR** tras aprobación; la fase 5 consolida el **Blueprint** y la **Auditoría Well-Architected**; la fase 6 (automática) hace la **validación cruzada** de trazabilidad.
+Cada fase 1-4 produce su **ADR** tras aprobación; la fase 5 consolida el **Blueprint** y la **Auditoría Well-Architected**; la fase 6 (automática) hace la **validación cruzada** de trazabilidad; la fase 7 decide con el usuario si el scaffold del repositorio se materializa ya (sub-agente consolidador) o si queda documentado como Enablers de máxima prioridad para el Sprint 0.
 
 ## Al terminar
 
-Verifica que cada ADR aprobado tenga su artefacto y que el `blueprint_arquitectura.md` **no contradiga** ningún ADR. Si la fase 6 detecta inconsistencias, deben quedar corregidas.
+Verifica que cada ADR aprobado tenga su artefacto y que el `blueprint_arquitectura.md` **no contradiga** ningún ADR. Si la fase 6 detecta inconsistencias, deben quedar corregidas. Verifica que `consolidacion.md` (fase 7) exista y refleje sin ambigüedad si el scaffold quedó materializado o pendiente para Sprint 0.
 
 ---
 
