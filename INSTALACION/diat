@@ -28,7 +28,9 @@ PLATFORM_DEFAULT = ".opencode"
 # Nota: validar-ca entra por dependencia de ejecutar-plan.
 SAC_SKILLS = [
     "tomar-contexto",                                              # contexto del proyecto
+    "iniciar-sprint",                                              # materializa HU del sprint activo
     "refinar-hu", "validar-hu", "planificar-hu", "ejecutar-plan",  # ciclo de vida de HU
+    "priorizar-backlog",                                           # orden real de ejecucion (dependencias + prioridad)
     "sincronizar-backlog", "registrar-hallazgo",                   # backlog y hallazgos
     "init-reglas-arquitectonicas", "crear-adr", "analizar-calidad-codigo", "analizar-seguridad",  # arquitectura/calidad
     "git-branch-commit", "bitacora-tecnica",                       # soporte dev
