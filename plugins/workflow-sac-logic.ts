@@ -18,12 +18,13 @@ function extractText(result: unknown): string {
   const r = result as any
   if (typeof r?.text === "string") return r.text
   if (Array.isArray(r?.parts)) {
-    return r.parts
+    const text = r.parts
       .filter((p: any) => p?.type === "text" && typeof p.text === "string")
       .map((p: any) => p.text)
       .join("\n")
+    if (text.length > 0) return text
   }
-  return JSON.stringify(result)
+  throw new Error(`respuesta del sub-agente no reconocida: ${JSON.stringify(result)}`)
 }
 
 export function listWorkflows(workflowsDir: string): string {
@@ -99,6 +100,11 @@ export async function executePhase(
     }
     const promptText = meta.pre ? `${meta.pre}\n\n${content}` : content
     try {
+      // NO verificado contra un servidor OpenCode real (sin opencode/bun en este
+      // entorno de desarrollo): hay fuentes del SDK que muestran envelopes
+      // {path, body} y otras que muestran campos planos como los de abajo — la
+      // forma exacta puede requerir ajuste tras la primera prueba manual real
+      // (ver spec, sección "Verificación").
       const session = await client.session.create()
       const result = await client.session.prompt({
         sessionID: session.id,

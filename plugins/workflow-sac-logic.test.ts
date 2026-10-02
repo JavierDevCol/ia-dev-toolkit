@@ -148,3 +148,46 @@ test("agents/auditor-arquitectura.md existe con mode: subagent y hidden: true", 
   assert.match(content, /mode:\s*subagent/)
   assert.match(content, /hidden:\s*true/)
 })
+
+test("executePhase con agent: trata una respuesta no reconocida como error, no la auto-aprueba", async () => {
+  const { workflowsDir, stateDir } = makeFixtureWorkflow()
+  const wfFile = path.join(workflowsDir, "demo", "workflow.md")
+  const content = readFileSync(wfFile, "utf-8").replace(
+    "    gate: auto",
+    "    gate: auto\n    agent: mock-auditor"
+  )
+  writeFileSync(wfFile, content)
+
+  await executePhase(workflowsDir, stateDir, "demo", "uno.md")
+  approvePhase(stateDir, "demo", "uno.md")
+
+  const weirdShapeClient = {
+    session: {
+      create: async () => ({ id: "sess-789" }),
+      prompt: async () => ({ foo: "bar" }), // ni .text ni .parts[] de texto
+    },
+  }
+
+  const result = await executePhase(workflowsDir, stateDir, "demo", "dos.md", weirdShapeClient)
+  assert.match(result, /⛔ Error al despachar sub-agente 'mock-auditor'/)
+
+  const status = getStatus(stateDir, "demo")
+  assert.doesNotMatch(status, /dos\.md: approved/)
+})
+
+test("seis.md no delega a un sub-agente ni pide reportar al usuario (ahora se despacha como agente real)", () => {
+  const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
+  const content = readFileSync(
+    path.join(repoRoot, "workflows", "definir-arquitectura-solucion", "fases", "seis.md"),
+    "utf-8"
+  )
+  assert.doesNotMatch(content, /delegar a.*sub-agente/i)
+  assert.doesNotMatch(content, /reporte de síntesis al usuario/i)
+})
+
+test("auditor-arquitectura.md cubre el mismo alcance que seis.md (blueprint + auditoría Well-Architected)", () => {
+  const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
+  const agentContent = readFileSync(path.join(repoRoot, "agents", "auditor-arquitectura.md"), "utf-8")
+  assert.match(agentContent, /blueprint_arquitectura\.md/)
+  assert.match(agentContent, /auditoria_well_architected\.md/)
+})
