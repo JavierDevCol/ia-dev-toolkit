@@ -3,6 +3,7 @@ import assert from "node:assert/strict"
 import { mkdtempSync, mkdirSync, writeFileSync, readFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import path from "node:path"
+import { fileURLToPath } from "node:url"
 import {
   getPhases,
   nextPhase,
@@ -130,4 +131,20 @@ test("executePhase con agent: si el despacho falla, no deja la fase colgada", as
   const next = nextPhase(workflowsDir, stateDir, "demo")
   assert.match(next, /dos\.md/)
   assert.doesNotMatch(next, /Todas las fases/)
+})
+
+test("fase 6 de definir-arquitectura-solucion usa el agente auditor-arquitectura", () => {
+  const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
+  const phases = getPhases(path.join(repoRoot, "workflows"), "definir-arquitectura-solucion")
+  const fase6 = phases.find(p => p.file === "seis.md")
+  assert.ok(fase6, "fase seis.md debe existir en el manifiesto")
+  assert.equal(fase6!.agent, "auditor-arquitectura")
+  assert.equal(fase6!.pre, undefined)
+})
+
+test("agents/auditor-arquitectura.md existe con mode: subagent y hidden: true", () => {
+  const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
+  const content = readFileSync(path.join(repoRoot, "agents", "auditor-arquitectura.md"), "utf-8")
+  assert.match(content, /mode:\s*subagent/)
+  assert.match(content, /hidden:\s*true/)
 })

@@ -26,7 +26,7 @@ phases:
   - file: seis.md
     title: Validación Cruzada por Sub-Agente Auditor
     gate: auto
-    pre: "Actúa como auditor independiente. NO reabras ni cambies decisiones ya aprobadas; solo verifica la trazabilidad exacta entre los ADRs y los documentos consolidados, y corrige inconsistencias de forma quirúrgica."
+    agent: auditor-arquitectura
   - file: siete.md
     title: Consolidación Opcional de la Propuesta Arquitectónica
     gate: approval
