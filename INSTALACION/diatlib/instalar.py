@@ -31,12 +31,26 @@ def install_component(ctype, name, cache, project, platform):
         if dst.exists():
             shutil.rmtree(dst)
         shutil.copytree(src, dst, ignore=shutil.ignore_patterns("_archived"))  # excluye obsoletas
-    else:                                              # agents(.md)/tools(.ts)/commands(.md)
+    else:                                              # agents(.md)/tools(.ts)/commands(.md)/plugins(.ts)
         src, dst = cache / ctype / f"{name}{spec}", dest_base / f"{name}{spec}"
         if not src.exists():
             print_warning(f"{ctype}:{name}{spec} no está en cache — omitido")
             return False
         shutil.copy2(src, dst)
+        if ctype == "plugins":
+            # Un plugin puede tener un módulo de lógica sibling (p.ej. workflow-sac.ts
+            # importa ./workflow-sac-logic.ts) — no está catalogado como componente
+            # propio (ver github.build_catalog), pero debe viajar junto al plugin.
+            logic_src = cache / ctype / f"{name}-logic{spec}"
+            if logic_src.exists():
+                shutil.copy2(logic_src, dest_base / f"{name}-logic{spec}")
+            if name == "workflow-sac":
+                # Migración: versiones previas instalaban este componente como
+                # tool suelto (.opencode/tools/workflow-sac.ts). Si queda, limpiarlo
+                # para que no colisione/duplique con el plugin nuevo.
+                stale = project / platform / "tools" / f"{name}.ts"
+                if stale.exists():
+                    stale.unlink()
     return True
 
 

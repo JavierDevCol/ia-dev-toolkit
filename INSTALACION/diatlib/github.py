@@ -201,6 +201,8 @@ def build_catalog(cache_path=None):
                 if spec is None or (item / spec).exists():   # requiere archivo marcador
                     catalog[t].add(item.name)
             elif kind == "file" and item.is_file() and item.suffix == spec:
+                if t == "plugins" and (item.stem.endswith("-logic") or ".test" in item.stem):
+                    continue  # archivos de soporte del plugin (lógica/tests), no instalables por sí solos
                 catalog[t].add(item.stem)
     return catalog
 
