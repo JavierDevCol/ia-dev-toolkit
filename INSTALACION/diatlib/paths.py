@@ -30,7 +30,7 @@ CLI_PACKAGE = "diatlib"
 # LAYOUT DE COMPONENTES  (verificado contra el repo real)
 # ============================================================
 # Las 6 carpetas de componentes que se copian al cache.
-COMPONENT_DIRS = ("skills", "agents", "workflows", "tools", "commands", "config")
+COMPONENT_DIRS = ("skills", "agents", "workflows", "tools", "commands", "config", "plugins")
 
 # Tipos cuyas dependencias hay que resolver recursivamente.
 RECURSIVE_TYPES = {"skills", "agents", "workflows"}
@@ -46,7 +46,7 @@ COMPONENT_LAYOUT = {
     "agents":    ("file", ".md"),
     "tools":     ("file", ".ts"),
     "commands":  ("file", ".md"),
-    "plugins":   ("file", ".md"),
+    "plugins":   ("file", ".ts"),
 }
 
 # Runtime del sistema SAC (workflows + config + artifacts). Agnóstico al agente.
