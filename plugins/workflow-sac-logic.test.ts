@@ -57,19 +57,77 @@ test("nextPhase devuelve la primera fase no aprobada", () => {
   assert.match(msg, /1\/2/)
 })
 
-test("executePhase bloquea si la fase anterior no está aprobada", () => {
+test("executePhase bloquea si la fase anterior no está aprobada", async () => {
   const { workflowsDir, stateDir } = makeFixtureWorkflow()
-  const result = executePhase(workflowsDir, stateDir, "demo", "dos.md")
+  const result = await executePhase(workflowsDir, stateDir, "demo", "dos.md")
   assert.match(result, /⛔/)
   assert.match(result, /uno\.md/)
 })
 
-test("executePhase con gate:auto se auto-aprueba", () => {
+test("executePhase con gate:auto se auto-aprueba", async () => {
   const { workflowsDir, stateDir } = makeFixtureWorkflow()
-  executePhase(workflowsDir, stateDir, "demo", "uno.md")
+  await executePhase(workflowsDir, stateDir, "demo", "uno.md")
   approvePhase(stateDir, "demo", "uno.md")
-  const result = executePhase(workflowsDir, stateDir, "demo", "dos.md")
+  const result = await executePhase(workflowsDir, stateDir, "demo", "dos.md")
   assert.match(result, /Fase automática/)
   const status = getStatus(stateDir, "demo")
   assert.match(status, /dos\.md: approved/)
+})
+
+test("executePhase con agent: despacha un sub-agente real y devuelve su respuesta", async () => {
+  const { workflowsDir, stateDir } = makeFixtureWorkflow()
+  // Reescribe el workflow.md de la fixture agregando `agent:` a la fase dos
+  const wfFile = path.join(workflowsDir, "demo", "workflow.md")
+  const content = readFileSync(wfFile, "utf-8").replace(
+    "    gate: auto",
+    "    gate: auto\n    agent: mock-auditor"
+  )
+  writeFileSync(wfFile, content)
+
+  executePhase(workflowsDir, stateDir, "demo", "uno.md")
+  approvePhase(stateDir, "demo", "uno.md")
+
+  const mockClient = {
+    session: {
+      create: async () => ({ id: "sess-123" }),
+      prompt: async (params: any) => {
+        assert.equal(params.agent, "mock-auditor")
+        assert.equal(params.sessionID, "sess-123")
+        return { parts: [{ type: "text", text: "Auditoría OK: sin inconsistencias." }] }
+      },
+    },
+  }
+
+  const result = await executePhase(workflowsDir, stateDir, "demo", "dos.md", mockClient)
+  assert.match(result, /Auditoría OK: sin inconsistencias\./)
+  const status = getStatus(stateDir, "demo")
+  assert.match(status, /dos\.md: approved/)
+})
+
+test("executePhase con agent: si el despacho falla, no deja la fase colgada", async () => {
+  const { workflowsDir, stateDir } = makeFixtureWorkflow()
+  const wfFile = path.join(workflowsDir, "demo", "workflow.md")
+  const content = readFileSync(wfFile, "utf-8").replace(
+    "    gate: auto",
+    "    gate: auto\n    agent: mock-auditor"
+  )
+  writeFileSync(wfFile, content)
+
+  executePhase(workflowsDir, stateDir, "demo", "uno.md")
+  approvePhase(stateDir, "demo", "uno.md")
+
+  const failingClient = {
+    session: {
+      create: async () => ({ id: "sess-456" }),
+      prompt: async () => { throw new Error("servidor no disponible") },
+    },
+  }
+
+  const result = await executePhase(workflowsDir, stateDir, "demo", "dos.md", failingClient)
+  assert.match(result, /⛔ Error al despachar sub-agente 'mock-auditor'/)
+  assert.match(result, /servidor no disponible/)
+
+  const next = nextPhase(workflowsDir, stateDir, "demo")
+  assert.match(next, /dos\.md/)
+  assert.doesNotMatch(next, /Todas las fases/)
 })

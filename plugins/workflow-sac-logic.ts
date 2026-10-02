@@ -1,7 +1,30 @@
 import fs from "fs"
 import path from "path"
 
-export type Phase = { file: string; title?: string; gate?: string; output?: string; pre?: string }
+export type Phase = { file: string; title?: string; gate?: string; output?: string; pre?: string; agent?: string }
+
+export interface SessionClient {
+  session: {
+    create(): Promise<{ id: string }>
+    prompt(params: {
+      sessionID: string
+      agent: string
+      parts: Array<{ type: "text"; text: string }>
+    }): Promise<unknown>
+  }
+}
+
+function extractText(result: unknown): string {
+  const r = result as any
+  if (typeof r?.text === "string") return r.text
+  if (Array.isArray(r?.parts)) {
+    return r.parts
+      .filter((p: any) => p?.type === "text" && typeof p.text === "string")
+      .map((p: any) => p.text)
+      .join("\n")
+  }
+  return JSON.stringify(result)
+}
 
 export function listWorkflows(workflowsDir: string): string {
   if (!fs.existsSync(workflowsDir)) return "No workflows directory found"
@@ -41,7 +64,13 @@ export function readPhase(workflowsDir: string, workflow: string, phase: string)
   return fs.readFileSync(phaseFile, "utf-8")
 }
 
-export function executePhase(workflowsDir: string, stateDir: string, workflow: string, phase: string): string {
+export async function executePhase(
+  workflowsDir: string,
+  stateDir: string,
+  workflow: string,
+  phase: string,
+  client?: SessionClient
+): Promise<string> {
   const content = readPhase(workflowsDir, workflow, phase)
   if (content.startsWith("Phase '")) return content
 
@@ -63,6 +92,28 @@ export function executePhase(workflowsDir: string, stateDir: string, workflow: s
     }
   }
 
+  let body: string
+  if (meta.agent) {
+    if (!client) {
+      return `⛔ Error interno: la fase '${phase}' requiere el agente '${meta.agent}' pero no se proveyó un cliente de sesión.`
+    }
+    const promptText = meta.pre ? `${meta.pre}\n\n${content}` : content
+    try {
+      const session = await client.session.create()
+      const result = await client.session.prompt({
+        sessionID: session.id,
+        agent: meta.agent,
+        parts: [{ type: "text", text: promptText }],
+      })
+      body = extractText(result)
+    } catch (err) {
+      return `⛔ Error al despachar sub-agente '${meta.agent}': ${(err as Error).message}. ` +
+        `La fase NO quedó marcada como iniciada — puedes reintentar.`
+    }
+  } else {
+    body = meta.pre ? `> **Antes de esta fase:** ${meta.pre}\n\n${content}` : content
+  }
+
   state.started_at = state.started_at || new Date().toISOString()
   state.current_phase = phase
   state.phases[phase] = {
@@ -71,7 +122,6 @@ export function executePhase(workflowsDir: string, stateDir: string, workflow: s
     started_at: new Date().toISOString()
   }
 
-  const body = meta.pre ? `> **Antes de esta fase:** ${meta.pre}\n\n${content}` : content
   const heading = meta.title ? `## Fase: ${meta.title} (${phase})` : `## Fase: ${phase}`
   const outNote = meta.output ? `\n\n*Salida esperada: ${meta.output}*` : ""
 
