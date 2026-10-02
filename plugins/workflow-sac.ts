@@ -24,7 +24,7 @@ export default async (ctx: { client: SessionClient; worktree: string }) => {
 - read: leer workflow.md completo (pipeline y gates)
 - read_phase: leer una fase específica
 - next: obtener la siguiente fase pendiente (según el orden de workflow.md). Úsalo en vez de adivinar el nombre del archivo
-- execute: inyectar el contexto de una fase en el agente (lazy loading), o despacharla a un sub-agente real si declara `agent:`. Bloquea si una fase anterior no está aprobada
+- execute: inyectar el contexto de una fase en el agente (lazy loading), o despacharla a un sub-agente real si declara 'agent:'. Bloquea si una fase anterior no está aprobada
 - approve: marcar una fase como aprobada
 - status: ver progreso del workflow
 - reset: reiniciar progreso
