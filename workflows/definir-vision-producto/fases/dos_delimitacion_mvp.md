@@ -1,6 +1,6 @@
-Fase 2: Delimitación del MVP
+# Fase 2: Visión Holística del Producto y Slicing del MVP
 
-**Objetivo:** Definir el Producto Mínimo Viable (MVP) que resuelve el problema identificado.
+**Objetivo:** Articular la solución completa a largo plazo (El Norte) y recortar estratégicamente la primera versión ejecutable (MVP).
 
 ---
 
@@ -11,62 +11,46 @@ Completar `fases/uno_descubrimiento_problema.md` antes de iniciar esta fase.
 ---
 
 🔄 Regla de Sincronización (Si existe un archivo previo):
-Si ./artifacts/vision_producto.md ya existe, no lo recrees desde cero. Lee el contenido actual, compara los nuevos inputs con la versión previa y actualiza únicamente las secciones impactadas (marcando los cambios en la sección de histórico o aprobaciones).
+Si ./artifacts/vision_producto.md ya existe, no lo recrees desde cero. Lee el contenido actual, compara los nuevos inputs con la versión previa y actualiza únicamente las secciones impactadas.
 
 ## Preguntas guía
 
-### 2.1 ¿Qué incluye el MVP?
+### 2.1 Visión Holística a Largo Plazo (El Norte)
+- **Ecosistema Completo:** ¿Cómo se ve la solución ideal cuando el producto esté completamente maduro y escalado?
+- **Capacidades Futuras:** ¿Qué módulos, automatizaciones, analítica o integraciones avanzadas formarán parte del producto final?
 
-- ¿Cuál es la funcionalidad核心 que resuelve el problema?
-- ¿Qué es imprescindible vs deseable?
-- ¿Cuál es la experiencia mínima aceptable?
-- ¿Qué NO incluimos en esta versión?
-### 2.2 ¿Cómo se usa?
+### 2.2 Slicing y Delimitación del MVP (Fase 1)
+- **Hipótesis a Validar:** ¿Qué es lo más crítico que debemos probar con los primeros usuarios reales?
+- **Funcionalidades MUST (In-Scope):** ¿Cuáles son los módulos indispensables sin los cuales el sistema **no puede operar ni entregar valor básico**?
+- **Funcionalidades OUT-OF-SCOPE:** ¿Qué grandes funcionalidades pertenecen a la Visión Global pero quedan explícitamente fuera del MVP para acelerar el lanzamiento?
 
-- ¿Cuál es el flujo principal del usuario?
-- ¿Cuántos pasos tiene?
-- ¿Dónde vive el usuario? (web, móvil, escritorio)
-- ¿Qué integraciones necesita?
+### 2.3 Experiencia y Flujo Core del MVP
+- ¿Cuál es el flujo principal paso a paso que ejecutará el usuario en esta primera versión?
+- ¿En qué plataformas vivirá el MVP? (Web, Móvil, Panel Administrativo).
 
-### 2.3 ¿Qué restricciones tenemos?
+### 2.4 Restricciones Operativas (MVP)
+- **Tiempo:** ¿Cuál es la fecha límite o ventana de mercado para la primera entrega?
+- **Presupuesto:** ¿Cuáles son los límites financieros para el desarrollo inicial?
+- **Equipo:** ¿Con qué roles y nivel de madurez se cuenta para ejecutar?
+- **Tecnología:** ¿Existen restricciones o decisiones previas sobre el stack?
 
-- **Tiempo:** ¿Cuándo debe estar listo?
-- **Presupuesto:** ¿Cuál es el límite?
-- **Equipo:** ¿Quiénes participan?
-- **Tecnología:** ¿Qué stack usamos?
+### 2.5 Mapa de Actores
+- Identifica los roles de usuarios humanos y los sistemas externos (ej. pasarelas de pago, APIs de terceros) que interactúan tanto en el MVP como a futuro.
 
-### 2.4 ¿Cómo validamos?
-
-- ¿Cómo sabemos que funciona?
-- ¿A quién se lo mostramos primero?
-- ¿Qué métricas trackeamos?
-- ¿Cuándo consideramos éxito?
-
-### 2.5 Mapa de Actores / Roles
-   - Identificar usuarios finales (ej. *Cliente, Barbero, Administrador*).
-   - Identificar sistemas externos con los que debe interactuar (ej. *Pasarela de Pago, Servicio SMS*).
-
-### 2.6 Criterios de Slicing Funcional (In-Scope vs. Out-of-Scope):
-   - **Dentro del MVP (In-Scope):** Funcionalidades mínimas sin las cuales el producto **no puede operar ni generar valor**.
-   - **Fuera del MVP (Out-of-Scope):** Ideas valiosas pero no críticas para el lanzamiento inicial (ej. *Motor de IA para recomendaciones, programa de fidelización avanzado*).
-
-### 2.7 Módulos / Épicas Candidatas:
-   - Agrupar las capacidades del MVP en 3 a 5 grandes módulos conceptuales (ej. *Gestión de Citas, Autenticación, Pagos*).
 ---
 
 ## Entregable
 
-Construye y rellena la **Sección 2. MVP Definido** en la plantilla final (`./plantillas/vision_producto.md`), asegurando poblar la tabla de funcionalidades MUST/SHOULD, el flujo principal y las restricciones.
+Construye y rellena la **Sección 2. MVP Definido** (o Alcance y Estrategia) en la plantilla final (`./plantillas/vision_producto.md`), documentando tanto el alcance macro a futuro como la tabla detallada del MVP (MUST/SHOULD), el flujo principal y las restricciones.
 
 ---
 
 ## Criterios de completitud
 
-- [ ] Las funcionalidades MUST están definidas
-- [ ] El flujo principal está documentado
-- [ ] Las restricciones están cuantificadas
-- [ ] Los criterios de éxito son medibles
-- [ ] El equipo aprueba el alcance
+- [ ] La Visión Global a largo plazo está diferenciada del alcance inicial.
+- [ ] Las funcionalidades del MVP están priorizadas (MUST vs SHOULD / In-Scope vs Out-of-Scope).
+- [ ] El flujo del usuario principal está documentado paso a paso.
+- [ ] Las restricciones de tiempo, presupuesto y equipo están cuantificadas.
 
 ---
 
