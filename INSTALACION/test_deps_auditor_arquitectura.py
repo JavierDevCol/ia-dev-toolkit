@@ -11,4 +11,9 @@ order, by_type = deps.resolve_closure([("workflows", "definir-arquitectura-soluc
 assert "auditor-arquitectura" in by_type.get("agents", []), \
     f"auditor-arquitectura debería estar en el cierre de dependencias, agents={by_type.get('agents', [])}"
 
-print("OK: definir-arquitectura-solucion arrastra auditor-arquitectura como dependencia")
+# Fases 1-5 despachan a disenador-arquitectura-solucion — sin esta dependencia,
+# instalar el workflow solo deja esas 5 fases sin agente disponible.
+assert "disenador-arquitectura-solucion" in by_type.get("agents", []), \
+    f"disenador-arquitectura-solucion debería estar en el cierre de dependencias, agents={by_type.get('agents', [])}"
+
+print("OK: definir-arquitectura-solucion arrastra auditor-arquitectura y disenador-arquitectura-solucion como dependencias")

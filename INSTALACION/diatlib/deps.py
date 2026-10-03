@@ -32,9 +32,13 @@ COMPONENT_DEPENDENCIES = {
             "optional": {},
         },
         "definir-arquitectura-solucion": {
-            # Fase 6 (auditor) despacha a este agente como sub-agente real — sin él,
-            # instalar el workflow solo deja la fase 6 sin poder ejecutarse.
-            "requires": {"plugins": ["workflow-sac"], "commands": ["workflow-sac"], "agents": ["auditor-arquitectura"]},
+            # Fase 6 (auditor) y fases 1-5 (diseñador) despachan a estos agentes
+            # como sub-agentes reales — sin ellos, esas fases no pueden ejecutarse.
+            "requires": {
+                "plugins": ["workflow-sac"],
+                "commands": ["workflow-sac"],
+                "agents": ["auditor-arquitectura", "disenador-arquitectura-solucion"],
+            },
             "optional": {},
         },
         "gestionar-backlog-roadmap": {
