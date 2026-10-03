@@ -1,44 +1,66 @@
 # FASE 7: Consolidación Opcional de la Propuesta Arquitectónica
 
-**Objetivo:** Decidir junto al usuario si se materializa ya el scaffold base del proyecto (estructura de carpetas, boilerplate del stack, esqueleto de CI/CD/infra) según lo aprobado en los ADRs y el Blueprint, o si esa creación queda pendiente como trabajo explícito del Sprint 0.
+**Objetivo:** Decidir junto al usuario si se materializa de inmediato el scaffold base del proyecto (estructura de carpetas, boilerplate del stack, `.gitignore`, `.env.example` y esqueleto CI/CD) según lo aprobado en los ADRs y el Blueprint, o si su creación se delega formalmente como Historias de Usuario Enablers para el Sprint 0.
 
 ---
 
 ## Pasos de Ejecución
 
-1. **Recapitular brevemente** los ADRs aprobados (001–004) y el `blueprint_arquitectura.md`.
-2. **Preguntar explícitamente al usuario:** *"¿Consolidar propuesta arquitectónica?"* (SI/CONSOLIDA vs NO). No asumir una respuesta por defecto — esperar la respuesta explícita antes de continuar.
+1. **Lectura de la Fuente de Verdad:**
+   - Lee únicamente `./artifacts/blueprint_arquitectura.md` para extraer el stack, la estructura de carpetas, la base de datos y el pipeline aprobados.
 
-### Si el usuario responde SI / CONSOLIDA
-
-3. Materializa en el filesystem lo ya decidido y aprobado — no propongas opciones, no reabras decisiones, todo ya fue aprobado en los ADRs:
-   - Lee `./artifacts/ADR/*.md` (las 4 decisiones aprobadas) y `./artifacts/blueprint_arquitectura.md`.
-   - Crea la estructura de carpetas y el patrón definidos en ADR-002 (patrón y persistencia).
-   - Ejecuta el scaffold mínimo del stack/framework decidido en ADR-001/ADR-002 (el comando `create-*` nativo del lenguaje: `npm init`, `spring init`, `django-admin startproject`, etc.).
-   - Crea el esqueleto de CI/CD e infraestructura de ADR-003/ADR-004 (puede ser un pipeline que falle a propósito o un `Dockerfile`/IaC mínimo — el objetivo es la forma, no la implementación completa).
-4. Escribe `./artifacts/consolidacion.md` documentando: qué se creó (con rutas), a qué ADR corresponde cada decisión materializada, y qué queda explícitamente pendiente (si algo no se pudo automatizar).
-5. Presenta un reporte de síntesis al usuario: "✅ Propuesta consolidada: se materializaron X decisiones de los ADRs 001-004 en el repositorio."
-
-### Si el usuario responde NO
-
-3. **No tocar el filesystem.**
-4. Escribir `./artifacts/consolidacion.md` dejando constancia explícita de que la propuesta **no se consolidó**, y que por lo tanto **toda la creación del scaffold base** (estructura de carpetas, boilerplate del stack, esqueleto de CI/CD/infra) **debe entrar como la(s) primera(s) HU Enabler del Sprint 0** al ejecutar `gestionar-backlog-roadmap`, con máxima prioridad — el producto debe tener sus bases resueltas desde el Sprint 0, no después.
+2. **Confirmación con el Usuario (Gatekeeper):**
+   - Presenta un mensaje ultrasintético del stack a generar (1 o 2 líneas) y pregunta:
+     > **"¿Deseas consolidar y materializar la propuesta arquitectónica en el repositorio en este momento? (Responde SI/CONSOLIDA o NO)"**
+   - **DETÉN LA EJECUCIÓN** y espera la respuesta explícita del usuario.
 
 ---
 
-## Entregable
+### Si el usuario responde SI / CONSOLIDA
 
-- `./artifacts/consolidacion.md` — registro de la decisión (SI/NO):
-  - Si SI: qué se materializó y su trazabilidad a cada ADR.
-  - Si NO: nota explícita de que el scaffold base queda pendiente como Enablers de máxima prioridad en Sprint 0.
+3. **Inspección de Seguridad del Workspace:**
+   - Verifica si el directorio raíz o `./src` ya contiene código. Si existen archivos de código preexistentes, advierte al usuario antes de modificar nada.
 
-> `gestionar-backlog-roadmap` lee este archivo en su Fase 1 (Ingesta) para decidir si genera Enablers de scaffold base en Sprint 0 o si los omite porque ya fueron consolidados aquí.
+4. **Materialización del Scaffold Base:**
+   - **Estructura de Carpetas:** Crea la jerarquía de directorios aprobada en `ADR-002` (ej. `domain/`, `application/`, `infrastructure/`).
+   - **Boilerplate e Higiene:** 
+     - Genera un `.gitignore` adaptado al stack tecnológico elegido (`ADR-001`/`ADR-002`).
+     - Genera un `.env.example` con las variables de entorno, puertos y secretos requeridos según `ADR-003` y `ADR-004`.
+     - Genera un `README.md` básico en la raíz vinculando a `./artifacts/blueprint_arquitectura.md`.
+   - **Ejecución de Scaffold / Fallback:**
+     - Intenta ejecutar el comando de inicialización nativo del stack (ej. `npm init -y`, `go mod init`, etc.).
+     - *Estrategia Fallback:* Si el entorno no cuenta con la CLI instalada o el comando falla, genera directamente los archivos manifest estáticos mínimos (ej. `package.json`, `pom.xml`, `go.mod`, `requirements.txt`).
+   - **Esqueleto de CI/CD e Infraestructura:**
+     - Crea el archivo del pipeline en la ruta correspondiente (ej. `.github/workflows/ci.yml` o `bitbucket-pipelines.yml`) con las etapas definidas en `ADR-004`.
+     - Crea el `Dockerfile` o archivo de IaC básico según `ADR-003`.
 
-Leer también `CONFIG_USER.yaml` (ruta en `archivos.config_user`) y tomar `usuario.nombre` → **`{{usuario.nombre}}`**, necesario para firmar `consolidacion.md`. Si está vacío o el archivo no existe, omitir el sufijo de la firma; no inventar un nombre.
+5. **Entregable de Registro (`./artifacts/consolidacion.md`):**
+   - Documenta el estado `ESTADO: CONSOLIDADO`.
+   - Detalla el inventario de carpetas y archivos creados con su trazabilidad directa al ADR correspondiente.
+   - Lista cualquier componente que no se haya podido automatizar.
 
-Al final de `consolidacion.md`, agregar (tanto si el usuario respondió SI como NO):
+---
 
+### Si el usuario responde NO
+
+3. **Respeto Estricto del filesystem:** No crea ni modifica archivos de código o estructura en el proyecto.
+4. **Entregable de Registro (`./artifacts/consolidacion.md`):**
+   - Documenta el estado `ESTADO: PENDIENTE_SPRINT_0`.
+   - Especifica que el scaffold base no se consolidó y debe ser absorbido en el Sprint 0.
+   - **Estructuración de Enablers para Backlog:** Redacta la lista explicita de Historias de Usuario Enablers sugeridas para que el workflow `gestionar-backlog-roadmap` las ingiera directamente:
+     - *HU-ENABLER-01:* Creación de Estructura de Directorios y Boilerplate Base *(Ref: ADR-001, ADR-002)*.
+     - *HU-ENABLER-02:* Aprovisionamiento de Esqueleto CI/CD y Pipeline de Calidad *(Ref: ADR-004)*.
+     - *HU-ENABLER-03:* Configuración de Entornos, Dockerfile e Infraestructura Base *(Ref: ADR-003)*.
+
+---
+
+## Formato del Entregable Final (`./artifacts/consolidacion.md`)
+
+Lee `CONFIG_USER.yaml` (ruta en `archivos.config_user`) y toma `usuario.nombre` → `{{usuario.nombre}}`. Si está vacío o el archivo no existe, omite el sufijo del nombre.
+
+Escribe el archivo `./artifacts/consolidacion.md` finalizando obligatoriamente con el siguiente bloque de cierre:
+
+```markdown
+---
 > **Aprobado por:** Arquitecto - {{usuario.nombre}}
 > **Fecha:** {{fecha}}
-
-Sin `{{usuario.nombre}}` configurado, la línea queda `> **Aprobado por:** Arquitecto`.

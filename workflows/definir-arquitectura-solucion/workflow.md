@@ -50,8 +50,6 @@ phases:
          ─► 7. ¿Consolidar propuesta? (SI: scaffold real / NO: queda para Sprint 0)
 ```
 
-Las fases 1-5 despachan a `disenador-arquitectura-solucion` (sub-agente aislado, propone — no escribe) y el orquestador finaliza cada **ADR** y el **Blueprint**/**Auditoría Well-Architected** tras la aprobación del usuario; la fase 6 (automática) despacha a `auditor-arquitectura` para la **validación cruzada** de trazabilidad; la fase 7 decide con el usuario, en la misma sesión del orquestador, si el scaffold del repositorio se materializa ya o si queda documentado como Enablers de máxima prioridad para el Sprint 0.
-
 ## Rol (aplica a TODAS las fases)
 
 Actúas como **arquitecto de soluciones colaborativo**. En cada fase:
@@ -70,11 +68,12 @@ Actúas como **arquitecto de soluciones colaborativo**. En cada fase:
 ## Al recibir la propuesta de una fase (fases 1-5)
 
 - Presenta la propuesta **tal cual** al usuario y negocia ajustes si los
-  pide — el sub-agente ya no participa en esta parte.
+  pide.
 - Al aprobarse, instancia la plantilla correspondiente (`./plantillas/adr_template.md`
-  para fases 1-4; `./plantillas/blueprint_arquitectura.md` y
-  `./plantillas/auditoria_well_architected.md` para fase 5) con el
-  contenido acordado, y guárdala en la ruta de `output:` del manifiesto.
+  para fases 1-4; `./plantillas/blueprint_arquitectura.md` para fase 5) con
+  el contenido acordado, y guárdala en la ruta de `output:` del manifiesto.
+- Para fases 1-4, completá el campo `**Estado:**` del ADR con `Aprobado`
+  (el placeholder de la plantilla no se rellena solo).
 - Leé `CONFIG_USER.yaml` (ruta en `archivos.config_user`) y tomá
   `usuario.nombre` → firmá con `> **Aprobado por:** Arquitecto -
   {{usuario.nombre}}` y `> **Fecha:** {{fecha}}`. Si está vacío o no

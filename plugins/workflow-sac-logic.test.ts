@@ -1,6 +1,6 @@
 import test from "node:test"
 import assert from "node:assert/strict"
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync } from "node:fs"
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync } from "node:fs"
 import { tmpdir } from "node:os"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
@@ -185,11 +185,50 @@ test("seis.md no delega a un sub-agente ni pide reportar al usuario (ahora se de
   assert.doesNotMatch(content, /reporte de síntesis al usuario/i)
 })
 
-test("auditor-arquitectura.md cubre el mismo alcance que seis.md (blueprint + auditoría Well-Architected)", () => {
+test("auditor-arquitectura.md cubre el mismo alcance que seis.md (visión + ADRs + blueprint + Mermaid, sin auditoria_well_architected)", () => {
   const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
   const agentContent = readFileSync(path.join(repoRoot, "agents", "auditor-arquitectura.md"), "utf-8")
-  assert.match(agentContent, /blueprint_arquitectura\.md/)
-  assert.match(agentContent, /auditoria_well_architected\.md/)
+  const seisContent = readFileSync(
+    path.join(repoRoot, "workflows", "definir-arquitectura-solucion", "fases", "seis.md"),
+    "utf-8"
+  )
+  for (const content of [agentContent, seisContent]) {
+    assert.match(content, /vision_producto\.md/)
+    assert.match(content, /blueprint_arquitectura\.md/)
+    assert.match(content, /mermaid/i)
+    assert.doesNotMatch(content, /auditoria_well_architected/)
+  }
+})
+
+test("agents/auditor-arquitectura.md ya no referencia auditoria_well_architected.md (plantilla eliminada)", () => {
+  const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
+  assert.equal(
+    existsSync(path.join(repoRoot, "workflows", "definir-arquitectura-solucion", "plantillas", "auditoria_well_architected.md")),
+    false,
+    "la plantilla auditoria_well_architected.md debería estar eliminada"
+  )
+})
+
+test("fases 1-4 referencian la ruta correcta de la plantilla de ADR (./plantillas/, no ./artifacts/)", () => {
+  const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
+  for (const file of ["uno.md", "dos.md", "tres.md", "cuatro.md"]) {
+    const content = readFileSync(
+      path.join(repoRoot, "workflows", "definir-arquitectura-solucion", "fases", file),
+      "utf-8"
+    )
+    assert.match(content, /\.\/plantillas\/adr_template\.md/, `${file} debe referenciar ./plantillas/adr_template.md`)
+    assert.doesNotMatch(content, /\.\/artifacts\/adr_template\.md/, `${file} no debe referenciar ./artifacts/adr_template.md`)
+  }
+})
+
+test("adr_template.md tiene Estado como placeholder, no hardcodeado a Aprobado", () => {
+  const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
+  const content = readFileSync(
+    path.join(repoRoot, "workflows", "definir-arquitectura-solucion", "plantillas", "adr_template.md"),
+    "utf-8"
+  )
+  assert.doesNotMatch(content, /\*\*Estado:\*\*\s*Aprobado\s*$/m)
+  assert.match(content, /\*\*Estado:\*\*\s*\[/)
 })
 
 test("fases 1-5 de definir-arquitectura-solucion usan el agente disenador-arquitectura-solucion", () => {
