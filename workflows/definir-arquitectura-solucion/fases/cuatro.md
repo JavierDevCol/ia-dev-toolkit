@@ -1,30 +1,22 @@
 # FASE 4: Estrategia Git, CI/CD y Protocolos de Comunicación
 
-**Objetivo:** Definir el modelo de branching en Git, automatización de integración/despliegue continuo e interacción entre componentes.
+**Objetivo:** Definir el modelo de branching en Git, automatización de CI/CD e interacción entre componentes — coherente con ADR-003.
 
----
+## Pasos de Análisis
 
-## Pasos de Ejecución
+1. **Estrategia de Branching:** Propón la convención de Git (ej. *Trunk-Based Development*, *GitHub Flow*).
+2. **Pipeline de CI/CD:** Define los stages mínimos obligatorios (Lint, Unit Tests, Build, Security Scan, Deploy).
+3. **Protocolos de Integración:** Define el estilo de comunicación entre servicios (ej. *REST/JSON*, *gRPC*, *Event-Driven con RabbitMQ/Kafka*).
 
-1. **Estrategia de Branching:** Proponer la convención de Git (ej. *Trunk-Based Development*, *GitHub Flow*).
-2. **Pipeline de CI/CD:** Definir los stages mínimos obligatorios (Lint, Unit Tests, Build, Security Scan, Deploy).
-3. **Protocolos de Integración:** Definir el estilo de comunicación entre servicios (ej. *REST/JSON*, *gRPC*, *Event-Driven con RabbitMQ/Kafka*).
-4. **Punto de Interacción (Pausa Obligatoria):**
-   - Mostrar el plan de DevOps y comunicación al usuario y recibir el OK final.
-5. **Creación del ADR:**
-   - Tras aprobación, instanciar `./plantillas/adr_template.md` y guardar en `./artifacts/ADR/ADR-004-devops-y-comunicacion.md` con estado `Aprobado`.
+## Criterios a Evaluar por Opción
 
----
+- Tamaño y madurez del equipo (afecta qué tan compleja puede ser la estrategia de branching).
+- Frecuencia de despliegue deseada y estrategia de rollback.
+- Observabilidad: qué logs/métricas/tracing exige el pipeline propuesto.
+- Resiliencia: implicancias de comunicación síncrona vs asíncrona entre servicios.
 
-## Entregable
+Indica cuál opción recomendás y por qué, con base en estos criterios.
 
-Documento formal `./artifacts/ADR/ADR-004-devops-y-comunicacion.md` generado tras recibir el visto bueno del usuario.
+## Entregable esperado
 
-Leer también `CONFIG_USER.yaml` (ruta en `archivos.config_user`) y tomar `usuario.nombre` → **`{{usuario.nombre}}`**, necesario para firmar el ADR. Si está vacío o el archivo no existe, omitir el sufijo de la firma; no inventar un nombre.
-
-Al final del ADR generado, agregar:
-
-> **Aprobado por:** Arquitecto - {{usuario.nombre}}
-> **Fecha:** {{fecha}}
-
-Sin `{{usuario.nombre}}` configurado, la línea queda `> **Aprobado por:** Arquitecto`.
+`ADR-004-devops-y-comunicacion.md` (lo escribe el orquestador tras tu propuesta y la aprobación del usuario).

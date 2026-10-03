@@ -1,30 +1,23 @@
 # FASE 2: Patrones de Software, Estructura de Carpetas y Persistencia
 
-**Objetivo:** Proponer el patrón de diseño de código, la estructura de directorios y el motor de base de datos.
+**Objetivo:** Proponer el patrón de diseño de código, la estructura de directorios y el motor de base de datos — coherente con el estilo aprobado en ADR-001.
 
----
+## Pasos de Análisis
 
-## Pasos de Ejecución
+1. **Formulación de Patrones de Código:** Propón la arquitectura de software recomendada (ej. *Clean Architecture*, *Hexagonal*).
+2. **Diseño del Árbol de Carpetas:** Estructura el árbol de directorios ajustado al stack tecnológico elegido.
+3. **Estrategia de Persistencia:** Propón el motor de datos (ej. *PostgreSQL*, *MongoDB*, *DynamoDB*) y estrategia de caching si aplica.
 
-1. **Formulación de Patrones de Código:** Proponer la arquitectura de software recomendada (ej. *Clean Architecture*, *Hexagonal*) indicando la ventaja para el mantenimiento del proyecto.
-2. **Diseño del Árbol de Carpetas:** Estructurar el árbol de directorios físico ajustado al stack tecnológico elegido.
-3. **Estrategia de Persistencia:** Proponer el motor de datos (ej. *PostgreSQL*, *MongoDB*, *DynamoDB*) y estrategia de caching si aplica.
-4. **Punto de Interacción (Pausa Obligatoria):**
-   - Exponer las propuestas al usuario justificando el porqué de las elecciones y esperar confirmación.
-5. **Creación del ADR:**
-   - Tras aprobación, instanciar `./plantillas/adr_template.md` y guardar en `./artifacts/ADR/ADR-002-patron-y-persistencia.md` con estado `Aprobado`.
+## Criterios a Evaluar por Opción
 
----
+- Testabilidad: qué tan fácil es testear unidades sin levantar infraestructura real.
+- Patrón de acceso a datos esperado (lecturas vs escrituras, volumen, consistencia vs disponibilidad si aplica).
+- Costo de migraciones y evolución del esquema a futuro.
+- Vendor lock-in del motor de datos elegido.
+- Curva de aprendizaje del patrón para el equipo.
 
-## Entregable
+Indica cuál opción recomendás y por qué, con base en estos criterios.
 
-Documento formal `./artifacts/ADR/ADR-002-patron-y-persistencia.md` generado tras recibir el visto bueno del usuario.
+## Entregable esperado
 
-Leer también `CONFIG_USER.yaml` (ruta en `archivos.config_user`) y tomar `usuario.nombre` → **`{{usuario.nombre}}`**, necesario para firmar el ADR. Si está vacío o el archivo no existe, omitir el sufijo de la firma; no inventar un nombre.
-
-Al final del ADR generado, agregar:
-
-> **Aprobado por:** Arquitecto - {{usuario.nombre}}
-> **Fecha:** {{fecha}}
-
-Sin `{{usuario.nombre}}` configurado, la línea queda `> **Aprobado por:** Arquitecto`.
+`ADR-002-patron-y-persistencia.md` (lo escribe el orquestador tras tu propuesta y la aprobación del usuario).

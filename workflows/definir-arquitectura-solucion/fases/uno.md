@@ -2,37 +2,22 @@
 
 **Objetivo:** Extraer de `./artifacts/vision_producto.md` los NFRs principales y proponer el estilo general del sistema.
 
----
+## Pasos de Análisis
 
-## 🔄 Regla de Sincronización Incremental (Delta Sync)
-Si `./artifacts/blueprint_arquitectura.md` o archivos en `./artifacts/ADR/` ya existen:
-- No reescribir decisiones vigentes.
-- Evaluar el impacto del nuevo requerimiento y proponer un ADR de modificación o adición.
+1. **Análisis de Visión:** Lee `./artifacts/vision_producto.md` y evalúa la volumetría, picos de carga y disponibilidad deseada.
+2. **Formulación de Alternativas:** Presenta al menos 2 estilos arquitectónicos viables (ej. *Monolito Modular* vs *Microservicios/Serverless*).
 
----
+## Criterios a Evaluar por Opción
 
-## Pasos de Ejecución
+- Escalabilidad horizontal vs vertical, y en qué punto cada una se vuelve limitante.
+- Complejidad operativa esperada (¿el equipo puede operar esto con su tamaño/madurez actual?).
+- Costo de infraestructura en MVP vs en escala proyectada.
+- Time-to-market: impacto en velocidad de desarrollo inicial.
+- Tolerancia a fallos requerida según disponibilidad deseada en la visión.
+- Riesgos y supuestos que tu recomendación da por sentados.
 
-1. **Análisis de Visión:** Leer `./artifacts/vision_producto.md` y evaluar la volumetría, picos de carga y disponibilidad deseada.
-2. **Formulación de Alternativas:**
-   - Presentar al menos 2 estilos arquitectónicos viables (ej. *Monolito Modular* vs *Microservicios/Serverless*).
-   - Detallar pros, contras, trade-offs y costo operativo estimado para cada opción.
-3. **Punto de Interacción (Pausa Obligatoria):**
-   - Presentar la recomendación técnica al usuario y esperar su aprobación o solicitud de ajuste.
-4. **Creación del ADR:**
-   - Una vez recibida la aprobación, instanciar la plantilla `./plantillas/adr_template.md` y guardar el archivo en `./artifacts/ADR/ADR-001-estilo-arquitectonico.md` con estado `Aprobado`.
+Indica cuál opción recomendás y por qué, con base en estos criterios — no en preferencia genérica.
 
----
+## Entregable esperado
 
-## Entregable
-
-Documento formal `./artifacts/ADR/ADR-001-estilo-arquitectonico.md` generado tras recibir el visto bueno del usuario.
-
-Leer también `CONFIG_USER.yaml` (ruta en `archivos.config_user`) y tomar `usuario.nombre` → **`{{usuario.nombre}}`**, necesario para firmar el ADR. Si está vacío o el archivo no existe, omitir el sufijo de la firma; no inventar un nombre.
-
-Al final del ADR generado, agregar:
-
-> **Aprobado por:** Arquitecto - {{usuario.nombre}}
-> **Fecha:** {{fecha}}
-
-Sin `{{usuario.nombre}}` configurado, la línea queda `> **Aprobado por:** Arquitecto`.
+`ADR-001-estilo-arquitectonico.md` (lo escribe el orquestador tras tu propuesta y la aprobación del usuario).

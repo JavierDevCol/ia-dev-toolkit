@@ -191,3 +191,40 @@ test("auditor-arquitectura.md cubre el mismo alcance que seis.md (blueprint + au
   assert.match(agentContent, /blueprint_arquitectura\.md/)
   assert.match(agentContent, /auditoria_well_architected\.md/)
 })
+
+test("fases 1-5 de definir-arquitectura-solucion usan el agente disenador-arquitectura-solucion", () => {
+  const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
+  const phases = getPhases(path.join(repoRoot, "workflows"), "definir-arquitectura-solucion")
+  const disenoPhases = ["uno.md", "dos.md", "tres.md", "cuatro.md", "cinco.md"]
+  for (const file of disenoPhases) {
+    const phase = phases.find(p => p.file === file)
+    assert.ok(phase, `fase ${file} debe existir en el manifiesto`)
+    assert.equal(phase!.agent, "disenador-arquitectura-solucion", `fase ${file} debe usar disenador-arquitectura-solucion`)
+    assert.equal(phase!.gate, "approval", `fase ${file} debe mantener gate: approval`)
+  }
+  // Fase 6 sigue con su propio agente (sin cambios en esta ronda)
+  const fase6 = phases.find(p => p.file === "seis.md")
+  assert.equal(fase6!.agent, "auditor-arquitectura")
+  // Fase 7 sigue sin agent: (Caso 1, colaborativo interactivo)
+  const fase7 = phases.find(p => p.file === "siete.md")
+  assert.equal(fase7!.agent, undefined)
+})
+
+test("agents/disenador-arquitectura-solucion.md existe con mode: subagent, hidden: true y sin permiso de escritura", () => {
+  const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
+  const content = readFileSync(path.join(repoRoot, "agents", "disenador-arquitectura-solucion.md"), "utf-8")
+  assert.match(content, /mode:\s*subagent/)
+  assert.match(content, /hidden:\s*true/)
+  assert.match(content, /write:\s*false/)
+  assert.match(content, /edit:\s*false/)
+})
+
+test("siete.md no finge delegar a un sub-agente (Caso 1, el orquestador ejecuta directo)", () => {
+  const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
+  const content = readFileSync(
+    path.join(repoRoot, "workflows", "definir-arquitectura-solucion", "fases", "siete.md"),
+    "utf-8"
+  )
+  assert.doesNotMatch(content, /delegar a.*sub-agente/i)
+  assert.doesNotMatch(content, /prompt del sub-agente/i)
+})

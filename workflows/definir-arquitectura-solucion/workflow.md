@@ -6,22 +6,27 @@ phases:
   - file: uno.md
     title: Análisis NFRs y Estilo Arquitectónico
     gate: approval
+    agent: disenador-arquitectura-solucion
     output: artifacts/ADR/ADR-001-estilo-arquitectonico.md
   - file: dos.md
     title: Patrones de Software, Carpetas y Persistencia
     gate: approval
+    agent: disenador-arquitectura-solucion
     output: artifacts/ADR/ADR-002-patron-y-persistencia.md
   - file: tres.md
     title: Infraestructura Cloud, Redes y Seguridad
     gate: approval
+    agent: disenador-arquitectura-solucion
     output: artifacts/ADR/ADR-003-infraestructura-y-seguridad.md
   - file: cuatro.md
     title: Estrategia Git, CI/CD y Protocolos de Comunicación
     gate: approval
+    agent: disenador-arquitectura-solucion
     output: artifacts/ADR/ADR-004-devops-y-comunicacion.md
   - file: cinco.md
     title: Consolidación de Gobierno y Entrega de Blueprint
     gate: approval
+    agent: disenador-arquitectura-solucion
     output: artifacts/blueprint_arquitectura.md
   - file: seis.md
     title: Validación Cruzada por Sub-Agente Auditor
@@ -36,6 +41,17 @@ phases:
 
 # Workflow: Definir / Sincronizar Arquitectura de Solución
 
+
+## Pipeline
+
+```
+[Visión] ─► 1. NFRs & Estilo ─► 2. Patrones & BD ─► 3. Cloud & Seguridad
+         ─► 4. DevOps & Comms ─► 5. Consolidación (Blueprint) ─► 6. Auditoría (auto)
+         ─► 7. ¿Consolidar propuesta? (SI: scaffold real / NO: queda para Sprint 0)
+```
+
+Las fases 1-5 despachan a `disenador-arquitectura-solucion` (sub-agente aislado, propone — no escribe) y el orquestador finaliza cada **ADR** y el **Blueprint**/**Auditoría Well-Architected** tras la aprobación del usuario; la fase 6 (automática) despacha a `auditor-arquitectura` para la **validación cruzada** de trazabilidad; la fase 7 decide con el usuario, en la misma sesión del orquestador, si el scaffold del repositorio se materializa ya o si queda documentado como Enablers de máxima prioridad para el Sprint 0.
+
 ## Rol (aplica a TODAS las fases)
 
 Actúas como **arquitecto de soluciones colaborativo**. En cada fase:
@@ -47,18 +63,23 @@ Actúas como **arquitecto de soluciones colaborativo**. En cada fase:
 ## Antes de cada fase
 
 - Recapitula brevemente las **decisiones aprobadas hasta ahora** (ADRs previos).
-- Carga el **contexto necesario**: visión de producto, NFRs y reglas arquitectónicas del proyecto.
-- Presenta la propuesta de la fase y **espera el OK** antes de generar su artefacto.
+- Las fases 1-5 despachan a `disenador-arquitectura-solucion` (sub-agente
+  aislado, sin permiso de escritura) — el resultado de `execute` es su
+  propuesta, no un artefacto final.
 
-## Pipeline
+## Al recibir la propuesta de una fase (fases 1-5)
 
-```
-[Visión] ─► 1. NFRs & Estilo ─► 2. Patrones & BD ─► 3. Cloud & Seguridad
-         ─► 4. DevOps & Comms ─► 5. Consolidación (Blueprint) ─► 6. Auditoría (auto)
-         ─► 7. ¿Consolidar propuesta? (SI: scaffold real / NO: queda para Sprint 0)
-```
+- Presenta la propuesta **tal cual** al usuario y negocia ajustes si los
+  pide — el sub-agente ya no participa en esta parte.
+- Al aprobarse, instancia la plantilla correspondiente (`./plantillas/adr_template.md`
+  para fases 1-4; `./plantillas/blueprint_arquitectura.md` y
+  `./plantillas/auditoria_well_architected.md` para fase 5) con el
+  contenido acordado, y guárdala en la ruta de `output:` del manifiesto.
+- Leé `CONFIG_USER.yaml` (ruta en `archivos.config_user`) y tomá
+  `usuario.nombre` → firmá con `> **Aprobado por:** Arquitecto -
+  {{usuario.nombre}}` y `> **Fecha:** {{fecha}}`. Si está vacío o no
+  existe, omití la firma; no inventes un nombre.
 
-Cada fase 1-4 produce su **ADR** tras aprobación; la fase 5 consolida el **Blueprint** y la **Auditoría Well-Architected**; la fase 6 (automática) hace la **validación cruzada** de trazabilidad; la fase 7 decide con el usuario si el scaffold del repositorio se materializa ya (sub-agente consolidador) o si queda documentado como Enablers de máxima prioridad para el Sprint 0.
 
 ## Al terminar
 
