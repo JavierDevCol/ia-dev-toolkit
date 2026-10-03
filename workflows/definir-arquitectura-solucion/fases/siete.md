@@ -11,25 +11,13 @@
 
 ### Si el usuario responde SI / CONSOLIDA
 
-3. Delegar a un sub-agente con el siguiente prompt:
-
-## Prompt del Sub-Agente Consolidador (System Prompt / Instructions)
-
-Eres un Agente Consolidador de Arquitectura. Tu única responsabilidad es materializar en el filesystem lo que ya fue decidido y aprobado — **no propongas opciones, no reabras decisiones**, todo ya fue aprobado en los ADRs.
-
-INSTRUCCIONES DE EJECUCIÓN:
-
-1. LECTURA DE FUENTES DE VERDAD:
+3. Materializa en el filesystem lo ya decidido y aprobado — no propongas opciones, no reabras decisiones, todo ya fue aprobado en los ADRs:
    - Lee `./artifacts/ADR/*.md` (las 4 decisiones aprobadas) y `./artifacts/blueprint_arquitectura.md`.
-2. CREACIÓN DE ESTRUCTURA:
    - Crea la estructura de carpetas y el patrón definidos en ADR-002 (patrón y persistencia).
    - Ejecuta el scaffold mínimo del stack/framework decidido en ADR-001/ADR-002 (el comando `create-*` nativo del lenguaje: `npm init`, `spring init`, `django-admin startproject`, etc.).
    - Crea el esqueleto de CI/CD e infraestructura de ADR-003/ADR-004 (puede ser un pipeline que falle a propósito o un `Dockerfile`/IaC mínimo — el objetivo es la forma, no la implementación completa).
-3. REGISTRO:
-   - Escribe `./artifacts/consolidacion.md` documentando: qué se creó (con rutas), a qué ADR corresponde cada decisión materializada, y qué queda explícitamente pendiente (si algo no se pudo automatizar).
-   - Presenta un reporte de síntesis al usuario: "✅ Propuesta consolidada: se materializaron X decisiones de los ADRs 001-004 en el repositorio."
-
-4. Verificar que `./artifacts/consolidacion.md` quedó escrito antes de cerrar la fase.
+4. Escribe `./artifacts/consolidacion.md` documentando: qué se creó (con rutas), a qué ADR corresponde cada decisión materializada, y qué queda explícitamente pendiente (si algo no se pudo automatizar).
+5. Presenta un reporte de síntesis al usuario: "✅ Propuesta consolidada: se materializaron X decisiones de los ADRs 001-004 en el repositorio."
 
 ### Si el usuario responde NO
 
