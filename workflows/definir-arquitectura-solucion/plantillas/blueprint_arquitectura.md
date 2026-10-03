@@ -7,17 +7,27 @@ type: architecture_blueprint
 
 **Versión:** 1.0  
 **Fecha:** [YYYY-MM-DD]  
-**Arquitecto Responsable:** Onad  
+**Arquitecto Responsable:** [Nombre del Arquitecto]  
 
 ---
 
 ## 1. Resumen Ejecutivo y Estrategia de Solución
-- **Visión General:** [Resumen de la solución técnica diseñada]
-- **Estilo Arquitectónico:** [Monolito Modular / Microservicios / Serverless] *(Ref: ADR-001)*
+
+* **Visión General:** [Resumen de la solución técnica diseñada]
+* **Estilo Arquitectónico:** [Monolito Modular / Microservicios / Serverless] *(Ref: ADR-001)*
 
 ---
 
-## 2. Atributos de Calidad y Trade-Offs
+## 2. Diagramas de Arquitectura (Modelo C4)
+
+* **Diagrama de Contexto:** 
+  *(Insertar aquí imagen o enlace al diagrama que muestra el sistema y sus interacciones con usuarios y sistemas externos).*
+* **Diagrama de Contenedores:** 
+  *(Insertar aquí imagen o enlace al diagrama que detalla las aplicaciones, APIs y bases de datos que componen el sistema).*
+
+---
+
+## 3. Atributos de Calidad y Trade-Offs
 
 | Atributo | Decisión de Arquitectura | Trade-Off / Compromiso |
 | :--- | :--- | :--- |
@@ -27,46 +37,58 @@ type: architecture_blueprint
 
 ---
 
-## 3. Patrones de Software y Estructura de Proyecto *(Ref: ADR-002)*
+## 4. Patrones de Software y Estructura de Proyecto *(Ref: ADR-002)*
 
-### Patrón Seleccionado
-[Descripción de Clean Architecture, Hexagonal, etc.]
+### 4.1 Patrón Seleccionado
+[Descripción de Clean Architecture, Hexagonal, Event-Driven, etc.]
 
-### Estructura de Directorios Recomendada
+### 4.2 Estructura de Directorios Recomendada
 ```plaintext
 src/
-├── domain/       # Entidades y reglas de negocio
-├── application/  # Casos de uso y puertos
+├── domain/         # Entidades y reglas de negocio
+├── application/    # Casos de uso y puertos
 ├── infrastructure/ # Adaptadores, BD, APIs externas
-└── config/       # Variables de entorno y DI
+└── config/         # Variables de entorno e inyección de dependencias
 ```
----
-
-## 4. Modelo de Datos y Persistencia (Ref: ADR-002)
-- Motor Principal: [PostgreSQL / MongoDB / DynamoDB]
-
-- Estrategia de Caching: [Redis / Memcached]
-
-- Estrategia de Migraciones: [Flyway / Liquibase / Prisma Migrations]
 
 ---
 
-## 5. Infraestructura Cloud, Redes y Seguridad (Ref: ADR-003)
+## 5. Modelo de Datos y Persistencia *(Ref: ADR-002)*
 
-### Componentes Cloud
-
-- API Gateway: Entrypoint unificado y Rate Limiting.
-
-- Compute: [Instancias, Contenedores o Funciones]
-
-- Seguridad: Gestor de secretos, VPC con Subnets públicas y privadas.
+* **Motor Principal:** [PostgreSQL / MongoDB / DynamoDB]
+* **Estrategia de Caching:** [Redis / Memcached]
+* **Estrategia de Migraciones:** [Flyway / Liquibase / Prisma Migrations]
 
 ---
 
-## 6. DevOps, CI/CD y Comunicación (Ref: ADR-004)
+## 6. Infraestructura Cloud, Redes y Seguridad *(Ref: ADR-003)*
 
-- Estrategia Git: [Trunk-Based / GitFlow]
+### 6.1 Componentes Cloud
+* **API Gateway:** Entrypoint unificado y Rate Limiting.
+* **Compute:** [Instancias, Contenedores o Funciones Serverless].
+* **Seguridad y Redes:** Gestor de secretos, VPC con Subnets públicas y privadas, WAF.
 
-- Protocolos de Comunicación: [REST / gRPC / Event-Driven]
+---
 
-- Pipeline CI/CD: [Etapas de ejecución para integración y despliegue]
+## 7. DevOps, CI/CD, Comunicación y Observabilidad *(Ref: ADR-004)*
+
+### 7.1 Entrega Continua y Comunicación
+* **Estrategia Git:** [Trunk-Based / GitFlow]
+* **Protocolos de Comunicación:** [REST / gRPC / Event-Driven / GraphQL]
+* **Pipeline CI/CD:** [Etapas de ejecución para integración (Tests, SonarQube) y despliegue (ArgoCD, Terraform)]
+
+### 7.2 Observabilidad
+* **Logging y Trazabilidad Centralizada:** [ELK Stack / Datadog / OpenTelemetry]
+* **Métricas y Alertas:** [Prometheus + Grafana / CloudWatch]
+
+---
+
+## 8. Anexos y Glosario de Referencias (ADRs)
+
+Enlaces directos a los registros de decisiones (Architecture Decision Records) para consultar el contexto y justificación profunda de cada elección:
+
+* **[ADR-001]:** [Enlace al documento sobre la elección del Estilo Arquitectónico]
+* **[ADR-002]:** [Enlace al documento sobre Patrones de Software y Base de Datos]
+* **[ADR-003]:** [Enlace al documento sobre Infraestructura Cloud y Seguridad]
+* **[ADR-004]:** [Enlace al documento sobre CI/CD y Observabilidad]
+* **Repositorios de Código (PoC):** [Enlaces a repositorios relevantes]
