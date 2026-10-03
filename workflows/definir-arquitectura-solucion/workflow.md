@@ -50,35 +50,36 @@ phases:
          ─► 7. ¿Consolidar propuesta? (SI: scaffold real / NO: queda para Sprint 0)
 ```
 
-## Rol (aplica a TODAS las fases)
+## Rol del orquestador
 
-Actúas como **arquitecto de soluciones colaborativo**. En cada fase:
-- Propón **2-3 opciones técnicas con sus trade-offs** antes de decidir; no impongas una única solución.
-- **NUNCA** formalices un ADR sin la **aprobación explícita** del usuario (respeta los `gate: approval`).
-- Mantén **coherencia con los ADRs ya aprobados**; si una propuesta los contradice, decláralo y propón un ADR nuevo.
-- Comunícate en el idioma configurado en `CONFIG_USER`.
-
-## Antes de cada fase
-
-- Recapitula brevemente las **decisiones aprobadas hasta ahora** (ADRs previos).
-- Las fases 1-5 despachan a `disenador-arquitectura-solucion` (sub-agente
-  aislado, sin permiso de escritura) — el resultado de `execute` es su
-  propuesta, no un artefacto final.
+Comunícate en el idioma configurado en `CONFIG_USER`. El resultado de
+`execute` en fases 1-5 es una propuesta a revisar, no un artefacto final:
+materializala como borrador para que el usuario la revise (incluyendo
+diagramas, si los hay), y marcala como aprobada (Estado + firma) solo tras
+su confirmación explícita — nunca antes.
 
 ## Al recibir la propuesta de una fase (fases 1-5)
 
-- Presenta la propuesta **tal cual** al usuario y negocia ajustes si los
-  pide.
-- Al aprobarse, instancia la plantilla correspondiente (`./plantillas/adr_template.md`
-  para fases 1-4; `./plantillas/blueprint_arquitectura.md` para fase 5) con
-  el contenido acordado, y guárdala en la ruta de `output:` del manifiesto.
-- Para fases 1-4, completá el campo `**Estado:**` del ADR con `Aprobado`
-  (el placeholder de la plantilla no se rellena solo).
-- Leé `CONFIG_USER.yaml` (ruta en `archivos.config_user`) y tomá
-  `usuario.nombre` → firmá con `> **Aprobado por:** Arquitecto -
-  {{usuario.nombre}}` y `> **Fecha:** {{fecha}}`. Si está vacío o no
-  existe, omití la firma; no inventes un nombre.
+- Al recibir la propuesta del sub-agente, instanciá la plantilla
+  correspondiente (`./plantillas/adr_template.md` para fases 1-4;
+  `./plantillas/blueprint_arquitectura.md` para fase 5) con el contenido
+  acordado, con `**Estado:** Pendiente`, y escribila en la ruta de
+  `output:` del manifiesto — sin firma todavía.
+- Avisale al usuario que el borrador quedó escrito en esa ruta y pedile
+  que lo revise (puede ver diagramas Mermaid si los hay): ¿aprueba tal
+  cual, o quiere ajustes?
+- Si pide ajustes, editá el archivo vos mismo con los cambios acordados —
+  no volvés a despachar al sub-agente.
+- Al aprobarse: actualizá `**Estado:** Aprobado`, agregá la firma (leé
+  `CONFIG_USER.yaml`, tomá `usuario.nombre` → `> **Aprobado por:**
+  Arquitecto - {{usuario.nombre}}` y `> **Fecha:** {{fecha}}`; si está
+  vacío o no existe, omití la firma, no inventes un nombre), y recién ahí
+  llamá a `workflow-sac action=approve` para esa fase.
 
+## Fase 7 (sin sub-agente)
+
+Es la única fase que ejecutás vos directamente, sin despacho — recapitula
+brevemente las decisiones aprobadas y seguí `fases/siete.md`.
 
 ## Al terminar
 

@@ -267,3 +267,41 @@ test("siete.md no finge delegar a un sub-agente (Caso 1, el orquestador ejecuta 
   assert.doesNotMatch(content, /delegar a.*sub-agente/i)
   assert.doesNotMatch(content, /prompt del sub-agente/i)
 })
+
+test("workflow.md ya no duplica la metodología del sub-agente en el rol del orquestador", () => {
+  const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
+  const content = readFileSync(
+    path.join(repoRoot, "workflows", "definir-arquitectura-solucion", "workflow.md"),
+    "utf-8"
+  )
+  assert.doesNotMatch(content, /Propón \*\*2-3 opciones técnicas/)
+  assert.doesNotMatch(content, /Mantén \*\*coherencia con los ADRs ya aprobados\*\*/)
+  assert.match(content, /CONFIG_USER/)
+})
+
+test("workflow.md instruye materializar el borrador (Estado: Pendiente) antes de aprobar", () => {
+  const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
+  const content = readFileSync(
+    path.join(repoRoot, "workflows", "definir-arquitectura-solucion", "workflow.md"),
+    "utf-8"
+  )
+  assert.match(content, /Pendiente/)
+  assert.match(content, /borrador/i)
+})
+
+test("adr_template.md incluye Pendiente como estado posible", () => {
+  const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
+  const content = readFileSync(
+    path.join(repoRoot, "workflows", "definir-arquitectura-solucion", "plantillas", "adr_template.md"),
+    "utf-8"
+  )
+  assert.match(content, /\*\*Estado:\*\*\s*\[Pendiente/)
+})
+
+test("disenador-arquitectura-solucion.md y auditor-arquitectura.md instruyen comunicarse en el idioma de CONFIG_USER", () => {
+  const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
+  for (const file of ["disenador-arquitectura-solucion.md", "auditor-arquitectura.md"]) {
+    const content = readFileSync(path.join(repoRoot, "agents", file), "utf-8")
+    assert.match(content, /CONFIG_USER/, `${file} debe mencionar CONFIG_USER para el idioma`)
+  }
+})

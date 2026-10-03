@@ -5,7 +5,7 @@ type: adr_record
 
 # ADR-{{id}}: [Título de la decisión]
 
-- **Estado:** [Aprobado | Rechazado | Obsoleto]
+- **Estado:** [Pendiente | Aprobado | Rechazado | Obsoleto]
 - **Fecha:** [YYYY-MM-DD]
 - **Decisor:** User & Onad (Arquitecto de Soluciones)
 
