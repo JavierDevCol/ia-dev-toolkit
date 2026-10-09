@@ -4,6 +4,13 @@
 
 ---
 
+## 🔄 Regla de Sincronización Incremental (Delta Sync)
+Si `./artifacts/consolidacion.md` ya existe:
+- No reconsolidar desde cero ni repetir la pregunta SI/NO original.
+- Evaluar únicamente el impacto incremental: ¿el nuevo ADR (de modificación/adición) requiere materializar algo adicional en el scaffold ya existente? Si sí, delegar al sub-agente consolidador solo para esa pieza incremental, documentándola como entrada nueva en `consolidacion.md` (no reescribir el historial previo).
+
+---
+
 ## Pasos de Ejecución
 
 1. **Recapitular brevemente** los ADRs aprobados (001–004) y el `blueprint_arquitectura.md`.
@@ -21,10 +28,13 @@ INSTRUCCIONES DE EJECUCIÓN:
 
 1. LECTURA DE FUENTES DE VERDAD:
    - Lee `./artifacts/ADR/*.md` (las 4 decisiones aprobadas) y `./artifacts/blueprint_arquitectura.md`.
-2. CREACIÓN DE ESTRUCTURA:
+2. CREACIÓN DE ESTRUCTURA (solo lo materializable en código; ver nota de alcance):
    - Crea la estructura de carpetas y el patrón definidos en ADR-002 (patrón y persistencia).
    - Ejecuta el scaffold mínimo del stack/framework decidido en ADR-001/ADR-002 (el comando `create-*` nativo del lenguaje: `npm init`, `spring init`, `django-admin startproject`, etc.).
-   - Crea el esqueleto de CI/CD e infraestructura de ADR-003/ADR-004 (puede ser un pipeline que falle a propósito o un `Dockerfile`/IaC mínimo — el objetivo es la forma, no la implementación completa).
+   - Crea el esqueleto de IaC usando **la herramienta específica decidida en ADR-003** (ej. un `main.tf` mínimo si es Terraform, un stack mínimo si es CDK/Pulumi/CloudFormation) — no un placeholder genérico desconectado de la decisión.
+   - Crea el esqueleto del pipeline de CI/CD usando **los stages, gates y la estrategia de despliegue decididos en ADR-004** (ej. un workflow de GitHub Actions con los stages nombrados y sus gates como comentarios/placeholders, y el nombre de la estrategia de despliegue — Blue-Green/Canary/Rolling — documentado aunque la implementación completa no sea el objetivo de esta fase).
+
+   > **Nota de alcance:** el diagrama de red, el sizing, el threat model (STRIDE), la resiliencia y la observabilidad de ADR-003 son **contexto de diseño, no artefactos a materializar** en este scaffold — no intentes crear archivos para ellos; quedan documentados únicamente en el ADR y el Blueprint.
 3. REGISTRO:
    - Escribe `./artifacts/consolidacion.md` documentando: qué se creó (con rutas), a qué ADR corresponde cada decisión materializada, y qué queda explícitamente pendiente (si algo no se pudo automatizar).
    - Presenta un reporte de síntesis al usuario: "✅ Propuesta consolidada: se materializaron X decisiones de los ADRs 001-004 en el repositorio."
