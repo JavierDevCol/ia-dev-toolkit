@@ -19,7 +19,7 @@ Si `./artifacts/blueprint_arquitectura.md` o archivos en `./artifacts/ADR/` ya e
    - **Elegir los criterios de la matriz a partir de los targets NFR del paso 1**, no de una lista genérica fija. Mínimo: costo operativo, escalabilidad, time-to-market, complejidad operativa, más cualquier NFR crítico del paso 1 (ej. si el target de disponibilidad es 99.99%, "resiliencia/tolerancia a fallos" entra como criterio).
    - **Asignar el peso (1-5) de cada criterio según prioridad de negocio.** Si `vision_producto.md` no indica qué NFR pesa más, preguntar al usuario antes de puntuar — no asumir una prioridad.
    - **Puntuar cada opción (1-5) por criterio con una justificación de una línea anclada a un dato real**: el target NFR del paso 1, un benchmark conocido de la tecnología, o un `Supuesto (no confirmado)`. Un score sin justificación no es válido.
-   - **Regla de decisión explícita:** la opción con mayor Total ponderado (`Σ score × peso`) es la recomendación por defecto. Si recomiendas la otra opción por una razón cualitativa que la matriz no captura (ej. restricción del equipo, deuda técnica existente), decláralo como una **excepción justificada** — nunca la ocultes detrás del número.
+   - Aplicar la **regla de decisión estándar** del Rol del workflow (mayor Total ponderado gana, salvo excepción justificada).
    - Marcar explícitamente cualquier dato de volumetría/carga no confirmado en `vision_producto.md` como `Supuesto (no confirmado)` y preguntarlo al usuario.
 3. **Punto de Interacción (Pausa Obligatoria):**
    - Presentar la recomendación técnica al usuario y esperar su aprobación o solicitud de ajuste.

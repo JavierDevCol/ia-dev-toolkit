@@ -18,7 +18,7 @@ type: adr_record
 
 ## Matriz de Decisión
 
-> Método: cada celda = `score (1-5) × peso`. El "Total ponderado" es la suma de esas celdas por columna, no la suma simple de scores. Mayor total = opción recomendada por defecto (ver regla de decisión y excepciones en la fase correspondiente).
+> Método: cada celda = `score (1-5) × peso`. El "Total ponderado" es la suma de esas celdas por columna, no la suma simple de scores. Mayor total = opción recomendada por defecto (ver "Regla de decisión estándar" en el Rol del workflow).
 
 | Criterio | Peso | Opción A: [nombre] | Opción B: [nombre] |
 | :--- | :---: | :--- | :--- |

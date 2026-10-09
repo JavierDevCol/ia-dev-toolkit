@@ -23,7 +23,7 @@ Si `./artifacts/ADR/ADR-004-devops-y-comunicacion.md` ya existe:
    - Proponer **al menos 2 estilos de comunicación viables** (ej. *REST/JSON* vs *Event-Driven con Kafka*), comparados en la Matriz de Decisión (acoplamiento, latencia, complejidad operativa) **anclada a cualquier target de latencia ya fijado en ADR-001**, si existe.
    - Definir el **contrato formal** de la integración elegida: especificación (OpenAPI para REST / AsyncAPI para eventos) y convención de **versionado semántico** — sin esto, "REST" o "eventos" es solo una etiqueta, no algo implementable sin ambigüedad entre equipos.
 
-4. **Regla de decisión:** en cada matriz (branching, protocolos), la opción con mayor Total ponderado es la recomendación por defecto; si recomiendas la otra por una razón cualitativa no capturada en la matriz, decláralo como excepción justificada.
+4. **Regla de decisión:** aplica la regla de decisión estándar del Rol del workflow a ambas matrices (branching, protocolos).
 
 5. **Punto de Interacción (Pausa Obligatoria):**
    - Mostrar el plan completo (branching, pipeline con gates, estrategia de despliegue/rollback, protocolos y su contrato) al usuario y recibir el OK final.

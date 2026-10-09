@@ -26,7 +26,7 @@ Si `./artifacts/ADR/ADR-002-patron-y-persistencia.md` ya existe:
    - **Manejo de errores:** cómo se propagan/mapean excepciones entre capas.
    - **Estrategia de testing por capa:** qué se cubre con unit tests vs integración.
    - **Estrategia de migraciones de esquema:** herramienta (Flyway/Liquibase/Prisma Migrate) y convención de versionado.
-5. **Regla de decisión (patrón y persistencia):** en cada matriz, la opción con mayor Total ponderado es la recomendación por defecto; si recomiendas la otra por una razón cualitativa no capturada en la matriz, decláralo como excepción justificada.
+5. **Regla de decisión:** aplica la regla de decisión estándar del Rol del workflow a ambas matrices (patrón y persistencia).
 6. **Punto de Interacción (Pausa Obligatoria):**
    - Exponer las propuestas (patrón, persistencia y reglas base) al usuario justificando el porqué de las elecciones y esperar confirmación.
 7. **Creación del ADR:**

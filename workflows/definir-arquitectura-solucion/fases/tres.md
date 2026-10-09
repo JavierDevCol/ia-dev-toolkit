@@ -43,7 +43,7 @@ Si `./artifacts/ADR/ADR-003-infraestructura-y-seguridad.md` ya existe:
    - Identificar los puntos de entrada expuestos (APIs públicas, webhooks, integraciones de terceros).
    - Mapear **al menos una amenaza por categoría STRIDE relevante** (Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service, Elevation of Privilege) con su mitigación propuesta — no amenazas genéricas desconectadas de la superficie real identificada.
 
-9. **Regla de decisión:** en la Matriz de Decisión, la opción con mayor Total ponderado es la recomendación por defecto; si recomiendas la otra por una razón cualitativa no capturada en la matriz, decláralo como excepción justificada.
+9. **Regla de decisión:** aplica la regla de decisión estándar del Rol del workflow.
 
 10. **Punto de Interacción (Pausa Obligatoria):**
     - Presentar la infraestructura completa (clasificación de datos, proveedor/sizing, diagrama de red, resiliencia, observabilidad, IaC, threat model) al usuario. Esperar su confirmación.

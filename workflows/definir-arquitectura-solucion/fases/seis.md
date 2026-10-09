@@ -26,7 +26,7 @@ INSTRUCCIONES DE EJECUCIÓN:
 3. AUDITORÍA DE CÁLCULO DE LA MATRIZ DE DECISIÓN:
    - En cada ADR, recalcular el Total ponderado de cada opción (`Σ score × peso`).
    - Verificar que la opción declarada como "Decisión Aprobada" corresponda a la de mayor Total ponderado, **o** que exista una excepción justificada explícita si no coincide.
-   - Corregir cualquier error aritmético encontrado directamente en el ADR.
+   - **Límite estricto:** puedes corregir errores aritméticos en la tabla (los números de la matriz) y completar secciones faltantes con contenido ya implícito en el ADR. **NUNCA cambies el campo "Decisión Aprobada"** — es una aprobación humana, no un resultado de cálculo. Si tras corregir la aritmética la matriz ya no respalda la decisión declarada y no hay excepción justificada, NO la sobrescribas: repórtalo como **discrepancia crítica** en la síntesis final para que el usuario decida.
 
 4. AUDITORÍA DEL BLUEPRINT (`./artifacts/blueprint_arquitectura.md`):
    - Verifica que cada tecnología, patrón, motor de BD y protocolo mencionado en el Blueprint corresponda EXACTAMENTE a lo aprobado en los ADRs.
@@ -36,6 +36,7 @@ INSTRUCCIONES DE EJECUCIÓN:
    - Verifica que la sección "7. Supuestos Abiertos y Riesgos Aceptados" incluya **todos** los supuestos/riesgos marcados en los ADRs, sin omisiones.
 
 5. ACCIÓN CORRECTIVA:
-   - Si encuentras alguna contradicción, omisión, error de cálculo o sección incompleta, EDITA DIRECTAMENTE los archivos `ADR-*.md` o `blueprint_arquitectura.md` para corregirlos y dejarlos 100% alineados, completos y correctamente calculados.
+   - Si encuentras alguna contradicción, omisión, error aritmético o sección incompleta, EDITA DIRECTAMENTE los archivos `ADR-*.md` o `blueprint_arquitectura.md` para corregirlos — **excepto el campo "Decisión Aprobada"**, que nunca se modifica sin pasar de nuevo por el usuario.
    - Presenta un reporte de síntesis al usuario confirmando:
      "✅ Auditoría completada: Se verificaron X ADRs contra el Blueprint. Se aplicaron Y correcciones de consistencia/completitud/cálculo."
+     Si hubo alguna discrepancia crítica sin resolver (decisión que no coincide con el cálculo y sin excepción declarada), agregar: "⚠️ Discrepancia crítica en ADR-00X: requiere tu revisión."

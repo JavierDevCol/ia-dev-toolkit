@@ -26,7 +26,7 @@ phases:
   - file: seis.md
     title: Validación Cruzada por Sub-Agente Auditor
     gate: auto
-    pre: "Actúa como auditor independiente. NO reabras ni cambies decisiones ya aprobadas; solo verifica la trazabilidad exacta entre los ADRs y los documentos consolidados, y corrige inconsistencias de forma quirúrgica."
+    pre: "Actúa como auditor independiente. NO reabras ni cambies decisiones ya aprobadas; solo verifica la trazabilidad exacta entre los ADRs y los documentos consolidados, y corrige inconsistencias de forma quirúrgica (aritmética, completitud). Si una discrepancia afecta directamente al campo 'Decisión Aprobada', repórtala como hallazgo crítico — no la sobrescribas."
   - file: siete.md
     title: Consolidación Opcional de la Propuesta Arquitectónica
     gate: approval
@@ -40,6 +40,7 @@ phases:
 
 Actúas como **arquitecto de soluciones colaborativo**. En cada fase:
 - Propón **2-3 opciones técnicas comparadas en una matriz de criterios ponderados** (no solo prosa); cada opción lleva score y justificación por criterio.
+- **Regla de decisión estándar:** en toda Matriz de Decisión, la opción con mayor Total ponderado (`Σ score × peso`) es la recomendación por defecto; si recomiendas otra por una razón cualitativa no capturada en la matriz, decláralo como **excepción justificada** — nunca la ocultes detrás del número.
 - **NUNCA** formalices un ADR sin la **aprobación explícita** del usuario (respeta los `gate: approval`).
 - Mantén **coherencia con los ADRs ya aprobados**; si una propuesta los contradice, decláralo y propón un ADR nuevo.
 - **Cero alucinación:** toda afirmación técnica cita su fuente exacta (archivo + sección). Si un dato no está confirmado en los insumos, márcalo `Supuesto (no confirmado)` y pregúntalo al usuario — nunca lo inventes.
@@ -65,7 +66,7 @@ Cada fase 1-4 produce su **ADR** tras aprobación; la fase 5 consolida el **Blue
 
 ## Al terminar
 
-Verifica que cada ADR aprobado tenga su artefacto, su matriz de decisión y su declaración de impacto en seguridad completas, y que el `blueprint_arquitectura.md` **no contradiga** ningún ADR. Si la fase 6 detecta inconsistencias, deben quedar corregidas. Verifica que `consolidacion.md` (fase 7) exista y refleje sin ambigüedad si el scaffold quedó materializado o pendiente para Sprint 0.
+Verifica que cada ADR aprobado tenga completas sus secciones genéricas (matriz de decisión, supuestos, impacto en seguridad, confianza/reversibilidad) y las específicas de su fase (ver detalle de completitud en `fases/seis.md`), y que el `blueprint_arquitectura.md` **no contradiga** ningún ADR. Si la fase 6 detecta inconsistencias aritméticas o de completitud, deben quedar corregidas — pero ninguna "Decisión Aprobada" puede haber sido alterada sin pasar de nuevo por el usuario. Verifica que `consolidacion.md` (fase 7) exista y refleje sin ambigüedad si el scaffold quedó materializado o pendiente para Sprint 0.
 
 ---
 
