@@ -58,11 +58,11 @@ NO adivines el nombre del archivo de fase: usa SIEMPRE next. execute rechaza si 
 
       case "execute":
         if (!args.workflow || !args.phase) return "Error: workflow and phase required"
-        return executePhase(workflowsDir, stateDir, args.workflow, args.phase)
+        return executePhase(workflowsDir, stateDir, context.worktree, args.workflow, args.phase)
 
       case "approve":
         if (!args.workflow || !args.phase) return "Error: workflow and phase required"
-        return approvePhase(stateDir, args.workflow, args.phase)
+        return approvePhase(workflowsDir, stateDir, context.worktree, args.workflow, args.phase)
 
       case "status":
         if (!args.workflow) return "Error: workflow name required"
@@ -116,7 +116,7 @@ function readPhase(workflowsDir: string, workflow: string, phase: string): strin
   return fs.readFileSync(phaseFile, "utf-8")
 }
 
-function executePhase(workflowsDir: string, stateDir: string, workflow: string, phase: string): string {
+function executePhase(workflowsDir: string, stateDir: string, worktree: string, workflow: string, phase: string): string {
   const content = readPhase(workflowsDir, workflow, phase)
   if (content.startsWith("Phase '")) return content
 
@@ -125,18 +125,20 @@ function executePhase(workflowsDir: string, stateDir: string, workflow: string, 
 
   const phases = getPhases(workflowsDir, workflow)
   const idx = phases.findIndex(p => p.file === phase)
+
+  // La fase pedida no existe en el manifiesto: no hay orden que validar porque no sabemos
+  // dónde iría — mejor rechazar explícito que ejecutar sin gate.
+  if (phases.length > 0 && idx === -1) {
+    return `⛔ La fase '${phase}' no está declarada en el manifiesto de '${workflow}'.\n` +
+      `Fases válidas: ${phases.map(p => p.file).join(", ")}`
+  }
+
   const meta: Phase = idx >= 0 ? phases[idx] : { file: phase }
 
-  // GATE: no ejecutar una fase si alguna fase ANTERIOR no está aprobada
+  // GATE: no ejecutar una fase si alguna fase ANTERIOR no está aprobada (o le falta su artefacto)
   if (idx > 0) {
-    for (let i = 0; i < idx; i++) {
-      const prev = phases[i]
-      if (state.phases[prev.file]?.status !== "approved") {
-        return `⛔ No puedes ejecutar '${phase}': la fase anterior '${prev.file}'` +
-          `${prev.title ? ` (${prev.title})` : ""} no está aprobada.\n` +
-          `Ejecútala primero → workflow-sac action=execute workflow=${workflow} phase=${prev.file}`
-      }
-    }
+    const gateError = findGateBlocker(phases, state, worktree, idx, workflow)
+    if (gateError) return gateError
   }
 
   state.started_at = state.started_at || new Date().toISOString()
@@ -154,10 +156,15 @@ function executePhase(workflowsDir: string, stateDir: string, workflow: string, 
 
   let footer: string
   if (meta.gate === "auto") {
-    // Fase automática: se aprueba sin pausa del usuario
-    state.phases[phase].status = "approved"
-    state.phases[phase].approved_at = new Date().toISOString()
-    footer = "*Fase automática (gate: auto): aprobada sin pausa. Usa next para continuar.*"
+    // Fase automática: se aprueba sin pausa del usuario, pero solo si ya tiene su artefacto
+    // (si declara `output` y no existe, queda en progreso — no se auto-aprueba a ciegas).
+    if (meta.output && !fs.existsSync(path.join(worktree, meta.output))) {
+      footer = `*Fase automática (gate: auto), pero el artefacto declarado ('${meta.output}') aún no existe — queda en progreso. Vuelve a ejecutarla cuando exista, o apruébala manualmente si no aplica.*`
+    } else {
+      state.phases[phase].status = "approved"
+      state.phases[phase].approved_at = new Date().toISOString()
+      footer = "*Fase automática (gate: auto): aprobada sin pausa. Usa next para continuar.*"
+    }
   } else {
     footer = `*Para aprobar: workflow-sac action=approve workflow=${workflow} phase=${phase}*`
   }
@@ -166,9 +173,37 @@ function executePhase(workflowsDir: string, stateDir: string, workflow: string, 
   return `${heading}\n\n${body}${outNote}\n\n---\n${footer}`
 }
 
-function approvePhase(stateDir: string, workflow: string, phase: string): string {
+function approvePhase(workflowsDir: string, stateDir: string, worktree: string, workflow: string, phase: string): string {
   const stateFile = path.join(stateDir, `${workflow}.state.json`)
   const state = loadState(stateFile)
+
+  const phases = getPhases(workflowsDir, workflow)
+  const idx = phases.findIndex(p => p.file === phase)
+
+  if (phases.length > 0 && idx === -1) {
+    return `⛔ La fase '${phase}' no está declarada en el manifiesto de '${workflow}'.\n` +
+      `Fases válidas: ${phases.map(p => p.file).join(", ")}`
+  }
+
+  const meta: Phase = idx >= 0 ? phases[idx] : { file: phase }
+
+  // No se puede aprobar lo que nunca se ejecutó (evita saltos de orden vía approve directo).
+  const currentStatus = state.phases[phase]?.status
+  if (currentStatus !== "in_progress" && currentStatus !== "approved") {
+    return `⛔ No puedes aprobar '${phase}': todavía no se ha ejecutado.\n` +
+      `Ejecútala primero → workflow-sac action=execute workflow=${workflow} phase=${phase}`
+  }
+
+  if (idx > 0) {
+    const gateError = findGateBlocker(phases, state, worktree, idx, workflow)
+    if (gateError) return gateError
+  }
+
+  // El artefacto declarado como `output` debe existir antes de poder aprobar la fase.
+  if (meta.output && !fs.existsSync(path.join(worktree, meta.output))) {
+    return `⛔ No puedes aprobar '${phase}': el artefacto declarado ('${meta.output}') no existe todavía en el workspace.\n` +
+      `Genera el artefacto antes de aprobar.`
+  }
 
   state.phases[phase] = {
     ...state.phases[phase],
@@ -178,6 +213,25 @@ function approvePhase(stateDir: string, workflow: string, phase: string): string
 
   saveState(stateFile, state)
   return `Fase '${phase}' aprobada. Continúa con la siguiente fase.`
+}
+
+// Verifica que todas las fases anteriores a `idx` estén aprobadas Y, si declaran `output`,
+// que su artefacto exista en el worktree. Devuelve null si todo está en orden, o un mensaje
+// de error listo para mostrar al usuario.
+function findGateBlocker(phases: Phase[], state: any, worktree: string, idx: number, workflow: string): string | null {
+  for (let i = 0; i < idx; i++) {
+    const prev = phases[i]
+    if (state.phases[prev.file]?.status !== "approved") {
+      return `⛔ No puedes continuar: la fase anterior '${prev.file}'` +
+        `${prev.title ? ` (${prev.title})` : ""} no está aprobada.\n` +
+        `Ejecútala primero → workflow-sac action=execute workflow=${workflow} phase=${prev.file}`
+    }
+    if (prev.output && !fs.existsSync(path.join(worktree, prev.output))) {
+      return `⛔ No puedes continuar: la fase '${prev.file}' está marcada como aprobada pero su artefacto` +
+        ` declarado ('${prev.output}') no existe en el workspace. Verifica que se haya generado antes de continuar.`
+    }
+  }
+  return null
 }
 
 function getStatus(stateDir: string, workflow: string): string {
