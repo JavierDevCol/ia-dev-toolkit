@@ -29,8 +29,8 @@ CLI_PACKAGE = "diatlib"
 # ============================================================
 # LAYOUT DE COMPONENTES  (verificado contra el repo real)
 # ============================================================
-# Las 6 carpetas de componentes que se copian al cache.
-COMPONENT_DIRS = ("skills", "agents", "workflows", "tools", "commands", "config")
+# Las 7 carpetas de componentes que se copian al cache.
+COMPONENT_DIRS = ("skills", "agents", "workflows", "tools", "commands", "plugins", "config")
 
 # Tipos cuyas dependencias hay que resolver recursivamente.
 RECURSIVE_TYPES = {"skills", "agents", "workflows"}
@@ -39,14 +39,15 @@ RECURSIVE_TYPES = {"skills", "agents", "workflows"}
 #   ("dir",  marcador) -> subcarpeta que CONTIENE ese archivo marcador; nombre = carpeta
 #   ("file", ext)      -> archivo con esa extensión; nombre = stem (sin extensión)
 # El marcador evita contar carpetas que no son componentes (p.ej. skills/references).
-# OJO: agents y commands son .md; tools son .ts; skills y workflows son carpetas.
+# OJO: agents y commands son .md; tools son .ts; skills, workflows y plugins son carpetas
+# (plugins requiere el marcador index.ts — entrada de un plugin V2 de OpenCode).
 COMPONENT_LAYOUT = {
     "skills":    ("dir",  "SKILL.md"),
     "workflows": ("dir",  "workflow.md"),
     "agents":    ("file", ".md"),
     "tools":     ("file", ".ts"),
     "commands":  ("file", ".md"),
-    "plugins":   ("file", ".md"),
+    "plugins":   ("dir",  "index.ts"),
 }
 
 # Runtime del sistema SAC (workflows + config + artifacts). Agnóstico al agente.
@@ -56,7 +57,8 @@ SAC_DIR = ".SAC"
 def component_dest(ctype, project, platform):
     """Directorio destino de un tipo de componente DENTRO del proyecto.
     - workflows -> .SAC/workflows (runtime SAC; lo lee la tool workflow-sac).
-    - skills/agents/tools/commands -> plataforma del agente (.opencode).
+    - skills/agents/tools/commands/plugins -> plataforma del agente (.opencode);
+      plugins -> .opencode/plugins/ (auto-descubierto por OpenCode V2).
     (config se instala aparte en .SAC/config vía install_sac_config.)"""
     project = Path(project)
     if ctype == "workflows":

@@ -23,7 +23,7 @@ def install_component(ctype, name, cache, project, platform):
     dest_base.mkdir(parents=True, exist_ok=True)
     kind, spec = paths.COMPONENT_LAYOUT[ctype]         # dir: marcador · file: extensión
 
-    if kind == "dir":                                  # skills/workflows (carpetas)
+    if kind == "dir":                                  # skills/workflows/plugins (carpetas)
         src, dst = cache / ctype / name, dest_base / name
         if not src.exists():
             print_warning(f"{ctype}:{name} no está en cache — omitido")
@@ -153,6 +153,23 @@ def install_shared_skill_assets(cache, project, platform):
 # ============================================================
 # INSTALACIÓN DE SEEDS
 # ============================================================
+# Migraciones de artefactos de versiones previas: si se instala el componente nuevo,
+# se elimina el archivo legado que reemplaza (OpenCode V2 ignora `.opencode/tools/*.ts`).
+LEGACY_REPLACED = (
+    ("plugins", "workflow-sac", "tools/workflow-sac.ts"),
+)
+
+
+def _remove_legacy_files(project, platform, installed):
+    """Borra artefactos V1 reemplazados por componentes recién instalados."""
+    for ctype, cname, legacy_rel in LEGACY_REPLACED:
+        if cname in installed.get(ctype, []):
+            legacy = Path(project) / platform / legacy_rel
+            if legacy.exists():
+                legacy.unlink()
+                print_warning(f"legado eliminado: {legacy_rel} (reemplazado por {ctype}:{cname})")
+
+
 def install_seeds(seeds, cache, project, platform, with_config=False,
                   dependencies=None, interactive=True):
     """Resuelve las seeds (deps transitivas), instala en orden (deps primero) y
@@ -162,6 +179,7 @@ def install_seeds(seeds, cache, project, platform, with_config=False,
     for ctype, cname in order:
         if install_component(ctype, cname, cache, project, platform):
             installed.setdefault(ctype, []).append(cname)
+    _remove_legacy_files(project, platform, installed)
     if installed.get("skills"):
         install_shared_skill_assets(cache, project, platform)   # memory_skill.json, references/…
     if with_config:

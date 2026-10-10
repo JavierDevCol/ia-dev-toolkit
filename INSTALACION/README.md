@@ -1,6 +1,6 @@
 # DIAT — Instalador modular de ia-dev-toolkit
 
-CLI para instalar **skills, agents, workflows, tools y commands** del toolkit en tus
+CLI para instalar **skills, agents, workflows, plugins, tools y commands** del toolkit en tus
 proyectos, resolviendo dependencias automáticamente.
 
 > Reescritura modular (v2). Reemplaza a `INSTALACION/` en el cutover.

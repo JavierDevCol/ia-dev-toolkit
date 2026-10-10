@@ -132,7 +132,8 @@ DIAT/
 ├── skills/                   # 42+ skills para AI agents
 ├── agents/                   # 4 agents especializados
 ├── workflows/                # 3 workflows de proceso
-├── tools/                    # Tools y plugins
+├── plugins/                  # Plugins V2 de OpenCode (workflow-sac)
+├── tools/                    # Tools legacy (V1)
 ├── config/                   # Configuración del sistema
 ├── tests/                    # Pruebas E2E
 └── docs/                     # Documentación

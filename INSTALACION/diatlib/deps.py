@@ -24,19 +24,19 @@ class DependencyError(Exception):
 # original (agentes→skills, prerequisitos navegacionales, opcionales) se eliminaron
 # por no tener evidencia de invocación.
 COMPONENT_DEPENDENCIES = {
-    # Workflows -> requieren el command + la tool workflow-sac para poder ejecutarse
+    # Workflows -> requieren el command + el plugin workflow-sac para poder ejecutarse
     # con el mecanismo /workflow-sac (leer, activar y llevar el estado del workflow).
     "workflows": {
         "definir-vision-producto": {
-            "requires": {"tools": ["workflow-sac"], "commands": ["workflow-sac"]},
+            "requires": {"plugins": ["workflow-sac"], "commands": ["workflow-sac"]},
             "optional": {},
         },
         "definir-arquitectura-solucion": {
-            "requires": {"tools": ["workflow-sac"], "commands": ["workflow-sac"]},
+            "requires": {"plugins": ["workflow-sac"], "commands": ["workflow-sac"]},
             "optional": {},
         },
         "gestionar-backlog-roadmap": {
-            "requires": {"tools": ["workflow-sac"], "commands": ["workflow-sac"]},
+            "requires": {"plugins": ["workflow-sac"], "commands": ["workflow-sac"]},
             "optional": {},
         },
     },

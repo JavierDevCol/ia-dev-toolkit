@@ -81,7 +81,7 @@ def _gather_seeds(catalog):
     main_options = [
         ("skills", "Skills", "Seleccionar skills específicas"),
         ("agents", "Agents", "Seleccionar agentes específicos"),
-        ("workflows", "Workflows", "Workflows (+ tools + commands automáticos)"),
+        ("workflows", "Workflows", "Workflows (+ plugins + commands automáticos)"),
         ("team_sac", "Team Dev SAC", "Stack SAC: agentes + workflows + skills SAC + config"),
         ("kit", "Kit Completo", "TODO el repo (incl. skills sueltas) + config"),
     ]
@@ -247,7 +247,7 @@ def _status_project(project):
         estado = "⚠️  sin conexión"
     print(f"     Estado:      {estado}\n")
     comps = inst.get("components", {})
-    for ctype in ("agents", "workflows", "skills", "tools", "commands"):
+    for ctype in ("agents", "workflows", "skills", "plugins", "tools", "commands"):
         names = comps.get(ctype, [])
         if names:
             print(f"     {ctype} ({len(names)}): {', '.join(names)}")
