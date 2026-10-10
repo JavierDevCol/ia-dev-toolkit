@@ -39,6 +39,14 @@ Si ./artifacts/vision_producto.md ya existe, no lo recrees desde cero. Lee el co
 
 ---
 
+## Reglas de Profundidad
+
+- Si una respuesta es vaga o genérica (ej. "mejorar la experiencia"), repregunta pidiendo un caso concreto antes de avanzar a la siguiente pregunta — no aceptes abstracciones sin un ejemplo real.
+- Para datos cuantificables sin cifra exacta (cuántas personas, con qué frecuencia), acepta una estimación en rangos (ej. "cientos", "semanal") o márcalo `Supuesto (no confirmado)` — nunca inventes una cifra precisa.
+- Antes de cerrar la fase, verifica coherencia interna: el valor de la solución (1.3) debe responder directamente al dolor declarado en 1.1, y al menos una alternativa (1.4) debe explicar por qué no resuelve ese mismo dolor.
+
+---
+
 ## Entregable
 
 Construye y rellena la **Sección 1. Problema Identificado** en la plantilla final (`./plantillas/vision_producto.md`), mapeando las respuestas consolidadas en sus tablas y bloques correspondientes.
