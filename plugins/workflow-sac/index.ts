@@ -30,9 +30,12 @@ import path from "path"
  * - `name`/`description` de workflow se leen SOLO del frontmatter.
  * - Se elimina `getPhaseOrder()` (código muerto); el chequeo de manifiesto y el gate
  *   se comparten entre `execute` y `approve` (antes duplicados).
+ * - `subAgent: <agente>.md` en el manifiesto: `execute` delega la fase en una sesión
+ *   hija de OpenCode (subagente) vía `ctx.session`; el agente principal solo recibe
+ *   el resumen. Sin `subAgent`, la fase se inyecta al principal (lazy loading, como antes).
  */
 
-type Phase = { file: string; title?: string; gate?: string; output?: string; pre?: string }
+type Phase = { file: string; title?: string; gate?: string; output?: string; pre?: string; subAgent?: string }
 type PhaseState = { status?: string; started_at?: string; approved_at?: string }
 type WorkflowState = {
   workflow?: string
@@ -40,6 +43,19 @@ type WorkflowState = {
   current_phase?: string | null
   phases: Record<string, PhaseState>
 }
+
+// Delegación a un subagente: crea una sesión hija de OpenCode con el agente indicado,
+// le envía el prompt, espera a que termine y devuelve su síntesis. Se inyecta desde
+// `setup()` (único lugar con acceso a `ctx.session`/`ctx.agent`).
+type DelegateResult = { ok: boolean; text: string }
+type Delegate = (opts: {
+  parentID: string
+  agent: string
+  title: string
+  prompt: string
+}) => Promise<DelegateResult>
+// Contexto de ejecución de la tool (llega del executor): sesión del llamador + delegación.
+type RunCtx = { sessionID: string; delegate: Delegate }
 
 const ACTIONS = ["list", "read", "read_phase", "next", "execute", "approve", "status", "reset"] as const
 
@@ -66,6 +82,75 @@ const plugin: Plugin.Plugin = {
       return loc.directory
     }
 
+    // Delegación a subagentes: sesión hija → prompt → wait → síntesis → remove.
+    const delegate: Delegate = async ({ parentID, agent, title, prompt }) => {
+      let agentInfo: { data: { model?: { id: string; providerID: string } } }
+      try {
+        agentInfo = await ctx.agent.get({ agentID: agent })
+      } catch {
+        return {
+          ok: false,
+          text:
+            `⛔ El agente '${agent}' no existe en este proyecto ` +
+            `(se esperaba un agente registrado como '${agent}', p. ej. agents/${agent}.md). ` +
+            `Corrige 'subAgent' en el manifiesto o declara el agente antes de ejecutar la fase.`,
+        }
+      }
+
+      // Modelo del subagente: el configurado en el agente manda; si no tiene, hereda el de la
+      // sesión padre explícitamente (create() NO lo hereda y caería en el modelo por defecto).
+      let model: { id: string; providerID: string; variant?: string } | undefined
+      if (!agentInfo.data.model) {
+        try {
+          model = (await ctx.session.get({ sessionID: parentID })).model
+        } catch {
+          /* sin modelo heredado: el agente usará su default */
+        }
+      }
+
+      let sub: { id: string }
+      try {
+        sub = await ctx.session.create({ parentID, agent, title, model })
+      } catch (err) {
+        return { ok: false, text: `⛔ No se pudo crear la sesión delegada: ${err instanceof Error ? err.message : String(err)}` }
+      }
+
+      try {
+        await ctx.session.prompt({ sessionID: sub.id, text: prompt })
+        await ctx.session.wait({ sessionID: sub.id })
+        const messages = await ctx.session.context({ sessionID: sub.id })
+        // Último mensaje del asistente: si terminó en error, propagarlo; si no, su texto
+        // (ignora tool calls y reasoning).
+        let text = ""
+        let failure: string | null = null
+        for (let i = messages.length - 1; i >= 0 && !text && !failure; i--) {
+          const m = messages[i]
+          if (m.type !== "assistant") continue
+          if (m.error) {
+            failure = m.error.message
+            break
+          }
+          const parts: string[] = []
+          for (const c of m.content) {
+            if (c.type === "text") parts.push(c.text)
+          }
+          text = parts.join("\n").trim()
+        }
+        if (failure) {
+          return { ok: false, text: `⛔ El subagente '${agent}' terminó con error: ${failure}` }
+        }
+        return { ok: true, text: text || "(el subagente terminó sin texto de resultado)" }
+      } catch (err) {
+        return { ok: false, text: `⛔ Falló la delegación al subagente '${agent}': ${err instanceof Error ? err.message : String(err)}` }
+      } finally {
+        try {
+          await ctx.session.remove({ sessionID: sub.id })
+        } catch {
+          /* mejor esfuerzo: no fallar la fase por limpieza de la sesión */
+        }
+      }
+    }
+
     await ctx.tool.transform((editor) => {
       editor.add({
         name: "workflow-sac",
@@ -78,6 +163,10 @@ const plugin: Plugin.Plugin = {
 - approve: marcar una fase como aprobada
 - status: ver progreso del workflow
 - reset: reiniciar progreso
+
+Delegación: si una fase declara 'subAgent: <agente>.md' en el manifiesto, execute la delega
+a una sesión hija (subagente) con ese agente y te devuelve SOLO su resumen — el trabajo
+pesado lo hace el subagente, tú solo presentas el resultado y pides approve.
 
 Flujo para EJECUTAR un workflow completo:
 1) read  → conocer el pipeline y sus gates.
@@ -105,10 +194,10 @@ NO adivines el nombre del archivo de fase: usa SIEMPRE next. execute rechaza si 
           required: ["action"],
           additionalProperties: false,
         },
-        async execute(input) {
+        async execute(input, context) {
           const args = input as { action?: string; workflow?: string; phase?: string }
           try {
-            return { content: runAction(args, resolveRoot()) }
+            return { content: await runAction(args, resolveRoot(), { sessionID: context.sessionID, delegate }) }
           } catch (err) {
             return {
               content: `⛔ Error inesperado en workflow-sac: ${err instanceof Error ? err.message : String(err)}`,
@@ -125,7 +214,11 @@ export default plugin
 // ============================================================
 // DISPATCH
 // ============================================================
-function runAction(args: { action?: string; workflow?: string; phase?: string }, root: string): string {
+async function runAction(
+  args: { action?: string; workflow?: string; phase?: string },
+  root: string,
+  rc: RunCtx
+): Promise<string> {
   const workflowsDir = path.join(root, ".SAC", "workflows")
   const stateDir = path.join(root, ".SAC", "workflow-state")
 
@@ -154,7 +247,7 @@ function runAction(args: { action?: string; workflow?: string; phase?: string },
     case "execute": {
       const err = requirePhase(args.workflow, args.phase)
       if (err) return err
-      return executePhase(workflowsDir, stateDir, root, args.workflow!, args.phase!)
+      return executePhase(workflowsDir, stateDir, root, args.workflow!, args.phase!, rc)
     }
 
     case "approve": {
@@ -254,13 +347,14 @@ function readPhase(workflowsDir: string, workflow: string, phase: string): strin
   return fs.readFileSync(phaseFile, "utf-8")
 }
 
-function executePhase(
+async function executePhase(
   workflowsDir: string,
   stateDir: string,
   root: string,
   workflow: string,
-  phase: string
-): string {
+  phase: string,
+  rc: RunCtx
+): Promise<string> {
   const phases = getPhases(workflowsDir, workflow)
   const idx = phases.findIndex((p) => p.file === phase)
 
@@ -282,6 +376,37 @@ function executePhase(
     if (gateError) return gateError
   }
 
+  // `pre`: instrucción de comportamiento a inyectar ANTES del contenido de la fase
+  const phaseBody = meta.pre ? `> **Antes de esta fase:** ${meta.pre}\n\n${content}` : content
+  const heading = meta.title ? `## Fase: ${meta.title} (${phase})` : `## Fase: ${phase}`
+  const outNote = meta.output ? `\n\n*Salida esperada: ${meta.output}*` : ""
+
+  // --- Delegación a subagente (manifiesto: `subAgent: <agente>.md`) ---
+  // Se resuelve ANTES de mutar el estado: si la delegación falla, la fase queda como estaba.
+  let delegated: string | null = null
+  if (meta.subAgent) {
+    const agent = meta.subAgent.replace(/\.md$/i, "")
+    const prompt =
+      `Ejecuta esta fase del workflow '${workflow}' como subagente especializado.\n\n` +
+      `${heading}\n\n${phaseBody}\n\n` +
+      (meta.output ? `Artefacto esperado: ${meta.output} — genera o actualízalo en el workspace si corresponde.\n\n` : "") +
+      `Cuando termines, devuelve un resumen breve y concreto del resultado para el agente principal.`
+    const result = await rc.delegate({
+      parentID: rc.sessionID,
+      agent,
+      title: `${workflow} — fase ${phase}`,
+      prompt,
+    })
+    if (!result.ok) {
+      return `${heading}\n\n${result.text}\n\n---\n` +
+        `*La fase NO cambió de estado. Corrige y vuelve a ejecutar → ` +
+        `workflow-sac action=execute workflow=${workflow} phase=${phase}*`
+    }
+    delegated =
+      `> **Delegada al subagente \`${agent}\`** (sesión hija ejecutada por debajo;\n` +
+      `> el agente principal solo presenta el resultado y pide aprobación).\n\n${result.text}`
+  }
+
   state.started_at = state.started_at || new Date().toISOString()
   state.current_phase = phase
   state.phases[phase] = {
@@ -290,10 +415,7 @@ function executePhase(
     started_at: new Date().toISOString(),
   }
 
-  // `pre`: instrucción de comportamiento a inyectar ANTES del contenido de la fase
-  const body = meta.pre ? `> **Antes de esta fase:** ${meta.pre}\n\n${content}` : content
-  const heading = meta.title ? `## Fase: ${meta.title} (${phase})` : `## Fase: ${phase}`
-  const outNote = meta.output ? `\n\n*Salida esperada: ${meta.output}*` : ""
+  const body = delegated ?? phaseBody
 
   let footer: string
   if (meta.gate === "auto") {

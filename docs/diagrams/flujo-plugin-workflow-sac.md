@@ -298,15 +298,16 @@ flowchart LR
 
 | Función | Llamadas internas | Operaciones `fs` |
 |---|---|---|
-| `setup(ctx)` | `ctx.tool.transform`, `editor.add`, `resolveRoot` (cierre) | — |
+| `setup(ctx)` | `ctx.tool.transform`, `editor.add`, `resolveRoot` y `delegate` (cierres) | — |
 | `resolveRoot()` | `fs.existsSync(.SAC)` × candidatos | lectura (stat) |
-| `execute(input)` | `resolveRoot`, `runAction` | — (vía `runAction`) |
-| `runAction(args, root)` | `requireWorkflow`/`requirePhase` + despachador | — |
+| `execute(input, context)` | `resolveRoot`, `runAction(args, root, rc)` con `rc = { sessionID, delegate }` | — (vía `runAction`) |
+| `runAction(args, root, rc)` | `requireWorkflow`/`requirePhase` + despachador; `execute` → `executePhase(…, rc)` | — |
 | `requireWorkflow` / `requirePhase` | regex `SAFE_COMPONENT` | — |
 | `listWorkflows` | `frontmatter`, `matchKey` | `existsSync`, `readdirSync`, `readFileSync` |
 | `readWorkflow` / `readPhase` | `isInside` | `existsSync`, `readFileSync` |
 | `nextPhase` | `getPhases`, `loadState` | vía ambos |
-| `executePhase` | `getPhases`, `readPhase`, `loadState`, `findGateBlocker`, `saveState` | `existsSync` (artefacto), lectura/escritura state |
+| `executePhase` (async) | `getPhases`, `readPhase`, `loadState`, `findGateBlocker`, **`delegate`** (si `subAgent`), `saveState` | `existsSync` (artefacto), lectura/escritura state |
+| `delegate` (cierre en `setup`) | `ctx.agent.get`, `ctx.session.get`/`create`/`prompt`/`wait`/`context`/`remove` | — (vía API de sesiones) |
 | `approvePhase` | `getPhases`, `loadState`, `findGateBlocker`, `saveState` | `existsSync` (artefacto), escritura state |
 | `getStatus` | `getPhases`, `loadState` | vía ambos |
 | `resetWorkflow` | `saveState` | `mkdirSync`, `writeFileSync` |
@@ -317,6 +318,62 @@ flowchart LR
 | `saveState` | — | `mkdirSync`, `writeFileSync` |
 | `frontmatter` / `matchKey` | regex | — |
 | `notDeclared` / `isInside` | `path.resolve` | — |
+
+---
+
+## 6. Delegación a subagentes (`subAgent: <agente>.md` en el manifiesto)
+
+Cuando una fase declara `subAgent`, `execute` no inyecta la fase al agente principal: la
+delega a una **sesión hija de OpenCode** y el principal solo recibe el resumen.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant M as Agente principal
+    participant T as execute() de la tool
+    participant EP as executePhase (async)
+    participant D as delegate (cierre en setup)
+    participant API as ctx.agent / ctx.session
+    participant SUB as Sesión hija (subagente)
+
+    M->>T: workflow-sac {action: execute, workflow, phase}
+    T->>EP: runAction(args, root, rc = {sessionID, delegate})
+    EP->>EP: requirePhase · getPhases · notDeclared · readPhase · findGateBlocker
+    EP->>EP: ¿meta.subAgent declarado en el manifiesto?
+    Note over EP,SUB: sin subAgent → flujo normal (cuerpo de la fase al principal)
+    EP->>D: delegate({parentID: sessionID, agent: "PO", title, prompt})
+    D->>API: ctx.agent.get("PO")
+    API-->>D: existe? · ¿tiene model configurado?
+    alt agente sin model propio
+        D->>API: ctx.session.get(parentID)
+        API-->>D: model de la sesión padre (herencia explícita)
+    end
+    D->>API: ctx.session.create({parentID, agent, model})
+    API-->>D: sub.id (sesión hija enlazada)
+    D->>API: ctx.session.prompt({sessionID: sub.id, text: cuerpo de la fase})
+    D->>API: ctx.session.wait({sessionID: sub.id})
+    SUB->>SUB: ejecución completa (user → assistant → idle)
+    D->>API: ctx.session.context({sessionID: sub.id})
+    API-->>D: mensajes (assistant.content · error?)
+    alt assistant con error (p.ej. modelo caído)
+        D-->>EP: {ok: false, "⛔ terminó con error: …"}
+        EP-->>M: ⛔ + "La fase NO cambió de estado" (estado intacto)
+    else texto de resultado
+        D->>API: ctx.session.remove({sessionID: sub.id})  (cleanup)
+        D-->>EP: {ok: true, resumen}
+        EP->>EP: state → in_progress (+ gate auto tras delegar)
+        EP-->>M: heading + nota "Delegada al subagente" + resumen + footer approve
+    end
+```
+
+**Reglas de la delegación:**
+
+- **Agente inexistente** → `agent.get` falla → ⛔ claro, la fase **no cambia de estado** (la delegación corre *antes* de mutar el state).
+- **Modelo**: usa el model del agente si está configurado; si no, hereda explícitamente el de la sesión padre (`create()` no lo hereda solo).
+- **Gates primero**: `notDeclared` y `findGateBlocker` se resuelven *antes* de crear la sesión hija.
+- **`gate: auto`** se evalúa **después** de la delegación → si el subagente creó el artefacto `output`, la fase se auto-aprueba en la misma llamada.
+- **Cleanup**: la sesión hija se elimina tras leer su contexto (`remove` en `finally`); errores de limpieza no fallan la fase.
+- **`approve`/`next`/`status`** no cambian: la fase delegada sigue la misma máquina de estados.
 
 ---
 
@@ -332,4 +389,5 @@ flowchart LR
 
 > **Invariantes:** toda acción pasa primero por `requireWorkflow`/`requirePhase` (regex `SAFE_COMPONENT`);
 > toda ruta se verifica además con `isInside`; una fase no declarada en el manifiesto se rechaza explícitamente;
-> ninguna fase se ejecuta ni aprueba si una anterior falta de aprobación o de su artefacto (`findGateBlocker`).
+> ninguna fase se ejecuta ni aprueba si una anterior falta de aprobación o de su artefacto (`findGateBlocker`);
+> una fase con `subAgent` solo se delega tras pasar los gates, y si la delegación falla el estado queda intacto.
