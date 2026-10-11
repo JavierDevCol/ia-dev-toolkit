@@ -38,7 +38,11 @@ def cmd_update(argv=None):
     args = [a for a in (argv or []) if not a.startswith("-")]
     target_path = Path(args[0]).resolve() if args else None
 
-    remote_sha = github.get_remote_sha()
+    try:
+        remote_sha = github.get_remote_sha()
+    except github.RefNotFoundError as e:
+        ui.print_error(str(e))
+        return
     if not remote_sha:
         ui.print_error("No se pudo obtener la versión remota. Abortando.")
         return

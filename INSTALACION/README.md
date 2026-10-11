@@ -49,7 +49,7 @@ Comportamiento:
 - Cambiar la ref **fuerza la re-descarga** del snapshot aunque el `sha` coincida (compara ref + sha).
 - La ref usada queda registrada: `.ref` en el cache + campo `ref` en `instalacion.json`.
 - `diat --status` muestra la ref activa (`Ref: main → feature/x (canal de prueba)`).
-- Ref inexistente → error claro de GitHub (404) al descargar el tarball.
+- Ref inexistente → el CLI y el bootstrap **abortan** con error claro (CLI: `La ref 'X' no existe en el repo …`; bootstrap: 404 de GitHub). Nunca instala desde el cache viejo.
 
 ---
 

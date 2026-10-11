@@ -45,7 +45,11 @@ def ensure_cache():
     Compara sha Y ref: si cambias DIAT_REF (p. ej. a una rama de prueba), se
     re-descarga el snapshot aunque el sha coincidiera."""
     ref = paths.get_ref()
-    remote_sha = github.get_remote_sha()
+    try:
+        remote_sha = github.get_remote_sha()
+    except github.RefNotFoundError as e:
+        ui.print_error(str(e))
+        return None
     cache = paths.get_cache_dir()
     have = (cache / "skills").exists()
     if remote_sha and (registro.get_installed_sha() != remote_sha
@@ -224,8 +228,12 @@ def _status_system():
         print(f"  PATH:    ✅ reparado")
 
     local_sha = registro.get_installed_sha()
-    remote_sha = github.get_remote_sha()
     ref = paths.get_ref()
+    try:
+        remote_sha = github.get_remote_sha()
+    except github.RefNotFoundError as e:
+        ui.print_error(str(e))
+        return
     ref_cache = registro.get_installed_ref() or "main"
     canal = " (canal de prueba)" if ref != paths.DEFAULT_REF else ""
     print(f"  Ref:     {ref_cache} → {ref}{canal}")
@@ -233,10 +241,8 @@ def _status_system():
         print("  Repo:    ⚠️  sin conexión")
     elif local_sha == remote_sha and ref_cache == ref:
         print(f"  Repo:    ✅ al día ({(local_sha or '?')[:7]})")
-    elif remote_sha:
-        print(f"  Repo:    ⚠️  hay actualización ({(local_sha or '?')[:7]} → {remote_sha[:7]})")
     else:
-        print(f"  Repo:    ⚠️  hay actualización")
+        print(f"  Repo:    ⚠️  hay actualización ({(local_sha or '?')[:7]} → {remote_sha[:7]})")
     print(f"\n  Proyectos registrados: {len(registro.load_installations())}")
 
 
@@ -250,7 +256,12 @@ def _status_project(project):
     print(f"     Plataforma:  {inst['platform']}")
     print(f"     Ref:         {inst.get('ref', 'main')}")
     print(f"     Instalado:   {inst['installed_at']}")
-    local_sha, remote_sha = inst.get("sha"), github.get_remote_sha()
+    local_sha = inst.get("sha")
+    try:
+        remote_sha = github.get_remote_sha()
+    except github.RefNotFoundError as e:
+        ui.print_error(str(e))
+        return
     if remote_sha and local_sha == remote_sha:
         estado = "✅ al día"
     elif remote_sha:
@@ -277,7 +288,11 @@ def cmd_list():
         ui.print_info("No hay instalaciones registradas.")
         print("     Usa `diat --install /ruta/proyecto` para empezar.")
         return
-    remote_sha = github.get_remote_sha()
+    try:
+        remote_sha = github.get_remote_sha()
+    except github.RefNotFoundError as e:
+        ui.print_error(str(e))
+        return
     print(f"  📋 {len(installs)} proyecto(s) con DIAT:\n")
     for inst in installs:
         path = inst["project_path"]

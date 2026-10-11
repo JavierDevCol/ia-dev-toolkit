@@ -9,7 +9,8 @@ $Owner  = "JavierDevCol"
 $Repo   = "ia-dev-toolkit"
 # Ref por defecto 'main'. Para probar una implementacion sin publicar en main:
 #   $env:DIAT_REF="v1.2.3-test"; irm https://raw.githubusercontent.com/.../install.ps1 | iex
-$Ref = if ($env:DIAT_REF) { $env:DIAT_REF } else { "main" }
+$Ref = "$($env:DIAT_REF)".Trim()
+if (-not $Ref) { $Ref = "main" }
 $CliDir = "INSTALACION"
 
 $Bin   = Join-Path $env:LOCALAPPDATA "ia-dev-toolkit\bin"

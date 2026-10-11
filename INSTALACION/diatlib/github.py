@@ -10,6 +10,7 @@ import os
 import shutil
 import tarfile
 import tempfile
+import urllib.error
 import urllib.request
 from pathlib import Path
 
@@ -18,6 +19,11 @@ from .ui import print_warning
 
 
 class DownloadError(Exception):
+    pass
+
+
+class RefNotFoundError(Exception):
+    """La ref indicada (rama, tag o commit) no existe en el repo."""
     pass
 
 
@@ -73,7 +79,9 @@ def _safe_extract(tar, dest):
 
 
 def get_remote_sha(owner=None, repo=None, ref=None):
-    """SHA del último commit (1 request). None si no hay conexión."""
+    """SHA del último commit (1 request). None si no hay conexión.
+    Lanza RefNotFoundError si la ref no existe en el repo (evita instalar
+    un cache viejo creyendo que se probaba otra rama)."""
     owner = owner or paths.OWNER
     repo = repo or paths.REPO
     ref = ref or paths.get_ref()
@@ -85,6 +93,13 @@ def get_remote_sha(owner=None, repo=None, ref=None):
     try:
         with urllib.request.urlopen(req, timeout=30) as r:
             return r.read().decode().strip()
+    except urllib.error.HTTPError as e:
+        # La API de commits responde 422 (no 404) cuando la ref no existe.
+        if e.code in (404, 422):
+            raise RefNotFoundError(
+                f"La ref '{ref}' no existe en {owner}/{repo} "
+                f"(¿typo o rama/tag sin pushear?)") from e
+        return None
     except Exception:
         return None
 
