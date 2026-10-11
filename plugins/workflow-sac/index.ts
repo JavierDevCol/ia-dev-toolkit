@@ -61,8 +61,10 @@ type Delegate = (opts: {
   title: string
   prompt: string
 }) => Promise<DelegateResult>
-// Contexto de ejecución de la tool (llega del executor): sesión del llamador + delegación.
-type RunCtx = { sessionID: string; delegate: Delegate }
+// Contexto de ejecución de la tool (llega del executor): sesión del llamador, delegación
+// y reportería de progreso a la TUI (best-effort: un progress caído no rompe la fase).
+type RunProgress = (update: Record<string, unknown>) => Promise<void>
+type RunCtx = { sessionID: string; delegate: Delegate; progress: RunProgress }
 
 const ACTIONS = ["list", "read", "read_phase", "next", "execute", "approve", "status", "reset"] as const
 
@@ -280,7 +282,16 @@ NO adivines el nombre del archivo de fase: usa SIEMPRE next. execute rechaza si 
         async execute(input, context) {
           const args = input as { action?: string; workflow?: string; phase?: string }
           try {
-            return { content: await runAction(args, resolveRoot(), { sessionID: context.sessionID, delegate }) }
+            return {
+              content: await runAction(args, resolveRoot(), {
+                sessionID: context.sessionID,
+                delegate,
+                progress:
+                  typeof context.progress === "function"
+                    ? (update) => context.progress(update)
+                    : async () => {},
+              }),
+            }
           } catch (err) {
             return {
               content: `⛔ Error inesperado en workflow-sac: ${err instanceof Error ? err.message : String(err)}`,
@@ -473,6 +484,9 @@ async function executePhase(
       `${heading}\n\n${phaseBody}\n\n` +
       (meta.output ? `Artefacto esperado: ${meta.output} — genera o actualízalo en el workspace si corresponde.\n\n` : "") +
       SUBAGENT_CONTRACT
+    // Progreso visible en la TUI: sin esto la tool call parece muda durante la espera
+    // larga de la delegación (puede durar minutos).
+    await rc.progress({ title: `Delegando '${phase}' al subagente '${agent}'…` }).catch(() => {})
     const result = await rc.delegate({
       parentID: rc.sessionID,
       agent,
@@ -587,10 +601,14 @@ function getStatus(workflowsDir: string, stateDir: string, workflow: string): st
   }
 
   lines.push("Fases:")
+  // Marcador [→ agente] de las fases delegables (manifiesto subAgent), para que
+  // status/next no se lean como fases del agente principal.
+  const subOf = new Map(phases.filter((p) => p.subAgent).map((p) => [p.file, p.subAgent as string]))
   for (const [file, info] of entries) {
     const status = info?.status || "pending"
     const icon = status === "approved" ? "✅" : status === "in_progress" ? "🔄" : "⏳"
-    lines.push(`  ${icon} ${file}: ${status}`)
+    const sub = subOf.get(file)
+    lines.push(`  ${icon} ${file}: ${status}${sub ? ` [→ ${sub.replace(/\.md$/i, "")}]` : ""}`)
   }
 
   return lines.join("\n")
@@ -704,7 +722,8 @@ function nextPhase(workflowsDir: string, stateDir: string, workflow: string): st
   for (let i = 0; i < phases.length; i++) {
     const p = phases[i]
     if (state.phases[p.file]?.status !== "approved") {
-      const gateNote = p.gate === "auto" ? " [auto]" : ""
+      const gateNote =
+      (p.gate === "auto" ? " [auto]" : "") + (p.subAgent ? ` [→ ${p.subAgent.replace(/\.md$/i, "")}]` : "")
       return `Siguiente fase (${i + 1}/${phases.length}): ${p.file}` +
         `${p.title ? ` — "${p.title}"` : ""}${gateNote} — estado: ${state.phases[p.file]?.status || "pendiente"}\n` +
         `Ejecuta → workflow-sac action=execute workflow=${workflow} phase=${p.file}`

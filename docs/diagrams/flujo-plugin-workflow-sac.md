@@ -300,7 +300,7 @@ flowchart LR
 |---|---|---|
 | `setup(ctx)` | `ctx.tool.transform`, `editor.add`, `resolveRoot` y `delegate` (cierres) | — |
 | `resolveRoot()` | `fs.existsSync(.SAC)` × candidatos | lectura (stat) |
-| `execute(input, context)` | `resolveRoot`, `runAction(args, root, rc)` con `rc = { sessionID, delegate }` | — (vía `runAction`) |
+| `execute(input, context)` | `resolveRoot`, `runAction(args, root, rc)` con `rc = { sessionID, delegate, progress }` | — (vía `runAction`) |
 | `runAction(args, root, rc)` | `requireWorkflow`/`requirePhase` + despachador; `execute` → `executePhase(…, rc)` | — |
 | `requireWorkflow` / `requirePhase` | regex `SAFE_COMPONENT` | — |
 | `listWorkflows` | `frontmatter`, `matchKey` | `existsSync`, `readdirSync`, `readFileSync` |
@@ -387,6 +387,7 @@ sequenceDiagram
 - **Gates primero**: `notDeclared` y `findGateBlocker` se resuelven *antes* de crear la sesión hija.
 - **`gate: auto`** se evalúa **después** de la delegación → si el subagente creó el artefacto `output`, la fase se auto-aprueba en la misma llamada.
 - **Cleanup**: la sesión hija se elimina tras leer su contexto — o tras interrumpirla — (`remove` en `finally`, todos los caminos); errores de limpieza no fallan la fase.
+- **Visibilidad**: durante la delegación la TUI recibe `context.progress({title: "Delegando 'fase' al subagente 'PO'…"})` — la tool call no se ve muda mientras el hijo trabaja. Además `next` y `status` marcan las fases declaradas con `subAgent` como `[→ agente]` (p. ej. `Siguiente fase (2/7): dos.md … [→ PO]`), para que el principal sepa de entrada que esa fase la ejecuta el subagente.
 - **`approve`/`next`/`status`** no cambian: la fase delegada sigue la misma máquina de estados.
 
 ---
