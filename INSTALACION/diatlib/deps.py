@@ -39,6 +39,13 @@ COMPONENT_DEPENDENCIES = {
             "requires": {"plugins": ["workflow-sac"], "commands": ["workflow-sac"]},
             "optional": {},
         },
+        # Demo de delegación: necesita el plugin + command para ejecutarse y el
+        # agente PO porque su fase 1 se delega en él (subAgent: PO.md).
+        "demo-delegacion": {
+            "requires": {"plugins": ["workflow-sac"], "commands": ["workflow-sac"],
+                         "agents": ["PO"]},
+            "optional": {},
+        },
     },
 
     # Skills -> única invocación real skill→skill encontrada en el contenido.

@@ -1,6 +1,7 @@
 ---
 name: demo-delegacion
 description: Demo de la delegación a subagentes del plugin workflow-sac (1 fase delegada + 1 fase del principal)
+ready: true
 phases:
   - file: uno.md
     title: Análisis delegado al PO
