@@ -511,7 +511,7 @@ async function executePhase(
       footer = "*Fase automática (gate: auto): aprobada sin pausa. Usa next para continuar.*"
     }
   } else {
-    footer = `*Para aprobar: workflow-sac action=approve workflow=${workflow} phase=${phase}*`
+    footer = `*Espera el OK del usuario: cuando él apruebe la fase, ejecuta → workflow-sac action=approve workflow=${workflow} phase=${phase}*`
   }
 
   saveState(stateFile, state)

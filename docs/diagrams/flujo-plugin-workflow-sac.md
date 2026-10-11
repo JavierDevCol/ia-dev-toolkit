@@ -189,7 +189,7 @@ flowchart TD
         A10 -->|"⛔ bloqueo"| A11["return mensaje de gate"]
         A10 -->|"null (ok)"| A12["state.started_at ||= now<br/>current_phase = phase<br/>phases[phase] = in_progress"]
         A12 --> A13{"meta.gate === 'auto' ?"}
-        A13 -->|"no"| A16["footer = 'Para aprobar:<br/>workflow-sac action=approve …'"]
+        A13 -->|"no"| A16["footer = 'Espera el OK del usuario:<br/>si aprueba → workflow-sac action=approve …'"]
         A13 -->|"sí"| A14{"meta.output declarado<br/>y existe su artefacto ?"}
         A14 -->|"no existe"| A15["queda in_progress<br/>footer = 'aún no existe …'"]
         A14 -->|"existe o sin output"| A17["phases[phase] = approved<br/>approved_at = now<br/>footer = 'aprobada sin pausa'"]
