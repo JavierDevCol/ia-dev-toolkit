@@ -43,6 +43,10 @@ def cmd_update(argv=None):
         ui.print_error("No se pudo obtener la versión remota. Abortando.")
         return
 
+    ref = paths.get_ref()
+    if ref != paths.DEFAULT_REF:
+        ui.print_warning(f"Canal de prueba: actualizando desde '{ref}'")
+
     remote_version = github.get_remote_version()
     if remote_version:
         registro.save_installed_version(remote_version)
@@ -56,8 +60,8 @@ def cmd_update(argv=None):
                        f"Usa `diat --install {target_path}` primero.")
         return
 
-    # Descargar snapshot SOLO si el repo cambió (refresca componentes + CLI en bin)
-    if registro.get_installed_sha() != remote_sha:
+    # Descargar snapshot SOLO si el repo o la ref cambiaron (refresca componentes + CLI)
+    if registro.get_installed_sha() != remote_sha or registro.get_installed_ref() != ref:
         ui.print_info("Repo actualizado — descargando snapshot...")
         cache = github.download_and_stage()
         catalog = github.build_catalog(cache)
@@ -67,7 +71,8 @@ def cmd_update(argv=None):
             ui.print_error(str(e))
             return
         registro.save_installed_sha(remote_sha)
-        ui.print_success("Cache y CLI actualizados")
+        registro.save_installed_ref(ref)
+        ui.print_success(f"Cache y CLI actualizados (ref: {ref})")
     else:
         ui.print_success("Cache ya está al día.")
         cache = paths.get_cache_dir()
@@ -92,6 +97,7 @@ def cmd_update(argv=None):
         ui.print_info(f"Reinstalando en {project}...")
         inst["components"] = reinstall_components(inst, cache)
         inst["sha"] = remote_sha
+        inst["ref"] = ref
         inst["installed_at"] = datetime.now().isoformat()
         updated += 1
 

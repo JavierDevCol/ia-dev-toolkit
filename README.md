@@ -45,8 +45,20 @@ curl -fsSL https://raw.githubusercontent.com/JavierDevCol/ia-dev-toolkit/main/IN
 
 **Windows (PowerShell):**
 ```powershell
-irm https://github.com/JavierDevCol/ia-dev-toolkit/main/INSTALACION/bootstrap/install.ps1 | iex
+irm https://raw.githubusercontent.com/JavierDevCol/ia-dev-toolkit/main/INSTALACION/bootstrap/install.ps1 | iex
 ```
+
+**Versión de prueba (canal de prueba):**
+```bash
+# Instala el CLI y componentes desde una rama, tag o commit sin publicar en main
+curl -fsSL https://raw.githubusercontent.com/JavierDevCol/ia-dev-toolkit/main/INSTALACION/bootstrap/install.sh | DIAT_REF=v1.2.3-test bash
+```
+```powershell
+$env:DIAT_REF="v1.2.3-test"; irm https://raw.githubusercontent.com/JavierDevCol/ia-dev-toolkit/main/INSTALACION/bootstrap/install.ps1 | iex
+```
+Tras la instalación, `DIAT_REF` sigue siendo útil: `DIAT_REF=feature/x diat --install` y
+`DIAT_REF=feature/x diat --update` prueban componentes desde esa ref. `diat --status` muestra
+la ref activa (ver sección "Canales de prueba" en `INSTALACION/README.md`).
 
 **Python:**
 ```bash

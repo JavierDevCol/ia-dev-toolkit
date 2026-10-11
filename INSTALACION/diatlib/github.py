@@ -29,7 +29,7 @@ def download_repo_snapshot(owner=None, repo=None, ref=None):
     Devuelve la ruta a la raíz extraída (sin el prefijo owner-repo-sha/)."""
     owner = owner or paths.OWNER
     repo = repo or paths.REPO
-    ref = ref or paths.REF
+    ref = ref or paths.get_ref()
     url = f"https://codeload.github.com/{owner}/{repo}/tar.gz/{ref}"
 
     cache = paths.get_cache_dir()
@@ -76,7 +76,7 @@ def get_remote_sha(owner=None, repo=None, ref=None):
     """SHA del último commit (1 request). None si no hay conexión."""
     owner = owner or paths.OWNER
     repo = repo or paths.REPO
-    ref = ref or paths.REF
+    ref = ref or paths.get_ref()
     url = f"https://api.github.com/repos/{owner}/{repo}/commits/{ref}"
     req = urllib.request.Request(url, headers={
         "Accept": "application/vnd.github.sha",

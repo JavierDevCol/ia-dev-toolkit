@@ -7,7 +7,9 @@ $ErrorActionPreference = "Stop"
 
 $Owner  = "JavierDevCol"
 $Repo   = "ia-dev-toolkit"
-$Ref    = "main"
+# Ref por defecto 'main'. Para probar una implementacion sin publicar en main:
+#   $env:DIAT_REF="v1.2.3-test"; irm https://raw.githubusercontent.com/.../install.ps1 | iex
+$Ref = if ($env:DIAT_REF) { $env:DIAT_REF } else { "main" }
 $CliDir = "INSTALACION"
 
 $Bin   = Join-Path $env:LOCALAPPDATA "ia-dev-toolkit\bin"
@@ -34,6 +36,7 @@ $tmp = Join-Path $env:TEMP ("diat-" + [guid]::NewGuid().ToString("N"))
 New-Item -ItemType Directory -Path $tmp -Force | Out-Null
 try {
     $url = "https://codeload.github.com/$Owner/$Repo/tar.gz/$Ref"
+    if ($Ref -ne "main") { Write-Host "Canal de prueba: instalando desde ref '$Ref'" -ForegroundColor Yellow }
     $tgz = Join-Path $tmp "repo.tar.gz"
     Invoke-WebRequest -Uri $url -OutFile $tgz -UseBasicParsing
     tar -xzf $tgz -C $tmp
