@@ -27,7 +27,9 @@ Si ./artifacts/vision_producto.md ya existe, no lo recrees desde cero. Lee el co
 - ¿Qué datos sensibles maneja?
 - ¿Qué autenticación necesita?
 - ¿Qué autorización requiere?
-- ¿Qué normativas cumple? (GDPR, HIPAA, PCI-DSS)
+- ¿Qué normativas cumple? (GDPR, HIPAA, PCI-DSS) — marca `N/A` si ninguna aplica.
+
+Revisa los actores e integraciones de la Sección 2 (ej. pasarela de pago, datos de salud) — si hay una integración que típicamente implica una normativa (pagos → PCI-DSS, salud → HIPAA), decláralo aquí aunque el usuario no lo haya mencionado, y confírmalo con él.
 
 ### 3.3 Usabilidad
 
@@ -57,6 +59,19 @@ Si ./artifacts/vision_producto.md ya existe, no lo recrees desde cero. Lee el co
 - ¿Qué backups se requieren?
 - ¿Qué tiempo de recuperación (RTO)?
 
+Verifica consistencia con el "downtime aceptable" de la sección 3.1 (un SLA de 99.9% ≈ 8.7h/año de downtime) — si hay contradicción, resuélvela con el usuario antes de cerrar la fase.
+
+---
+
+## Targets Críticos para Arquitectura (obligatorio)
+
+Antes de cerrar esta fase, asegúrate de que el documento declare explícitamente estos 3 datos — son los que `definir-arquitectura-solucion` usa directamente en su Fase 1:
+- **Disponibilidad objetivo** (%)
+- **Throughput / picos de carga esperados** (si se conocen)
+- **RTO/RPO** (si aplica disaster recovery)
+
+Si alguno no se conoce todavía, márcalo `Supuesto (no confirmado)` en vez de dejarlo vacío o inventar una cifra.
+
 ---
 
 ## Entregable
@@ -73,6 +88,10 @@ Construye y rellena la **Sección 3. Atributos de Calidad** en la plantilla fina
 
 ---
 
-## Resultado final
+## Consolidación Final del Documento
 
-Al completar las 3 fases, usar `plantillas/vision_producto.md` para consolidar el documento final.
+Al cerrar esta fase (la última de las 3), completa también lo que falta de la plantilla:
+- **Sección 4. Resumen Ejecutivo:** sintetiza en 2-3 párrafos el producto (problema + MVP + atributos clave), completa "Visión en una frase" y los "Próximos pasos" (ej. iniciar `definir-arquitectura-solucion`).
+- **Sección 5. Aprobaciones:** deja la tabla con los roles esperados (Product Owner, Tech Lead, Stakeholder) — las firmas quedan pendientes de quien corresponda, no las inventes.
+
+Presenta el documento completo al usuario para su aprobación final antes de darlo por cerrado.

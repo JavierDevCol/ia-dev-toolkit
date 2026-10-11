@@ -4,7 +4,7 @@
 Analizar la documentación técnica de entrada (ADRs, diagramas C4, esquemas de BD, IaC) y clasificar las tareas de ingeniería necesarias antes del desarrollo funcional.
 
 ## 🔄 Regla de Sincronización Incremental (Si existen artefactos previos)
-- **Comparación Delta:** Antes de crear un nuevo Enabler, compara la entrada con el backlog existente.
+- **Comparación Delta:** Antes de crear un nuevo Enabler, compara la entrada con los archivos existentes en `./artifacts/HU/enablers/` y `./artifacts/HU/epics/`.
 - **Evitar Duplicados:** Si el Enabler o decisión ya está registrado, márcalo como `EXISTENTE`. Solo genera `STORY-ENABLER-XXX` para componentes nuevos o modificados.
 
 ## Scaffold Base: Verificar `consolidacion.md`
@@ -28,7 +28,20 @@ Antes de clasificar Enablers, leer `./artifacts/consolidacion.md` (generado por 
    - **Clasificación por Rol:**
      - `DevOps`: Infraestructura, pipelines, IaC (Terraform), contenedores (K8s/Docker).
      - `Arquitectura / Backend`: Boilerplate de código, entidades base, interfaces, middlewares.
+     - `Seguridad`: gestión de secretos, middleware de auth/authz, mitigaciones del Threat Model STRIDE declaradas en ADR-003.
+     - `SRE / Observabilidad`: logging centralizado, monitoreo y alerting mínimo (ADR-003), estrategia de backup/DR (ADR-003).
+
+**Regla de cobertura obligatoria:** recorre explícitamente las secciones de ADR-003 (Resiliencia, Observabilidad, Herramienta de IaC, Threat Model) y ADR-002 (Reglas Base Recomendadas) — cada una debe producir un `STORY-ENABLER-XXX` o quedar explícitamente marcada `Cubierta por el scaffold` (si `consolidacion.md` ya la materializó). No es opcional: una decisión de ADR sin Enabler correspondiente es una decisión que nunca se va a construir.
 
 4. **Spike Enabler (`SPIKE-ENABLER-XXX`):**
    - **Criterio:** Tarea de investigación o Prueba de Concepto (PoC) para reducir la incertidumbre.
    - **Requisito Obligatorio:** Asignar un *Timebox* estricto (ej. 4h, 8h, 16h máximo).
+
+---
+
+## Criterios de completitud
+
+- [ ] Cada Enabler nuevo tiene ID único y no duplica uno existente
+- [ ] Todo Spike Enabler tiene timebox asignado
+- [ ] Cada sección relevante de ADR-002/003 (reglas base, resiliencia, observabilidad, IaC, threat model) quedó cubierta por un Enabler o marcada `Cubierta por el scaffold`
+- [ ] El scaffold base de Sprint 0 está correctamente incluido u omitido según `consolidacion.md`

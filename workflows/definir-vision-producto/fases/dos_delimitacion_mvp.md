@@ -17,7 +17,7 @@ Si ./artifacts/vision_producto.md ya existe, no lo recrees desde cero. Lee el co
 
 ### 2.1 ¿Qué incluye el MVP?
 
-- ¿Cuál es la funcionalidad核心 que resuelve el problema?
+- ¿Cuál es la funcionalidad núcleo que resuelve el problema?
 - ¿Qué es imprescindible vs deseable?
 - ¿Cuál es la experiencia mínima aceptable?
 - ¿Qué NO incluimos en esta versión?
@@ -35,6 +35,8 @@ Si ./artifacts/vision_producto.md ya existe, no lo recrees desde cero. Lee el co
 - **Equipo:** ¿Quiénes participan?
 - **Tecnología:** ¿Qué stack usamos?
 
+Si alguna restricción no está definida todavía, regístrala como "Por definir — `Supuesto (no confirmado)`" en vez de inventar una cifra o fecha.
+
 ### 2.4 ¿Cómo validamos?
 
 - ¿Cómo sabemos que funciona?
@@ -46,9 +48,10 @@ Si ./artifacts/vision_producto.md ya existe, no lo recrees desde cero. Lee el co
    - Identificar usuarios finales (ej. *Cliente, Barbero, Administrador*).
    - Identificar sistemas externos con los que debe interactuar (ej. *Pasarela de Pago, Servicio SMS*).
 
-### 2.6 Criterios de Slicing Funcional (In-Scope vs. Out-of-Scope):
-   - **Dentro del MVP (In-Scope):** Funcionalidades mínimas sin las cuales el producto **no puede operar ni generar valor**.
-   - **Fuera del MVP (Out-of-Scope):** Ideas valiosas pero no críticas para el lanzamiento inicial (ej. *Motor de IA para recomendaciones, programa de fidelización avanzado*).
+### 2.6 Criterios de Slicing Funcional (MUST vs. SHOULD vs. Fuera del MVP):
+   - **MUST (bloqueante):** sin esto, el producto no puede operar ni generar valor. Si al quitarla el producto sigue siendo usable y vendible, no es MUST.
+   - **SHOULD (no bloqueante):** mejora significativamente la experiencia o el valor, pero el producto puede lanzarse sin ella.
+   - **Fuera del MVP:** valiosa pero diferible por completo a una versión futura sin impacto en el lanzamiento (ej. *Motor de IA para recomendaciones, programa de fidelización avanzado*).
 
 ### 2.7 Módulos / Épicas Candidatas:
    - Agrupar las capacidades del MVP en 3 a 5 grandes módulos conceptuales (ej. *Gestión de Citas, Autenticación, Pagos*).
