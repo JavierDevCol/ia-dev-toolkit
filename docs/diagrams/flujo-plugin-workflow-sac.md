@@ -307,7 +307,7 @@ flowchart LR
 | `readWorkflow` / `readPhase` | `isInside` | `existsSync`, `readFileSync` |
 | `nextPhase` | `getPhases`, `loadState` | vía ambos |
 | `executePhase` (async) | `getPhases`, `readPhase`, `loadState`, `findGateBlocker`, **`delegate`** (si `subAgent`), `saveState` | `existsSync` (artefacto), lectura/escritura state |
-| `delegate` (cierre en `setup`) | `ctx.agent.get`, `ctx.session.get`/`create`/`prompt`/`wait`/`context`/`remove` | — (vía API de sesiones) |
+| `delegate` (cierre en `setup`) | `ctx.agent.get`, `ctx.session.get`/`create`/`prompt`/`wait`/`interrupt`/`context`/`remove` | — (vía API de sesiones) |
 | `approvePhase` | `getPhases`, `loadState`, `findGateBlocker`, `saveState` | `existsSync` (artefacto), escritura state |
 | `getStatus` | `getPhases`, `loadState` | vía ambos |
 | `resetWorkflow` | `saveState` | `mkdirSync`, `writeFileSync` |
@@ -348,18 +348,29 @@ sequenceDiagram
         D->>API: ctx.session.get(parentID)
         API-->>D: model de la sesión padre (herencia explícita)
     end
+    Note over D: intento 1 de 2 · el reintento es solo para fallos no-timeout
     D->>API: ctx.session.create({parentID, agent, model})
     API-->>D: sub.id (sesión hija enlazada)
     D->>API: ctx.session.prompt({sessionID: sub.id, text: cuerpo de la fase})
-    D->>API: ctx.session.wait({sessionID: sub.id})
-    SUB->>SUB: ejecución completa (user → assistant → idle)
-    D->>API: ctx.session.context({sessionID: sub.id})
-    API-->>D: mensajes (assistant.content · error?)
-    alt assistant con error (p.ej. modelo caído)
-        D-->>EP: {ok: false, "⛔ terminó con error: …"}
+    D->>API: ctx.session.wait({sessionID: sub.id}) · carrera contra deadline (10 min, env WORKFLOW_SAC_DELEGATE_TIMEOUT_MS)
+    alt deadline vencido (hijo colgado)
+        D->>API: ctx.session.interrupt({sessionID: sub.id})  (detiene al hijo)
+        D->>API: ctx.session.remove (cleanup, en todos los caminos)
+        D-->>EP: {ok: false, timeout}
+        EP-->>M: ⛔ Timeout + "La fase NO cambió de estado" · sin reintento
+    else termina a tiempo · assistant con error (rate-limit / modelo caído)
+        SUB->>SUB: ejecución interrumpida por error del proveedor
+        D->>API: ctx.session.context({sessionID: sub.id})
+        API-->>D: mensajes (assistant.error)
+        D->>API: ctx.session.remove (cleanup, en todos los caminos)
+        Note over D: fallo transitorio → se repite 1 vez con sesión hija nueva
+        D-->>EP: {ok: false, "⛔ terminó con error: … (tras 1 reintento automático)"}
         EP-->>M: ⛔ + "La fase NO cambió de estado" (estado intacto)
-    else texto de resultado
-        D->>API: ctx.session.remove({sessionID: sub.id})  (cleanup)
+    else termina a tiempo · texto de resultado
+        SUB->>SUB: ejecución completa (user → assistant → idle)
+        D->>API: ctx.session.context({sessionID: sub.id})
+        API-->>D: mensajes (assistant.content)
+        D->>API: ctx.session.remove (cleanup, en todos los caminos)
         D-->>EP: {ok: true, resumen}
         EP->>EP: state → in_progress (+ gate auto tras delegar)
         EP-->>M: heading + nota "Delegada al subagente" + resumen + footer approve
@@ -368,11 +379,13 @@ sequenceDiagram
 
 **Reglas de la delegación:**
 
-- **Agente inexistente** → `agent.get` falla → ⛔ claro, la fase **no cambia de estado** (la delegación corre *antes* de mutar el state).
+- **Agente inexistente** → `agent.get` falla → ⛔ claro, la fase **no cambia de estado** (la delegación corre *antes* de mutar el state). Sin reintento: es un error de configuración, no transitorio.
+- **Timeout**: cada intento tiene un tope de tiempo (10 min por defecto, ajustable con la env `WORKFLOW_SAC_DELEGATE_TIMEOUT_MS`). Si el hijo no termina, se le llama `interrupt` (best effort) y la fase falla **sin tocar el estado**. Un timeout **no reintenta** (reintentar duplicaría la espera máxima).
+- **1 reintento automático**: ante un fallo transitorio (rate-limit, proveedor caído, sesión que no arranca), la delegación repite **una vez** con una sesión hija nueva; si el 2.º intento también falla, el error lo indica ("tras 1 reintento automático").
 - **Modelo**: usa el model del agente si está configurado; si no, hereda explícitamente el de la sesión padre (`create()` no lo hereda solo).
 - **Gates primero**: `notDeclared` y `findGateBlocker` se resuelven *antes* de crear la sesión hija.
 - **`gate: auto`** se evalúa **después** de la delegación → si el subagente creó el artefacto `output`, la fase se auto-aprueba en la misma llamada.
-- **Cleanup**: la sesión hija se elimina tras leer su contexto (`remove` en `finally`); errores de limpieza no fallan la fase.
+- **Cleanup**: la sesión hija se elimina tras leer su contexto — o tras interrumpirla — (`remove` en `finally`, todos los caminos); errores de limpieza no fallan la fase.
 - **`approve`/`next`/`status`** no cambian: la fase delegada sigue la misma máquina de estados.
 
 ---

@@ -33,6 +33,10 @@ import path from "path"
  * - `subAgent: <agente>.md` en el manifiesto: `execute` delega la fase en una sesión
  *   hija de OpenCode (subagente) vía `ctx.session`; el agente principal solo recibe
  *   el resumen. Sin `subAgent`, la fase se inyecta al principal (lazy loading, como antes).
+ *   Robustez de la delegación: cada intento tiene tope de tiempo (env
+ *   WORKFLOW_SAC_DELEGATE_TIMEOUT_MS, por defecto 10 min; al vencer se interrumpe al
+ *   hijo) y hay 1 reintento automático ante fallos transitorios (rate-limit, error de
+ *   proveedor). Un timeout no reintenta: reintentar duplicaría la espera máxima.
  */
 
 type Phase = { file: string; title?: string; gate?: string; output?: string; pre?: string; subAgent?: string }
@@ -63,6 +67,16 @@ const ACTIONS = ["list", "read", "read_phase", "next", "execute", "approve", "st
 // Bloquea `..`, `a/b`, `a\b`, rutas absolutas y nombres vacíos.
 const SAFE_COMPONENT = /^[A-Za-z0-9][A-Za-z0-9._-]*$/
 
+// Espera máxima (por intento) de una delegación: si el subagente no termina a tiempo,
+// se interrumpe su sesión hija y la fase falla sin tocar el estado.
+const DEFAULT_DELEGATE_TIMEOUT_MS = 10 * 60 * 1000
+
+function resolveDelegateTimeoutMs(): number {
+  const raw = process.env.WORKFLOW_SAC_DELEGATE_TIMEOUT_MS
+  const n = raw ? Number.parseInt(raw, 10) : NaN
+  return Number.isFinite(n) && n > 0 ? n : DEFAULT_DELEGATE_TIMEOUT_MS
+}
+
 const plugin: Plugin.Plugin = {
   id: "workflow-sac",
   async setup(ctx) {
@@ -82,7 +96,8 @@ const plugin: Plugin.Plugin = {
       return loc.directory
     }
 
-    // Delegación a subagentes: sesión hija → prompt → wait → síntesis → remove.
+    // Delegación a subagentes: sesión hija → prompt → wait acotado → síntesis → remove.
+    // 1 reintento automático ante fallo transitorio; timeout = sin reintento.
     const delegate: Delegate = async ({ parentID, agent, title, prompt }) => {
       let agentInfo: { data: { model?: { id: string; providerID: string } } }
       try {
@@ -108,47 +123,88 @@ const plugin: Plugin.Plugin = {
         }
       }
 
-      let sub: { id: string }
-      try {
-        sub = await ctx.session.create({ parentID, agent, title, model })
-      } catch (err) {
-        return { ok: false, text: `⛔ No se pudo crear la sesión delegada: ${err instanceof Error ? err.message : String(err)}` }
+      const timeoutMs = resolveDelegateTimeoutMs()
+
+      // Un intento completo: crea la sesión hija, la promptea, espera con tope de
+      // tiempo, extrae la síntesis y SIEMPRE limpia la sesión en `finally`.
+      const attempt = async (): Promise<{ ok: boolean; timeout?: boolean; text: string }> => {
+        let sub: { id: string }
+        try {
+          sub = await ctx.session.create({ parentID, agent, title, model })
+        } catch (err) {
+          return { ok: false, text: `⛔ No se pudo crear la sesión delegada: ${err instanceof Error ? err.message : String(err)}` }
+        }
+
+        // Se declara fuera para liberar el timer en `finally` en TODOS los caminos
+        // (si wait rechaza, el race lanza y un clear posterior no llegaría a ejecutarse).
+        let timer: ReturnType<typeof setTimeout> | undefined
+        try {
+          await ctx.session.prompt({ sessionID: sub.id, text: prompt })
+
+          // Espera acotada: `wait` no acepta un timeout propio, así que se corre contra
+          // un timer. Al vencer se interrumpe al hijo (best effort) y se rinde la fase.
+          const deadline = new Promise<"timeout">((resolve) => {
+            timer = setTimeout(() => resolve("timeout"), timeoutMs)
+          })
+          const waited = ctx.session.wait({ sessionID: sub.id }).then(() => "done" as const)
+          waited.catch(() => {}) // si vence el deadline, evita un rechazo sin manejar
+          const outcome = await Promise.race([waited, deadline])
+          if (outcome === "timeout") {
+            try {
+              await ctx.session.interrupt({ sessionID: sub.id })
+            } catch {
+              /* sesión ya terminada o caída: la limpieza de abajo basta */
+            }
+            return {
+              ok: false,
+              timeout: true,
+              text: `⛔ Timeout: el subagente '${agent}' no terminó en ${Math.round(timeoutMs / 1000)}s; se interrumpió su sesión hija.`,
+            }
+          }
+
+          const messages = await ctx.session.context({ sessionID: sub.id })
+          // Último mensaje del asistente: si terminó en error, propagarlo; si no, su texto
+          // (ignora tool calls y reasoning).
+          let text = ""
+          let failure: string | null = null
+          for (let i = messages.length - 1; i >= 0 && !text && !failure; i--) {
+            const m = messages[i]
+            if (m.type !== "assistant") continue
+            if (m.error) {
+              failure = m.error.message
+              break
+            }
+            const parts: string[] = []
+            for (const c of m.content) {
+              if (c.type === "text") parts.push(c.text)
+            }
+            text = parts.join("\n").trim()
+          }
+          if (failure) {
+            return { ok: false, text: `⛔ El subagente '${agent}' terminó con error: ${failure}` }
+          }
+          return { ok: true, text: text || "(el subagente terminó sin texto de resultado)" }
+        } catch (err) {
+          return { ok: false, text: `⛔ Falló la delegación al subagente '${agent}': ${err instanceof Error ? err.message : String(err)}` }
+        } finally {
+          if (timer) clearTimeout(timer)
+          try {
+            await ctx.session.remove({ sessionID: sub.id })
+          } catch {
+            /* mejor esfuerzo: no fallar la fase por limpieza de la sesión */
+          }
+        }
       }
 
-      try {
-        await ctx.session.prompt({ sessionID: sub.id, text: prompt })
-        await ctx.session.wait({ sessionID: sub.id })
-        const messages = await ctx.session.context({ sessionID: sub.id })
-        // Último mensaje del asistente: si terminó en error, propagarlo; si no, su texto
-        // (ignora tool calls y reasoning).
-        let text = ""
-        let failure: string | null = null
-        for (let i = messages.length - 1; i >= 0 && !text && !failure; i--) {
-          const m = messages[i]
-          if (m.type !== "assistant") continue
-          if (m.error) {
-            failure = m.error.message
-            break
-          }
-          const parts: string[] = []
-          for (const c of m.content) {
-            if (c.type === "text") parts.push(c.text)
-          }
-          text = parts.join("\n").trim()
-        }
-        if (failure) {
-          return { ok: false, text: `⛔ El subagente '${agent}' terminó con error: ${failure}` }
-        }
-        return { ok: true, text: text || "(el subagente terminó sin texto de resultado)" }
-      } catch (err) {
-        return { ok: false, text: `⛔ Falló la delegación al subagente '${agent}': ${err instanceof Error ? err.message : String(err)}` }
-      } finally {
-        try {
-          await ctx.session.remove({ sessionID: sub.id })
-        } catch {
-          /* mejor esfuerzo: no fallar la fase por limpieza de la sesión */
-        }
-      }
+      // 1.º intento
+      const first = await attempt()
+      if (first.ok) return first
+      if (first.timeout) return first // sin reintento: el hijo ya fue interrumpido
+
+      // 2.º intento (reintento ante fallo transitorio: rate-limit, proveedor caído…)
+      const second = await attempt()
+      if (second.ok) return second
+      return { ok: false, text: second.text + " (tras 1 reintento automático)" }
     }
 
     await ctx.tool.transform((editor) => {
@@ -167,6 +223,8 @@ const plugin: Plugin.Plugin = {
 Delegación: si una fase declara 'subAgent: <agente>.md' en el manifiesto, execute la delega
 a una sesión hija (subagente) con ese agente y te devuelve SOLO su resumen — el trabajo
 pesado lo hace el subagente, tú solo presentas el resultado y pides approve.
+La delegación es robusta: cada intento tiene un tope de tiempo (por defecto 10 min) y hay
+1 reintento automático ante fallos transitorios; si se agota, la fase NO cambia de estado.
 
 Flujo para EJECUTAR un workflow completo:
 1) read  → conocer el pipeline y sus gates.
@@ -387,7 +445,6 @@ async function executePhase(
   if (meta.subAgent) {
     const agent = meta.subAgent.replace(/\.md$/i, "")
     const prompt =
-      `Ejecuta esta fase del workflow '${workflow}' como subagente especializado.\n\n` +
       `${heading}\n\n${phaseBody}\n\n` +
       (meta.output ? `Artefacto esperado: ${meta.output} — genera o actualízalo en el workspace si corresponde.\n\n` : "") +
       `Cuando termines, devuelve un resumen breve y concreto del resultado para el agente principal.`
