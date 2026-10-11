@@ -37,6 +37,9 @@ import path from "path"
  *   WORKFLOW_SAC_DELEGATE_TIMEOUT_MS, por defecto 10 min; al vencer se interrumpe al
  *   hijo) y hay 1 reintento automático ante fallos transitorios (rate-limit, error de
  *   proveedor). Un timeout no reintenta: reintentar duplicaría la espera máxima.
+ *   El encargo cierra con el contrato estándar de entregable (SUBAGENT_CONTRACT, 6
+ *   secciones) que cubre fases de solo-análisis, solo-archivo y mixtas; las phases
+ *   pueden añadir specifics en su cuerpo (`## ENTREGABLE`), que se componen con él.
  */
 
 type Phase = { file: string; title?: string; gate?: string; output?: string; pre?: string; subAgent?: string }
@@ -76,6 +79,27 @@ function resolveDelegateTimeoutMs(): number {
   const n = raw ? Number.parseInt(raw, 10) : NaN
   return Number.isFinite(n) && n > 0 ? n : DEFAULT_DELEGATE_TIMEOUT_MS
 }
+
+// Contrato de salida estándar, inyectado al final de TODO encargo delegado. Cubre las
+// tres naturalezas de fase: solo-análisis (2 = "Ninguno"), solo-archivo y mixtas. Los
+// autores de fases pueden añadir specifics en el cuerpo (`## ENTREGABLE`), que se
+// componen con esto (el cuerpo va primero, el contrato cierra el encargo).
+const SUBAGENT_CONTRACT =
+  `## ENTREGABLE — contrato de salida\n` +
+  `Devuelve tu resultado con EXACTAMENTE esta estructura. No dejes secciones vacías: escribe "Ninguno" donde no aplique.\n\n` +
+  `### 1. Trabajo realizado\n` +
+  `Lista de tareas ejecutadas en orden (lecturas, análisis, ediciones, validaciones).\n\n` +
+  `### 2. Artefactos\n` +
+  `Cada archivo creado o modificado: ruta exacta (relativa a la raíz) + qué contiene o qué cambió. Si no tocaste ningún archivo: "Ninguno (análisis sin persistencia)".\n\n` +
+  `### 3. Resultado\n` +
+  `El núcleo del entregable: hallazgos, conclusiones, recomendaciones o diseño — TODO lo que el agente principal y el usuario deben leer para decidir. Esta es la parte real del trabajo: no la comprimas a una frase.\n\n` +
+  `### 4. Decisiones y pendientes\n` +
+  `- Decisiones que tomaste por tu cuenta, con su justificación breve.\n` +
+  `- Ítems que requieren confirmación del usuario antes de aprobar (lista concreta).\n\n` +
+  `### 5. Supuestos\n` +
+  `Todo dato no verificado que asumiste, como "Supuesto (no confirmado): ...".\n\n` +
+  `### 6. Errores o bloqueos\n` +
+  `Lo que no pudiste hacer y por qué (archivo inexistente, permiso, ambigüedad).`
 
 const plugin: Plugin.Plugin = {
   id: "workflow-sac",
@@ -221,8 +245,9 @@ const plugin: Plugin.Plugin = {
 - reset: reiniciar progreso
 
 Delegación: si una fase declara 'subAgent: <agente>.md' en el manifiesto, execute la delega
-a una sesión hija (subagente) con ese agente y te devuelve SOLO su resumen — el trabajo
-pesado lo hace el subagente, tú solo presentas el resultado y pides approve.
+a una sesión hija (subagente) con ese agente y te devuelve SOLO su entregable estructurado
+(contrato de 6 secciones: trabajo, artefactos, resultado, decisiones, supuestos, errores) —
+el trabajo pesado lo hace el subagente, tú solo presentas el resultado y pides approve.
 La delegación es robusta: cada intento tiene un tope de tiempo (por defecto 10 min) y hay
 1 reintento automático ante fallos transitorios; si se agota, la fase NO cambia de estado.
 
@@ -447,7 +472,7 @@ async function executePhase(
     const prompt =
       `${heading}\n\n${phaseBody}\n\n` +
       (meta.output ? `Artefacto esperado: ${meta.output} — genera o actualízalo en el workspace si corresponde.\n\n` : "") +
-      `Cuando termines, devuelve un resumen breve y concreto del resultado para el agente principal.`
+      SUBAGENT_CONTRACT
     const result = await rc.delegate({
       parentID: rc.sessionID,
       agent,

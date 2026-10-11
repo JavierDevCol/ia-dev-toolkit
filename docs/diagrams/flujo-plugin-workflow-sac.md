@@ -351,7 +351,7 @@ sequenceDiagram
     Note over D: intento 1 de 2 · el reintento es solo para fallos no-timeout
     D->>API: ctx.session.create({parentID, agent, model})
     API-->>D: sub.id (sesión hija enlazada)
-    D->>API: ctx.session.prompt({sessionID: sub.id, text: cuerpo de la fase})
+    D->>API: ctx.session.prompt({sessionID: sub.id, text: fase + contrato ENTREGABLE})
     D->>API: ctx.session.wait({sessionID: sub.id}) · carrera contra deadline (10 min, env WORKFLOW_SAC_DELEGATE_TIMEOUT_MS)
     alt deadline vencido (hijo colgado)
         D->>API: ctx.session.interrupt({sessionID: sub.id})  (detiene al hijo)
@@ -383,6 +383,7 @@ sequenceDiagram
 - **Timeout**: cada intento tiene un tope de tiempo (10 min por defecto, ajustable con la env `WORKFLOW_SAC_DELEGATE_TIMEOUT_MS`). Si el hijo no termina, se le llama `interrupt` (best effort) y la fase falla **sin tocar el estado**. Un timeout **no reintenta** (reintentar duplicaría la espera máxima).
 - **1 reintento automático**: ante un fallo transitorio (rate-limit, proveedor caído, sesión que no arranca), la delegación repite **una vez** con una sesión hija nueva; si el 2.º intento también falla, el error lo indica ("tras 1 reintento automático").
 - **Modelo**: usa el model del agente si está configurado; si no, hereda explícitamente el de la sesión padre (`create()` no lo hereda solo).
+- **Contrato de entregable**: todo encargo cierra con el contrato estándar (`SUBAGENT_CONTRACT`, 6 secciones: trabajo, artefactos, resultado, decisiones/pendientes, supuestos, errores). Cubre fases de solo-análisis ("Ninguno" en artefactos), solo-archivo y mixtas; una fase puede añadir specifics en su cuerpo (`## ENTREGABLE`) que se componen con el contrato (el cuerpo va primero).
 - **Gates primero**: `notDeclared` y `findGateBlocker` se resuelven *antes* de crear la sesión hija.
 - **`gate: auto`** se evalúa **después** de la delegación → si el subagente creó el artefacto `output`, la fase se auto-aprueba en la misma llamada.
 - **Cleanup**: la sesión hija se elimina tras leer su contexto — o tras interrumpirla — (`remove` en `finally`, todos los caminos); errores de limpieza no fallan la fase.
