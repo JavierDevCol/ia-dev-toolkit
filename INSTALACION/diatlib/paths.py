@@ -17,7 +17,10 @@ from pathlib import Path
 # ============================================================
 OWNER = "JavierDevCol"
 REPO = "ia-dev-toolkit"
-REF = "main"
+# Ref del repo a instalar. Por defecto, main. Se puede sobreescribir con la
+# variable de entorno DIAT_REF para probar tags o ramas concretas
+# (p. ej. DIAT_REF=plugin-wf-sac-rc1 ./INSTALACION/diat --install /ruta).
+REF = os.environ.get("DIAT_REF", "main")
 
 # Carpeta del repo donde viven los archivos del CLI.
 CLI_SRC_DIR = "INSTALACION"
