@@ -18,6 +18,10 @@ import path from "path"
  * Instalación: DIAT copia esta carpeta a `<proyecto>/.opencode/plugins/workflow-sac/`,
  * donde OpenCode V2 la descubre automáticamente (sin tocar opencode.json).
  *
+ * Tests: `node plugins/workflow-sac/test/smoke.mjs` — auto-compila index.ts con --strict
+ * en un entorno temporal (typescript + @opencode/plugin) y corre 51 checks.
+ * Demo delegable out-of-the-box: `workflows/demo-delegacion/` (fase delegada al agente PO).
+ *
  * Cambios respecto a la versión V1:
  * - API V2: input como JSON Schema, execute devuelve `{ content }`.
  * - La raíz del proyecto ya no viene de `context.worktree` (V1): se resuelve desde
