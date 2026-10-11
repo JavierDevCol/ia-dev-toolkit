@@ -17,10 +17,19 @@ from pathlib import Path
 # ============================================================
 OWNER = "JavierDevCol"
 REPO = "ia-dev-toolkit"
-# Ref del repo a instalar. Por defecto, main. Se puede sobreescribir con la
-# variable de entorno DIAT_REF para probar tags o ramas concretas
-# (p. ej. DIAT_REF=plugin-wf-sac-rc1 ./INSTALACION/diat --install /ruta).
-REF = os.environ.get("DIAT_REF", "main")
+DEFAULT_REF = "main"
+
+
+def get_ref():
+    """Ref (rama, tag o commit) de la que se descarga el repo.
+
+    Por defecto 'main'. Se puede cambiar con la env DIAT_REF para probar
+    implementaciones sin tocar main:
+
+        curl -fsSL .../install.sh | DIAT_REF=v1.2.3-test bash
+        DIAT_REF=feature/x diat --update
+    """
+    return (os.environ.get("DIAT_REF") or "").strip() or DEFAULT_REF
 
 # Carpeta del repo donde viven los archivos del CLI.
 CLI_SRC_DIR = "INSTALACION"
@@ -104,3 +113,8 @@ def get_sha_file():
 def get_version_file():
     """Ruta del archivo con el tag de versión cacheado (ej. '0.11.0')."""
     return get_cache_dir() / ".version"
+
+
+def get_ref_file():
+    """Ruta del archivo con la ref (rama/tag) del último snapshot cacheado."""
+    return get_cache_dir() / ".ref"

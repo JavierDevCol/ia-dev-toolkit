@@ -9,7 +9,11 @@ set -euo pipefail
 
 OWNER="JavierDevCol"
 REPO="ia-dev-toolkit"
-REF="main"
+# Ref por defecto 'main'. Para probar una implementación sin publicar en main:
+#   curl -fsSL https://raw.githubusercontent.com/.../install.sh | DIAT_REF=v1.2.3-test bash
+# Normaliza como get_ref() del CLI: quita espacios alrededor; vacío => main.
+REF="$(printf '%s' "${DIAT_REF:-}" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+if [ -z "$REF" ]; then REF="main"; fi
 CLI_DIR="INSTALACION"
 
 BIN="$HOME/.local/bin"
@@ -47,6 +51,9 @@ TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 
 URL="https://codeload.github.com/$OWNER/$REPO/tar.gz/$REF"
+if [ "$REF" != "main" ]; then
+    echo -e "${YELLOW}🧪 Canal de prueba: instalando desde ref '$REF'${NC}"
+fi
 if command -v curl >/dev/null 2>&1; then
     curl -fsSL "$URL" | tar -xz -C "$TMP"
 else

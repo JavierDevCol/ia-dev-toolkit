@@ -51,8 +51,8 @@ def _merge_dict(old, new):
     return merged
 
 
-def save_installation(project_path, platform_dir, selection, components, sha):
-    """Guarda/actualiza una instalación con seeds (selection), resueltos y sha.
+def save_installation(project_path, platform_dir, selection, components, sha, ref=None):
+    """Guarda/actualiza una instalación con seeds (selection), resueltos, sha y ref.
     Si el proyecto ya estaba registrado, fusiona con la selección/componentes previos
     en vez de reemplazarlos (instalar algo nuevo no debe des-trackear lo anterior)."""
     project_path = str(Path(project_path).resolve())   # normaliza (symlinks, relativas)
@@ -71,6 +71,7 @@ def save_installation(project_path, platform_dir, selection, components, sha):
         "platform": platform_dir,
         "installed_at": datetime.now().isoformat(),
         "sha": sha,
+        "ref": ref or paths.get_ref(),
         "selection": selection,
         "components": components,
     }
@@ -128,3 +129,19 @@ def save_installed_version(version):
     f = paths.get_version_file()
     f.parent.mkdir(parents=True, exist_ok=True)
     f.write_text(version, encoding="utf-8")
+
+
+# ============================================================
+# REF CACHEADA (de la que vino el snapshot: 'main', tag o rama)
+# ============================================================
+def get_installed_ref():
+    """Ref desde la que se descargó el cache (ej. 'main', 'v0.18.1', 'feature/x'),
+    o None si el snapshot es anterior al soporte de canales."""
+    f = paths.get_ref_file()
+    return f.read_text(encoding="utf-8").strip() if f.exists() else None
+
+
+def save_installed_ref(ref):
+    f = paths.get_ref_file()
+    f.parent.mkdir(parents=True, exist_ok=True)
+    f.write_text(ref, encoding="utf-8")

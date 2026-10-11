@@ -25,6 +25,34 @@ Tras instalar, reinicia la terminal (o `source ~/.zshrc`) y ya tienes el comando
 
 ---
 
+## Canales de prueba (DIAT_REF)
+
+Por defecto todo se descarga de `main`. La env **`DIAT_REF`** permite instalar y probar una
+implementación sin publicar en `main`, apuntando a una **rama, tag o commit** cualquiera del repo.
+
+**Instalar el CLI desde una ref de prueba:**
+```bash
+curl -fsSL https://raw.githubusercontent.com/JavierDevCol/ia-dev-toolkit/main/INSTALACION/bootstrap/install.sh | DIAT_REF=v1.2.3-test bash
+```
+```powershell
+$env:DIAT_REF="v1.2.3-test"; irm https://raw.githubusercontent.com/JavierDevCol/ia-dev-toolkit/main/INSTALACION/bootstrap/install.ps1 | iex
+```
+
+**Probar componentes con el CLI ya instalado** (`--install` y `--update` respetan la env):
+```bash
+DIAT_REF=feature/nueva-skill diat --install /ruta/proyecto
+DIAT_REF=feature/nueva-skill diat --update
+```
+
+Comportamiento:
+- Sin `DIAT_REF` → `main` (comportamiento clásico, sin cambios).
+- Cambiar la ref **fuerza la re-descarga** del snapshot aunque el `sha` coincida (compara ref + sha).
+- La ref usada queda registrada: `.ref` en el cache + campo `ref` en `instalacion.json`.
+- `diat --status` muestra la ref activa (`Ref: main → feature/x (canal de prueba)`).
+- Ref inexistente → el CLI y el bootstrap **abortan** con error claro (CLI: `La ref 'X' no existe en el repo …`; bootstrap: 404 de GitHub). Nunca instala desde el cache viejo.
+
+---
+
 ## Comandos
 
 | Comando | Descripción |
