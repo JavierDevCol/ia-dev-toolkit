@@ -8,6 +8,7 @@
 
 | Fecha | Entrada | Descripción |
 |---|---|---|
+| 2026-10-13 | [Mejoras Canal DIAT](mejoras-canal-di/bitacora.md) | Auditoría CLI↔ref (34 hallazgos, 7 críticos) y plan de mejoras por oleadas |
 | 2026-08-30 | [Sistema Memoria Persistente](sistema-memoria-persistente/bitacora.md) | Diseño de sistema SQLite + MCP para memoria persistente de agentes AI |
 | 2026-08-27 | [Pruebas E2E Skills SAC](pruebas-e2e-skills/bitacora.md) | Pruebas punto a punto del pipeline de skills SAC (7 escenarios, 108 assertions) |
 | 2026-08-26 | [Revisar install-skill](revisar-install-skill/) | Análisis del script de instalación legacy |
