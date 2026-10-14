@@ -3,7 +3,9 @@
 - resolve_closure: cierre transitivo (DFS post-orden = orden topológico) con
   detección de ciclos. Solo sigue 'requires', no 'optional'.
 - collect_optional: opcionales del nivel superior, para ofrecer (no en cascada).
-- validate_dependencies: falla temprano si un nombre referenciado no existe en el catálogo.
+- validate_dependencies: valida el grafo local contra el catálogo de la ref.
+  Con 'seeds' valida SOLO el subgrafo de la selección (lo no relacionado no
+  bloquea: puede pertenecer a otra ref); sin 'seeds', el grafo completo.
 """
 
 from . import paths
@@ -65,24 +67,63 @@ COMPONENT_DEPENDENCIES = {
 # ============================================================
 # VALIDACIÓN
 # ============================================================
-def validate_dependencies(catalog, dependencies=None):
-    """Verifica que cada nombre referenciado exista en el catálogo.
-    Lanza DependencyError con la lista COMPLETA de errores."""
-    dependencies = dependencies or COMPONENT_DEPENDENCIES
-    errors = []
-    for owner_type, entries in dependencies.items():
-        for owner_name, spec in entries.items():
-            if owner_name not in catalog.get(owner_type, set()):
-                errors.append(f"{owner_type}:{owner_name} tiene deps pero no está en el catálogo")
-            for bucket in ("requires", "optional"):
-                for dep_type, dep_names in spec.get(bucket, {}).items():
-                    for dep_name in dep_names:
-                        if dep_name not in catalog.get(dep_type, set()):
-                            errors.append(
-                                f"{owner_type}:{owner_name} → {bucket}.{dep_type}:"
-                                f"{dep_name} NO existe en el catálogo")
+def validate_dependencies(catalog, seeds=None, dependencies=None):
+    """Verifica la compatibilidad entre el grafo local y el catálogo de la ref.
+
+    - Con 'seeds' [(tipo,nombre)]: valida SOLO el subgrafo alcanzable desde la
+      selección. Componentes del grafo que no afectan a lo pedido no bloquean
+      la instalación (pueden pertenecer a otra ref).
+    - Sin 'seeds': valida el grafo completo (modo diagnóstico).
+
+    Lanza DependencyError si la selección no podría instalarse completa
+    (requires ausente del catálogo). Devuelve la lista de warnings no
+    bloqueantes (selección ausente de la ref, opcionales no disponibles)."""
+    if dependencies is None:
+        dependencies = COMPONENT_DEPENDENCIES
+
+    if seeds is None:
+        nodes = [(t, n) for t, entries in dependencies.items() for n in entries]
+        selected = set()
+    else:
+        _, closure = resolve_closure(seeds, dependencies)
+        nodes = [(t, n) for t, names in closure.items() for n in names]
+        selected = {(t, n) for t, n in seeds}
+
+    errors, warnings = [], []
+    for otype, oname in nodes:
+        in_catalog = oname in catalog.get(otype, set())
+        spec = dependencies.get(otype, {}).get(oname)
+
+        if not in_catalog:
+            if (otype, oname) in selected:
+                # El usuario lo seleccionó pero esta ref no lo trae: se omitirá.
+                warnings.append(f"{otype}:{oname} no está en esta ref — se omitirá")
+            else:
+                # Dependencia transitiva ausente: lo que la requiere quedaría incompleto.
+                errors.append(f"{otype}:{oname} (requerido) no está en el catálogo")
+            continue
+
+        if spec is None:
+            continue  # hoja sin reglas propias en el grafo local
+
+        for bucket in ("requires", "optional"):
+            for dep_type, dep_names in spec.get(bucket, {}).items():
+                for dep_name in dep_names:
+                    if dep_name in catalog.get(dep_type, set()):
+                        continue
+                    msg = (f"{otype}:{oname} → {bucket}.{dep_type}:{dep_name}"
+                           f" NO existe en el catálogo")
+                    if bucket == "requires":
+                        errors.append(msg)
+                    else:
+                        warnings.append(msg + " (opcional, se omite)")
+
     if errors:
-        raise DependencyError("Dependencias inválidas:\n  - " + "\n  - ".join(errors))
+        raise DependencyError(
+            "Dependencias inválidas para esta ref:\n  - " + "\n  - ".join(errors)
+            + f"\n  (grafo del CLI local · ref activa: {paths.get_ref()})"
+            + "\n  Si cambiaste DIAT_REF, ejecuta 'diat --update'.")
+    return warnings
 
 
 # ============================================================

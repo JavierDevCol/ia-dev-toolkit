@@ -156,15 +156,19 @@ def cmd_install(argv):
         return
 
     catalog = github.scan_components(cache)
-    try:
-        deps.validate_dependencies(catalog)
-    except deps.DependencyError as e:
-        ui.print_error(str(e))
-        return
 
     seeds, with_config = _gather_seeds(catalog)
     if not seeds and not with_config:
         ui.print_info("Nada seleccionado. Cancelado.")
+        return
+
+    # Validar SOLO lo seleccionado contra el catálogo de la ref: lo no
+    # relacionado con la elección no bloquea (puede pertenecer a otra ref).
+    try:
+        for w in deps.validate_dependencies(catalog, seeds=seeds):
+            ui.print_warning(w)
+    except deps.DependencyError as e:
+        ui.print_error(str(e))
         return
 
     # Ofrecer solo opcionales que NO estén ya incluidas en lo que se instalará

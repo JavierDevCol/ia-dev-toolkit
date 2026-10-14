@@ -68,12 +68,19 @@ def cmd_update(argv=None):
     if registro.get_installed_sha() != remote_sha or registro.get_installed_ref() != ref:
         ui.print_info("Repo actualizado — descargando snapshot...")
         cache = github.download_and_stage()
-        catalog = github.build_catalog(cache)
-        try:
-            deps.validate_dependencies(catalog)
-        except deps.DependencyError as e:
-            ui.print_error(str(e))
-            return
+        catalog = github.scan_components(cache)
+        # Validar solo lo que los proyectos registrados usan realmente:
+        # seeds ausentes de la nueva ref se omiten con warning (no abortan).
+        seeds = [(t, n) for inst in installations
+                 for t, names in inst.get("selection", inst.get("components", {})).items()
+                 if isinstance(names, list) for n in names]
+        if seeds:
+            try:
+                for w in deps.validate_dependencies(catalog, seeds=seeds):
+                    ui.print_warning(w)
+            except deps.DependencyError as e:
+                ui.print_error(str(e))
+                return
         registro.save_installed_sha(remote_sha)
         registro.save_installed_ref(ref)
         ui.print_success(f"Cache y CLI actualizados (ref: {ref})")
