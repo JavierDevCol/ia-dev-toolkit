@@ -29,6 +29,8 @@ Proceso estructurado de mejoras al canal de prueba de DIAT (CLI instalador): eli
     - **O2 — integridad del caché + persistencia del canal:** purgado al cambiar de ref · sonda de validez · tarball anclado al sha · `--channel` persistente · bootstrap escribe `.ref` · skip "al día" considera ref · seeds sin trazabilidad · DownloadError capturado · `--version` por canal
     - **O3 — UX/robustez:** mensaje de deps con `DIAT_REF` · validación de formato de ref · 403≠offline · "0 componentes" como éxito · config/assets viejos · `LEGACY_REPLACED` en ref · `is_test_channel` único
   - Validación por fix: HOME aislado + `DIAT_REF` (procedimiento ya probado en la fase de canal de prueba).
+  - **Modelo objetivo del canal (definido con el usuario 2026-10-14):** el tag es la fuente de verdad de la instalación COMPLETA. 4 reglas: R1 bootstrap con `DIAT_REF=X` instala TODO desde X (CLI+caché+metadatos consistentes) · R2 el canal queda fijado en `.ref` (la env es solo argumento de entrada) · R3 cambiar de tag = reemplazo completo y seguro (purge+staging atómico) · R4 cada proyecto registra la ref REAL y el status compara contra SU ref.
+  - **Decisión [P] (2026-10-14):** cuando el bootstrap detecte instalación existente con canal distinto al tag solicitado → **cambiar todo pero pidiendo confirmación primero** ("canal actual: main → nuevo: vX-test, ¿continuar?"). Aplica a O2 (M-4/M-8).
 
 ## Evidencias
 - **Descripción:** {file:./EVIDENCIAS/auditoria-cli-ref-deps.md} — Auditoría 1: `diat` + `deps.py` + `instalar.py` (C-01…C-04, M-01…M-12, B-01…B-08)
