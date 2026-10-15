@@ -153,8 +153,13 @@ main() {
             *) fail "No se pudo resolver la última release (red/permisos). Reintenta." ;;
         esac
     fi
-    validate_ref_format "$REF" "$REF_FROM_ENV" || fail \
-        "DIAT_REF solo acepta tags vX.Y.Z o vX.Y.Z-TEST. Recibido: '$REF'. Para la última release, ejecuta sin DIAT_REF."
+    if ! validate_ref_format "$REF" "$REF_FROM_ENV"; then
+        if [ "$REF_FROM_ENV" = "1" ]; then
+            fail "DIAT_REF solo acepta tags vX.Y.Z o vX.Y.Z-TEST. Recibido: '$REF'. Para la última release, ejecuta sin DIAT_REF."
+        else
+            fail "última release con nombre inválido ('$REF') — revisa las releases del repo"
+        fi
+    fi
 
     # 3) Requisitos previos
     echo "🔍 Verificando requisitos previos..."

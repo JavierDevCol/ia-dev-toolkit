@@ -13,6 +13,7 @@ Uso:
 """
 
 import os
+import re
 import sys
 from pathlib import Path
 
@@ -236,17 +237,17 @@ def _status_system():
     except github.RefNotFoundError as e:
         ui.print_error(str(e))
         return
-    ref_cache = registro.get_installed_ref() or "main"
-    canal = " (canal de prueba)" if ref != paths.DEFAULT_REF else ""
-    print(f"  Ref:     {ref_cache} → {ref}{canal}")
+    canal = " (canal de prueba)" if paths.is_test_channel(ref) else ""
+    print(f"  Ref:     {ref}{canal}")
     if not paths.is_test_channel(ref):
         latest = github.get_latest_release_tag()
-        if latest:
+        # Solo releases con nombre estable (vX.Y.Z) colorean el canal (B3).
+        if latest and re.fullmatch(r"v\d+\.\d+\.\d+", latest):
             extra = " → ejecuta 'diat --update'" if latest != ref else ""
             print(f"  Release: actual {ref} · última {latest}{extra}")
     if remote_sha is None:
         print("  Repo:    ⚠️  sin conexión")
-    elif local_sha == remote_sha and ref_cache == ref:
+    elif local_sha == remote_sha:
         print(f"  Repo:    ✅ al día ({(local_sha or '?')[:7]})")
     else:
         print(f"  Repo:    ⚠️  hay actualización ({(local_sha or '?')[:7]} → {remote_sha[:7]})")

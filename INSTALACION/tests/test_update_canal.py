@@ -37,8 +37,41 @@ class UpdateCanalR10Test(unittest.TestCase):
         rel.assert_called_once()
         self.assertIn("Canal estable: v2.0.0 → v2.1.1 (última release)", out)
         sha.assert_called_once_with(ref="v2.1.1")           # descarga desde la nueva release
-        dl.assert_called_once()
+        dl.assert_called_once_with(ref="v2.1.1")            # la descarga viaja con la ref nueva
         self.assertEqual(paths.get_ref_file().read_text(encoding="utf-8"), "v2.1.1")
+        self.assertEqual(paths.get_version_file().read_text(encoding="utf-8"), "2.1.1")
+
+    def test_estable_release_nombre_invalido_no_migra(self):   # B3: patrón estable
+        for bad in ("v2.2.0-TEST", "release-1"):
+            with self.subTest(latest=bad):
+                out, sha, dl, rel = self._run_update("v2.0.0", bad)
+                self.assertIn(f"última release con nombre inválido ('{bad}')", out)
+                self.assertNotIn("Canal estable:", out)
+                sha.assert_called_once_with(ref="v2.0.0")   # la descarga decide el sha
+                dl.assert_called_once_with(ref="v2.0.0")    # sin migración de ref
+                self.assertEqual(paths.get_ref_file().read_text(encoding="utf-8"), "v2.0.0")
+
+    def test_abort_validacion_deja_estado_del_canal_nuevo(self):  # staging etiquetado
+        paths.get_ref_file().write_text("v2.0.0", encoding="utf-8")
+        registro.save_installed_sha("OLD")
+        proyecto = Path(self._tmp.name) / "proj"
+        registro.save_installation(proyecto, ".opencode",
+                                   {"skills": ["ejecutar-plan"]}, {}, "OLD",
+                                   ref="v2.0.0")
+        out = io.StringIO()
+        with patch("diatlib.github.get_remote_sha", return_value="NEW123"), \
+             patch("diatlib.github.download_and_stage",
+                   return_value=paths.get_cache_dir()) as dl, \
+             patch("diatlib.github.scan_components",
+                   return_value={"skills": {"ejecutar-plan"}}), \
+             patch("diatlib.github.get_latest_release_tag", return_value="v2.1.1"):
+            with redirect_stdout(out):
+                update.cmd_update([])       # valida -> falta validar-ca -> aborta
+        dl.assert_called_once_with(ref="v2.1.1")
+        self.assertIn("Dependencias inválidas", out.getvalue())
+        # lo staged queda etiquetado con el canal NUEVO pese al abort
+        self.assertEqual(paths.get_ref_file().read_text(encoding="utf-8"), "v2.1.1")
+        self.assertEqual(paths.get_sha_file().read_text(encoding="utf-8"), "NEW123")
         self.assertEqual(paths.get_version_file().read_text(encoding="utf-8"), "2.1.1")
 
     def test_estable_al_dia_no_descarga(self):
@@ -53,7 +86,7 @@ class UpdateCanalR10Test(unittest.TestCase):
         rel.assert_not_called()                            # la release ni se consulta
         self.assertIn("Canal de prueba", out)
         sha.assert_called_once_with(ref="v2.2.0-TEST")
-        dl.assert_called_once()                            # sha movido -> refresca el tag
+        dl.assert_called_once_with(ref="v2.2.0-TEST")      # sha movido -> refresca el tag
         self.assertEqual(paths.get_ref_file().read_text(encoding="utf-8"), "v2.2.0-TEST")
 
     def test_legacy_main_migra_a_ultima_release(self):      # Review Focus 5 (B12)
@@ -82,6 +115,30 @@ class StatusReleaseTest(unittest.TestCase):                 # R10 display
              redirect_stdout(out):
             cli._status_system()
         self.assertIn("actual v2.1.1 · última v2.2.0", out.getvalue())
+        self.assertNotIn("canal de prueba", out.getvalue())  # estable NO se etiqueta
+        self.assertIn("  Ref:     v2.1.1\n", out.getvalue())  # sin "X → X"
+
+    def test_status_marca_canal_de_prueba(self):
+        paths.get_ref_file().write_text("v2.2.0-TEST", encoding="utf-8")
+        cli = _load_cli()
+        out = io.StringIO()
+        with patch("diatlib.github.get_remote_sha", return_value="SAME"), \
+             patch("diatlib.github.get_latest_release_tag", return_value="v2.1.1") as rel, \
+             redirect_stdout(out):
+            cli._status_system()
+        self.assertIn("  Ref:     v2.2.0-TEST (canal de prueba)\n", out.getvalue())
+        self.assertNotIn("Release:", out.getvalue())          # canales TEST sin release
+        rel.assert_not_called()
+
+    def test_status_release_nombre_invalido_no_muestra_linea(self):  # B3 display
+        paths.get_ref_file().write_text("v2.1.1", encoding="utf-8")
+        cli = _load_cli()
+        out = io.StringIO()
+        with patch("diatlib.github.get_remote_sha", return_value="SAME"), \
+             patch("diatlib.github.get_latest_release_tag", return_value="release-1"), \
+             redirect_stdout(out):
+            cli._status_system()
+        self.assertNotIn("Release:", out.getvalue())
 
 
 if __name__ == "__main__":

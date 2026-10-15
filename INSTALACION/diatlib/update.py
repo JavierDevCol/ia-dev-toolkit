@@ -9,6 +9,7 @@ Con ruta explícita, restringe la actualización a esa instalación (debe estar
 registrada; si no, dirige a `diat --install`) en vez de recorrer todo el registro.
 """
 
+import re
 from datetime import datetime
 from pathlib import Path
 
@@ -45,7 +46,12 @@ def cmd_update(argv=None):
         ui.print_warning(f"Canal de prueba: actualizando desde '{ref}'")
     else:                                                # R10: estable = última release
         latest = github.get_latest_release_tag()
-        if latest and latest != ref:
+        # B3: solo migra a releases con nombre estable (vX.Y.Z); cualquier otro
+        # nombre (p. ej. 'v2.2.0-TEST' publicada como release o 'release-1')
+        # se ignora y se conserva el ref actual.
+        if latest and not re.fullmatch(r"v\d+\.\d+\.\d+", latest):
+            ui.print_warning(f"última release con nombre inválido ('{latest}') — ignorada")
+        elif latest and latest != ref:
             ui.print_warning(f"Canal estable: {ref} → {latest} (última release)")
             ref = latest
         elif latest:
@@ -73,6 +79,13 @@ def cmd_update(argv=None):
     if registro.get_installed_sha() != remote_sha or registro.get_installed_ref() != ref:
         ui.print_info("Repo actualizado — descargando snapshot...")
         cache = github.download_and_stage(ref=ref)
+        # Etiquetar lo recién staged ANTES de validar: si la validación aborta,
+        # el cache nuevo queda con la etiqueta nueva (nunca contenido nuevo con
+        # .ref/.sha del canal viejo).
+        registro.save_installed_sha(remote_sha)
+        registro.save_installed_ref(ref)
+        if ref != paths.DEFAULT_REF:
+            registro.save_installed_version(ref[1:])     # espejo exacto del canal
         catalog = github.scan_components(cache)
         # Validar solo lo que los proyectos registrados usan realmente:
         # seeds ausentes de la nueva ref se omiten con warning (no abortan).
@@ -86,10 +99,6 @@ def cmd_update(argv=None):
             except deps.DependencyError as e:
                 ui.print_error(str(e))
                 return
-        registro.save_installed_sha(remote_sha)
-        registro.save_installed_ref(ref)
-        if ref != paths.DEFAULT_REF:
-            registro.save_installed_version(ref[1:])     # espejo exacto del canal
         ui.print_success(f"Cache y CLI actualizados (ref: {ref})")
     else:
         ui.print_success("Cache ya está al día.")
