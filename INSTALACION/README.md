@@ -25,31 +25,36 @@ Tras instalar, reinicia la terminal (o `source ~/.zshrc`) y ya tienes el comando
 
 ---
 
-## Canales de prueba (DIAT_REF)
+## Canales (releases + prueba)
 
-Por defecto todo se descarga de `main`. La env **`DIAT_REF`** permite instalar y probar una
-implementación sin publicar en `main`, apuntando a una **rama, tag o commit** cualquiera del repo.
+La instalación se fija por **canal**, y el canal vive en `.ref`
+(`~/.local/share/ia-dev-toolkit/.ref` en POSIX). Solo lo cambia el bootstrap
+(o `diat --update` en canal estable).
 
-**Instalar el CLI desde una ref de prueba:**
+**Estable (por defecto):** `curl ... | bash` sin `DIAT_REF` instala la **última release**
+publicada en GitHub (`vX.Y.Z`; requiere al menos una release publicada en el repo).
+`diat --update` te **migra automáticamente** a la última release nueva, sin repetir el
+bootstrap (aviso `Canal estable: vX → vY (última release)`).
+
+**Prueba (pin a un tag `-TEST`):**
 ```bash
-curl -fsSL https://raw.githubusercontent.com/JavierDevCol/ia-dev-toolkit/main/INSTALACION/bootstrap/install.sh | DIAT_REF=v1.2.3-test bash
+curl -fsSL https://raw.githubusercontent.com/JavierDevCol/ia-dev-toolkit/main/INSTALACION/bootstrap/install.sh | DIAT_REF=vX.Y.Z-TEST bash
 ```
 ```powershell
-$env:DIAT_REF="v1.2.3-test"; irm https://raw.githubusercontent.com/JavierDevCol/ia-dev-toolkit/main/INSTALACION/bootstrap/install.ps1 | iex
+$env:DIAT_REF="vX.Y.Z-TEST"; irm https://raw.githubusercontent.com/JavierDevCol/ia-dev-toolkit/main/INSTALACION/bootstrap/install.ps1 | iex
 ```
 
-**Probar componentes con el CLI ya instalado** (`--install` y `--update` respetan la env):
-```bash
-DIAT_REF=feature/nueva-skill diat --install /ruta/proyecto
-DIAT_REF=feature/nueva-skill diat --update
-```
+El sufijo **`-TEST` va en mayúsculas** (`-test` en minúsculas se rechaza). Solo se aceptan
+tags `vX.Y.Z` o `vX.Y.Z-TEST` — **`main` y ramas ya no son canal**. Es un **pin**:
+`diat --update` solo refresca si el tag se movió; nunca salta a otro tag.
 
 Comportamiento:
-- Sin `DIAT_REF` → `main` (comportamiento clásico, sin cambios).
-- Cambiar la ref **fuerza la re-descarga** del snapshot aunque el `sha` coincida (compara ref + sha).
-- La ref usada queda registrada: `.ref` en el cache + campo `ref` en `instalacion.json`.
-- `diat --status` muestra la ref activa (`Ref: main → feature/x (canal de prueba)`).
-- Ref inexistente → el CLI y el bootstrap **abortan** con error claro (CLI: `La ref 'X' no existe en el repo …`; bootstrap: 404 de GitHub). Nunca instala desde el cache viejo.
+- El bootstrap **verifica que el tag exista** antes de descargar; un tag inexistente aborta con error claro.
+- Si ya hay una instalación con otro canal, el bootstrap pide **confirmación** antes de cambiar [P].
+- `DIAT_REF` solo aplica al bootstrap: los comandos `diat` con la env exportada **abortan**
+  (mensaje de D7) — retira el `export` de tu shell.
+- `diat --version` muestra la versión exacta del canal: `v2.2.0-TEST (canal: v2.2.0-TEST)`.
+- `diat --status` muestra el canal activo (`Release: actual vX · última vY` en estable).
 
 ---
 
@@ -98,10 +103,17 @@ instalan) en orden correcto, con detección de ciclos y validación previa: si u
 referenciada no existe, se aborta con un error claro antes de tocar nada.
 
 ### Actualización
-`diat --update` descarga solo si el repo cambió (compara `sha`). Por cada proyecto registrado
-**re-resuelve las selecciones originales** contra el catálogo nuevo — así, si un componente
-ganó una dependencia entre versiones, esa nueva dependencia se instala sola. La configuración
-SAC ya respondida **no se sobrescribe**.
+`diat --update` resuelve primero el canal (R10):
+- **Estable:** consulta la última release publicada; si hay una más nueva, **migra
+  automáticamente** (reescribe `.ref`/`.version`, re-descarga y reinstala) con el aviso
+  `Canal estable: vX → vY (última release)`. Si ya estás en la última release, decide por
+  `sha` por si el tag se movió.
+- **Prueba (`-TEST`):** pin — nunca salta a otro tag; solo refresca si el tag se movió
+  (comparación por `sha` del tag).
+
+Por cada proyecto registrado **re-resuelve las selecciones originales** contra el catálogo
+nuevo — así, si un componente ganó una dependencia entre versiones, esa nueva dependencia se
+instala sola. La configuración SAC ya respondida **no se sobrescribe**.
 
 ---
 

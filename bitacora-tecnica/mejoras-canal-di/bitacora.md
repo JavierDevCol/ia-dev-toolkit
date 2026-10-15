@@ -83,3 +83,16 @@ Si algo sale mal, ejecutar:
 2. Implementar C1 (el known, mayor impacto inmediato) → validar en HOME aislado
 3. Seguir con C5 y C6 (los más aislados entre sí), luego C3, C4, C7, C2
 4. Actualizar esta bitácora tras cada fix (checkpoint [C])
+
+---
+
+## Checkpoint 2026-10-14 — Canal por tag (releases + `-TEST`)
+
+- **Spec:** `docs/superpowers/specs/2026-10-14-diat-ref-bootstrap-canal-por-tag-design.md` (aprobado + enmienda R8-R10 [C] 2026-10-14).
+- **Plan:** `docs/superpowers/plans/2026-10-14-diat-ref-bootstrap-canal-por-tag.md`.
+- **Decisiones:** [E] aborto · [P] confirmación por TTY · [O1] C5-por-proyecto diferido · R8-R10 (releases + `-TEST` + migración estable) · B14 `main` nunca canal · B15 sin purge/`.sha` en bootstrap.
+
+### Pendientes
+- [ ] Cierre de M-4/M-5/M-8/M-10
+- [ ] E2E pendiente (apagada por el usuario)
+- [ ] push pendiente de preview

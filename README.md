@@ -48,17 +48,22 @@ curl -fsSL https://raw.githubusercontent.com/JavierDevCol/ia-dev-toolkit/main/IN
 irm https://raw.githubusercontent.com/JavierDevCol/ia-dev-toolkit/main/INSTALACION/bootstrap/install.ps1 | iex
 ```
 
-**Versión de prueba (canal de prueba):**
+**Canales (releases + prueba):**
+- **Estable (por defecto):** `curl ... | bash` instala la **última release** publicada en
+  GitHub (`vX.Y.Z`; requiere al menos una release publicada). `diat --update` migra
+  automáticamente a la última release nueva.
+- **Prueba:** pin a un tag con sufijo **`-TEST` en mayúsculas** (`-test` se rechaza;
+  `main` y ramas ya no son canal):
 ```bash
-# Instala el CLI y componentes desde una rama, tag o commit sin publicar en main
-curl -fsSL https://raw.githubusercontent.com/JavierDevCol/ia-dev-toolkit/main/INSTALACION/bootstrap/install.sh | DIAT_REF=v1.2.3-test bash
+curl -fsSL https://raw.githubusercontent.com/JavierDevCol/ia-dev-toolkit/main/INSTALACION/bootstrap/install.sh | DIAT_REF=vX.Y.Z-TEST bash
 ```
 ```powershell
-$env:DIAT_REF="v1.2.3-test"; irm https://raw.githubusercontent.com/JavierDevCol/ia-dev-toolkit/main/INSTALACION/bootstrap/install.ps1 | iex
+$env:DIAT_REF="vX.Y.Z-TEST"; irm https://raw.githubusercontent.com/JavierDevCol/ia-dev-toolkit/main/INSTALACION/bootstrap/install.ps1 | iex
 ```
-Tras la instalación, `DIAT_REF` sigue siendo útil: `DIAT_REF=feature/x diat --install` y
-`DIAT_REF=feature/x diat --update` prueban componentes desde esa ref. `diat --status` muestra
-la ref activa (ver sección "Canales de prueba" en `INSTALACION/README.md`).
+Es un **pin**: `--update` solo refresca si el tag se movió; nunca salta a otro tag. `DIAT_REF`
+solo aplica al bootstrap — los comandos `diat` con la env exportada abortan (retira el
+`export` del shell). Detalles en la sección "Canales (releases + prueba)" de
+[INSTALACION/README.md](INSTALACION/README.md).
 
 **Python:**
 ```bash
