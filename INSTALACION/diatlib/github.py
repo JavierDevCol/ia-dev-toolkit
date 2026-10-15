@@ -134,6 +134,24 @@ def get_remote_version(owner=None, repo=None):
     return max(versions, key=lambda v: v[0])[1]
 
 
+def get_latest_release_tag(owner=None, repo=None):
+    """Tag de la última release publicada (ej. 'v2.1.1'), o None sin conexión/releases.
+    /releases/latest nunca devuelve prereleases ni drafts: los tags -TEST jamás
+    colorean el canal estable (R8/R10)."""
+    owner = owner or paths.OWNER
+    repo = repo or paths.REPO
+    url = f"https://api.github.com/repos/{owner}/{repo}/releases/latest"
+    req = urllib.request.Request(url, headers={
+        "Accept": "application/vnd.github+json",
+        "User-Agent": "diat-cli",
+    })
+    try:
+        with urllib.request.urlopen(req, timeout=30) as r:
+            return json.loads(r.read().decode()).get("tag_name") or None
+    except Exception:
+        return None
+
+
 # ============================================================
 # STAGING  (componentes -> cache, CLI -> bin)
 # ============================================================

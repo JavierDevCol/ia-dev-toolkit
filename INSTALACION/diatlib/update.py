@@ -2,7 +2,9 @@
 
 reinstall_components re-resuelve las seeds (selection) contra el catálogo nuevo, de
 modo que si un componente ganó una dependencia entre versiones, esa dep se instala.
-cmd_update descarga solo si el repo cambió y salta proyectos ya al día (por sha).
+cmd_update resuelve el canal (R10: estable migra a la última release, -TEST fija el
+tag) antes de tocar la red y descarga solo si el repo cambió, saltando proyectos ya
+al día (por sha).
 Con ruta explícita, restringe la actualización a esa instalación (debe estar
 registrada; si no, dirige a `diat --install`) en vez de recorrer todo el registro.
 """
@@ -38,22 +40,25 @@ def cmd_update(argv=None):
     args = [a for a in (argv or []) if not a.startswith("-")]
     target_path = Path(args[0]).resolve() if args else None
 
+    ref = paths.get_ref()
+    if paths.is_test_channel(ref):                       # R10: pin explícito
+        ui.print_warning(f"Canal de prueba: actualizando desde '{ref}'")
+    else:                                                # R10: estable = última release
+        latest = github.get_latest_release_tag()
+        if latest and latest != ref:
+            ui.print_warning(f"Canal estable: {ref} → {latest} (última release)")
+            ref = latest
+        elif latest:
+            ui.print_success(f"Canal estable al día ({ref})")
+
     try:
-        remote_sha = github.get_remote_sha()
+        remote_sha = github.get_remote_sha(ref=ref)
     except github.RefNotFoundError as e:
         ui.print_error(str(e))
         return
     if not remote_sha:
         ui.print_error("No se pudo obtener la versión remota. Abortando.")
         return
-
-    ref = paths.get_ref()
-    if ref != paths.DEFAULT_REF:
-        ui.print_warning(f"Canal de prueba: actualizando desde '{ref}'")
-
-    remote_version = github.get_remote_version()
-    if remote_version:
-        registro.save_installed_version(remote_version)
 
     installations = registro.load_installations()
 
@@ -67,7 +72,7 @@ def cmd_update(argv=None):
     # Descargar snapshot SOLO si el repo o la ref cambiaron (refresca componentes + CLI)
     if registro.get_installed_sha() != remote_sha or registro.get_installed_ref() != ref:
         ui.print_info("Repo actualizado — descargando snapshot...")
-        cache = github.download_and_stage()
+        cache = github.download_and_stage(ref=ref)
         catalog = github.scan_components(cache)
         # Validar solo lo que los proyectos registrados usan realmente:
         # seeds ausentes de la nueva ref se omiten con warning (no abortan).
@@ -83,6 +88,8 @@ def cmd_update(argv=None):
                 return
         registro.save_installed_sha(remote_sha)
         registro.save_installed_ref(ref)
+        if ref != paths.DEFAULT_REF:
+            registro.save_installed_version(ref[1:])     # espejo exacto del canal
         ui.print_success(f"Cache y CLI actualizados (ref: {ref})")
     else:
         ui.print_success("Cache ya está al día.")

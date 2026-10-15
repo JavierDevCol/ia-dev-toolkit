@@ -239,6 +239,11 @@ def _status_system():
     ref_cache = registro.get_installed_ref() or "main"
     canal = " (canal de prueba)" if ref != paths.DEFAULT_REF else ""
     print(f"  Ref:     {ref_cache} → {ref}{canal}")
+    if not paths.is_test_channel(ref):
+        latest = github.get_latest_release_tag()
+        if latest:
+            extra = " → ejecuta 'diat --update'" if latest != ref else ""
+            print(f"  Release: actual {ref} · última {latest}{extra}")
     if remote_sha is None:
         print("  Repo:    ⚠️  sin conexión")
     elif local_sha == remote_sha and ref_cache == ref:
