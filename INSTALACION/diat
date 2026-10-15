@@ -42,8 +42,7 @@ SAC_SKILLS = [
 # ============================================================
 def ensure_cache():
     """Garantiza que el cache tenga componentes actualizados. Devuelve la ruta o None.
-    Compara sha Y ref: si cambias DIAT_REF (p. ej. a una rama de prueba), se
-    re-descarga el snapshot aunque el sha coincidiera."""
+    Compara sha (G4): .ref ya es el canal, la etiqueta solo cambia al bajar."""
     ref = paths.get_ref()
     try:
         remote_sha = github.get_remote_sha()
@@ -52,8 +51,7 @@ def ensure_cache():
         return None
     cache = paths.get_cache_dir()
     have = (cache / "skills").exists()
-    if remote_sha and (registro.get_installed_sha() != remote_sha
-                       or registro.get_installed_ref() != ref or not have):
+    if remote_sha and (registro.get_installed_sha() != remote_sha or not have):
         ui.print_info(f"Descargando componentes (ref: {ref})...")
         try:
             cache = github.download_and_stage()
@@ -344,28 +342,39 @@ def cmd_version():
 
 
 def main():
+    if (os.environ.get("DIAT_REF") or "").strip():            # D7/B2: env no aplica
+        ui.print_error(
+            "DIAT_REF ya no aplica al CLI: el canal vive en '.ref' y solo el\n"
+            "  bootstrap lo cambia. Para cambiar de canal, re-ejecuta el bootstrap\n"
+            "  (p. ej. `curl ... | DIAT_REF=vX.Y.Z-TEST bash`) y retira\n"
+            "  'export DIAT_REF=...' de tu shell (p. ej. ~/.zshrc).")
+        sys.exit(1)
     argv = sys.argv[1:]
     if not argv:
         cmd_help()
         return
-    cmd, rest = argv[0], argv[1:]
-    if cmd in ("--help", "--h", "-h"):
-        cmd_help()
-    elif cmd in ("--version", "--v", "-v"):
-        cmd_version()
-    elif cmd in ("--install", "--i", "-i"):
-        cmd_install(rest)
-    elif cmd in ("--update", "--u", "-u"):
-        update.cmd_update(rest)
-    elif cmd in ("--status", "-s"):
-        cmd_status(rest)
-    elif cmd in ("--list", "-l"):
-        cmd_list()
-    elif cmd in ("--uninstall",):
-        cmd_uninstall(rest)
-    else:
-        ui.print_error(f"Comando desconocido: {cmd}")
-        cmd_help()
+    try:
+        cmd, rest = argv[0], argv[1:]
+        if cmd in ("--help", "--h", "-h"):
+            cmd_help()
+        elif cmd in ("--version", "--v", "-v"):
+            cmd_version()
+        elif cmd in ("--install", "--i", "-i"):
+            cmd_install(rest)
+        elif cmd in ("--update", "--u", "-u"):
+            update.cmd_update(rest)
+        elif cmd in ("--status", "-s"):
+            cmd_status(rest)
+        elif cmd in ("--list", "-l"):
+            cmd_list()
+        elif cmd in ("--uninstall",):
+            cmd_uninstall(rest)
+        else:
+            ui.print_error(f"Comando desconocido: {cmd}")
+            cmd_help()
+    except paths.ChannelError as e:                           # B4/B12 -> educativo
+        ui.print_error(str(e))
+        sys.exit(1)
 
 
 if __name__ == "__main__":
