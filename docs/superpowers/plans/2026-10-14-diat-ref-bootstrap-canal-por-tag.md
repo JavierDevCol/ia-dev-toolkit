@@ -1165,10 +1165,10 @@ Expected: `Resultado: 22 ok · 0 fail` (sin `fail`).
 Run: `python3 -m py_compile INSTALACION/diat INSTALACION/diatlib/*.py`
 Expected: silencio (exit 0).
 
-- [ ] **Step 4: Invariante G1 (cero lecturas de env como canal)**
+- [ ] **Step 4: Invariante G1 (cero lecturas de env como canal en producción)**
 
-Run: `grep -rn 'environ.get("DIAT_REF")\|environ\["DIAT_REF"\]' INSTALACION --include='*.py'`
-Expected: **una sola** ocurrencia — la detección [E] en `INSTALACION/diat` (`main()`). Si hay más → fix + commit.
+Run: `grep -rn 'DIAT_REF' INSTALACION/diatlib/*.py INSTALACION/diat | grep environ`
+Expected: **una sola** ocurrencia — la detección [E] en `INSTALACION/diat` (`main()`). Los tests escriben la env a propósito y no se escanean (son escrituras legítimas que prueban que `.ref` manda, no lecturas de canal). Si hay más → fix + commit.
 
 - [ ] **Step 5: No ejecutar la E2E (apagada) y pedir push**
 
