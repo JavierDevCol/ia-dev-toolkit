@@ -10,6 +10,7 @@ una subcarpeta que un --update pueda borrar.
 
 import os
 import platform
+import re
 from pathlib import Path
 
 # ============================================================
@@ -19,17 +20,36 @@ OWNER = "JavierDevCol"
 REPO = "ia-dev-toolkit"
 DEFAULT_REF = "main"
 
+# R9: canales = tags de release vX.Y.Z o de prueba vX.Y.Z-TEST. 'main' solo legado (B12).
+TAG_PATTERN = re.compile(r"^v\d+\.\d+\.\d+(-TEST)?$")
+
+
+class ChannelError(Exception):
+    pass
+
+
+def is_test_channel(ref):
+    """True si el canal es de prueba (sufijo -TEST, R9/R10)."""
+    return ref.endswith("-TEST")
+
 
 def get_ref():
-    """Ref (rama, tag o commit) de la que se descarga el repo.
+    """Canal activo (tag release/TEST o 'main' legado) leído del fichero .ref
+    (fuente única, G4/R2).
 
-    Por defecto 'main'. Se puede cambiar con la env DIAT_REF para probar
-    implementaciones sin tocar main:
-
-        curl -fsSL .../install.sh | DIAT_REF=v1.2.3-test bash
-        DIAT_REF=feature/x diat --update
-    """
-    return (os.environ.get("DIAT_REF") or "").strip() or DEFAULT_REF
+    Solo el bootstrap escribe .ref: `curl ... | DIAT_REF=v2.2.0-TEST bash`
+    (o sin env para la última release). La env DIAT_REF NO se lee aquí (G1);
+    los comandos abortan si la ven (D7).
+    Lanza ChannelError si no hay canal registrado o es inválido (B4/B12)."""
+    ref = get_ref_file().read_text(encoding="utf-8").strip() if get_ref_file().exists() else ""
+    if not ref:
+        raise ChannelError(
+            "Canal no registrado — re-ejecuta el bootstrap "
+            "(DIAT_REF solo aplica en el bootstrap; p. ej. "
+            "`curl ... | DIAT_REF=vX.Y.Z-TEST bash`).")
+    if ref != DEFAULT_REF and not TAG_PATTERN.match(ref):
+        raise ChannelError(f"Canal inválido ('{ref}') — re-ejecuta el bootstrap.")
+    return ref
 
 # Carpeta del repo donde viven los archivos del CLI.
 CLI_SRC_DIR = "INSTALACION"
