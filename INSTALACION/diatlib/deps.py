@@ -122,7 +122,7 @@ def validate_dependencies(catalog, seeds=None, dependencies=None):
         raise DependencyError(
             "Dependencias inválidas para esta ref:\n  - " + "\n  - ".join(errors)
             + f"\n  (grafo del CLI local · ref activa: {paths.get_ref()})"
-            + "\n  Si cambiaste DIAT_REF, ejecuta 'diat --update'.")
+            + "\n  Si el canal cambió, re-ejecuta el bootstrap; si no, ejecuta 'diat --update'.")
     return warnings
 
 
