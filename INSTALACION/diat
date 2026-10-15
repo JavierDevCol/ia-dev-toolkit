@@ -334,6 +334,11 @@ def cmd_help():
 
 
 def cmd_version():
+    if paths.get_ref_file().exists():
+        ref = paths.get_ref()            # valida el formato (B12); puede lanzar ChannelError
+        if ref != paths.DEFAULT_REF:     # 'main' = legado -> cae al espejo .version
+            print(f"DIAT — ia-dev-toolkit v{ref[1:]} (canal: {ref})")   # B11
+            return
     version = registro.get_installed_version()
     if version:
         print(f"DIAT — ia-dev-toolkit v{version}")
