@@ -1,0 +1,87 @@
+# Canal de prueba: cada push a `develop` mueve el tag móvil vX.Y.Z-TEST al
+# commit nuevo. El tag `-TEST` se mueve por diseño (borrar + recrear); NUNCA se
+# crea una GitHub Release aquí (eso es canal estable, release-stable.yml).
+name: release-test
+
+on:
+  push:
+    branches: [develop]
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Calcular el tag y mostrarlo sin mover nada"
+        type: boolean
+        required: false
+        default: false
+
+# El GITHUB_TOKEN no escribe nunca; toda escritura va por RELEASE_TOKEN (PAT).
+permissions:
+  contents: read
+
+concurrency:
+  group: release-test
+  cancel-in-progress: false
+
+jobs:
+  move-test-tag:
+    # Anti-bucle: los push con GITHUB_TOKEN no disparan workflows, pero esta
+    # guardia cubre el caso de que el PAT empuje como github-actions[bot].
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify RELEASE_TOKEN
+        env:
+          RELEASE_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+        run: |
+          if [ -z "$RELEASE_TOKEN" ]; then
+            echo "::error::RELEASE_TOKEN is not configured; refusing to run"
+            exit 1
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.RELEASE_TOKEN }}
+
+      - name: Compute next -TEST tag
+        id: plan
+        run: |
+          set +e
+          python3 scripts/release/next_version.py --channel test --json > plan.json
+          status=$?
+          set -e
+          if [ "$status" -eq 3 ]; then
+            echo "::notice::nothing to release"
+            exit 0
+          fi
+          if [ "$status" -ne 0 ]; then
+            echo "::error::next_version.py failed (exit $status)"
+            exit "$status"
+          fi
+          TAG="$(python3 -c 'import json; print(json.load(open("plan.json"))["tag"])')"
+          if ! printf '%s' "$TAG" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+-TEST$'; then
+            echo "::error::refusing to move a non -TEST tag: $TAG"
+            exit 1
+          fi
+          python3 -c 'import json; [print("::warning::" + w) for w in json.load(open("plan.json")).get("warnings", [])]'
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "Computed -TEST tag: $TAG"
+
+      - name: Dry run
+        if: steps.plan.outputs.tag != '' && inputs.dry_run == true
+        env:
+          TAG: ${{ steps.plan.outputs.tag }}
+        run: |
+          echo "Would move tag $TAG to $(git rev-parse HEAD) (dry_run: no git write)"
+
+      - name: Move -TEST tag to HEAD
+        if: steps.plan.outputs.tag != '' && inputs.dry_run != true
+        env:
+          TAG: ${{ steps.plan.outputs.tag }}
+        run: |
+          # El tag es móvil por diseño: borrar primero (remoto y local) y recrear.
+          git push origin ":refs/tags/$TAG" || echo "::warning::remote tag $TAG did not exist yet"
+          git tag -d "$TAG" 2>/dev/null || true
+          git tag -a "$TAG" -m "Test build $TAG"
+          git push origin "refs/tags/$TAG"
