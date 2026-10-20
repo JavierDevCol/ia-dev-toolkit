@@ -1,16 +1,25 @@
-"""Clasificación de commits convencionales y cálculo de bump SemVer.
+"""Versionado por canal para la automatización de releases.
 
-Lógica pura: no toca git ni la CLI (eso es de otros módulos).
+Lógica pura (clasificación de commits, bump SemVer y planificación por canal),
+gatherers sobre ``git`` y CLI ``--channel {stable,test}``.
 """
 
 from __future__ import annotations
 
+import argparse
+import json
 import re
+import subprocess
+import sys
+from pathlib import Path
 
 _COMMIT_RE = re.compile(r"^(?P<type>[a-z]+)(?:\((?P<scope>[^)]*)\))?(?P<bang>!)?: ")
 _BREAKING_FOOTER = "BREAKING CHANGE:"
 _VERSION_RE = re.compile(r"^v?(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)$")
 _BUMPS = ("major", "minor", "patch", "none")
+STABLE_TAG_RE = re.compile(r"^v(\d+)\.(\d+)\.(\d+)$")
+TEST_TAG_RE = re.compile(r"^v(\d+)\.(\d+)\.(\d+)-TEST$")
+_CHANNELS = ("stable", "test")
 
 
 def parse_commit(message: str) -> tuple[str, bool]:
@@ -95,3 +104,184 @@ def next_version(last_stable: str | None, bump: str) -> str:
     elif bump == "patch":
         patch += 1
     return f"{major}.{minor}.{patch}"
+
+
+def find_last_stable(tags: list[str]) -> str | None:
+    """Devuelve el mayor tag ``vX.Y.Z`` por orden numérico, o ``None``.
+
+    Los tags ``-TEST`` y los que no casan con ``STABLE_TAG_RE`` se ignoran.
+    """
+    best_tag: str | None = None
+    best_key: tuple[int, int, int] | None = None
+    for tag in tags:
+        match = STABLE_TAG_RE.match(tag)
+        if not match:
+            continue
+        key = (int(match.group(1)), int(match.group(2)), int(match.group(3)))
+        if best_key is None or key > best_key:
+            best_tag, best_key = tag, key
+    return best_tag
+
+
+def _highest_test_tag(test_ancestors: list[str]) -> tuple[str, str] | None:
+    """Devuelve ``(tag, versión)`` del mayor ``vX.Y.Z-TEST`` de la lista."""
+    best: tuple[str, str] | None = None
+    best_key: tuple[int, int, int] | None = None
+    for tag in test_ancestors:
+        match = TEST_TAG_RE.match(tag)
+        if not match:
+            continue
+        key = (int(match.group(1)), int(match.group(2)), int(match.group(3)))
+        if best_key is None or key > best_key:
+            best = (tag, f"{match.group(1)}.{match.group(2)}.{match.group(3)}")
+            best_key = key
+    return best
+
+
+def plan_release(
+    channel: str, tags: list[str], messages: list[str], test_ancestors: list[str]
+) -> dict | None:
+    """Planifica el tag a publicar para un canal.
+
+    Devuelve ``{"tag", "version", "source", "warnings"}``: ``version`` sin ``v``,
+    ``tag`` con él, ``source`` en ``{"test-tag", "recalculated"}``.
+    ``None`` significa que no hay nada que publicar (sin mensajes nuevos y sin
+    un ``-TEST`` que adoptar).
+
+    Canal ``stable`` (D12): se adopta el mayor ``vX.Y.Z-TEST`` ancestro de
+    ``HEAD``; si ``vX.Y.Z`` ya existe como tag se avisa y se recalcula (nunca
+    se devuelve un tag ya existente). Canal ``test``: siempre recalcula y añade
+    el sufijo ``-TEST`` (ese tag se mueve por diseño).
+    """
+    if channel not in _CHANNELS:
+        raise ValueError(f"canal inválido: {channel!r}")
+
+    last_stable = find_last_stable(tags)
+    warnings: list[str] = []
+
+    if channel == "stable":
+        adopted = _highest_test_tag(test_ancestors)
+        if adopted is not None:
+            test_tag, version = adopted
+            stable_tag = f"v{version}"
+            if stable_tag in tags:
+                warnings.append(
+                    f"el tag {stable_tag} ya existe; se recalcula en lugar de adoptar {test_tag}"
+                )
+            else:
+                return {
+                    "tag": stable_tag,
+                    "version": version,
+                    "source": "test-tag",
+                    "warnings": [],
+                }
+
+    if not messages:
+        return None
+
+    version = next_version(last_stable, parse_bump(messages))
+    tag = f"v{version}-TEST" if channel == "test" else f"v{version}"
+    return {"tag": tag, "version": version, "source": "recalculated", "warnings": warnings}
+
+
+def _run_git(repo: str | Path, *args: str) -> str:
+    result = subprocess.run(
+        ["git", "-C", str(repo), *args], capture_output=True, text=True
+    )
+    if result.returncode != 0:
+        raise RuntimeError(
+            f"git {' '.join(args)} falló en {repo}: {result.stderr.strip()}"
+        )
+    return result.stdout
+
+
+def git_messages_since(repo: str | Path, since_tag: str | None) -> list[str]:
+    """Mensajes de commit no-merge entre ``since_tag`` y ``HEAD``.
+
+    Con ``since_tag=None`` se cubre todo el historial. El log se pide con
+    ``git log --no-merges --format=%B%x1e``: los merges quedan fuera para que
+    un rango que solo contiene merges devuelva ``[]`` (sin release vacío).
+    """
+    revision = "HEAD" if since_tag is None else f"{since_tag}..HEAD"
+    out = _run_git(repo, "log", "--no-merges", "--format=%B%x1e", revision)
+    return [
+        message
+        for message in (part.strip() for part in out.split("\x1e"))
+        if message
+    ]
+
+
+def git_test_tag_ancestors(repo: str | Path, tags: list[str]) -> list[str]:
+    """De ``tags``, los ``vX.Y.Z-TEST`` cuyo commit es ancestro de ``HEAD``.
+
+    La comprobación se hace con ``git merge-base --is-ancestor``; se conserva
+    el orden de entrada.
+    """
+    ancestors: list[str] = []
+    for tag in tags:
+        if not TEST_TAG_RE.match(tag):
+            continue
+        result = subprocess.run(
+            ["git", "-C", str(repo), "merge-base", "--is-ancestor", tag, "HEAD"],
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode == 0:
+            ancestors.append(tag)
+        elif result.returncode != 1:
+            raise RuntimeError(
+                f"git merge-base --is-ancestor {tag} HEAD falló: {result.stderr.strip()}"
+            )
+    return ancestors
+
+
+class _ArgumentParser(argparse.ArgumentParser):
+    """Parser que reporta errores de argumentos con exit 1 (contrato CLI)."""
+
+    def error(self, message: str) -> None:
+        self.print_usage(sys.stderr)
+        print(f"error: {message}", file=sys.stderr)
+        raise SystemExit(1)
+
+
+def main(argv: list[str] | None = None) -> int:
+    """CLI: imprime por stdout el tag a crear y devuelve el código de salida.
+
+    Códigos: 0 OK, 3 nada que publicar, 1 error. Los mensajes humanos van por
+    stderr; con ``--json`` se imprime el plan completo en stdout.
+    """
+    parser = _ArgumentParser(
+        description="Calcula el tag a publicar para un canal de release."
+    )
+    parser.add_argument(
+        "--channel", required=True, choices=_CHANNELS, help="canal de release"
+    )
+    parser.add_argument("--repo", default=".", help="ruta del repositorio git")
+    parser.add_argument(
+        "--json", action="store_true", dest="as_json", help="imprime el plan en JSON"
+    )
+    args = parser.parse_args(argv)
+
+    try:
+        tags = [tag for tag in _run_git(args.repo, "tag", "--list").splitlines() if tag]
+        messages = git_messages_since(args.repo, find_last_stable(tags))
+        test_ancestors = (
+            git_test_tag_ancestors(args.repo, tags) if args.channel == "stable" else []
+        )
+        plan = plan_release(args.channel, tags, messages, test_ancestors)
+    except RuntimeError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 1
+
+    if plan is None:
+        print("nada que publicar: sin commits nuevos desde el último tag", file=sys.stderr)
+        return 3
+
+    for warning in plan["warnings"]:
+        print(f"aviso: {warning}", file=sys.stderr)
+    print(json.dumps(plan, ensure_ascii=False) if args.as_json else plan["tag"])
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
