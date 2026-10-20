@@ -51,12 +51,16 @@ irm https://raw.githubusercontent.com/JavierDevCol/ia-dev-toolkit/main/INSTALACI
 **Canales (releases + prueba):**
 Ambos canales se publican solos desde CI: cada merge en `main` publica una release
 estable `vX.Y.Z` (tag + `CHANGELOG.md` + GitHub Release) y cada merge en `develop`
-mueve el tag móvil `vX.Y.Z-TEST` al nuevo commit. La versión la deciden los
-conventional commits (`feat!:`/`BREAKING CHANGE:` → major, `feat` → minor, resto →
-patch), así que los títulos de PR deben seguir ese formato (con squash merge el
-título es el mensaje del commit). Si no hay nada que publicar, el workflow termina
-en verde con un aviso. Toda escritura la hace CI con el secret de Actions
-`RELEASE_TOKEN` (PAT con `contents: write`), configurado una sola vez en el repo.
+mueve el tag móvil `vX.Y.Z-TEST` al nuevo commit. En el canal estable primero se
+adopta como versión el mayor tag `vX.Y.Z-TEST` ancestro por encima del último
+estable (el flujo normal de promoción test → `main`); los conventional commits
+(`feat!:`/`BREAKING CHANGE:` → major, `feat` → minor, resto → patch) solo deciden
+la versión cuando no hay un `-TEST` que promover — con squash merge el título del
+PR es el mensaje del commit, así que debe seguir ese formato. Cada release estable
+hace además merge-back de `main` a `develop`. Si no hay nada que publicar, el
+workflow termina en verde con un aviso. Toda escritura la hace CI con el secret de
+Actions `RELEASE_TOKEN` (PAT con `contents: write`), configurado una sola vez en el
+repo.
 - **Estable (por defecto):** `curl ... | bash` instala la **última release** publicada en
   GitHub (`vX.Y.Z`; requiere al menos una release publicada). `diat --update` migra
   automáticamente a la última release nueva.

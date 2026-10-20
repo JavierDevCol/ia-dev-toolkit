@@ -1,6 +1,6 @@
 ---
 name: auto-versioning
-description: Use when pushing, merging a PR, or committing to main branch. Self-triggers on semantic versioning needs. Triggers on "version", "tag", "release", "semver", "git tag", "version bump", "push to main", "merge to main"
+description: Reserve skill for manual semantic versioning when CI does not handle it — manual releases, repos without the release workflows, or recovery. Do NOT trigger on pushes or merges to main/develop: versioning there is automated by CI.
 ready: true
 ---
 
@@ -16,9 +16,9 @@ Determines the next semantic version by analyzing code diffs between the last ta
 
 ## When to Use
 
-- Committing to main branch
-- Merging a PR to main
-- Pushing changes to main
+- Manual versioning in a repo without the release CI workflows (reserve/fallback)
+- Backfilling or recovering a tag by hand
+- Not for pushes or merges to `main`/`develop`: those are versioned automatically by CI
 
 **Flowchart:**
 
