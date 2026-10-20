@@ -3,7 +3,9 @@
 # GitHub Release con las notas, y merge-back de main a develop. Los tags
 # estables son inmutables: si ya existen, el job falla limpio (nunca se
 # fuerza ni se mueve ninguno). Si el push del merge-back a develop falla se
-# abre un PR y el canal -TEST queda pausado hasta mergearlo.
+# abre un PR y el canal -TEST queda pausado hasta mergearlo. Si un run muere
+# a mitad de release (tras el tag), relanzarlo lo reanuda: crea la GitHub
+# Release y hace el merge-back sin tocar changelog ni tags.
 name: release-stable
 
 on:
@@ -68,6 +70,7 @@ jobs:
           fi
           TAG="$(python3 -c 'import json; print(json.load(open("plan.json"))["tag"])')"
           VERSION="$(python3 -c 'import json; print(json.load(open("plan.json"))["version"])')"
+          RESUME="$(python3 -c 'import json; print("true" if json.load(open("plan.json")).get("resume") else "false")')"
           if ! printf '%s' "$TAG" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+$'; then
             echo "::error::refusing to publish a non stable tag: $TAG"
             exit 1
@@ -84,10 +87,21 @@ jobs:
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "since=$PREV" >> "$GITHUB_OUTPUT"
-          echo "Computed stable release: $TAG (since $PREV)"
+          echo "resume=$RESUME" >> "$GITHUB_OUTPUT"
+          if [ "$RESUME" = "true" ]; then
+            echo "Resuming release $TAG: tag already at HEAD; changelog and tag stay untouched"
+          else
+            echo "Computed stable release: $TAG (since $PREV)"
+          fi
+
+      - name: Configure git identity
+        if: steps.plan.outputs.tag != '' && inputs.dry_run != true
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
       - name: Update changelog
-        if: steps.plan.outputs.tag != ''
+        if: steps.plan.outputs.tag != '' && steps.plan.outputs.resume != 'true'
         id: changelog
         env:
           TAG: ${{ steps.plan.outputs.tag }}
@@ -115,13 +129,11 @@ jobs:
           fi
 
       - name: Commit changelog
-        if: steps.plan.outputs.tag != '' && inputs.dry_run != true
+        if: steps.plan.outputs.tag != '' && steps.plan.outputs.resume != 'true' && inputs.dry_run != true
         env:
           GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
           TAG: ${{ steps.plan.outputs.tag }}
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add CHANGELOG.md
           git commit -m "chore(changelog): $TAG"
           if git push origin "HEAD:main"; then
@@ -136,7 +148,7 @@ jobs:
           fi
 
       - name: Tag stable release
-        if: steps.plan.outputs.tag != '' && inputs.dry_run != true
+        if: steps.plan.outputs.tag != '' && steps.plan.outputs.resume != 'true' && inputs.dry_run != true
         env:
           TAG: ${{ steps.plan.outputs.tag }}
         run: |
@@ -155,7 +167,18 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
           TAG: ${{ steps.plan.outputs.tag }}
+          VERSION: ${{ steps.plan.outputs.version }}
+          RESUME: ${{ steps.plan.outputs.resume }}
         run: |
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "::notice::GitHub Release $TAG already exists; nothing to create"
+            exit 0
+          fi
+          if [ "$RESUME" = "true" ]; then
+            # Las notas ya están en el changelog (el run anterior las escribió);
+            # regenerarlas ahora partiría de un rango de commits vacío.
+            python3 scripts/release/update_changelog.py --extract-notes --version "$VERSION" > notes.md
+          fi
           gh release create "$TAG" --title "$TAG" --notes-file notes.md
 
       - name: Merge back into develop

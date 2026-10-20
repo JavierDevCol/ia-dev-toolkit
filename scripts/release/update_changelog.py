@@ -129,6 +129,21 @@ def insert_release(
     return _splice(text, "", section)
 
 
+def extract_release_body(text: str, version: str) -> str | None:
+    """Body (sin el encabezado) de la sección ``## [version]`` existente.
+
+    ``None`` si la sección no existe; ``""`` si existe pero su body está vacío.
+    El encabezado es la línea ``## [version] - date``; el body llega hasta el
+    siguiente encabezado de nivel 1/2 (``_section_bounds``). Sirve para
+    reanudar un release a medias sin regenerar el changelog.
+    """
+    bounds = _section_bounds(text, f"## [{version}]")
+    if bounds is None:
+        return None
+    _, _, body = text[bounds[0] : bounds[1]].partition("\n")
+    return body.strip("\n")
+
+
 class _ArgumentParser(argparse.ArgumentParser):
     """Parser que reporta errores de argumentos con exit 1 (contrato CLI)."""
 
@@ -143,7 +158,9 @@ def main(argv: list[str] | None = None) -> int:
 
     Códigos: 0 OK, 1 error. Los mensajes humanos van por stderr. Con
     ``--dry-run`` no se escribe el archivo: el body de notas sale igual por
-    stdout y el changelog resultante se imprime por stderr.
+    stdout y el changelog resultante se imprime por stderr. Con
+    ``--extract-notes`` solo se imprime el body de la sección ``--version``
+    ya existente (sin escribir nada; incompatible con ``--since``).
     """
     parser = _ArgumentParser(
         description=(
@@ -155,7 +172,9 @@ def main(argv: list[str] | None = None) -> int:
         "--version", required=True, help="versión a publicar (sin prefijo v)"
     )
     parser.add_argument(
-        "--since", required=True, help="tag desde el que recoger los commits"
+        "--since",
+        default=None,
+        help="tag desde el que recoger los commits (requerido salvo --extract-notes)",
     )
     parser.add_argument("--repo", default=".", help="ruta del repositorio git")
     parser.add_argument(
@@ -174,7 +193,40 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--dry-run", action="store_true", help="no escribe el changelog"
     )
+    parser.add_argument(
+        "--extract-notes",
+        action="store_true",
+        help="imprime el body de la sección --version existente y termina sin escribir",
+    )
     args = parser.parse_args(argv)
+
+    if args.extract_notes and args.since is not None:
+        print("error: --extract-notes no admite --since", file=sys.stderr)
+        return 1
+    if args.since is None and not args.extract_notes:
+        print("error: --since es obligatorio salvo con --extract-notes", file=sys.stderr)
+        return 1
+
+    changelog = Path(args.changelog)
+    if not changelog.is_absolute():
+        changelog = Path(args.repo) / changelog
+
+    if args.extract_notes:
+        try:
+            text = changelog.read_text(encoding="utf-8") if changelog.exists() else ""
+        except OSError as exc:
+            print(f"error: {exc}", file=sys.stderr)
+            return 1
+        body = extract_release_body(text, args.version)
+        if body is None:
+            print(
+                f"error: no existe la sección ## [{args.version}] en {changelog}",
+                file=sys.stderr,
+            )
+            return 1
+        if body:
+            print(body)
+        return 0
 
     date = args.date or datetime.date.today().isoformat()
     try:
@@ -197,9 +249,6 @@ def main(argv: list[str] | None = None) -> int:
     body = render_body(classify_commits(messages))
     notes = _render_release_body(body, args.compare_url)
 
-    changelog = Path(args.changelog)
-    if not changelog.is_absolute():
-        changelog = Path(args.repo) / changelog
     try:
         text = changelog.read_text(encoding="utf-8") if changelog.exists() else ""
         updated = insert_release(text, args.version, date, body, args.compare_url)

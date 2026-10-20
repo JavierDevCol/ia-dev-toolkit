@@ -26,6 +26,12 @@ def read(path: Path) -> str:
     return path.read_text(encoding="utf-8")
 
 
+def steps_by_name(text: str) -> dict[str, str]:
+    """Steps del workflow por nombre: texto completo desde ``- name:``."""
+    steps = re.split(r"(?m)^      - name: ", text)[1:]
+    return {step.splitlines()[0]: step for step in steps}
+
+
 def assert_run_blocks_are_well_formed(test: unittest.TestCase, text: str) -> None:
     # Un bloque `run: |` termina en cuanto aparece una línea con sangría
     # menor o igual que sea YAML (clave, item o comentario). Una línea de
@@ -164,6 +170,48 @@ class ReleaseStableWorkflowTest(unittest.TestCase):
         self.assertIn("--base develop --head main", self.yaml)
         self.assertIn(
             "::warning::canal -TEST pausado hasta mergear el merge-back", self.yaml
+        )
+
+    def test_release_stable_resumes_half_finished_release(self):
+        # next_version.py señala la reanudación en el payload --json y el
+        # workflow la propaga como output del step de plan.
+        self.assertIn('print("true" if json.load(open("plan.json")).get("resume")', self.yaml)
+        self.assertIn('echo "resume=$RESUME" >> "$GITHUB_OUTPUT"', self.yaml)
+        steps = steps_by_name(self.yaml)
+        # en reanudación el changelog, su commit y el tag ya existen: se saltan
+        for name in ("Update changelog", "Commit changelog", "Tag stable release"):
+            self.assertIn(
+                "steps.plan.outputs.resume != 'true'",
+                steps[name],
+                f"el step {name!r} debe saltarse en reanudación",
+            )
+        # la GitHub Release y el merge-back SÍ se completan en reanudación
+        for name in ("Create GitHub Release", "Merge back into develop"):
+            self.assertNotIn(
+                "steps.plan.outputs.resume != 'true'",
+                steps[name],
+                f"el step {name!r} debe ejecutarse también en reanudación",
+            )
+        # las notas salen de la sección existente del changelog y la release
+        # nunca se duplica
+        release_step = steps["Create GitHub Release"]
+        self.assertIn("--extract-notes", release_step)
+        self.assertIn("gh release view", release_step)
+
+    def test_release_stable_configures_git_identity_before_writes(self):
+        # los commits/tags/merges del release necesitan identidad aunque el
+        # commit del changelog se salte (diff vacío o reanudación)
+        steps = steps_by_name(self.yaml)
+        self.assertIn("Configure git identity", steps)
+        identity = steps["Configure git identity"]
+        self.assertIn("git config user.name", identity)
+        self.assertIn("git config user.email", identity)
+        names = list(steps)
+        self.assertLess(
+            names.index("Configure git identity"), names.index("Commit changelog")
+        )
+        self.assertLess(
+            names.index("Configure git identity"), names.index("Merge back into develop")
         )
 
     def test_release_stable_pins_checkout_by_sha(self):

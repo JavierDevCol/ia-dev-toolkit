@@ -68,13 +68,59 @@ class GitIntegrationTest(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(
             json.loads(result.stdout),
-            {"tag": "v1.0.2", "version": "1.0.2", "source": "test-tag", "warnings": []},
+            {
+                "tag": "v1.0.2",
+                "version": "1.0.2",
+                "source": "test-tag",
+                "warnings": [],
+                "resume": False,
+            },
         )
+
+    def test_cli_resumes_half_finished_release(self):
+        repo = self._init_repo()
+        self._commit(repo, "chore: init", "a.txt")
+        self._git(repo, "tag", "-a", "v1.0.1", "-m", "Release v1.0.1")
+
+        result = self._run_cli(repo, "stable", "--json")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        plan = json.loads(result.stdout)
+        self.assertEqual(plan["tag"], "v1.0.1")
+        self.assertEqual(plan["version"], "1.0.1")
+        self.assertEqual(plan["source"], "resume")
+        self.assertTrue(plan["resume"])
 
     def test_cli_exit_3_when_nothing(self):
         repo = self._init_repo()
         self._commit(repo, "chore: init", "a.txt")
         self._git(repo, "tag", "v1.0.1")
+
+        result = self._run_cli(repo, "test")
+        self.assertEqual(result.returncode, 3, result.stderr)
+        self.assertEqual(result.stdout, "")
+
+    def test_cli_exit_3_when_only_merges_since_tag(self):
+        repo = self._init_repo()
+        self._commit(repo, "chore: init", "a.txt")
+        root = self._git(repo, "rev-parse", "HEAD").strip()
+        self._commit(repo, "fix: x", "b.txt")
+        self._git(repo, "tag", "v1.0.1")
+        # HEAD avanza solo con un merge real (padres el tag y su ancestro): sin
+        # commits convencionales nuevos no hay nada que publicar y el tag ya no
+        # está en HEAD, así que tampoco hay reanudación.
+        tree = self._git(repo, "rev-parse", "HEAD^{tree}").strip()
+        merge = self._git(
+            repo,
+            "commit-tree",
+            tree,
+            "-p",
+            "v1.0.1",
+            "-p",
+            root,
+            "-m",
+            "Merge branch 'x'",
+        ).strip()
+        self._git(repo, "reset", "--hard", "--quiet", merge)
 
         result = self._run_cli(repo, "stable")
         self.assertEqual(result.returncode, 3, result.stderr)

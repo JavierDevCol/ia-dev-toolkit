@@ -101,6 +101,43 @@ class PlanReleaseTest(unittest.TestCase):
         self.assertIsNone(plan_release("stable", ["v1.0.1"], [], []))
         self.assertIsNone(plan_release("test", ["v1.0.1"], [], []))
 
+    def test_resumes_half_finished_release_when_tag_is_at_head(self):
+        result = plan_release("stable", ["v1.0.1"], [], [], head_at_last_stable=True)
+        self.assertEqual(result["tag"], "v1.0.1")
+        self.assertEqual(result["version"], "1.0.1")
+        self.assertEqual(result["source"], "resume")
+        self.assertTrue(result["resume"])
+        self.assertEqual(result["warnings"], [])
+
+    def test_no_resume_when_head_moved_past_tag(self):
+        self.assertIsNone(
+            plan_release("stable", ["v1.0.1"], [], [], head_at_last_stable=False)
+        )
+        self.assertIsNone(
+            plan_release("test", ["v1.0.1"], [], [], head_at_last_stable=True)
+        )
+
+    def test_resume_needs_a_stable_tag(self):
+        self.assertIsNone(plan_release("stable", [], [], [], head_at_last_stable=True))
+
+    def test_new_release_wins_over_resume(self):
+        adopted = plan_release(
+            "stable", ["v1.0.1"], [], ["v1.0.2-TEST"], head_at_last_stable=True
+        )
+        self.assertEqual(adopted["tag"], "v1.0.2")
+        self.assertEqual(adopted["source"], "test-tag")
+        self.assertFalse(adopted["resume"])
+        recalculated = plan_release(
+            "stable", ["v1.0.1"], ["fix: x"], [], head_at_last_stable=True
+        )
+        self.assertEqual(recalculated["tag"], "v1.0.2")
+        self.assertEqual(recalculated["source"], "recalculated")
+        self.assertFalse(recalculated["resume"])
+
+    def test_normal_plans_are_not_resume(self):
+        result = plan_release("test", ["v1.0.1"], ["fix: x"], [])
+        self.assertFalse(result["resume"])
+
     def test_highest_test_tag_wins(self):
         tags = ["v1.0.1", "v1.0.2-TEST", "v1.0.3-TEST"]
         result = plan_release("stable", tags, [], ["v1.0.2-TEST", "v1.0.3-TEST"])

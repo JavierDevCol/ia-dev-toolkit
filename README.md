@@ -58,7 +58,9 @@ estable (el flujo normal de promoción test → `main`); los conventional commit
 la versión cuando no hay un `-TEST` que promover — con squash merge el título del
 PR es el mensaje del commit, así que debe seguir ese formato. Cada release estable
 hace además merge-back de `main` a `develop`. Si no hay nada que publicar, el
-workflow termina en verde con un aviso. Toda escritura la hace CI con el secret de
+workflow termina en verde con un aviso. Si un run se corta a mitad de release
+(tras el tag), relanzarlo lo reanuda: completa la GitHub Release y el merge-back
+sin tocar changelog ni tags. Toda escritura la hace CI con el secret de
 Actions `RELEASE_TOKEN` (PAT con `contents: write`), configurado una sola vez en el
 repo.
 - **Estable (por defecto):** `curl ... | bash` instala la **última release** publicada en

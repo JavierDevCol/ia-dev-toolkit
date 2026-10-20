@@ -155,14 +155,20 @@ def _highest_test_tag(
 
 
 def plan_release(
-    channel: str, tags: list[str], messages: list[str], test_ancestors: list[str]
+    channel: str,
+    tags: list[str],
+    messages: list[str],
+    test_ancestors: list[str],
+    *,
+    head_at_last_stable: bool = False,
 ) -> dict | None:
     """Planifica el tag a publicar para un canal.
 
-    Devuelve ``{"tag", "version", "source", "warnings"}``: ``version`` sin ``v``,
-    ``tag`` con él, ``source`` en ``{"test-tag", "recalculated"}``.
-    ``None`` significa que no hay nada que publicar (sin mensajes nuevos y sin
-    un ``-TEST`` que adoptar).
+    Devuelve ``{"tag", "version", "source", "warnings", "resume"}``: ``version``
+    sin ``v``, ``tag`` con él, ``source`` en ``{"test-tag", "recalculated",
+    "resume"}`` y ``resume`` solo ``True`` cuando hay que reanudar un release a
+    medias. ``None`` significa que no hay nada que publicar (sin mensajes nuevos
+    y sin un ``-TEST`` que adoptar).
 
     Canal ``stable`` (D12): se adopta el mayor ``vX.Y.Z-TEST`` ancestro de
     ``HEAD`` cuya versión sea estrictamente mayor que el último estable (nunca
@@ -170,6 +176,12 @@ def plan_release(
     adoptable porque su ``vX.Y.Z`` ya existe se avisa y se recalcula (nunca se
     devuelve un tag ya existente). Canal ``test``: siempre recalcula y añade
     el sufijo ``-TEST`` (ese tag se mueve por diseño).
+
+    Reanudación (G5): si no hay mensajes nuevos y ``head_at_last_stable`` (el
+    último tag estable apunta al commit de ``HEAD``) se devuelve el plan del
+    propio tag con ``source="resume"``: el run anterior murió a mitad de release
+    (después del tag) y faltan la GitHub Release y el merge-back. La existencia
+    de la GitHub Release no se comprueba aquí; la gestiona el workflow.
     """
     if channel not in _CHANNELS:
         raise ValueError(f"canal inválido: {channel!r}")
@@ -186,6 +198,7 @@ def plan_release(
                 "version": version,
                 "source": "test-tag",
                 "warnings": [],
+                "resume": False,
             }
         highest = _highest_test_tag(test_ancestors)
         if highest is not None and f"v{highest[1]}" in tags:
@@ -194,11 +207,26 @@ def plan_release(
             )
 
     if not messages:
+        if channel == "stable" and head_at_last_stable and last_stable is not None:
+            match = STABLE_TAG_RE.match(last_stable)
+            return {
+                "tag": last_stable,
+                "version": f"{match.group(1)}.{match.group(2)}.{match.group(3)}",
+                "source": "resume",
+                "warnings": warnings,
+                "resume": True,
+            }
         return None
 
     version = next_version(last_stable, parse_bump(messages))
     tag = f"v{version}-TEST" if channel == "test" else f"v{version}"
-    return {"tag": tag, "version": version, "source": "recalculated", "warnings": warnings}
+    return {
+        "tag": tag,
+        "version": version,
+        "source": "recalculated",
+        "warnings": warnings,
+        "resume": False,
+    }
 
 
 def _run_git(repo: str | Path, *args: str) -> str:
@@ -252,6 +280,17 @@ def git_test_tag_ancestors(repo: str | Path, tags: list[str]) -> list[str]:
     return ancestors
 
 
+def git_tag_points_at_head(repo: str | Path, tag: str) -> bool:
+    """``True`` si ``tag`` (anotado o no) apunta al commit de ``HEAD``.
+
+    Se compara el SHA del commit del tag (``<tag>^{commit}``, que deshace los
+    tags anotados) con el de ``HEAD``.
+    """
+    head = _run_git(repo, "rev-parse", "HEAD").strip()
+    tagged = _run_git(repo, "rev-parse", f"{tag}^{{commit}}").strip()
+    return head == tagged
+
+
 class _ArgumentParser(argparse.ArgumentParser):
     """Parser que reporta errores de argumentos con exit 1 (contrato CLI)."""
 
@@ -281,11 +320,21 @@ def main(argv: list[str] | None = None) -> int:
 
     try:
         tags = [tag for tag in _run_git(args.repo, "tag", "--list").splitlines() if tag]
-        messages = git_messages_since(args.repo, find_last_stable(tags))
+        last_stable = find_last_stable(tags)
+        messages = git_messages_since(args.repo, last_stable)
         test_ancestors = (
             git_test_tag_ancestors(args.repo, tags) if args.channel == "stable" else []
         )
-        plan = plan_release(args.channel, tags, messages, test_ancestors)
+        head_at_last_stable = last_stable is not None and git_tag_points_at_head(
+            args.repo, last_stable
+        )
+        plan = plan_release(
+            args.channel,
+            tags,
+            messages,
+            test_ancestors,
+            head_at_last_stable=head_at_last_stable,
+        )
     except RuntimeError as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
@@ -296,6 +345,12 @@ def main(argv: list[str] | None = None) -> int:
 
     for warning in plan["warnings"]:
         print(f"aviso: {warning}", file=sys.stderr)
+    if plan["resume"]:
+        print(
+            f"reanudación: {plan['tag']} ya apunta a HEAD; faltan la GitHub "
+            "Release y el merge-back",
+            file=sys.stderr,
+        )
     print(json.dumps(plan, ensure_ascii=False) if args.as_json else plan["tag"])
     return 0
 

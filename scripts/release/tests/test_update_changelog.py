@@ -9,7 +9,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from next_version import classify_commits
-from update_changelog import insert_release, render_body
+from update_changelog import extract_release_body, insert_release, render_body
 
 
 class RenderBodyTest(unittest.TestCase):
@@ -137,6 +137,30 @@ class InsertReleaseTest(unittest.TestCase):
         self.assertLess(result.index("## [1.0.1]"), result.index("## [1.0.2]"))
 
 
+class ExtractReleaseBodyTest(unittest.TestCase):
+    def test_extracts_body_without_header(self):
+        text = (
+            "# Changelog\n\n## [Unreleased]\n\n"
+            "## [1.2.3] - 2026-10-20\n\n### Fixed\n- fix: x\n\n"
+            "**Full Changelog**: https://example.com/c\n\n"
+            "## [1.0.0] - 2026-01-01\n\n### Added\n- feat: old\n"
+        )
+        self.assertEqual(
+            extract_release_body(text, "1.2.3"),
+            "### Fixed\n- fix: x\n\n**Full Changelog**: https://example.com/c",
+        )
+
+    def test_returns_none_when_section_missing(self):
+        self.assertIsNone(extract_release_body("# Changelog\n", "1.2.3"))
+        # la versión solo coincide como sección completa, nunca por prefijo
+        text = "# Changelog\n\n## [1.2.34] - 2026-10-20\n\n- x\n"
+        self.assertIsNone(extract_release_body(text, "1.2.3"))
+
+    def test_empty_body_section_returns_empty_string(self):
+        text = "# Changelog\n\n## [1.2.3] - 2026-10-20\n\n## [1.0.0] - 2026-01-01\n"
+        self.assertEqual(extract_release_body(text, "1.2.3"), "")
+
+
 class CliTest(unittest.TestCase):
     def _git(self, repo, *args):
         result = subprocess.run(
@@ -257,6 +281,55 @@ class CliTest(unittest.TestCase):
         repo = self._init_repo()
         code, out, err = self._run_main(
             ["--version", "1.0.2", "--since", "v9.9.9", "--repo", str(repo)]
+        )
+        self.assertEqual(code, 1)
+        self.assertEqual(out, "")
+        self.assertIn("error:", err)
+
+    def test_cli_requires_since_unless_extracting(self):
+        repo = self._init_repo()
+        code, out, err = self._run_main(["--version", "1.0.2", "--repo", str(repo)])
+        self.assertEqual(code, 1)
+        self.assertEqual(out, "")
+        self.assertIn("error:", err)
+
+    def test_cli_extract_notes_prints_existing_section(self):
+        repo = self._init_repo()
+        original = (
+            "# Changelog\n\n## [Unreleased]\n\n"
+            "## [1.0.2] - 2026-10-20\n\n### Added\n- feat: nueva cosa\n\n"
+            "## [1.0.1] - 2026-10-01\n\n### Fixed\n- fix: old\n"
+        )
+        (repo / "CHANGELOG.md").write_text(original)
+        code, out, err = self._run_main(
+            ["--extract-notes", "--version", "1.0.2", "--repo", str(repo)]
+        )
+        self.assertEqual(code, 0)
+        self.assertEqual(out, "### Added\n- feat: nueva cosa\n")
+        # nunca escribe el changelog
+        self.assertEqual((repo / "CHANGELOG.md").read_text(), original)
+
+    def test_cli_extract_notes_missing_section_fails(self):
+        repo = self._init_repo()
+        code, out, err = self._run_main(
+            ["--extract-notes", "--version", "1.0.2", "--repo", str(repo)]
+        )
+        self.assertEqual(code, 1)
+        self.assertEqual(out, "")
+        self.assertIn("error:", err)
+
+    def test_cli_extract_notes_rejects_since(self):
+        repo = self._init_repo()
+        code, out, err = self._run_main(
+            [
+                "--extract-notes",
+                "--version",
+                "1.0.2",
+                "--since",
+                "v1.0.1",
+                "--repo",
+                str(repo),
+            ]
         )
         self.assertEqual(code, 1)
         self.assertEqual(out, "")
