@@ -88,6 +88,17 @@ class InsertReleaseTest(unittest.TestCase):
         self.assertLess(result.index("## [1.0.1]"), result.index("## [1.0.2]"))
         self.assertIn("- fix: old", result)
 
+    def test_reinsert_same_version_is_idempotent(self):
+        first = insert_release(
+            "", "1.0.2", "2026-10-20", "### Added\n- feat: new", None
+        )
+        second = insert_release(
+            first, "1.0.2", "2026-10-20", "### Fixed\n- fix: later", None
+        )
+        self.assertEqual(second.count("## [1.0.2]"), 1)
+        self.assertIn("- fix: later", second)
+        self.assertNotIn("- feat: new", second)
+
     def test_compare_url_included_in_section(self):
         url = "https://example.com/compare/v1.0.1...v1.0.2"
         result = insert_release("", "1.0.2", "2026-10-20", "### Added\n- feat: new", url)
@@ -176,6 +187,25 @@ class CliTest(unittest.TestCase):
         self.assertEqual((repo / "CHANGELOG.md").read_text(), original)
         self.assertTrue(err.startswith("# Changelog\n\n## [Unreleased]\n\n"))
         self.assertIn("## [1.0.2] - 2026-10-20", err)
+
+    def test_cli_rerun_is_idempotent(self):
+        repo = self._init_repo()
+        argv = [
+            "--version",
+            "1.0.2",
+            "--since",
+            "v1.0.1",
+            "--repo",
+            str(repo),
+            "--date",
+            "2026-10-20",
+        ]
+        code1, _, _ = self._run_main(argv)
+        code2, _, _ = self._run_main(argv)
+        self.assertEqual((code1, code2), (0, 0))
+        changelog = (repo / "CHANGELOG.md").read_text()
+        self.assertEqual(changelog.count("## [1.0.2]"), 1)
+        self.assertIn("- feat: nueva cosa", changelog)
 
     def test_cli_compare_url_in_notes(self):
         repo = self._init_repo()

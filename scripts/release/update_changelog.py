@@ -52,6 +52,38 @@ def _splice(head: str, tail: str, block: str) -> str:
     return "\n\n".join(parts) + "\n"
 
 
+def _line_start_index(text: str, anchor: str, start: int = 0) -> int:
+    """Índice de la primera ocurrencia de ``anchor`` al inicio de línea, o -1."""
+    pos = start
+    while True:
+        index = text.find(anchor, pos)
+        if index == -1:
+            return -1
+        if index == 0 or text[index - 1] == "\n":
+            return index
+        pos = index + len(anchor)
+
+
+def _section_bounds(text: str, anchor: str, start: int = 0) -> tuple[int, int] | None:
+    """Extensión ``(inicio, fin)`` de la sección cuyo encabezado es ``anchor``.
+
+    La sección llega hasta el siguiente encabezado de nivel 1 o 2 (``# `` o
+    ``## ``) o hasta el final del texto; los ``###`` del body no la cortan.
+    """
+    index = _line_start_index(text, anchor, start)
+    if index == -1:
+        return None
+    pos = index + len(anchor)
+    while True:
+        boundary = text.find("\n#", pos)
+        if boundary == -1:
+            return index, len(text)
+        line = text[boundary + 1 :]
+        if line.startswith("# ") or line.startswith("## "):
+            return index, boundary + 1
+        pos = boundary + 1
+
+
 def insert_release(
     text: str,
     version: str,
@@ -61,11 +93,15 @@ def insert_release(
 ) -> str:
     """Devuelve ``text`` con la sección ``## [version] - date`` insertada.
 
-    La sección va justo después de ``## [Unreleased]`` si existe; si no, justo
-    después del título ``# Changelog``; sin ninguna de las anclas se añade al
-    final (nunca se corrompe el contenido previo). Con ``text == ""`` se crea
-    el documento desde cero con título y ``## [Unreleased]``. El ancla se
-    localiza con ``str.partition``; el contenido previo se conserva intacto.
+    Es idempotente: si ya existe una sección de esa misma versión se reemplaza
+    su contenido (encabezado + body) en su posición; siempre queda una única
+    sección por versión. Si no existe, la sección va justo después de
+    ``## [Unreleased]`` si está el ancla; si no, justo después del título
+    ``# Changelog``; sin ninguna de las anclas se añade al final (nunca se
+    corrompe el contenido previo). Con ``text == ""`` se crea el documento
+    desde cero con título y ``## [Unreleased]``. Los anclajes se localizan con
+    ``str.partition``/``str.find`` sobre texto literal; el contenido previo se
+    conserva intacto.
     """
     section = f"## [{version}] - {date}"
     release_body = _render_release_body(body, compare_url)
@@ -73,8 +109,20 @@ def insert_release(
         section += f"\n\n{release_body}"
     if not text:
         return f"{_TITLE_ANCHOR}\n\n{_UNRELEASED_ANCHOR}\n\n{section}\n"
-    for anchor in (_UNRELEASED_ANCHOR, _TITLE_ANCHOR):
-        before, found, after = text.partition(anchor)
+
+    anchor = f"## [{version}]"
+    bounds = _section_bounds(text, anchor)
+    if bounds is not None:
+        head, tail = text[: bounds[0]], text[bounds[1] :]
+        while True:
+            extra = _section_bounds(tail, anchor)
+            if extra is None:
+                break
+            tail = tail[: extra[0]] + tail[extra[1] :]
+        return _splice(head, tail, section)
+
+    for candidate in (_UNRELEASED_ANCHOR, _TITLE_ANCHOR):
+        before, found, after = text.partition(candidate)
         if found:
             return _splice(before + found, after, section)
     return _splice(text, "", section)
