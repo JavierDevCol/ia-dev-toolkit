@@ -34,6 +34,7 @@ class NextVersionTest(unittest.TestCase):
         self.assertEqual(next_version("v1.0.1", "minor"), "1.1.0")
         self.assertEqual(next_version("v1.0.1", "major"), "2.0.0")
         self.assertEqual(next_version(None, "patch"), "0.0.1")
+        self.assertEqual(next_version("v1.0.1", "none"), "1.0.1")
 
 
 class ClassifyCommitsTest(unittest.TestCase):

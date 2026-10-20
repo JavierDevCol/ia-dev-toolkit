@@ -73,12 +73,10 @@ def next_version(last_stable: str | None, bump: str) -> str:
     """Devuelve la siguiente versión ``major.minor.patch`` (sin ``v``).
 
     ``last_stable=None`` parte de ``0.0.0``; con ``bump="none"`` se devuelve
-    el mismo ``last_stable``.
+    la versión actual sin cambios (también sin ``v``).
     """
     if bump not in _BUMPS:
         raise ValueError(f"bump inválido: {bump!r}")
-    if bump == "none":
-        return "0.0.0" if last_stable is None else last_stable
 
     if last_stable is None:
         major = minor = patch = 0
@@ -94,6 +92,6 @@ def next_version(last_stable: str | None, bump: str) -> str:
         major, minor, patch = major + 1, 0, 0
     elif bump == "minor":
         major, minor, patch = major, minor + 1, 0
-    else:
+    elif bump == "patch":
         patch += 1
     return f"{major}.{minor}.{patch}"
