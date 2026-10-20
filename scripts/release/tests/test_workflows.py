@@ -85,7 +85,28 @@ class ReleaseTestWorkflowTest(unittest.TestCase):
         self.assertRegex(self.yaml, r"dry_run:[\s\S]{0,200}?type: boolean")
 
     def test_release_test_has_anti_loop_guard(self):
-        self.assertIn("if: github.actor != 'github-actions[bot]'", self.yaml)
+        self.assertIn("github.actor != 'github-actions[bot]'", self.yaml)
+
+    def test_workflows_skip_release_bot_bookkeeping_commits(self):
+        # Los push hechos con RELEASE_TOKEN (PAT) SÍ lanzan workflows: el
+        # commit del changelog en main y el merge-back en develop provocarían
+        # un run nuevo de cada canal. La recursión se corta por el mensaje del
+        # commit HEAD, no por el actor.
+        for path in sorted(WORKFLOWS_DIR.glob("release-*.yml")):
+            with self.subTest(path.name):
+                text = read(path)
+                self.assertIn(
+                    "!startsWith(github.event.head_commit.message, 'chore(changelog):')",
+                    text,
+                )
+                self.assertIn(
+                    "!startsWith(github.event.head_commit.message, 'chore(merge-back):')",
+                    text,
+                )
+                # el comentario no debe culpar a GITHUB_TOKEN de la recursión
+                self.assertNotIn(
+                    "los push con GITHUB_TOKEN no disparan workflows", text
+                )
 
     def test_release_test_uses_locked_concurrency(self):
         self.assertRegex(

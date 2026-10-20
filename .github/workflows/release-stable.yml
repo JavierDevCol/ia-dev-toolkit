@@ -29,9 +29,14 @@ concurrency:
 
 jobs:
   publish-stable:
-    # Anti-bucle: los push con GITHUB_TOKEN no disparan workflows, pero esta
-    # guardia cubre el caso de que el PAT empuje como github-actions[bot].
-    if: github.actor != 'github-actions[bot]'
+    # Anti-bucle: los push con RELEASE_TOKEN (PAT) SÍ lanzan workflows, así
+    # que se salta el run cuando el commit HEAD es un commit de bookkeeping
+    # del bot de release (chore(changelog)/chore(merge-back)). La guarda de
+    # actor cubre el caso de que el PAT empuje como github-actions[bot].
+    if: >-
+      github.actor != 'github-actions[bot]' &&
+      !startsWith(github.event.head_commit.message, 'chore(changelog):') &&
+      !startsWith(github.event.head_commit.message, 'chore(merge-back):')
     runs-on: ubuntu-latest
     steps:
       - name: Verify RELEASE_TOKEN
