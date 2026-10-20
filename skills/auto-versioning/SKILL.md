@@ -24,7 +24,7 @@ Determines the next semantic version by analyzing code diffs between the last ta
 
 ```dot
 digraph version_flowchart {
-    "Commit/merge/push to main?" [shape=diamond];
+    "No release CI or manual recovery?" [shape=diamond];
     "Get last tag" [shape=box];
     "Analyze diff" [shape=box];
     "Breaking changes?" [shape=diamond];
@@ -35,8 +35,8 @@ digraph version_flowchart {
     "Create and push tag" [shape=box];
     "No significant changes" [shape=box];
 
-    "Commit/merge/push to main?" -> "Get last tag" [label="yes"];
-    "Commit/merge/push to main?" -> "Skip" [label="no"];
+    "No release CI or manual recovery?" -> "Get last tag" [label="yes"];
+    "No release CI or manual recovery?" -> "Skip" [label="no"];
     "Get last tag" -> "Analyze diff";
     "Analyze diff" -> "Breaking changes?";
     "Breaking changes?" -> "Increment Major" [label="yes"];
@@ -62,10 +62,9 @@ digraph version_flowchart {
 
 ## Implementation
 
-1. Detectar si el push/merge es hacia `main`:
-   - Si el agente acaba de hacer `git push origin main` → **activar**
-   - Si el agente acaba de mergear PR a `main` → **activar**
-   - Si NO → **detenerse** (no ejecutar versioning)
+1. Confirmar que esta skill aplica (solo casos manuales/reserva):
+   - ¿El repo tiene los workflows de release CI (`release-stable` / `release-test`)? → **detenerse** (CI ya versiona `main`/`develop`; esta skill no se activa con pushes ni merges)
+   - ¿Repo sin release CI o recuperación manual (backfill o tag perdido)? → **continuar**
 2. Obtener último tag: `git describe --tags --abbrev=0`
 3. Analizar diff: `git diff {last_tag}...HEAD`
 4. Clasificar cambios: Major / Minor / Patch (ver Diff Analysis Triggers)
