@@ -6,8 +6,13 @@ importa: pinning por SHA, token de escritura, tag ``-TEST`` móvil, sin releases
 """
 
 import re
+import sys
 import unittest
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from next_version import STABLE_TAG_RE, TEST_TAG_RE
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 WORKFLOWS_DIR = REPO_ROOT / ".github" / "workflows"
@@ -253,6 +258,70 @@ class ReleaseStableWorkflowTest(unittest.TestCase):
             r"\s+else\n"
             r'\s+git commit -m "chore\(changelog\): \$TAG"',
         )
+
+    def test_release_stable_only_publishes_stable_tags(self):
+        self.assertIn(STABLE_TAG_GUARD, self.yaml)
+        self.assertNotIn("--force", self.yaml)
+
+
+class TagPatternConsistencyTest(unittest.TestCase):
+    """El contrato de tags debe ser único: guards de los workflows, regexes del
+    CLI y el patrón del instalador (se lee de ``INSTALACION/diatlib/paths.py``,
+    solo lectura). ``\\d`` y ``[0-9]`` solo difieren en dígitos Unicode, fuera
+    del contrato: los tags los crea el CLI y siempre son ASCII.
+    """
+
+    SAMPLES = (
+        "v0.0.0",
+        "v1.2.3",
+        "v10.20.30",
+        "v1.2.3-TEST",
+        "v0.0.1-TEST",
+        "v1.2.3-TEST1",
+        "v1.2.3-test",
+        "v1.2.3-",
+        "v1.2.3.4",
+        "1.2.3",
+        "vv1.2.3",
+        "v1.2",
+        "release-1.2.3",
+        "",
+    )
+
+    @classmethod
+    def setUpClass(cls):
+        source = read(REPO_ROOT / "INSTALACION" / "diatlib" / "paths.py")
+        match = re.search(r'TAG_PATTERN = re\.compile\(r"([^"]+)"\)', source)
+        if match is None:
+            raise AssertionError("TAG_PATTERN no está en INSTALACION/diatlib/paths.py")
+        cls.installer_re = re.compile(match.group(1))
+
+    def test_installer_pattern_is_unchanged(self):
+        # si el instalador cambia de patrón hay que revisar los otros contratos
+        self.assertEqual(self.installer_re.pattern, r"^v\d+\.\d+\.\d+(-TEST)?$")
+
+    def test_samples_cover_both_outcomes(self):
+        # anti-vacío: los samples deben aceptar y rechazar, o las comparaciones
+        # de debajo pasarían siempre
+        self.assertTrue([t for t in self.SAMPLES if self.installer_re.match(t)])
+        self.assertTrue([t for t in self.SAMPLES if not self.installer_re.match(t)])
+
+    def test_cli_tag_regexes_match_installer_pattern(self):
+        for tag in self.SAMPLES:
+            with self.subTest(tag=tag):
+                cli_accepts = bool(STABLE_TAG_RE.match(tag) or TEST_TAG_RE.match(tag))
+                self.assertEqual(cli_accepts, bool(self.installer_re.match(tag)))
+
+    def test_workflow_tag_guards_match_installer_pattern(self):
+        self.assertIn(TAG_GUARD, read(RELEASE_TEST))
+        self.assertIn(STABLE_TAG_GUARD, read(RELEASE_STABLE))
+        for tag in self.SAMPLES:
+            with self.subTest(tag=tag):
+                guard_accepts = bool(
+                    re.compile(TAG_GUARD).match(tag)
+                    or re.compile(STABLE_TAG_GUARD).match(tag)
+                )
+                self.assertEqual(guard_accepts, bool(self.installer_re.match(tag)))
 
 
 if __name__ == "__main__":
