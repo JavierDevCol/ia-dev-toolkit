@@ -108,6 +108,14 @@ class PlanReleaseTest(unittest.TestCase):
         self.assertEqual(result["version"], "1.0.3")
         self.assertEqual(result["source"], "test-tag")
 
+    def test_never_adopts_below_last_stable(self):
+        tags = ["v1.0.1"]
+        result = plan_release("stable", tags, ["fix: x"], ["v1.0.0-TEST"])
+        self.assertEqual(result["source"], "recalculated")
+        self.assertEqual(result["tag"], "v1.0.2")
+        self.assertNotIn(result["tag"], tags)
+        self.assertIsNone(plan_release("stable", tags, [], ["v1.0.0-TEST"]))
+
     def test_first_release_without_tags(self):
         result = plan_release("stable", [], ["feat: x"], [])
         self.assertEqual(result["tag"], "v0.1.0")

@@ -106,6 +106,10 @@ def next_version(last_stable: str | None, bump: str) -> str:
     return f"{major}.{minor}.{patch}"
 
 
+def _numeric_key(match: re.Match) -> tuple[int, int, int]:
+    return (int(match.group(1)), int(match.group(2)), int(match.group(3)))
+
+
 def find_last_stable(tags: list[str]) -> str | None:
     """Devuelve el mayor tag ``vX.Y.Z`` por orden numérico, o ``None``.
 
@@ -117,21 +121,33 @@ def find_last_stable(tags: list[str]) -> str | None:
         match = STABLE_TAG_RE.match(tag)
         if not match:
             continue
-        key = (int(match.group(1)), int(match.group(2)), int(match.group(3)))
+        key = _numeric_key(match)
         if best_key is None or key > best_key:
             best_tag, best_key = tag, key
     return best_tag
 
 
-def _highest_test_tag(test_ancestors: list[str]) -> tuple[str, str] | None:
-    """Devuelve ``(tag, versión)`` del mayor ``vX.Y.Z-TEST`` de la lista."""
+def _highest_test_tag(
+    test_ancestors: list[str], floor: str | None = None
+) -> tuple[str, str] | None:
+    """Devuelve ``(tag, versión)`` del mayor ``vX.Y.Z-TEST`` de la lista.
+
+    Con ``floor`` solo son candidatos las versiones estrictamente mayores:
+    nunca se adopta un ``-TEST`` por debajo del último release estable.
+    """
+    floor_key: tuple[int, int, int] | None = None
+    if floor is not None:
+        match = STABLE_TAG_RE.match(floor)
+        floor_key = _numeric_key(match) if match else None
     best: tuple[str, str] | None = None
     best_key: tuple[int, int, int] | None = None
     for tag in test_ancestors:
         match = TEST_TAG_RE.match(tag)
         if not match:
             continue
-        key = (int(match.group(1)), int(match.group(2)), int(match.group(3)))
+        key = _numeric_key(match)
+        if floor_key is not None and key <= floor_key:
+            continue
         if best_key is None or key > best_key:
             best = (tag, f"{match.group(1)}.{match.group(2)}.{match.group(3)}")
             best_key = key
@@ -149,8 +165,10 @@ def plan_release(
     un ``-TEST`` que adoptar).
 
     Canal ``stable`` (D12): se adopta el mayor ``vX.Y.Z-TEST`` ancestro de
-    ``HEAD``; si ``vX.Y.Z`` ya existe como tag se avisa y se recalcula (nunca
-    se devuelve un tag ya existente). Canal ``test``: siempre recalcula y añade
+    ``HEAD`` cuya versión sea estrictamente mayor que el último estable (nunca
+    se publica por debajo del último release); si el mayor ``-TEST`` no es
+    adoptable porque su ``vX.Y.Z`` ya existe se avisa y se recalcula (nunca se
+    devuelve un tag ya existente). Canal ``test``: siempre recalcula y añade
     el sufijo ``-TEST`` (ese tag se mueve por diseño).
     """
     if channel not in _CHANNELS:
@@ -160,21 +178,20 @@ def plan_release(
     warnings: list[str] = []
 
     if channel == "stable":
-        adopted = _highest_test_tag(test_ancestors)
+        adopted = _highest_test_tag(test_ancestors, floor=last_stable)
         if adopted is not None:
-            test_tag, version = adopted
-            stable_tag = f"v{version}"
-            if stable_tag in tags:
-                warnings.append(
-                    f"el tag {stable_tag} ya existe; se recalcula en lugar de adoptar {test_tag}"
-                )
-            else:
-                return {
-                    "tag": stable_tag,
-                    "version": version,
-                    "source": "test-tag",
-                    "warnings": [],
-                }
+            _, version = adopted
+            return {
+                "tag": f"v{version}",
+                "version": version,
+                "source": "test-tag",
+                "warnings": [],
+            }
+        highest = _highest_test_tag(test_ancestors)
+        if highest is not None and f"v{highest[1]}" in tags:
+            warnings.append(
+                f"el tag v{highest[1]} ya existe; se recalcula en lugar de adoptar {highest[0]}"
+            )
 
     if not messages:
         return None
