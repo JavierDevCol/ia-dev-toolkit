@@ -1,0 +1,173 @@
+# Canal estable: cada push a `main` publica una release vX.Y.Z completa —
+# sección nueva en CHANGELOG.md (commit propio en main), tag estable anotado,
+# GitHub Release con las notas, y merge-back de main a develop. Los tags
+# estables son inmutables: si ya existen, el job falla limpio (nunca se
+# fuerza ni se mueve ninguno). Si el push del merge-back a develop falla se
+# abre un PR y el canal -TEST queda pausado hasta mergearlo.
+name: release-stable
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Calcular la release y mostrar el plan sin escribir"
+        type: boolean
+        required: false
+        default: false
+
+# El GITHUB_TOKEN no escribe nunca; toda escritura va por RELEASE_TOKEN (PAT).
+permissions:
+  contents: read
+
+concurrency:
+  group: release-stable
+  cancel-in-progress: false
+
+jobs:
+  publish-stable:
+    # Anti-bucle: los push con GITHUB_TOKEN no disparan workflows, pero esta
+    # guardia cubre el caso de que el PAT empuje como github-actions[bot].
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify RELEASE_TOKEN
+        env:
+          RELEASE_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+        run: |
+          if [ -z "$RELEASE_TOKEN" ]; then
+            echo "::error::RELEASE_TOKEN is not configured; refusing to run"
+            exit 1
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.RELEASE_TOKEN }}
+
+      - name: Fetch tags
+        run: |
+          git fetch --tags
+
+      - name: Compute next stable version
+        id: plan
+        run: |
+          set +e
+          python3 scripts/release/next_version.py --channel stable --json > plan.json
+          status=$?
+          set -e
+          if [ "$status" -eq 3 ]; then
+            echo "::notice::nothing to release"
+            exit 0
+          fi
+          if [ "$status" -ne 0 ]; then
+            echo "::error::next_version.py failed (exit $status)"
+            exit "$status"
+          fi
+          TAG="$(python3 -c 'import json; print(json.load(open("plan.json"))["tag"])')"
+          VERSION="$(python3 -c 'import json; print(json.load(open("plan.json"))["version"])')"
+          if ! printf '%s' "$TAG" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error::refusing to publish a non stable tag: $TAG"
+            exit 1
+          fi
+          python3 -c 'import json; [print("::warning::" + w) for w in json.load(open("plan.json")).get("warnings", [])]'
+          PREV="$(git tag --list 'v*' | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1)"
+          if [ -z "$PREV" ]; then
+            PREV="$(git rev-list --max-parents=0 HEAD | tail -1)"
+            echo "compare_url=" >> "$GITHUB_OUTPUT"
+            echo "First stable release; range base is the root commit $PREV"
+          else
+            echo "compare_url=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/compare/$PREV...$TAG" >> "$GITHUB_OUTPUT"
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "since=$PREV" >> "$GITHUB_OUTPUT"
+          echo "Computed stable release: $TAG (since $PREV)"
+
+      - name: Update changelog
+        id: changelog
+        env:
+          TAG: ${{ steps.plan.outputs.tag }}
+          VERSION: ${{ steps.plan.outputs.version }}
+          SINCE: ${{ steps.plan.outputs.since }}
+          COMPARE_URL: ${{ steps.plan.outputs.compare_url }}
+        run: |
+          if [ -n "$COMPARE_URL" ]; then
+            python3 scripts/release/update_changelog.py --version "$VERSION" --since "$SINCE" --compare-url "$COMPARE_URL" > notes.md
+          else
+            python3 scripts/release/update_changelog.py --version "$VERSION" --since "$SINCE" > notes.md
+          fi
+
+      - name: Dry run
+        if: steps.plan.outputs.tag != '' && inputs.dry_run == true
+        env:
+          TAG: ${{ steps.plan.outputs.tag }}
+          VERSION: ${{ steps.plan.outputs.version }}
+        run: |
+          echo "Would release $VERSION ($TAG) (dry_run: stopping before any git write)"
+          if git ls-files --error-unmatch CHANGELOG.md >/dev/null 2>&1; then
+            git diff -- CHANGELOG.md
+          else
+            git diff --no-index /dev/null CHANGELOG.md || true
+          fi
+
+      - name: Commit changelog
+        if: steps.plan.outputs.tag != '' && inputs.dry_run != true
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+          TAG: ${{ steps.plan.outputs.tag }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add CHANGELOG.md
+          git commit -m "chore(changelog): $TAG"
+          if git push origin "HEAD:main"; then
+            echo "Changelog commit pushed to main for $TAG"
+          else
+            BRANCH="release/changelog-$TAG"
+            git checkout -b "$BRANCH"
+            git push origin "$BRANCH"
+            gh pr create --base main --head "$BRANCH" --title "release/changelog-$TAG" --body "Changelog for $TAG; branch protection rejected a direct push to main."
+            echo "::error::branch protection rejected the changelog commit on main; review and merge the PR, then rerun. No tag, no release."
+            exit 1
+          fi
+
+      - name: Tag stable release
+        if: steps.plan.outputs.tag != '' && inputs.dry_run != true
+        env:
+          TAG: ${{ steps.plan.outputs.tag }}
+        run: |
+          if git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then
+            echo "::error::tag $TAG already exists; stable tags are never moved"
+            exit 1
+          fi
+          git tag -a "$TAG" -m "Release $TAG"
+          if ! git push origin "refs/tags/$TAG"; then
+            echo "::error::failed to push tag $TAG; stable tags are never forced"
+            exit 1
+          fi
+
+      - name: Create GitHub Release
+        if: steps.plan.outputs.tag != '' && inputs.dry_run != true
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+          TAG: ${{ steps.plan.outputs.tag }}
+        run: |
+          gh release create "$TAG" --title "$TAG" --notes-file notes.md
+
+      - name: Merge back into develop
+        if: steps.plan.outputs.tag != '' && inputs.dry_run != true
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+          TAG: ${{ steps.plan.outputs.tag }}
+        run: |
+          git fetch origin develop
+          git checkout -B develop origin/develop
+          if git merge --no-ff main -m "chore(merge-back): $TAG" && git push origin develop; then
+            echo "Merged main back into develop for $TAG"
+          else
+            echo "::warning::canal -TEST pausado hasta mergear el merge-back"
+            gh pr create --base develop --head main --title "release/merge-back-$TAG" --body "Merge back of $TAG into develop."
+          fi
