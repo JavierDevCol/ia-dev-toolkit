@@ -87,6 +87,7 @@ jobs:
           echo "Computed stable release: $TAG (since $PREV)"
 
       - name: Update changelog
+        if: steps.plan.outputs.tag != ''
         id: changelog
         env:
           TAG: ${{ steps.plan.outputs.tag }}

@@ -145,6 +145,18 @@ class ReleaseStableWorkflowTest(unittest.TestCase):
             "el orden de pasos no es checkout -> compute -> changelog -> "
             "commit del changelog -> tag -> release -> merge-back",
         )
+        # Cada step posterior al compute debe estar gateado por el tag
+        # calculado: si no hay release (exit 3), el job termina y ni siquiera
+        # se genera el changelog.
+        steps = re.split(r"(?m)^      - name: ", self.yaml)[1:]
+        names = [step.splitlines()[0] for step in steps]
+        plan = next(i for i, n in enumerate(names) if n.startswith("Compute "))
+        for step, name in zip(steps[plan + 1 :], names[plan + 1 :]):
+            self.assertIn(
+                "steps.plan.outputs.tag != ''",
+                step,
+                f"el step {name!r} debe estar gateado por steps.plan.outputs.tag != ''",
+            )
 
     def test_release_stable_has_merge_back_step(self):
         self.assertIn("git merge --no-ff", self.yaml)
