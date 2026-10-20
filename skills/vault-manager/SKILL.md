@@ -50,7 +50,9 @@ Gestiona operaciones sobre HashiCorp Vault: autenticación, lectura/escritura de
    Pedirle que confirme cuando estén exportadas, y volver al paso 1.
 4. **Autenticar según lo disponible** (token tiene prioridad — no requiere `vault login`):
    - **Token:** usar directo. Validar con `vault token lookup` (confirma validez, no expone el valor).
-   - **Userpass:** `vault login -method=userpass username="$VAULT_USER" password=- <<< "$VAULT_PASS"` — **nunca** `password="$VAULT_PASS"` como argumento expandido: el shell lo vuelca en texto plano al `argv` del proceso, visible vía `ps aux`/`/proc/[pid]/cmdline` mientras corre, igual de expuesto que escribir la contraseña literal.
+   - **Userpass:** `printf '%s' "$VAULT_PASS" | vault login -method=userpass username="$VAULT_USER" password=-` — la contraseña va por **stdin sin salto de línea final**. `printf '%s'` es builtin de bash/zsh, así que el valor no aparece en el `argv` de ningún proceso hijo.
+     - **Nunca** `<<< "$VAULT_PASS"` ni `echo "$VAULT_PASS"`: ambos agregan un `\n` final que Vault incluye en la contraseña y el login falla con "invalid username or password".
+     - **Nunca** `password="$VAULT_PASS"` como argumento expandido: el shell lo vuelca en texto plano al `argv` del proceso, visible vía `ps aux`/`/proc/[pid]/cmdline` mientras corre, igual de expuesto que escribir la contraseña literal.
 5. Si la autenticación falla → informar error y detener.
 
 ### Comandos comunes
@@ -78,7 +80,7 @@ Pedir al usuario que copie el output. Cada entrada contiene: `remote_address`, `
 | Verificar CLI | `vault --version` |
 | Verificar token existente | `vault token lookup` |
 | Login interactivo | `vault login -method=userpass username=USER` |
-| Login no interactivo | `vault login -method=userpass username="$VAULT_USER" password=- <<< "$VAULT_PASS"` |
+| Login no interactivo | `printf '%s' "$VAULT_PASS" \| vault login -method=userpass username="$VAULT_USER" password=-` |
 | Leer secreto | `vault kv get [path]` |
 | Listar | `vault kv list [path]` |
 | Escribir | `vault kv put [path] clave=valor` |
@@ -86,7 +88,8 @@ Pedir al usuario que copie el output. Cada entrada contiene: `remote_address`, `
 
 ## Common Mistakes
 
-- **Credenciales en línea de comandos:** Nunca usar `password=MI_PASS` ni `password="$VAULT_PASS"` como argumento — en ambos casos el shell deja el valor en texto plano en el `argv` del proceso (visible vía `ps aux`/`/proc/[pid]/cmdline`), no solo en el historial. Usar input interactivo o `password=- <<< "$VAULT_PASS"` (stdin).
+- **Credenciales en línea de comandos:** Nunca usar `password=MI_PASS` ni `password="$VAULT_PASS"` como argumento — en ambos casos el shell deja el valor en texto plano en el `argv` del proceso (visible vía `ps aux`/`/proc/[pid]/cmdline`), no solo en el historial. Usar input interactivo o `printf '%s' "$VAULT_PASS" | vault login ... password=-` (stdin).
+- **`<<<` o `echo` para pasar la contraseña por stdin:** ambos agregan un salto de línea final al stream. `vault login password=-` lee stdin sin recortarlo, así que la contraseña llega como `MIPASS\n` y Vault responde "invalid username or password". Usar siempre `printf '%s'` (sin `\n`), nunca `<<<`, `echo` ni `printf '%s\n'`.
 - **Token expirado:** Si un comando falla con error de autenticación, re-autenticar antes de reintentar.
 - **Asumir el default local de `VAULT_ADDR` en silencio:** si no está seteada, `vault` cae a `https://127.0.0.1:8200` sin avisar. No proceder sin más — avisar al usuario de ese fallback y pedirle que confirme si es intencional o dé la URL real (ver Autenticación paso 2). Verificar siempre, incluso si ya hay token o userpass.
 - **Usar userpass habiendo `VAULT_TOKEN`:** El token tiene prioridad — no pedir/usar usuario y contraseña si ya hay un token en el entorno.
