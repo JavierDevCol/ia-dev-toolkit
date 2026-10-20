@@ -6,6 +6,10 @@ ready: true
 
 # Auto-Versioning
 
+> **Nota:** el versionado de `main`/`develop` lo automatiza CI (workflows
+> `release-stable` y `release-test`); usar esta skill solo para casos
+> manuales/reserva.
+
 ## Overview
 
 Determines the next semantic version by analyzing code diffs between the last tag and pending changes. Follows SemVer rules: breaking changes → Major, new features → Minor, fixes/docs → Patch.
@@ -51,6 +55,7 @@ digraph version_flowchart {
 
 ## When NOT to Use
 
+- Releases de `main`/`develop` (las automatiza CI; esta skill queda como respaldo)
 - Committing to feature branches (use manual versioning or skip)
 - Hotfix branches (determine version after merge to main)
 - Initial project setup (start at v0.1.0 manually)
