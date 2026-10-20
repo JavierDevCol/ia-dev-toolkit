@@ -135,16 +135,20 @@ jobs:
           TAG: ${{ steps.plan.outputs.tag }}
         run: |
           git add CHANGELOG.md
-          git commit -m "chore(changelog): $TAG"
-          if git push origin "HEAD:main"; then
-            echo "Changelog commit pushed to main for $TAG"
+          if git diff --cached --quiet; then
+            echo "changelog already committed for $TAG; nothing to do"
           else
-            BRANCH="release/changelog-$TAG"
-            git checkout -b "$BRANCH"
-            git push origin "$BRANCH"
-            gh pr create --base main --head "$BRANCH" --title "release/changelog-$TAG" --body "Changelog for $TAG; branch protection rejected a direct push to main."
-            echo "::error::branch protection rejected the changelog commit on main; review and merge the PR, then rerun. No tag, no release."
-            exit 1
+            git commit -m "chore(changelog): $TAG"
+            if git push origin "HEAD:main"; then
+              echo "Changelog commit pushed to main for $TAG"
+            else
+              BRANCH="release/changelog-$TAG"
+              git checkout -b "$BRANCH"
+              git push origin "$BRANCH"
+              gh pr create --base main --head "$BRANCH" --title "release/changelog-$TAG" --body "Changelog for $TAG; branch protection rejected a direct push to main."
+              echo "::error::branch protection rejected the changelog commit on main; review and merge the PR, then rerun: the run continues with the tag and the release"
+              exit 1
+            fi
           fi
 
       - name: Tag stable release

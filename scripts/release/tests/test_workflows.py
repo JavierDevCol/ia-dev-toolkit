@@ -218,6 +218,21 @@ class ReleaseStableWorkflowTest(unittest.TestCase):
         self.assertIn(f"actions/checkout@{CHECKOUT_PIN}", self.yaml)
         self.assertRegex(self.yaml, r"actions/checkout@[0-9a-f]{40}")
 
+    def test_release_stable_commit_step_tolerates_empty_diff(self):
+        # Rerun tras mergear el PR de changelog: la sección regenerada es
+        # idempotente y no hay diff. Sin este guard el commit muere con
+        # "nothing to commit", el job queda en rojo y jamás se publican ni el
+        # tag ni la release.
+        step = steps_by_name(self.yaml)["Commit changelog"]
+        self.assertIn("if git diff --cached --quiet; then", step)
+        self.assertRegex(
+            step,
+            r'if git diff --cached --quiet; then\n'
+            r'\s+echo "changelog already committed[^\n]*\n'
+            r"\s+else\n"
+            r'\s+git commit -m "chore\(changelog\): \$TAG"',
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
