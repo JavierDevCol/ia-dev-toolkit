@@ -110,6 +110,32 @@ class InsertReleaseTest(unittest.TestCase):
         )
         self.assertNotIn("Full Changelog", result)
 
+    def test_unreleased_anchor_must_be_at_line_start(self):
+        text = (
+            "Mencionar ## [Unreleased] en mitad de frase.\n\n"
+            "# Changelog\n\n"
+            "## [1.0.1] - 2026-10-01\n\n### Fixed\n- fix: old\n"
+        )
+        result = insert_release(
+            text, "1.0.2", "2026-10-20", "### Added\n- feat: new", None
+        )
+        # la mención en mitad de línea no parte el texto
+        self.assertEqual(
+            result.splitlines()[0], "Mencionar ## [Unreleased] en mitad de frase."
+        )
+        # el ancla real es el título de línea completa
+        self.assertLess(result.index("# Changelog"), result.index("## [1.0.2]"))
+        self.assertLess(result.index("## [1.0.2]"), result.index("## [1.0.1]"))
+
+    def test_title_anchor_must_be_at_line_start(self):
+        text = "Intro con # Changelog incrustado.\n\n## [1.0.1] - 2026-10-01\n"
+        result = insert_release(
+            text, "1.0.2", "2026-10-20", "### Added\n- feat: new", None
+        )
+        self.assertEqual(result.splitlines()[0], "Intro con # Changelog incrustado.")
+        # sin ancla de línea se añade al final, sin partir la introducción
+        self.assertLess(result.index("## [1.0.1]"), result.index("## [1.0.2]"))
+
 
 class CliTest(unittest.TestCase):
     def _git(self, repo, *args):

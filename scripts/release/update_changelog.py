@@ -99,9 +99,9 @@ def insert_release(
     ``## [Unreleased]`` si está el ancla; si no, justo después del título
     ``# Changelog``; sin ninguna de las anclas se añade al final (nunca se
     corrompe el contenido previo). Con ``text == ""`` se crea el documento
-    desde cero con título y ``## [Unreleased]``. Los anclajes se localizan con
-    ``str.partition``/``str.find`` sobre texto literal; el contenido previo se
-    conserva intacto.
+    desde cero con título y ``## [Unreleased]``. Los anclajes se localizan al
+    inicio de línea (``_line_start_index``); una mención en mitad de línea no
+    es ancla y el contenido previo se conserva intacto.
     """
     section = f"## [{version}] - {date}"
     release_body = _render_release_body(body, compare_url)
@@ -122,9 +122,10 @@ def insert_release(
         return _splice(head, tail, section)
 
     for candidate in (_UNRELEASED_ANCHOR, _TITLE_ANCHOR):
-        before, found, after = text.partition(candidate)
-        if found:
-            return _splice(before + found, after, section)
+        index = _line_start_index(text, candidate)
+        if index != -1:
+            split = index + len(candidate)
+            return _splice(text[:split], text[split:], section)
     return _splice(text, "", section)
 
 
