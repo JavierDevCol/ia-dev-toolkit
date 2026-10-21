@@ -10,7 +10,7 @@ ready: true
 
 # Entrega Ambiente Banco
 
-Orquesta la entrega de releases de CEIBA al banco siguiendo el manual de paso entre ambientes.
+Orquesta la entrega de releases de CEIBA al banco siguiendo el flujo de paso entre ambientes del equipo.
 
 ## Overview
 
@@ -62,71 +62,50 @@ START: User requests release handoff
 
 ## Referencias
 
-- Manual completo: `{file:./references/MANUAL_PASO_AMBIENTES.md}` (fuente de verdad)
 - Menús ASCII: `references/menus.txt`
 - Flujo hotfix: `references/flujo-hotfix.sh`
 - Flujo RC: `references/flujo-rc.sh`
 - Checklist: `references/checklist-entrega.txt`
+- Plantilla de resumen de entrega: `references/resumen-entrega.txt` (variantes RELEASE / HOTFIX / RC)
 
 ## Implementation
 
-**Carpeta de salida:** usar `output_folder` global de `memory_skill.json` (`$SKILL_DIR/../memory_skill.json`) como base para todas las rutas de entrega (`{output_folder}/entrega_release/...`). Si es `null` o el archivo no existe, preguntar al usuario la carpeta y persistirla en `output_folder`.
+### Configuración global (`memory_skill.json`)
 
-Leer también `CONFIG_USER.yaml` (ruta en `archivos.config_user`) y tomar `usuario.nombre` → **`{{usuario.nombre}}`**, necesario para firmar los resúmenes de entrega. Si `usuario.incluir_firma_en_documentos` es `false`, omitir el bloque de firma. Si el nombre está vacío o el archivo no existe, omitir el sufijo de la firma; no inventar un nombre.
+Antes de generar artefactos, leer `$SKILL_DIR/../memory_skill.json` y tomar los tres campos globales (raíz del JSON):
 
-Todo `RESUMEN_ENTREGA_*.txt` (Opción 1 paso 7, Opción 2b paso 7, Opción 2c paso 5) cierra con:
+| Campo | Para qué se usa | Comportamiento si falta |
+|-------|-----------------|-------------------------|
+| `output_folder` | Base de **todas** las rutas de entrega: `{output_folder}/entrega_release/...` | `null` o archivo inexistente → preguntar la carpeta al usuario y **persistirla** en `output_folder` |
+| `user_name` | Firma de los resúmenes de entrega → placeholder **`{{user_name}}`** | Vacío o archivo inexistente → la línea queda `> **Release Manager:**` sin sufijo. **No inventar un nombre** |
+| `incluir_firma_en_documentos` | Activa o desactiva el bloque de firma | `false` → omitir el bloque completo. Cualquier otro valor (o ausente) → incluirlo |
+
+**Bloque de firma.** Todo `resumen-entrega_*.txt` (Opción 1 paso 8, Opción 2b paso 10, Opción 2c paso 7) cierra con:
 ```
-> **Release Manager:** {{usuario.nombre}}
+> **Release Manager:** {{user_name}}
 > **Fecha:** {{fecha}}
 ```
-Sin `usuario.nombre` configurado, la línea queda `> **Release Manager:**`.
+Sustituir `{{user_name}}` por el valor leído. Con `user_name` sin configurar, la línea queda `> **Release Manager:**`.
+
+### Skills sugeridas: comandos exactos
+
+1. Toda skill sugerida al usuario se muestra con el **comando exacto, listo para copiar**, con los placeholders ya sustituidos por los valores reales de la entrega (versión, ramas, pipeline). Nunca sugerirla solo por nombre.
+2. El diff de `@env-config-audit` es siempre **`<destino>..<origen>` del PR que entregará el cambio** (lo que entra al ambiente). En la Opción 1: `origin/des..release/vX.Y.Z`. **Nunca** `develop..release/vX.Y.Z` — la Regla de oro iguala ambas ramas y el diff saldría siempre vacío.
 
 Mostrar menú principal (`references/menus.txt`) y esperar selección.
 
-### Opción 1: Entregar release desde DEVELOP
+## Fases de ejecución
 
-**Cuándo:** La feature ya está integrada a develop mediante PR aprobado. Sigue §3.2 del manual.
+Determinar la opción con el flowchart y el menú (Opción 2 → sub-menú `references/menus.txt`), luego **cargar solo el archivo de fase elegido** y ejecutar sus pasos en orden:
 
-1. **Verificar develop:** `git fetch origin`, verificar existencia, mostrar último commit, confirmar pipeline OK
-2. **Estado de promoción de la versión anterior (informativo — nunca bloquea):** hallar el tag anterior más reciente (mismo hallazgo que reutiliza el paso 3) y verificar `vX.Y.Z` (DES), `vX.Y.Z-pru`, `vX.Y.Z-prepro`, `vX.Y.Z-pro`. Mostrar cuáles existen y cuáles faltan. **Nunca detener el flujo por esto** — el ritmo de promoción del banco (DES→PRU→PREPRO→PRO) es independiente de que CEIBA prepare el siguiente release, y un hotfix urgente (Opción 2b) no puede esperar a que la versión anterior termine de promoverse. Es solo visibilidad, útil mientras el deploy siga disparado por rama y no por tag (el tagging real aún puede estar incompleto).
-3. **Release notes:** `git checkout develop && git pull`, usar el tag anterior del paso 2, generar `git log <TAG>..HEAD --oneline --no-merges > release-notes.md`, guardar en `{output_folder}/entrega_release/{nombre_repo}/{version}/`
-4. **Crear/actualizar release/vX.Y.Z:** Validar tag inexistente, buscar si rama existe, crear con `--ff-only` o crear nueva desde develop, push
-5. **Validar mismo commit:** `git rev-parse develop` vs `git rev-parse release/vX.Y.Z` — deben coincidir
-6. **Checklist de entrega** (`references/checklist-entrega.txt`): Mostrar checklist **sustituyendo `vX.Y.Z` por la versión real** de esta entrega en todas las líneas (incluida la de `env-config-audit`) antes de mostrarlo — nunca dejar el placeholder literal. Items ⚠️ requieren skills externas (`env-config-audit`, `ado-pipeline-analyzer`)
-7. **Resumen final:** Mostrar y guardar en `{output_folder}/entrega_release/{nombre_repo}/{version}/RESUMEN_ENTREGA_release ({nombre_repo}).txt`
+| Opción | Fase | Archivo |
+|--------|------|---------|
+| **1** | Entregar release desde DEVELOP | `{file:./references/paso_uno.md}` |
+| **2a** | feature/fix → develop | `{file:./references/paso_dos_a.md}` |
+| **2b** | hotfix post-entrega | `{file:./references/paso_dos_b.md}` |
+| **2c** | ajuste RC post-entrega en DES | `{file:./references/paso_dos_c.md}` |
 
-### Opción 2: Entregar release desde feature/fix/hotfix
-
-Mostrar sub-menú (`references/menus.txt`). Determinar sub-flujo:
-
-#### 2a: feature/fix → develop
-
-1. Preguntar nombre de rama y versión, validar existencia
-2. Informar sobre `env-config-audit`, con el comando ya armado y listo para copiar (sustituir `<rama>` por el nombre real): `@env-config-audit sobre el diff develop..<rama>` — **no** reutilizar el diff de la Opción 1 (`develop..release/vX.Y.Z`), acá todavía no existe ningún `release/vX.Y.Z`
-3. Crear PR desde `<rama>` → `develop` (título sugerido: "Release vX.Y.Z — <descripción>")
-4. Instrucciones: aprobar PR, luego re-ejecutar Opción 1
-
-#### 2b: hotfix post-entrega (§5.2)
-
-Ver `references/flujo-hotfix.sh` para flujo bash completo.
-
-1. Preguntar ambiente (PRU/PREPRO/PRO), versión afectada, descripción
-2. Validar tag: `git tag -l "vX.Y.Z-ambiente"`
-3. **Estado de promoción de vX.Y.Z (informativo — nunca bloquea):** mismo chequeo que Opción 1 paso 2 (`vX.Y.Z`, `-pru`, `-prepro`, `-pro`). Mostrar y continuar — un hotfix es por definición urgente, no puede esperar a que termine de promoverse.
-4. Crear hotfix branch desde el tag del ambiente afectado, aplicar el fix
-5. Informar sobre `env-config-audit`, con el comando ya armado (sustituir `<hotfix>` por el nombre real): `@env-config-audit sobre el diff develop..hotfix/<hotfix>` — correrlo acá, sobre el fix en sí, antes de mergear a develop
-6. Merge a develop → nuevo release/vX.Y.Z+1 → limpiar hotfix branch
-7. Resumen y guardar en `{output_folder}/entrega_release/{nombre_repo}/vX.Y.Z+1/RESUMEN_ENTREGA_hotfix ({nombre_repo}).txt`
-
-#### 2c: ajuste RC post-entrega en DES (§3.2.1)
-
-Ver `references/flujo-rc.sh` para flujo bash completo.
-
-1. Preguntar versión activa, descripción del ajuste, número de RCs existentes
-2. Aplicar el fix sobre release/vX.Y.Z (la rama sigue viva)
-3. Informar sobre `env-config-audit`, con el comando ya armado (sustituir `<vX.Y.Z-rc.N-1>` por el tag del RC anterior si existe, o `<vX.Y.Z>` si es el primer ajuste): `@env-config-audit sobre el diff <vX.Y.Z-rc.N-1 o vX.Y.Z>..release/vX.Y.Z` — el ajuste es el commit nuevo sobre la misma rama, no un diff entre dos ramas distintas. Correrlo acá, antes del back-merge
-4. Back-merge a develop → crear rama RC efímera
-5. Resumen y guardar en `{output_folder}/entrega_release/{nombre_repo}/vX.Y.Z/RESUMEN_ENTREGA_rc ({nombre_repo}).txt`
+Cada fase referencia sus archivos de apoyo (`references/flujo-hotfix.sh`, `references/flujo-rc.sh`, `references/checklist-entrega.txt` en Opción 1) y su ruta de `resumen-entrega_*.txt`. El ciclo completo 2a → 1 se encadena: al aprobarse el PR, volver al menú y ejecutar la Opción 1.
 
 ## Quick Reference
 
@@ -142,13 +121,13 @@ Ver `references/flujo-rc.sh` para flujo bash completo.
 ### Reglas obligatorias
 
 1. **Regla de oro:** develop y release/vX.Y.Z = mismo commit antes del handoff. Usar `--ff-only`.
-2. **Semver:** vMAJOR.MINOR.PATCH. Validar formato.
+2. **Semver:** `vMAJOR.MINOR.PATCH`. Calcular la versión siguiente con `@auto-versioning` (analiza el diff desde el último tag: breaking→MAJOR, feature→MINOR, fix/docs→PATCH) y validar el formato. **Usar solo el cálculo** (sus pasos de análisis): los tags no los crea CEIBA (Regla 6) — nunca ejecutar el tagging de esa skill. Si el usuario ya trae la versión, solo validar el formato.
 3. **Ajustes DES:** usar RC — `release/vX.Y.Z-rc.N`. Ramas RC efímeras.
 4. **Hotfixes:** incremento PATCH. Merge a develop primero, nuevo release, flujo completo.
-5. **release-notes.md** se genera desde cero en cada release.
+5. **release-notes.md** se genera desde cero en cada release nuevo (Opción 1 y Opción 2b, con `git log <TAG>..HEAD --oneline --no-merges`). En un ajuste RC (Opción 2c) **no** se regenera: sigue siendo el mismo release `vX.Y.Z` — el ajuste se documenta en el `resumen-entrega_rc`.
 6. **PR a des lo crea el banco**, no CEIBA.
 7. **No exponer tokens ni contraseñas.**
-8. **Si `--ff-only` falla:** detener y remitir a §3.2.1 del manual.
+8. **Si `--ff-only` falla:** detener y ver Opción 2c (ajuste RC).
 9. **Release branch viva** durante validación y ciclo RC.
 10. **Hotfix merge a develop primero** — merge limpio antes de nuevo release.
 
@@ -156,21 +135,24 @@ Ver `references/flujo-rc.sh` para flujo bash completo.
 
 | Error | Solución |
 |-------|----------|
-| develop y release no coinciden (`--ff-only` falla) | No forzar merge. Remitir a §3.2.1 del manual |
+| develop y release no coinciden (`--ff-only` falla) | No forzar merge. Ver Opción 2c (ajuste RC) |
 | Crear tag vX.Y.Z desde CEIBA | El tag lo crea el banco en DES |
 | Hotfix sin merge a develop primero | El flujo es develop → des → pru → prepro → pro |
 | RC branches no efímeras | Se crean para PR a des, se eliminan después del merge |
 | Merge directo a main/des en hotfix | Primero develop, luego crear release |
 | Generar release-notes incremental | Siempre desde cero con `git log <TAG>..HEAD` |
-| No generar CONFIG_ENTORNO_PR | Ejecutar `@env-config-audit` manualmente por separado |
+| No generar `config-entorno_{nombre_ms}_vX.Y.Z.md` | Ejecutar `@env-config-audit sobre el diff origin/des..release/vX.Y.Z` (Opción 1; en 2a/2b/2c el diff de su fase) manualmente por separado |
 | `--ff-only` forzado | Si falla, hay commits propios en release — detener |
-| Bloquear la entrega por tags de promoción faltantes | El chequeo de Opción 1 paso 2 / 2b paso 3 es informativo, nunca un gate — bloquearlo frenaría un hotfix urgente por el ritmo del banco, que es independiente de CEIBA |
+| Bloquear la entrega por tags de promoción faltantes | El chequeo de Opción 1 paso 2 / 2b paso 2 es informativo, nunca un gate — bloquearlo frenaría un hotfix urgente por el ritmo del banco, que es independiente de CEIBA |
 
-## Skills complementarias (NO las ejecuta esta skill)
+## Skills complementarias (se invocan aparte; esta skill solo las referencia)
 
-| Skill | Qué hace | Cuándo ejecutarla |
-|-------|----------|-------------------|
-| `env-config-audit` | Genera CONFIG_ENTORNO_PR_*.md analizando el diff | Checklist opción 1, 2a, 2b, 2c |
-| `ado-pipeline-analyzer` | Valida build, tests, cobertura, DAST, SonarQube | Checklist opción 1 |
-| `analizar-seguridad` | Auditoría estática (SAST) de todo lo que se va a promover | Checklist opción 1, `scope=project` |
-| `analizar-calidad-codigo` | Code smells y violaciones arquitectónicas del release completo | Checklist opción 1, `scope=project` |
+| Skill | Qué hace | Cuándo ejecutarla | Comando sugerido |
+|-------|----------|-------------------|------------------|
+| `env-config-audit` |  analiza el diff | Checklist opción 1, 2a, 2b, 2c | Opción 1: `@env-config-audit sobre el diff origin/des..release/vX.Y.Z` · 2a: `@env-config-audit sobre el diff develop..<rama>` · 2b: `@env-config-audit sobre el diff develop..hotfix/<hotfix>` · 2c: `@env-config-audit sobre el diff origin/des..release/vX.Y.Z` |
+| `ado-pipeline-analyzer` | Valida build, tests, cobertura, DAST, SonarQube.| Checklist opción 1 | `@ado-pipeline-analyzer build latest del pipeline <nombre_pipeline> en rama develop` |
+| `analizar-seguridad` | Auditoría estática (SAST) de todo lo que se va a promover.  | Checklist opción 1, `scope=project` | `@analizar-seguridad scope=project sobre release/vX.Y.Z` |
+| `analizar-calidad-codigo` | Code smells y violaciones arquitectónicas del release completo  | Checklist opción 1, `scope=project` | `@analizar-calidad-codigo scope=project sobre release/vX.Y.Z` |
+| `auto-versioning` | Calcula la versión siguiente según SemVer (breaking→MAJOR, feature→MINOR, fix→PATCH) | Regla 2 (inputs de Opción 1 y 2b) | `@auto-versioning calcular próxima versión desde el último tag (sin crear tag)` |
+
+Al ejecutar estas skills, **reflejar su resultado en el checklist de entrega** (marcar `[✓]`/`[✗]` sobre la copia de la entrega, nunca sobre la plantilla) — ver instrucción de uso al final de `references/checklist-entrega.txt`.

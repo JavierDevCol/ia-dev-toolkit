@@ -43,7 +43,7 @@ Analiza un PR/diff y clasifica variables, colas y secretos por ámbito (pipeline
 
 **Fase D — Preview:** Mostrar resumen consolidado (ver `references/preview-example.md`). Solo incluir secciones con cambios.
 
-**Fase E — Generación:** Crear `CONFIG-ENTORNO-PR-{ID} ({nombre_ms}).md` según template `assets/template-CONFIG-ENTORNO-PR.md`. Leer también `CONFIG_USER.yaml` (ruta en `archivos.config_user`) y tomar `usuario.nombre` → **`{{usuario.nombre}}`**, necesario para firmar el documento. Si `usuario.incluir_firma_en_documentos` es `false`, omitir el bloque de firma. Si el nombre está vacío o el archivo no existe, omitir el sufijo de la firma; no inventar un nombre. Antes del pie `*Documento generado con env-config-audit skill*`, agregar:
+**Fase E — Generación:** Crear `config-entorno_{nombre_ms}_vX.Y.Z.md` según template `assets/template-config-entorno.md` — la versión es la del release o RC entregado (misma `vX.Y.Z`/`vX.Y.Z-rc.N` del flujo) y el ID del PR va en la cabecera del documento, no en el nombre. Leer también `CONFIG_USER.yaml` (ruta en `archivos.config_user`) y tomar `usuario.nombre` → **`{{usuario.nombre}}`**, necesario para firmar el documento. Si `usuario.incluir_firma_en_documentos` es `false`, omitir el bloque de firma. Si el nombre está vacío o el archivo no existe, omitir el sufijo de la firma; no inventar un nombre. Antes del pie `*Documento generado con env-config-audit skill*`, agregar:
 ```
 > **Auditor:** {{usuario.nombre}}
 > **Fecha:** {{fecha}}
@@ -66,7 +66,7 @@ Sin `usuario.nombre` configurado, la línea queda `> **Auditor:**`.
 | B | Tabla clasificada por ámbito (pipeline/runtime) |
 | C | Variables sin origen → preguntas al usuario |
 | D | Preview consolidado antes de generar |
-| E | Documento final `CONFIG-ENTORNO-PR-{ID}.md` |
+| E | Documento final `config-entorno_{nombre_ms}_vX.Y.Z.md` |
 
 ## Common Mistakes
 

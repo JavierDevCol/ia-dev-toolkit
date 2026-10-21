@@ -1,24 +1,31 @@
 CHECKLIST DE ENTREGA — Handoff vX.Y.Z
 
-[✓] Release branch creado o actualizado desde develop
-[✓] develop y release/vX.Y.Z apuntan al mismo commit
+[ ] Release branch creado o actualizado desde develop
+[ ] develop y release/vX.Y.Z apuntan al mismo commit
 [ ] Versión actualizada en artefactos
-[✓] Release notes generados
+[ ] Release notes generados
 [⚠] Pruebas unitarias ejecutadas (100% OK)
-     → Ejecuta /ado-pipeline-analyzer para verificar
+     → Ejecuta @ado-pipeline-analyzer build latest del pipeline <nombre_pipeline> en rama release/vX.Y.Z
 [⚠] Cobertura ≥ 80% verificada
-     → Ejecuta /ado-pipeline-analyzer para verificar
+     → Ejecuta @ado-pipeline-analyzer build latest del pipeline <nombre_pipeline> en rama release/vX.Y.Z
 [⚠] DAST ejecutado (0 High/Critical)
-     → Ejecuta /ado-pipeline-analyzer para verificar
+     → Ejecuta @ado-pipeline-analyzer build latest del pipeline <nombre_pipeline> en rama release/vX.Y.Z
 [⚠] SonarQube Quality Gate passed
-     → Ejecuta /ado-pipeline-analyzer para verificar
-[⚠] CONFIG_ENTORNO_PR generado
-     → Ejecuta /env-config-audit sobre diff develop..release/vX.Y.Z
+     → Ejecuta @ado-pipeline-analyzer build latest del pipeline <nombre_pipeline> en rama release/vX.Y.Z
+[⚠] config-entorno generado (archivo config-entorno_{nombre_ms}_vX.Y.Z.md)
+     → Ejecuta @env-config-audit sobre el diff origin/des..release/vX.Y.Z (Opción 1; en 2a/2b/2c usar el diff de su fase)
 [⚠] Auditoría de seguridad estática (SAST) ejecutada
-     → Ejecuta /analizar-seguridad scope=project sobre release/vX.Y.Z
+     → Ejecuta @analizar-seguridad scope=project sobre release/vX.Y.Z
 [⚠] Calidad de código verificada
-     → Ejecuta /analizar-calidad-codigo scope=project sobre release/vX.Y.Z
+     → Ejecuta @analizar-calidad-codigo scope=project sobre release/vX.Y.Z
 [ ] Artefactos listos para entregar al banco
 
-NOTA: Las skills ´env-config-audit´, ´ado-pipeline-analyzer´, ´analizar-seguridad´ y
-´analizar-calidad-codigo´ se recomienda ejecutar en el mismo chat.
+NOTA: Las skills @env-config-audit, @ado-pipeline-analyzer, @analizar-seguridad y
+@analizar-calidad-codigo se recomienda ejecutar en el mismo chat.
+
+INSTRUCCIÓN DE USO (actualización del checklist):
+- Esta plantilla NO se modifica. La copia marcada es la que se entrega.
+- [ ] = lo hace el flujo de entrega; [⚠] = requiere la skill externa indicada abajo.
+- Al completar cada trabajo o skill, marcar el ítem: [✓] si pasó, o [✗] con el hallazgo si no.
+- Si una skill no se ejecuta, su [⚠] se mantiene explícito como pendiente (nunca [✓]).
+- El checklist entregado refleja el estado real al cierre de la entrega.

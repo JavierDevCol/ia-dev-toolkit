@@ -14,14 +14,14 @@
 
 #### 📦 ENTREGABLES
 • **`release-notes.md`** ➔ `{ruta}/entrega_release/{repo}/{version}/`
-• **`CONFIG-ENTORNO-PR`** ➔ `{ruta}/entrega_release/{repo}/{version}/`
+• **`config-entorno`** ➔ `{ruta}/entrega_release/{repo}/{version}/`
 
 #### ⚠️ ACCIONES REQUERIDAS
 1. Crear PR de `{rama}` ➔ `develop`
 2. Mergear PR a `develop`
 3. Taggear `v{versión}`
 4. Desplegar en **DES**
-5. Configurar variables/secrets según **`CONFIG-ENTORNO-PR`**
+5. Configurar variables/secrets según **`config-entorno`**
 
 > ⚠️ **NOTAS ADICIONALES**
 > {Notas adicionales si aplica. Si no hay notas, eliminar este bloque}
