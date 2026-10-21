@@ -1,0 +1,91 @@
+RESUMEN DE ENTREGA — Handoff CEIBA → banco
+
+Plantilla de relleno. Variantes: RELEASE (Opción 1) · HOTFIX (Opción 2b) · RC (Opción 2c).
+Copiar la variante que corresponda y sustituir TODOS los placeholders — nunca dejar `{...}` literal.
+Guardar como: {output_folder}/entrega_release/{nombre_repo}/{version}/resumen-entrega_<variante>_<version>.txt
+Ejemplos: resumen-entrega_release_vX.Y.Z.txt · resumen-entrega_hotfix_vX.Y.Z+1.txt · resumen-entrega_rc_vX.Y.Z-rc.N.txt
+
+
+═══════════════════ VARIANTE RELEASE (Opción 1) ═══════════════════
+
+RESUMEN ENTREGA — release ({nombre_repo})
+Versión: vX.Y.Z
+Commit de entrega: <sha>  (develop == release/vX.Y.Z ✓)
+Rama entregada: release/vX.Y.Z — el PR a des lo crea el banco
+Estado de promoción de la versión anterior (informativo): <cuáles existen / faltan>
+
+CAMBIOS INCLUIDOS (desde release-notes.md)
+- <commit o tema 1>
+- <commit o tema 2>
+
+CHECKLIST DE ENTREGA
+- <N> ítems [✓] · <M> pendientes ([⚠]/[✗]): <cuáles y por qué>
+
+ARTÉFACTOS (nombres reales según la skill que los genera)
+- release-notes.md
+- checklist-entrega_vX.Y.Z.txt
+- config-entorno_{nombre_ms}_vX.Y.Z.md — lo genera env-config-audit
+- PIPELINE-REPORT_{runId}.md — lo genera ado-pipeline-analyzer (en `base_reports_path` del perfil ADO, no en esta carpeta)
+- AUDITORIA-SEGURIDAD-{fecha}.md — lo genera analizar-seguridad (opcional: solo existe si se pidió guardarlo)
+- calidad-codigo_{scope}_{fecha}.md — lo genera analizar-calidad-codigo (opcional: solo si se pidió guardarlo)
+
+NOTIFICACIÓN AL BANCO
+- Entrega lista. El banco crea PR release/vX.Y.Z → des y taggea vX.Y.Z en DES.
+
+> **Release Manager:** {{user_name}}
+> **Fecha:** {{fecha}}
+
+
+═══════════════════ VARIANTE HOTFIX (Opción 2b) ═══════════════════
+
+RESUMEN ENTREGA — hotfix ({nombre_repo})
+Versión entregada: vX.Y.Z+1  (incremento de PATCH desde vX.Y.Z)
+Ambiente donde se detectó el bug: PRU/PREPRO/PRO  (tag de origen: vX.Y.Z-<sufijo>)
+Descripción del bug y del fix: <texto>
+Commit del fix: <sha>
+Rama entregada: release/vX.Y.Z+1  (develop == release/vX.Y.Z+1 ✓)
+Back-merge: PR hotfix/<nombre> → develop (aprobado y mergeado)
+
+CAMBIOS DEL FIX
+- <cambio 1>
+
+CHECKLIST DE ENTREGA
+- <N> ítems [✓] · <M> pendientes ([⚠]/[✗]): <cuáles y por qué>
+
+ARTÉFACTOS (nombres reales según la skill que los genera)
+- release-notes.md (desde cero, rango v<X.Y.Z>..HEAD)
+- config-entorno_{nombre_ms}_vX.Y.Z.md — lo genera env-config-audit
+
+NOTIFICACIÓN AL BANCO
+- La versión sigue el flujo completo: develop → des → pru → prepro → pro (sin saltar ambientes).
+
+> **Release Manager:** {{user_name}}
+> **Fecha:** {{fecha}}
+
+
+═══════════════════ VARIANTE RC (Opción 2c) ═══════════════════
+
+RESUMEN ENTREGA — rc ({nombre_repo})
+Versión activa: vX.Y.Z — RC: vX.Y.Z-rc.N
+Descripción del ajuste: <texto>
+Commit del ajuste: <sha>
+Rama RC efímera: release/vX.Y.Z-rc.N — el banco crea PR → des y taggea vX.Y.Z-rc.N
+Validación en DEVELOP: <OK / fix trivial (typo/config)>
+Back-merge: PR release/vX.Y.Z → develop <aprobado y mergeado / pendiente>
+Release notes: no se regeneran en un RC (Regla 5) — el ajuste queda documentado acá.
+
+CAMBIOS DEL AJUSTE
+- <cambio 1>
+
+CHECKLIST DE ENTREGA
+- <N> ítems [✓] · <M> pendientes ([⚠]/[✗]): <cuáles y por qué>
+
+ARTÉFACTOS (nombres reales según la skill que los genera)
+- config-entorno_{nombre_ms}_vX.Y.Z.md — lo genera env-config-audit
+
+POST-ENTREGA
+- Eliminar release/vX.Y.Z-rc.N (local y remoto) tras el merge del banco.
+- release/vX.Y.Z sigue viva hasta la aprobación final del banco.
+
+> **Release Manager:** {{user_name}}
+> **Fecha:** {{fecha}}

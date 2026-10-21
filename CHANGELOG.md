@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-10-21
+
+### Changed
+- refactor(entrega-ambiente-banco): phase-based flow, unified outputs (#5)
+
+**Full Changelog**: https://github.com/JavierDevCol/ia-dev-toolkit/compare/v1.1.0...v1.1.1
+
 ## [1.1.0] - 2026-10-21
 
 ### Added

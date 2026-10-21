@@ -1,5 +1,5 @@
 <!--
-  Plantilla para CONFIG-ENTORNO-PR-{ID} ({nombre microservicio}).md.
+  Plantilla para config-entorno_{nombre_ms}_vX.Y.Z.md (el ID del PR va en la cabecera del documento).
   {ID} = número de PR o nombre de rama.
   {nombre microservicio} = nombre del microservicio.
   Alcance: inventario completo (MS nuevo) o solo delta (funcionalidad).
