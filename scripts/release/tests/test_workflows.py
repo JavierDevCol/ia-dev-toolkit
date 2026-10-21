@@ -1,0 +1,328 @@
+"""Contrato de los workflows de release — checks con ``re`` sobre el YAML.
+
+Sin dependencias: solo stdlib. El "parser" es lectura de texto + regex, tal y
+como pide el plan (no se valida el YAML completo, solo el contrato que nos
+importa: pinning por SHA, token de escritura, tag ``-TEST`` móvil, sin releases).
+"""
+
+import re
+import sys
+import unittest
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from next_version import STABLE_TAG_RE, TEST_TAG_RE
+
+REPO_ROOT = Path(__file__).resolve().parents[3]
+WORKFLOWS_DIR = REPO_ROOT / ".github" / "workflows"
+RELEASE_TEST = WORKFLOWS_DIR / "release-test.yml"
+RELEASE_STABLE = WORKFLOWS_DIR / "release-stable.yml"
+
+# Literal que el workflow usa para validar el tag antes de moverlo (R1).
+TAG_GUARD = "^v[0-9]+\\.[0-9]+\\.[0-9]+-TEST$"
+# Tag estable: solo X.Y.Z, nunca móvil ni forzado.
+STABLE_TAG_GUARD = "^v[0-9]+\\.[0-9]+\\.[0-9]+$"
+# actions/checkout v4.4.0, pin compartido por todos los workflows de release.
+CHECKOUT_PIN = "11d5960a326750d5838078e36cf38b85af677262"
+
+
+def read(path: Path) -> str:
+    return path.read_text(encoding="utf-8")
+
+
+def steps_by_name(text: str) -> dict[str, str]:
+    """Steps del workflow por nombre: texto completo desde ``- name:``."""
+    steps = re.split(r"(?m)^      - name: ", text)[1:]
+    return {step.splitlines()[0]: step for step in steps}
+
+
+def assert_run_blocks_are_well_formed(test: unittest.TestCase, text: str) -> None:
+    # Un bloque `run: |` termina en cuanto aparece una línea con sangría
+    # menor o igual que sea YAML (clave, item o comentario). Una línea de
+    # shell a sangría menor cortaría el bloque y rompería el archivo.
+    block_indent = None
+    yaml_line = re.compile(r"^\s*(?:(?:- )?[A-Za-z_][\w.-]*:|#)")
+    for lineno, line in enumerate(text.splitlines(), start=1):
+        if not line.strip():
+            continue
+        indent = len(line) - len(line.lstrip())
+        if block_indent is not None:
+            if indent > block_indent:
+                continue
+            test.assertRegex(
+                line,
+                yaml_line,
+                f"línea {lineno} cierra el bloque run: | y no es YAML: {line!r}",
+            )
+            block_indent = None
+        match = re.match(r"^( +)run: \|$", line)
+        if match:
+            block_indent = len(match.group(1))
+
+
+class ReleaseTestWorkflowTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.yaml = read(RELEASE_TEST)
+
+    def test_release_test_workflow_pins_checkout_by_sha(self):
+        self.assertRegex(self.yaml, r"actions/checkout@[0-9a-f]{40}")
+
+    def test_release_test_never_creates_releases(self):
+        self.assertNotIn("gh release", self.yaml)
+
+    def test_workflows_use_release_token(self):
+        paths = sorted(WORKFLOWS_DIR.glob("release-*.yml"))
+        self.assertTrue(paths, "no hay workflows de release")
+        for path in paths:
+            with self.subTest(path.name):
+                text = read(path)
+                self.assertIn("secrets.RELEASE_TOKEN", text)
+                self.assertNotIn("permissions: contents: write", text)
+
+    def test_release_test_permissions_are_read_only(self):
+        self.assertRegex(self.yaml, r"(?m)^permissions:\n  contents: read$")
+
+    def test_release_test_triggers_on_develop_and_manual_dry_run(self):
+        self.assertIn("branches: [develop]", self.yaml)
+        self.assertIn("workflow_dispatch", self.yaml)
+        self.assertRegex(self.yaml, r"dry_run:[\s\S]{0,200}?type: boolean")
+
+    def test_release_test_has_anti_loop_guard(self):
+        self.assertIn("github.actor != 'github-actions[bot]'", self.yaml)
+
+    def test_workflows_skip_release_bot_bookkeeping_commits(self):
+        # Los push hechos con RELEASE_TOKEN (PAT) SÍ lanzan workflows: el
+        # commit del changelog en main y el merge-back en develop provocarían
+        # un run nuevo de cada canal. La recursión se corta por el mensaje del
+        # commit HEAD, no por el actor.
+        for path in sorted(WORKFLOWS_DIR.glob("release-*.yml")):
+            with self.subTest(path.name):
+                text = read(path)
+                self.assertIn(
+                    "!startsWith(github.event.head_commit.message, 'chore(changelog):')",
+                    text,
+                )
+                self.assertIn(
+                    "!startsWith(github.event.head_commit.message, 'chore(merge-back):')",
+                    text,
+                )
+                # el comentario no debe culpar a GITHUB_TOKEN de la recursión
+                self.assertNotIn(
+                    "los push con GITHUB_TOKEN no disparan workflows", text
+                )
+
+    def test_release_test_uses_locked_concurrency(self):
+        self.assertRegex(
+            self.yaml,
+            r"(?m)^concurrency:\n  group: release-test\n  cancel-in-progress: false$",
+        )
+
+    def test_release_test_only_moves_test_tags(self):
+        self.assertIn(TAG_GUARD, self.yaml)
+        self.assertNotIn("--force", self.yaml)
+
+    def test_release_test_exit_3_ends_with_notice(self):
+        self.assertIn("-eq 3", self.yaml)
+        self.assertIn("::notice::", self.yaml)
+
+    def test_release_test_step_order(self):
+        markers = [
+            "actions/checkout@",
+            "next_version.py --channel test --json",
+            "::notice::",
+            "Would move",
+            'git push origin ":refs/tags/',
+            "git tag -a",
+            'git push origin "refs/tags/',
+        ]
+        positions = [self.yaml.index(marker) for marker in markers]
+        self.assertEqual(
+            positions,
+            sorted(positions),
+            "el orden de pasos no es checkout -> CLI -> notice -> dry_run -> "
+            "borrar tag remoto -> tag anotado -> push del tag",
+        )
+
+    def test_release_test_move_step_skips_on_dry_run(self):
+        self.assertIn("inputs.dry_run == true", self.yaml)
+        self.assertIn("inputs.dry_run != true", self.yaml)
+
+    def test_release_test_run_blocks_are_well_formed(self):
+        for path in sorted(WORKFLOWS_DIR.glob("release-*.yml")):
+            with self.subTest(path.name):
+                assert_run_blocks_are_well_formed(self, read(path))
+
+
+class ReleaseStableWorkflowTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.yaml = read(RELEASE_STABLE)
+
+    def test_release_stable_orders_changelog_before_tag(self):
+        markers = [
+            "actions/checkout@",
+            "next_version.py --channel stable --json",
+            "update_changelog.py --version",
+            'git commit -m "chore(changelog)',
+            "git tag -a",
+            "gh release create",
+            "git merge --no-ff",
+        ]
+        positions = [self.yaml.index(marker) for marker in markers]
+        self.assertEqual(
+            positions,
+            sorted(positions),
+            "el orden de pasos no es checkout -> compute -> changelog -> "
+            "commit del changelog -> tag -> release -> merge-back",
+        )
+        # Cada step posterior al compute debe estar gateado por el tag
+        # calculado: si no hay release (exit 3), el job termina y ni siquiera
+        # se genera el changelog.
+        steps = re.split(r"(?m)^      - name: ", self.yaml)[1:]
+        names = [step.splitlines()[0] for step in steps]
+        plan = next(i for i, n in enumerate(names) if n.startswith("Compute "))
+        for step, name in zip(steps[plan + 1 :], names[plan + 1 :]):
+            self.assertIn(
+                "steps.plan.outputs.tag != ''",
+                step,
+                f"el step {name!r} debe estar gateado por steps.plan.outputs.tag != ''",
+            )
+
+    def test_release_stable_has_merge_back_step(self):
+        self.assertIn("git merge --no-ff", self.yaml)
+        self.assertIn("git push origin develop", self.yaml)
+        self.assertIn("--base develop --head main", self.yaml)
+        self.assertIn(
+            "::warning::canal -TEST pausado hasta mergear el merge-back", self.yaml
+        )
+
+    def test_release_stable_resumes_half_finished_release(self):
+        # next_version.py señala la reanudación en el payload --json y el
+        # workflow la propaga como output del step de plan.
+        self.assertIn('print("true" if json.load(open("plan.json")).get("resume")', self.yaml)
+        self.assertIn('echo "resume=$RESUME" >> "$GITHUB_OUTPUT"', self.yaml)
+        steps = steps_by_name(self.yaml)
+        # en reanudación el changelog, su commit y el tag ya existen: se saltan
+        for name in ("Update changelog", "Commit changelog", "Tag stable release"):
+            self.assertIn(
+                "steps.plan.outputs.resume != 'true'",
+                steps[name],
+                f"el step {name!r} debe saltarse en reanudación",
+            )
+        # la GitHub Release y el merge-back SÍ se completan en reanudación
+        for name in ("Create GitHub Release", "Merge back into develop"):
+            self.assertNotIn(
+                "steps.plan.outputs.resume != 'true'",
+                steps[name],
+                f"el step {name!r} debe ejecutarse también en reanudación",
+            )
+        # las notas salen de la sección existente del changelog y la release
+        # nunca se duplica
+        release_step = steps["Create GitHub Release"]
+        self.assertIn("--extract-notes", release_step)
+        self.assertIn("gh release view", release_step)
+
+    def test_release_stable_configures_git_identity_before_writes(self):
+        # los commits/tags/merges del release necesitan identidad aunque el
+        # commit del changelog se salte (diff vacío o reanudación)
+        steps = steps_by_name(self.yaml)
+        self.assertIn("Configure git identity", steps)
+        identity = steps["Configure git identity"]
+        self.assertIn("git config user.name", identity)
+        self.assertIn("git config user.email", identity)
+        names = list(steps)
+        self.assertLess(
+            names.index("Configure git identity"), names.index("Commit changelog")
+        )
+        self.assertLess(
+            names.index("Configure git identity"), names.index("Merge back into develop")
+        )
+
+    def test_release_stable_pins_checkout_by_sha(self):
+        self.assertIn(f"actions/checkout@{CHECKOUT_PIN}", self.yaml)
+        self.assertRegex(self.yaml, r"actions/checkout@[0-9a-f]{40}")
+
+    def test_release_stable_commit_step_tolerates_empty_diff(self):
+        # Rerun tras mergear el PR de changelog: la sección regenerada es
+        # idempotente y no hay diff. Sin este guard el commit muere con
+        # "nothing to commit", el job queda en rojo y jamás se publican ni el
+        # tag ni la release.
+        step = steps_by_name(self.yaml)["Commit changelog"]
+        self.assertIn("if git diff --cached --quiet; then", step)
+        self.assertRegex(
+            step,
+            r'if git diff --cached --quiet; then\n'
+            r'\s+echo "changelog already committed[^\n]*\n'
+            r"\s+else\n"
+            r'\s+git commit -m "chore\(changelog\): \$TAG"',
+        )
+
+    def test_release_stable_only_publishes_stable_tags(self):
+        self.assertIn(STABLE_TAG_GUARD, self.yaml)
+        self.assertNotIn("--force", self.yaml)
+
+
+class TagPatternConsistencyTest(unittest.TestCase):
+    """El contrato de tags debe ser único: guards de los workflows, regexes del
+    CLI y el patrón del instalador (se lee de ``INSTALACION/diatlib/paths.py``,
+    solo lectura). ``\\d`` y ``[0-9]`` solo difieren en dígitos Unicode, fuera
+    del contrato: los tags los crea el CLI y siempre son ASCII.
+    """
+
+    SAMPLES = (
+        "v0.0.0",
+        "v1.2.3",
+        "v10.20.30",
+        "v1.2.3-TEST",
+        "v0.0.1-TEST",
+        "v1.2.3-TEST1",
+        "v1.2.3-test",
+        "v1.2.3-",
+        "v1.2.3.4",
+        "1.2.3",
+        "vv1.2.3",
+        "v1.2",
+        "release-1.2.3",
+        "",
+    )
+
+    @classmethod
+    def setUpClass(cls):
+        source = read(REPO_ROOT / "INSTALACION" / "diatlib" / "paths.py")
+        match = re.search(r'TAG_PATTERN = re\.compile\(r"([^"]+)"\)', source)
+        if match is None:
+            raise AssertionError("TAG_PATTERN no está en INSTALACION/diatlib/paths.py")
+        cls.installer_re = re.compile(match.group(1))
+
+    def test_installer_pattern_is_unchanged(self):
+        # si el instalador cambia de patrón hay que revisar los otros contratos
+        self.assertEqual(self.installer_re.pattern, r"^v\d+\.\d+\.\d+(-TEST)?$")
+
+    def test_samples_cover_both_outcomes(self):
+        # anti-vacío: los samples deben aceptar y rechazar, o las comparaciones
+        # de debajo pasarían siempre
+        self.assertTrue([t for t in self.SAMPLES if self.installer_re.match(t)])
+        self.assertTrue([t for t in self.SAMPLES if not self.installer_re.match(t)])
+
+    def test_cli_tag_regexes_match_installer_pattern(self):
+        for tag in self.SAMPLES:
+            with self.subTest(tag=tag):
+                cli_accepts = bool(STABLE_TAG_RE.match(tag) or TEST_TAG_RE.match(tag))
+                self.assertEqual(cli_accepts, bool(self.installer_re.match(tag)))
+
+    def test_workflow_tag_guards_match_installer_pattern(self):
+        self.assertIn(TAG_GUARD, read(RELEASE_TEST))
+        self.assertIn(STABLE_TAG_GUARD, read(RELEASE_STABLE))
+        for tag in self.SAMPLES:
+            with self.subTest(tag=tag):
+                guard_accepts = bool(
+                    re.compile(TAG_GUARD).match(tag)
+                    or re.compile(STABLE_TAG_GUARD).match(tag)
+                )
+                self.assertEqual(guard_accepts, bool(self.installer_re.match(tag)))
+
+
+if __name__ == "__main__":
+    unittest.main()

@@ -1,10 +1,14 @@
 ---
 name: auto-versioning
-description: Use when pushing, merging a PR, or committing to main branch. Self-triggers on semantic versioning needs. Triggers on "version", "tag", "release", "semver", "git tag", "version bump", "push to main", "merge to main"
+description: Reserve skill for manual semantic versioning when CI does not handle it — manual releases, repos without the release workflows, or recovery. Do NOT trigger on pushes or merges to main/develop: versioning there is automated by CI.
 ready: true
 ---
 
 # Auto-Versioning
+
+> **Nota:** el versionado de `main`/`develop` lo automatiza CI (workflows
+> `release-stable` y `release-test`); usar esta skill solo para casos
+> manuales/reserva.
 
 ## Overview
 
@@ -12,15 +16,15 @@ Determines the next semantic version by analyzing code diffs between the last ta
 
 ## When to Use
 
-- Committing to main branch
-- Merging a PR to main
-- Pushing changes to main
+- Manual versioning in a repo without the release CI workflows (reserve/fallback)
+- Backfilling or recovering a tag by hand
+- Not for pushes or merges to `main`/`develop`: those are versioned automatically by CI
 
 **Flowchart:**
 
 ```dot
 digraph version_flowchart {
-    "Commit/merge/push to main?" [shape=diamond];
+    "No release CI or manual recovery?" [shape=diamond];
     "Get last tag" [shape=box];
     "Analyze diff" [shape=box];
     "Breaking changes?" [shape=diamond];
@@ -31,8 +35,8 @@ digraph version_flowchart {
     "Create and push tag" [shape=box];
     "No significant changes" [shape=box];
 
-    "Commit/merge/push to main?" -> "Get last tag" [label="yes"];
-    "Commit/merge/push to main?" -> "Skip" [label="no"];
+    "No release CI or manual recovery?" -> "Get last tag" [label="yes"];
+    "No release CI or manual recovery?" -> "Skip" [label="no"];
     "Get last tag" -> "Analyze diff";
     "Analyze diff" -> "Breaking changes?";
     "Breaking changes?" -> "Increment Major" [label="yes"];
@@ -51,16 +55,16 @@ digraph version_flowchart {
 
 ## When NOT to Use
 
+- Releases de `main`/`develop` (las automatiza CI; esta skill queda como respaldo)
 - Committing to feature branches (use manual versioning or skip)
 - Hotfix branches (determine version after merge to main)
 - Initial project setup (start at v0.1.0 manually)
 
 ## Implementation
 
-1. Detectar si el push/merge es hacia `main`:
-   - Si el agente acaba de hacer `git push origin main` → **activar**
-   - Si el agente acaba de mergear PR a `main` → **activar**
-   - Si NO → **detenerse** (no ejecutar versioning)
+1. Confirmar que esta skill aplica (solo casos manuales/reserva):
+   - ¿El repo tiene los workflows de release CI (`release-stable` / `release-test`)? → **detenerse** (CI ya versiona `main`/`develop`; esta skill no se activa con pushes ni merges)
+   - ¿Repo sin release CI o recuperación manual (backfill o tag perdido)? → **continuar**
 2. Obtener último tag: `git describe --tags --abbrev=0`
 3. Analizar diff: `git diff {last_tag}...HEAD`
 4. Clasificar cambios: Major / Minor / Patch (ver Diff Analysis Triggers)
