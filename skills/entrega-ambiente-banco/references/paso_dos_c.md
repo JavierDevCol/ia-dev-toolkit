@@ -38,7 +38,7 @@
 
 6. **Back-merge mediante PR** `release/vX.Y.Z → develop` (develop está protegida: PR con ≥1 approval, sin push directo), con descripción del fix y link al WI/bug original. **Conflictos → detener y reportar**, nunca forzar.
 
-7. **Resumen:** mostrar y guardar `RESUMEN_ENTREGA_rc ({nombre_repo}).txt` en `{output_folder}/entrega_release/{nombre_repo}/vX.Y.Z/` — contenido mínimo: versión, RC (`vX.Y.Z-rc.N`), commit, estado del checklist (qué `[⚠]` quedan pendientes y por qué), artefactos y bloque de firma (`SKILL.md` → Configuración global).
+7. **Resumen:** rellenar la **variante RC** de `references/RESUMEN_ENTREGA.txt` (sustituir todos los placeholders), mostrarla y guardarla como `RESUMEN_ENTREGA_rc ({nombre_repo}).txt` en `{output_folder}/entrega_release/{nombre_repo}/vX.Y.Z/`.
 
 8. **Post-entrega (tras el merge del banco):** cuando el banco confirme que mergeó el PR de la RC a `des`, eliminar la rama efímera — `git push origin --delete release/vX.Y.Z-rc.N` y `git branch -d release/vX.Y.Z-rc.N`. La rama base `release/vX.Y.Z` **sigue viva** hasta la aprobación final del banco (tag `vX.Y.Z` y back-merge final a develop).
 

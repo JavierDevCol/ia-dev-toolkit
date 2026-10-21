@@ -66,6 +66,7 @@ START: User requests release handoff
 - Flujo hotfix: `references/flujo-hotfix.sh`
 - Flujo RC: `references/flujo-rc.sh`
 - Checklist: `references/checklist-entrega.txt`
+- Plantilla de resumen de entrega: `references/RESUMEN_ENTREGA.txt` (variantes RELEASE / HOTFIX / RC)
 
 ## Implementation
 
@@ -120,7 +121,7 @@ Cada fase referencia sus archivos de apoyo (`references/flujo-hotfix.sh`, `refer
 ### Reglas obligatorias
 
 1. **Regla de oro:** develop y release/vX.Y.Z = mismo commit antes del handoff. Usar `--ff-only`.
-2. **Semver:** vMAJOR.MINOR.PATCH. Validar formato.
+2. **Semver:** `vMAJOR.MINOR.PATCH`. Calcular la versión siguiente con `@auto-versioning` (analiza el diff desde el último tag: breaking→MAJOR, feature→MINOR, fix/docs→PATCH) y validar el formato. **Usar solo el cálculo** (sus pasos de análisis): los tags no los crea CEIBA (Regla 6) — nunca ejecutar el tagging de esa skill. Si el usuario ya trae la versión, solo validar el formato.
 3. **Ajustes DES:** usar RC — `release/vX.Y.Z-rc.N`. Ramas RC efímeras.
 4. **Hotfixes:** incremento PATCH. Merge a develop primero, nuevo release, flujo completo.
 5. **release-notes.md** se genera desde cero en cada release nuevo (Opción 1 y Opción 2b, con `git log <TAG>..HEAD --oneline --no-merges`). En un ajuste RC (Opción 2c) **no** se regenera: sigue siendo el mismo release `vX.Y.Z` — el ajuste se documenta en el `RESUMEN_ENTREGA_rc`.
@@ -152,5 +153,6 @@ Cada fase referencia sus archivos de apoyo (`references/flujo-hotfix.sh`, `refer
 | `ado-pipeline-analyzer` | Valida build, tests, cobertura, DAST, SonarQube | Checklist opción 1 | `@ado-pipeline-analyzer build latest del pipeline <nombre_pipeline> en rama release/vX.Y.Z` |
 | `analizar-seguridad` | Auditoría estática (SAST) de todo lo que se va a promover | Checklist opción 1, `scope=project` | `@analizar-seguridad scope=project sobre release/vX.Y.Z` |
 | `analizar-calidad-codigo` | Code smells y violaciones arquitectónicas del release completo | Checklist opción 1, `scope=project` | `@analizar-calidad-codigo scope=project sobre release/vX.Y.Z` |
+| `auto-versioning` | Calcula la versión siguiente según SemVer (breaking→MAJOR, feature→MINOR, fix→PATCH) | Regla 2 (inputs de Opción 1 y 2b) | `@auto-versioning calcular próxima versión desde el último tag (sin crear tag)` |
 
 Al ejecutar estas skills, **reflejar su resultado en el checklist de entrega** (marcar `[✓]`/`[✗]` sobre la copia de la entrega, nunca sobre la plantilla) — ver instrucción de uso al final de `references/checklist-entrega.txt`.

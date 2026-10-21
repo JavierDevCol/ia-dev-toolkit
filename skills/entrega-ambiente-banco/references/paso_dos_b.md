@@ -37,7 +37,7 @@
    - **Conflictos en el PR → detener y reportar**; nunca forzar el merge hacia develop.
    - Tras el merge, verificar que develop contiene el fix.
 
-7. **Nuevo release `vX.Y.Z+1`** (incremento de PATCH):
+7. **Nuevo release `vX.Y.Z+1`** (incremento de PATCH — fix→PATCH, coherente con `@auto-versioning`):
    ```bash
    git checkout develop && git pull
    git checkout -b release/vX.Y.Z+1
@@ -53,4 +53,4 @@
 
 9. **Limpiar la rama hotfix** (tras el merge del PR): `git branch -d hotfix/<nombre>` y `git push origin --delete hotfix/<nombre>`.
 
-10. **Resumen y notificación:** mostrar y guardar `RESUMEN_ENTREGA_hotfix ({nombre_repo}).txt` en `{output_folder}/entrega_release/{nombre_repo}/vX.Y.Z+1/` — contenido mínimo: versión, commit de entrega, estado del checklist (qué `[⚠]` quedan pendientes y por qué), artefactos y bloque de firma (`SKILL.md` → Configuración global). Avisar al banco: la versión sigue el flujo completo develop → des → pru → prepro → pro (sin saltar ambientes).
+10. **Resumen y notificación:** rellenar la **variante HOTFIX** de `references/RESUMEN_ENTREGA.txt` (sustituir todos los placeholders), mostrarla y guardarla como `RESUMEN_ENTREGA_hotfix ({nombre_repo}).txt` en `{output_folder}/entrega_release/{nombre_repo}/vX.Y.Z+1/`.

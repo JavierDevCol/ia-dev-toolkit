@@ -5,7 +5,7 @@
 **Referencias:** `references/checklist-entrega.txt`
 
 **Inputs (pedir/validar antes de empezar):**
-- Versión de la entrega `vX.Y.Z` — validar formato semver (Regla 2). Si `vX.Y.Z` ya existe como tag → ver paso 5.
+- Versión de la entrega `vX.Y.Z` — sugerirla con `@auto-versioning` (Regla 2) y validar formato semver. Si `vX.Y.Z` ya existe como tag → ver paso 5.
 - `nombre_repo` del repositorio que se entrega.
 
 **Outputs** (en `{output_folder}/entrega_release/{nombre_repo}/{version}/`):
@@ -81,4 +81,4 @@
    @analizar-calidad-codigo scope=project sobre release/vX.Y.Z
    ```
 
-8. **Resumen final y notificación:** mostrar y guardar `RESUMEN_ENTREGA_release ({nombre_repo}).txt` en `{output_folder}/entrega_release/{nombre_repo}/{version}/`. Contenido mínimo: versión `vX.Y.Z`, commit de entrega (`git rev-parse`), release notes generadas, estado del checklist (qué `[⚠]` quedan pendientes y por qué), artefactos entregados y bloque de firma (`SKILL.md` → Configuración global). Avisar al banco que la entrega está lista — el PR a `des` lo crea el banco (Regla 6).
+8. **Resumen final y notificación:** rellenar la **variante RELEASE** de `references/RESUMEN_ENTREGA.txt` (sustituir todos los placeholders, nunca dejar literales), mostrarla y guardarla como `RESUMEN_ENTREGA_release ({nombre_repo}).txt` en `{output_folder}/entrega_release/{nombre_repo}/{version}/`. La notificación al banco cierra el resumen — el PR a `des` lo crea el banco (Regla 6).
