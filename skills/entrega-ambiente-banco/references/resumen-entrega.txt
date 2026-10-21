@@ -24,7 +24,7 @@ CHECKLIST DE ENTREGA
 ARTÉFACTOS (nombres reales según la skill que los genera)
 - release-notes.md
 - checklist-entrega_vX.Y.Z.txt
-- CONFIG-ENTORNO-PR-{ID} ({nombre_ms}).md — lo genera env-config-audit
+- config-entorno_{nombre_ms}_vX.Y.Z.md — lo genera env-config-audit
 - PIPELINE-REPORT_{runId}.md — lo genera ado-pipeline-analyzer (en `base_reports_path` del perfil ADO, no en esta carpeta)
 - AUDITORIA-SEGURIDAD-{fecha}.md — lo genera analizar-seguridad (opcional: solo existe si se pidió guardarlo)
 - analizar-calidad-codigo → reporte en chat, sin archivo
@@ -54,7 +54,7 @@ CHECKLIST DE ENTREGA
 
 ARTÉFACTOS (nombres reales según la skill que los genera)
 - release-notes.md (desde cero, rango v<X.Y.Z>..HEAD)
-- CONFIG-ENTORNO-PR-{ID} ({nombre_ms}).md — lo genera env-config-audit
+- config-entorno_{nombre_ms}_vX.Y.Z.md — lo genera env-config-audit
 
 NOTIFICACIÓN AL BANCO
 - La versión sigue el flujo completo: develop → des → pru → prepro → pro (sin saltar ambientes).
@@ -81,7 +81,7 @@ CHECKLIST DE ENTREGA
 - <N> ítems [✓] · <M> pendientes ([⚠]/[✗]): <cuáles y por qué>
 
 ARTÉFACTOS (nombres reales según la skill que los genera)
-- CONFIG-ENTORNO-PR-{ID} ({nombre_ms}).md — lo genera env-config-audit
+- config-entorno_{nombre_ms}_vX.Y.Z.md — lo genera env-config-audit
 
 POST-ENTREGA
 - Eliminar release/vX.Y.Z-rc.N (local y remoto) tras el merge del banco.

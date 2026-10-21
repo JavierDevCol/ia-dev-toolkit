@@ -26,7 +26,7 @@
    git push origin release/vX.Y.Z
    ```
 
-3. **env-config-audit:** `@env-config-audit sobre el diff origin/des..release/vX.Y.Z` (diff de esta fase — `SKILL.md` → Skills sugeridas), antes del back-merge. Al completarla, marcar `CONFIG-ENTORNO-PR` según la INSTRUCCIÓN DE USO de `references/checklist-entrega.txt`.
+3. **env-config-audit:** `@env-config-audit sobre el diff origin/des..release/vX.Y.Z` (diff de esta fase — `SKILL.md` → Skills sugeridas), antes del back-merge. Al completarla, marcar `config-entorno` según la INSTRUCCIÓN DE USO de `references/checklist-entrega.txt`.
 
 4. **Crear y publicar la rama RC efímera:**
    ```bash

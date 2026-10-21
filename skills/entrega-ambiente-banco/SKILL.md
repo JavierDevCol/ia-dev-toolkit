@@ -141,7 +141,7 @@ Cada fase referencia sus archivos de apoyo (`references/flujo-hotfix.sh`, `refer
 | RC branches no efímeras | Se crean para PR a des, se eliminan después del merge |
 | Merge directo a main/des en hotfix | Primero develop, luego crear release |
 | Generar release-notes incremental | Siempre desde cero con `git log <TAG>..HEAD` |
-| No generar `CONFIG-ENTORNO-PR-{ID} ({nombre_ms}).md` | Ejecutar `@env-config-audit sobre el diff origin/des..release/vX.Y.Z` (Opción 1; en 2a/2b/2c el diff de su fase) manualmente por separado |
+| No generar `config-entorno_{nombre_ms}_vX.Y.Z.md` | Ejecutar `@env-config-audit sobre el diff origin/des..release/vX.Y.Z` (Opción 1; en 2a/2b/2c el diff de su fase) manualmente por separado |
 | `--ff-only` forzado | Si falla, hay commits propios en release — detener |
 | Bloquear la entrega por tags de promoción faltantes | El chequeo de Opción 1 paso 2 / 2b paso 2 es informativo, nunca un gate — bloquearlo frenaría un hotfix urgente por el ritmo del banco, que es independiente de CEIBA |
 
@@ -149,10 +149,10 @@ Cada fase referencia sus archivos de apoyo (`references/flujo-hotfix.sh`, `refer
 
 | Skill | Qué hace | Cuándo ejecutarla | Comando sugerido |
 |-------|----------|-------------------|------------------|
-| `env-config-audit` | Genera `CONFIG-ENTORNO-PR-{ID} ({nombre_ms}).md` analizando el diff | Checklist opción 1, 2a, 2b, 2c | Opción 1: `@env-config-audit sobre el diff origin/des..release/vX.Y.Z` · 2a: `@env-config-audit sobre el diff develop..<rama>` · 2b: `@env-config-audit sobre el diff develop..hotfix/<hotfix>` · 2c: `@env-config-audit sobre el diff origin/des..release/vX.Y.Z` |
-| `ado-pipeline-analyzer` | Valida build, tests, cobertura, DAST, SonarQube; genera `PIPELINE-REPORT_{runId}.md` (en `base_reports_path` del perfil ADO) | Checklist opción 1 | `@ado-pipeline-analyzer build latest del pipeline <nombre_pipeline> en rama release/vX.Y.Z` |
-| `analizar-seguridad` | Auditoría estática (SAST) de todo lo que se va a promover; opcionalmente guarda `AUDITORIA-SEGURIDAD-{fecha}.md` | Checklist opción 1, `scope=project` | `@analizar-seguridad scope=project sobre release/vX.Y.Z` |
-| `analizar-calidad-codigo` | Code smells y violaciones arquitectónicas del release completo (reporte en chat, sin archivo) | Checklist opción 1, `scope=project` | `@analizar-calidad-codigo scope=project sobre release/vX.Y.Z` |
+| `env-config-audit` |  analiza el diff | Checklist opción 1, 2a, 2b, 2c | Opción 1: `@env-config-audit sobre el diff origin/des..release/vX.Y.Z` · 2a: `@env-config-audit sobre el diff develop..<rama>` · 2b: `@env-config-audit sobre el diff develop..hotfix/<hotfix>` · 2c: `@env-config-audit sobre el diff origin/des..release/vX.Y.Z` |
+| `ado-pipeline-analyzer` | Valida build, tests, cobertura, DAST, SonarQube.| Checklist opción 1 | `@ado-pipeline-analyzer build latest del pipeline <nombre_pipeline> en rama develop` |
+| `analizar-seguridad` | Auditoría estática (SAST) de todo lo que se va a promover.  | Checklist opción 1, `scope=project` | `@analizar-seguridad scope=project sobre release/vX.Y.Z` |
+| `analizar-calidad-codigo` | Code smells y violaciones arquitectónicas del release completo  | Checklist opción 1, `scope=project` | `@analizar-calidad-codigo scope=project sobre release/vX.Y.Z` |
 | `auto-versioning` | Calcula la versión siguiente según SemVer (breaking→MAJOR, feature→MINOR, fix→PATCH) | Regla 2 (inputs de Opción 1 y 2b) | `@auto-versioning calcular próxima versión desde el último tag (sin crear tag)` |
 
 Al ejecutar estas skills, **reflejar su resultado en el checklist de entrega** (marcar `[✓]`/`[✗]` sobre la copia de la entrega, nunca sobre la plantilla) — ver instrucción de uso al final de `references/checklist-entrega.txt`.
