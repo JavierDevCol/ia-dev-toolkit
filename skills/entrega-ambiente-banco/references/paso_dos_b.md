@@ -30,7 +30,7 @@
 
 4. **Verificar que develop necesita el fix** (precondition del merge limpio): `git log develop --oneline | head -10`. Si develop ya tiene el fix, reportarlo y reevaluar el flujo.
 
-5. **env-config-audit:** `@env-config-audit sobre el diff develop..hotfix/<nombre>` (diff de esta fase — `SKILL.md` → Skills sugeridas), antes del PR. Al completarla, marcar `CONFIG_ENTORNO_PR` según la INSTRUCCIÓN DE USO de `references/checklist-entrega.txt`.
+5. **env-config-audit:** `@env-config-audit sobre el diff develop..hotfix/<nombre>` (diff de esta fase — `SKILL.md` → Skills sugeridas), antes del PR. Al completarla, marcar `CONFIG-ENTORNO-PR` según la INSTRUCCIÓN DE USO de `references/checklist-entrega.txt`.
 
 6. **Merge a develop PRIMERO, mediante PR** (develop está protegida: PR con ≥1 approval, sin push directo):
    - Crear PR `hotfix/<nombre> → develop` con descripción y link al WI/bug original.

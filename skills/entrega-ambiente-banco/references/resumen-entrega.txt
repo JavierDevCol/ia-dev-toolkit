@@ -21,10 +21,13 @@ CAMBIOS INCLUIDOS (desde release-notes.md)
 CHECKLIST DE ENTREGA
 - <N> ítems [✓] · <M> pendientes ([⚠]/[✗]): <cuáles y por qué>
 
-ARTÉFACTOS
+ARTÉFACTOS (nombres reales según la skill que los genera)
 - release-notes.md
 - checklist-entrega_vX.Y.Z.txt
-- CONFIG_ENTORNO_PR_*.md (si se ejecutó env-config-audit)
+- CONFIG-ENTORNO-PR-{ID} ({nombre_ms}).md — lo genera env-config-audit
+- PIPELINE-REPORT_{runId}.md — lo genera ado-pipeline-analyzer (en `base_reports_path` del perfil ADO, no en esta carpeta)
+- AUDITORIA-SEGURIDAD-{fecha}.md — lo genera analizar-seguridad (opcional: solo existe si se pidió guardarlo)
+- analizar-calidad-codigo → reporte en chat, sin archivo
 
 NOTIFICACIÓN AL BANCO
 - Entrega lista. El banco crea PR release/vX.Y.Z → des y taggea vX.Y.Z en DES.
@@ -49,9 +52,9 @@ CAMBIOS DEL FIX
 CHECKLIST DE ENTREGA
 - <N> ítems [✓] · <M> pendientes ([⚠]/[✗]): <cuáles y por qué>
 
-ARTÉFACTOS
+ARTÉFACTOS (nombres reales según la skill que los genera)
 - release-notes.md (desde cero, rango v<X.Y.Z>..HEAD)
-- CONFIG_ENTORNO_PR_*.md (si se ejecutó env-config-audit)
+- CONFIG-ENTORNO-PR-{ID} ({nombre_ms}).md — lo genera env-config-audit
 
 NOTIFICACIÓN AL BANCO
 - La versión sigue el flujo completo: develop → des → pru → prepro → pro (sin saltar ambientes).
@@ -77,8 +80,8 @@ CAMBIOS DEL AJUSTE
 CHECKLIST DE ENTREGA
 - <N> ítems [✓] · <M> pendientes ([⚠]/[✗]): <cuáles y por qué>
 
-ARTÉFACTOS
-- CONFIG_ENTORNO_PR_*.md (si se ejecutó env-config-audit)
+ARTÉFACTOS (nombres reales según la skill que los genera)
+- CONFIG-ENTORNO-PR-{ID} ({nombre_ms}).md — lo genera env-config-audit
 
 POST-ENTREGA
 - Eliminar release/vX.Y.Z-rc.N (local y remoto) tras el merge del banco.
