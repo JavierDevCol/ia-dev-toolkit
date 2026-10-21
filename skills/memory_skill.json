@@ -1,5 +1,7 @@
 {
   "output_folder": null,
+  "user_name": "",
+  "incluir_firma_en_documentos": true,
   "handoff-release": {
     "config": {
       "environments": {
