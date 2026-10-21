@@ -66,7 +66,7 @@ START: User requests release handoff
 - Flujo hotfix: `references/flujo-hotfix.sh`
 - Flujo RC: `references/flujo-rc.sh`
 - Checklist: `references/checklist-entrega.txt`
-- Plantilla de resumen de entrega: `references/RESUMEN_ENTREGA.txt` (variantes RELEASE / HOTFIX / RC)
+- Plantilla de resumen de entrega: `references/resumen-entrega.txt` (variantes RELEASE / HOTFIX / RC)
 
 ## Implementation
 
@@ -80,7 +80,7 @@ Antes de generar artefactos, leer `$SKILL_DIR/../memory_skill.json` y tomar los 
 | `user_name` | Firma de los resúmenes de entrega → placeholder **`{{user_name}}`** | Vacío o archivo inexistente → la línea queda `> **Release Manager:**` sin sufijo. **No inventar un nombre** |
 | `incluir_firma_en_documentos` | Activa o desactiva el bloque de firma | `false` → omitir el bloque completo. Cualquier otro valor (o ausente) → incluirlo |
 
-**Bloque de firma.** Todo `RESUMEN_ENTREGA_*.txt` (Opción 1 paso 8, Opción 2b paso 10, Opción 2c paso 7) cierra con:
+**Bloque de firma.** Todo `resumen-entrega_*.txt` (Opción 1 paso 8, Opción 2b paso 10, Opción 2c paso 7) cierra con:
 ```
 > **Release Manager:** {{user_name}}
 > **Fecha:** {{fecha}}
@@ -105,7 +105,7 @@ Determinar la opción con el flowchart y el menú (Opción 2 → sub-menú `refe
 | **2b** | hotfix post-entrega | `{file:./references/paso_dos_b.md}` |
 | **2c** | ajuste RC post-entrega en DES | `{file:./references/paso_dos_c.md}` |
 
-Cada fase referencia sus archivos de apoyo (`references/flujo-hotfix.sh`, `references/flujo-rc.sh`, `references/checklist-entrega.txt` en Opción 1) y su ruta de `RESUMEN_ENTREGA_*.txt`. El ciclo completo 2a → 1 se encadena: al aprobarse el PR, volver al menú y ejecutar la Opción 1.
+Cada fase referencia sus archivos de apoyo (`references/flujo-hotfix.sh`, `references/flujo-rc.sh`, `references/checklist-entrega.txt` en Opción 1) y su ruta de `resumen-entrega_*.txt`. El ciclo completo 2a → 1 se encadena: al aprobarse el PR, volver al menú y ejecutar la Opción 1.
 
 ## Quick Reference
 
@@ -124,7 +124,7 @@ Cada fase referencia sus archivos de apoyo (`references/flujo-hotfix.sh`, `refer
 2. **Semver:** `vMAJOR.MINOR.PATCH`. Calcular la versión siguiente con `@auto-versioning` (analiza el diff desde el último tag: breaking→MAJOR, feature→MINOR, fix/docs→PATCH) y validar el formato. **Usar solo el cálculo** (sus pasos de análisis): los tags no los crea CEIBA (Regla 6) — nunca ejecutar el tagging de esa skill. Si el usuario ya trae la versión, solo validar el formato.
 3. **Ajustes DES:** usar RC — `release/vX.Y.Z-rc.N`. Ramas RC efímeras.
 4. **Hotfixes:** incremento PATCH. Merge a develop primero, nuevo release, flujo completo.
-5. **release-notes.md** se genera desde cero en cada release nuevo (Opción 1 y Opción 2b, con `git log <TAG>..HEAD --oneline --no-merges`). En un ajuste RC (Opción 2c) **no** se regenera: sigue siendo el mismo release `vX.Y.Z` — el ajuste se documenta en el `RESUMEN_ENTREGA_rc`.
+5. **release-notes.md** se genera desde cero en cada release nuevo (Opción 1 y Opción 2b, con `git log <TAG>..HEAD --oneline --no-merges`). En un ajuste RC (Opción 2c) **no** se regenera: sigue siendo el mismo release `vX.Y.Z` — el ajuste se documenta en el `resumen-entrega_rc`.
 6. **PR a des lo crea el banco**, no CEIBA.
 7. **No exponer tokens ni contraseñas.**
 8. **Si `--ff-only` falla:** detener y ver Opción 2c (ajuste RC).
