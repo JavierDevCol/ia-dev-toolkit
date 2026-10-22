@@ -11,6 +11,25 @@ from pathlib import Path
 SAFE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 
 
+SUBAGENT_CONTRACT = (
+    "## ENTREGABLE — contrato de salida\n"
+    'Devuelve tu resultado con EXACTAMENTE esta estructura. No dejes secciones vacías: escribe "Ninguno" donde no aplique.\n\n'
+    "### 1. Trabajo realizado\n"
+    "Lista de tareas ejecutadas en orden (lecturas, análisis, ediciones, validaciones).\n\n"
+    "### 2. Artefactos\n"
+    'Cada archivo creado o modificado: ruta exacta (relativa a la raíz) + qué contiene o qué cambió. Si no tocaste ningún archivo: "Ninguno (análisis sin persistencia)".\n\n'
+    "### 3. Resultado\n"
+    "El núcleo del entregable: hallazgos, conclusiones, recomendaciones o diseño — TODO lo que el agente principal y el usuario deben leer para decidir. Esta es la parte real del trabajo: no la comprimas a una frase.\n\n"
+    "### 4. Decisiones y pendientes\n"
+    "- Decisiones que tomaste por tu cuenta, con su justificación breve.\n"
+    "- Ítems que requieren confirmación del usuario antes de aprobar (lista concreta).\n\n"
+    "### 5. Supuestos\n"
+    'Todo dato no verificado que asumiste, como "Supuesto (no confirmado): ...".\n\n'
+    "### 6. Errores o bloqueos\n"
+    "Lo que no pudiste hacer y por qué (archivo inexistente, permiso, ambigüedad)."
+)
+
+
 def now_iso():
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
 
@@ -31,7 +50,7 @@ def find_root(start):
 def require_workflow(wf):
     if not wf:
         return "Error: workflow name required"
-    if not SAFE.match(wf):
+    if not SAFE.fullmatch(wf):
         return (f"⛔ Nombre de workflow inválido: '{wf}'. "
                 "Solo letras, dígitos, '-', '_' y '.' (sin separadores de ruta).")
     return None
@@ -43,7 +62,7 @@ def require_phase(wf, phase):
         return err
     if not phase:
         return "Error: workflow and phase required"
-    if not SAFE.match(phase):
+    if not SAFE.fullmatch(phase):
         return (f"⛔ Nombre de fase inválido: '{phase}'. "
                 "Solo letras, dígitos, '-', '_' y '.' (sin separadores de ruta).")
     return None
@@ -208,6 +227,108 @@ def reset_workflow(state_dir, wf):
     return f"Progreso de '{wf}' reiniciado."
 
 
+# ---------- gates ----------
+def not_declared(wf, phase, phases):
+    return (f"⛔ La fase '{phase}' no está declarada en el manifiesto de '{wf}'.\n"
+            f"Fases válidas: {', '.join(p['file'] for p in phases)}")
+
+
+def find_gate_blocker(phases, state, root, idx, wf):
+    for prev in phases[:idx]:
+        if state["phases"].get(prev["file"], {}).get("status") != "approved":
+            title = f" ({prev['title']})" if prev.get("title") else ""
+            return (f"⛔ No puedes continuar: la fase anterior '{prev['file']}'{title} no está aprobada.\n"
+                    f"Ejecútala primero → sac.py execute {wf} {prev['file']}")
+        if prev.get("output") and not (Path(root) / prev["output"]).exists():
+            return (f"⛔ No puedes continuar: la fase '{prev['file']}' está marcada como aprobada pero su artefacto"
+                    f" declarado ('{prev['output']}') no existe en el workspace. "
+                    "Verifica que se haya generado antes de continuar.")
+    return None
+
+
+def execute_phase(root, wf_dir, state_dir, wf, phase, delegated):
+    phases = get_phases(wf_dir, wf)
+    idx = next((i for i, p in enumerate(phases) if p["file"] == phase), -1)
+    if phases and idx == -1:
+        return not_declared(wf, phase, phases)
+    content = read_phase(wf_dir, wf, phase)
+    if content.startswith("Phase '"):
+        return content
+    meta = phases[idx] if idx >= 0 else {"file": phase}
+    state_file = state_dir / f"{wf}.state.json"
+    state = load_state(state_file)
+    if idx > 0:
+        blocker = find_gate_blocker(phases, state, root, idx, wf)
+        if blocker:
+            return blocker
+    heading = f"## Fase: {meta['title']} ({phase})" if meta.get("title") else f"## Fase: {phase}"
+    out_note = f"\n\n*Salida esperada: {meta['output']}*" if meta.get("output") else ""
+    sub = meta.get("subAgent")
+    if sub and not delegated:
+        agent = agent_name(sub)
+        if not (Path(root) / ".claude" / "agents" / f"{agent}.md").exists():
+            return f"⛔ el agente '{agent}' no existe en .claude/agents/{agent}.md"
+        pre = f"Antes de esta fase: {meta['pre']}\n\n" if meta.get("pre") else ""
+        art = f"Artefacto esperado: {meta['output']}\n\n" if meta.get("output") else ""
+        script = Path(__file__).resolve()
+        prompt = (f"Adopta el rol definido en `.claude/agents/{agent}.md` (léelo primero). "
+                  f"Lee tu encargo con `python3 {script} read_phase {wf} {phase}`.\n\n"
+                  f"{pre}{art}{SUBAGENT_CONTRACT}")
+        return (f"{heading}\n\n"
+                f"Esta fase se delega al subagente '{agent}'. Usa la herramienta de subagentes de tu harness "
+                "(Claude Code: `Agent` con `subagent_type: general-purpose`) con este prompt:\n\n"
+                f"---\n{prompt}\n---\n\n"
+                f"Al recibir el entregable, ejecuta `sac.py execute {wf} {phase} --delegated`, "
+                "preséntalo y pide OK.")
+    body = ""
+    if not sub:
+        body = f"> **Antes de esta fase:** {meta['pre']}\n\n{content}" if meta.get("pre") else content
+    state["started_at"] = state.get("started_at") or now_iso()
+    state["current_phase"] = phase
+    entry = dict(state["phases"].get(phase) or {})
+    entry.update(status="in_progress", started_at=now_iso())
+    state["phases"][phase] = entry
+    if meta.get("gate") == "auto":
+        if meta.get("output") and not (Path(root) / meta["output"]).exists():
+            footer = (f"*Fase automática (gate: auto), pero el artefacto declarado ('{meta['output']}') aún no existe"
+                      " — queda en progreso. Vuelve a ejecutarla cuando exista, o apruébala manualmente si no aplica.*")
+        else:
+            entry.update(status="approved", approved_at=now_iso())
+            footer = "*Fase automática (gate: auto): aprobada sin pausa. Usa next para continuar.*"
+    else:
+        footer = (f"*Espera el OK del usuario: cuando él apruebe la fase, ejecuta → "
+                  f"sac.py approve {wf} {phase}*")
+    save_state(state_file, state)
+    if sub:
+        return footer
+    return f"{heading}\n\n{body}{out_note}\n\n---\n{footer}"
+
+
+def approve_phase(root, wf_dir, state_dir, wf, phase):
+    phases = get_phases(wf_dir, wf)
+    idx = next((i for i, p in enumerate(phases) if p["file"] == phase), -1)
+    if phases and idx == -1:
+        return not_declared(wf, phase, phases)
+    meta = phases[idx] if idx >= 0 else {"file": phase}
+    state_file = state_dir / f"{wf}.state.json"
+    state = load_state(state_file)
+    if state["phases"].get(phase, {}).get("status") not in ("in_progress", "approved"):
+        return (f"⛔ No puedes aprobar '{phase}': todavía no se ha ejecutado.\n"
+                f"Ejecútala primero → sac.py execute {wf} {phase}")
+    if idx > 0:
+        blocker = find_gate_blocker(phases, state, root, idx, wf)
+        if blocker:
+            return blocker
+    if meta.get("output") and not (Path(root) / meta["output"]).exists():
+        return (f"⛔ No puedes aprobar '{phase}': el artefacto declarado ('{meta['output']}') "
+                "no existe todavía en el workspace.\nGenera el artefacto antes de aprobar.")
+    entry = dict(state["phases"][phase])
+    entry.update(status="approved", approved_at=now_iso())
+    state["phases"][phase] = entry
+    save_state(state_file, state)
+    return f"Fase '{phase}' aprobada. Continúa con la siguiente fase."
+
+
 def run(action, root, workflow=None, phase=None, delegated=False):
     root = Path(root)
     wf_dir = root / ".SAC" / "workflows"
@@ -228,6 +349,13 @@ def run(action, root, workflow=None, phase=None, delegated=False):
     if action == "read_phase":
         err = require_phase(workflow, phase)
         return err or read_phase(wf_dir, workflow, phase)
+    if action in ("execute", "approve"):
+        err = require_phase(workflow, phase)
+        if err:
+            return err
+        if action == "execute":
+            return execute_phase(root, wf_dir, state_dir, workflow, phase, delegated)
+        return approve_phase(root, wf_dir, state_dir, workflow, phase)
     return "Unknown action"
 
 

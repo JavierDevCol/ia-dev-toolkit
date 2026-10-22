@@ -27,17 +27,39 @@ phases:
 """
 
 
+WF2_MD = WF_MD.replace("name: wf", "name: wf2").replace("    gate: auto\n", "    gate: auto\n    output: artifacts/b.md\n")
+DLG_MD = """---
+name: dlg
+phases:
+  - file: uno.md
+    subAgent: PO.md
+    output: artifacts/a.md
+---
+"""
+
+
 class SacTest(unittest.TestCase):
     def setUp(self):
         self.root = Path(tempfile.mkdtemp()).resolve()
-        wf = self.root / ".SAC" / "workflows" / "wf"
-        (wf / "fases").mkdir(parents=True)
-        (wf / "workflow.md").write_text(WF_MD)
-        for f in ("uno", "dos", "tres"):
-            (wf / "fases" / f"{f}.md").write_text(f"# {f}\n")
         (self.root / "src" / "deep").mkdir(parents=True)
         self.state_dir = self.root / ".SAC" / "workflow-state"
-        self.state_dir.mkdir()
+        self.state_dir.mkdir(parents=True)
+        for name, md, body in (("wf", WF_MD, None), ("wf2", WF2_MD, None), ("dlg", DLG_MD, "CUERPO-DLG")):
+            d = self.root / ".SAC" / "workflows" / name
+            (d / "fases").mkdir(parents=True, exist_ok=True)
+            (d / "workflow.md").write_text(md)
+            for f in ("uno", "dos", "tres"):
+                (d / "fases" / f"{f}.md").write_text(body or ("CUERPO-UNO" if f == "uno" else f"# {f}\n"))
+        (self.root / ".claude" / "agents").mkdir(parents=True)
+        (self.root / ".claude" / "agents" / "PO.md").write_text("rol")
+
+    def state(self, wf):
+        return json.loads((self.state_dir / f"{wf}.state.json").read_text())
+
+    def touch(self, rel):
+        f = self.root / rel
+        f.parent.mkdir(parents=True, exist_ok=True)
+        f.write_text("x")
 
     def write_state(self, state):
         (self.state_dir / "wf.state.json").write_text(json.dumps(state))
@@ -86,12 +108,81 @@ class SacTest(unittest.TestCase):
 
     def test_read_y_read_phase(self):
         self.assertIn("# wf", sac.run("read", self.root, "wf"))
-        self.assertEqual(sac.run("read_phase", self.root, "wf", "uno.md"), "# uno\n")
+        self.assertEqual(sac.run("read_phase", self.root, "wf", "uno.md"), "CUERPO-UNO")
         self.assertEqual(sac.run("read_phase", self.root, "wf", "zz.md"), "Phase 'zz.md' not found in 'wf'")
 
     def test_acciones_pendientes_y_desconocidas(self):
-        self.assertEqual(sac.run("execute", self.root, "wf", "uno.md"), "Unknown action")
         self.assertEqual(sac.run("nope", self.root), "Unknown action")
+
+    def test_nombre_con_salto_de_linea_rechazado(self):
+        self.assertIn("inválido", sac.run("read", self.root, "wf\n"))
+
+    def test_execute_primera_fase_inyecta_y_marca_in_progress(self):
+        out = sac.run("execute", self.root, "wf", "uno.md")
+        self.assertIn("## Fase:", out)
+        self.assertIn("CUERPO-UNO", out)
+        self.assertIn("*Salida esperada: artifacts/a.md*", out)
+        self.assertEqual(self.state("wf")["phases"]["uno.md"]["status"], "in_progress")
+
+    def test_execute_bloquea_si_anterior_no_aprobada(self):
+        self.assertIn("⛔ No puedes continuar", sac.run("execute", self.root, "wf", "dos.md"))
+
+    def test_approve_sin_execute_rechaza(self):
+        self.assertIn("todavía no se ha ejecutado", sac.run("approve", self.root, "wf", "uno.md"))
+
+    def test_approve_sin_output_rechaza_y_con_output_aprueba(self):
+        sac.run("execute", self.root, "wf", "uno.md")
+        self.assertIn("no existe todavía", sac.run("approve", self.root, "wf", "uno.md"))
+        self.touch("artifacts/a.md")
+        self.assertIn("aprobada", sac.run("approve", self.root, "wf", "uno.md"))
+
+    def approve_uno(self, wf):
+        self.touch("artifacts/a.md")
+        sac.run("execute", self.root, wf, "uno.md")
+        sac.run("approve", self.root, wf, "uno.md")
+
+    def test_gate_auto_sin_output_aprueba_sola(self):
+        self.approve_uno("wf")
+        self.assertIn("aprobada sin pausa", sac.run("execute", self.root, "wf", "dos.md"))
+        self.assertEqual(self.state("wf")["phases"]["dos.md"]["status"], "approved")
+
+    def test_gate_auto_con_output_ausente_queda_en_progreso(self):
+        self.approve_uno("wf2")
+        out = sac.run("execute", self.root, "wf2", "dos.md")
+        self.assertIn("aún no existe — queda en progreso", out)
+        self.assertEqual(self.state("wf2")["phases"]["dos.md"]["status"], "in_progress")
+
+    def test_pre_se_antepone(self):
+        self.approve_uno("wf")
+        sac.run("execute", self.root, "wf", "dos.md")
+        self.assertIn("> **Antes de esta fase:** Sé breve", sac.run("execute", self.root, "wf", "tres.md"))
+
+    def test_fase_no_declarada(self):
+        self.assertIn("no está declarada en el manifiesto", sac.run("execute", self.root, "wf", "zzz.md"))
+
+    def test_subagent_no_inyecta_cuerpo_ni_estado(self):
+        out = sac.run("execute", self.root, "dlg", "uno.md")
+        self.assertNotIn("CUERPO-DLG", out)
+        self.assertIn(".claude/agents/PO.md", out)
+        self.assertIn("Artefacto esperado: artifacts/a.md", out)
+        self.assertIn("### 6. Errores o bloqueos", out)
+        self.assertIn("execute dlg uno.md --delegated", out)
+        self.assertFalse((self.state_dir / "dlg.state.json").exists())
+
+    def test_subagent_delegated_registra(self):
+        out = sac.run("execute", self.root, "dlg", "uno.md", delegated=True)
+        self.assertNotIn("CUERPO-DLG", out)
+        self.assertIn("approve dlg uno.md", out)
+        self.assertEqual(self.state("dlg")["phases"]["uno.md"]["status"], "in_progress")
+
+    def test_subagent_sin_archivo_de_agente(self):
+        (self.root / ".claude/agents/PO.md").unlink()
+        self.assertIn("no existe", sac.run("execute", self.root, "dlg", "uno.md"))
+
+    def test_cli_delegated(self):
+        r = subprocess.run([sys.executable, SAC, "execute", "dlg", "uno.md", "--delegated"],
+                           cwd=self.root, capture_output=True, text=True)
+        self.assertEqual(self.state("dlg")["phases"]["uno.md"]["status"], "in_progress", r.stderr)
 
     def test_cli_sin_raiz_exit_1(self):
         r = subprocess.run([sys.executable, SAC, "list"], cwd=tempfile.mkdtemp(), capture_output=True, text=True)
