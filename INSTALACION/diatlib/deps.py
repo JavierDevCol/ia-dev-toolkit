@@ -8,6 +8,8 @@
   bloquea: puede pertenecer a otra ref); sin 'seeds', el grafo completo.
 """
 
+import copy
+
 from . import paths
 
 RECURSIVE_TYPES = paths.RECURSIVE_TYPES
@@ -26,28 +28,15 @@ class DependencyError(Exception):
 # original (agentes→skills, prerequisitos navegacionales, opcionales) se eliminaron
 # por no tener evidencia de invocación.
 COMPONENT_DEPENDENCIES = {
-    # Workflows -> requieren el command + el plugin workflow-sac para poder ejecutarse
-    # con el mecanismo /workflow-sac (leer, activar y llevar el estado del workflow).
+    # Workflows -> solo lo propio de cada uno. El runner (plugin+command u skill)
+    # depende de la plataforma: ver WORKFLOW_RUNNER y for_platform().
     "workflows": {
-        "definir-vision-producto": {
-            "requires": {"plugins": ["workflow-sac"], "commands": ["workflow-sac"]},
-            "optional": {},
-        },
-        "definir-arquitectura-solucion": {
-            "requires": {"plugins": ["workflow-sac"], "commands": ["workflow-sac"]},
-            "optional": {},
-        },
-        "gestionar-backlog-roadmap": {
-            "requires": {"plugins": ["workflow-sac"], "commands": ["workflow-sac"]},
-            "optional": {},
-        },
-        # Demo de delegación: necesita el plugin + command para ejecutarse y el
-        # agente PO porque su fase 1 se delega en él (subAgent: PO.md).
-        "demo-delegacion": {
-            "requires": {"plugins": ["workflow-sac"], "commands": ["workflow-sac"],
-                         "agents": ["PO"]},
-            "optional": {},
-        },
+        "definir-vision-producto": {"requires": {}, "optional": {}},
+        "definir-arquitectura-solucion": {"requires": {}, "optional": {}},
+        "gestionar-backlog-roadmap": {"requires": {}, "optional": {}},
+        # Demo de delegación: necesita el agente PO porque su fase 1 se delega
+        # en él (subAgent: PO.md).
+        "demo-delegacion": {"requires": {"agents": ["PO"]}, "optional": {}},
     },
 
     # Skills -> única invocación real skill→skill encontrada en el contenido.
@@ -62,6 +51,24 @@ COMPONENT_DEPENDENCIES = {
     # Agentes: sin dependencias (no invocan skills/workflows por nombre).
     # Resto de skills: sin dependencias (las referencias eran navegacionales).
 }
+
+
+# Mecanismo que ejecuta los workflows, según la plataforma (harness) destino.
+WORKFLOW_RUNNER = {
+    ".opencode": {"plugins": ["workflow-sac"], "commands": ["workflow-sac"]},
+    ".claude": {"skills": ["exc-workflow-sac"]},
+}
+
+
+def for_platform(platform):
+    """Copia profunda del grafo con el runner de 'platform' fusionado en el
+    requires de cada workflow. KeyError si la plataforma no existe."""
+    runner = WORKFLOW_RUNNER[platform]
+    graph = copy.deepcopy(COMPONENT_DEPENDENCIES)
+    for spec in graph["workflows"].values():
+        for dep_type, names in runner.items():
+            spec["requires"].setdefault(dep_type, []).extend(names)
+    return graph
 
 
 # ============================================================
