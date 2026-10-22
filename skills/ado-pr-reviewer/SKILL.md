@@ -43,6 +43,8 @@ Reads from `memory_skill.json` → `[ado].config.perfiles[perfil_activo]` (stand
 
 **Profile guard:** if `perfil_activo` is null, its profile is missing, or no project resolves, stop and ask the user to run `ado-profile-setup`.
 
+**Missing profile fields:** if `user_email` or `base_reports_path` (absolute path) is missing from the active profile, ask the user once and persist the answer to that profile in `memory_skill.json` so later runs don't ask again.
+
 ### Standards Configuration
 
 Read `coding_standards_path` and `architecture_guide_path` from the active profile's `config_extras` (use `[nombre_del_repo]` as placeholder). If either key is missing, ask the user once and persist the answer to `config_extras` so later reviews don't ask again. If files don't exist, skip standards — deliver conflicts + threads + health only.

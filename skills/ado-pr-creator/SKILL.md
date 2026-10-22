@@ -29,6 +29,8 @@ Reads `user_email` and the projects from `memory_skill.json` → `[ado].config.p
 
 **Profile guard:** if `perfil_activo` is null, its profile is missing, or no project resolves, stop and ask the user to run `ado-profile-setup`.
 
+**Missing profile fields:** if `user_email` is missing from the active profile, ask the user once and persist the answer to that profile in `memory_skill.json` so later runs don't ask again.
+
 Also read `CONFIG_USER.yaml` (path in `archivos.config_user`) and take `usuario.nombre` → **`{{usuario.nombre}}`**, needed to sign the PR body in Phase C. If empty, the file doesn't exist, or `usuario.incluir_firma_en_documentos` is `false`, omit the signature line; never invent a name.
 
 ## Core Flow

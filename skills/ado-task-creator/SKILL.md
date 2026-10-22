@@ -22,6 +22,8 @@ This skill reads the active profile + `config_extras` + `project_map` from `memo
 
 **Profile guard:** if the user gave no project and `perfil_activo` is null, its profile is missing, or no project resolves, stop and ask the user to run `ado-profile-setup`.
 
+**Missing profile fields:** if `user_email` is missing from the active profile, ask the user once and persist the answer to that profile in `memory_skill.json` so later runs don't ask again.
+
 ### Phase 1 — Design
 
 1. **Analyze context:** Read the provided file, identify discrete technical steps → candidate subtasks.
