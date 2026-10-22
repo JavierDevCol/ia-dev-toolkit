@@ -272,7 +272,7 @@ def execute_phase(root, wf_dir, state_dir, wf, phase, delegated):
         art = f"Artefacto esperado: {meta['output']}\n\n" if meta.get("output") else ""
         script = Path(__file__).resolve()
         prompt = (f"Adopta el rol definido en `.claude/agents/{agent}.md` (léelo primero). "
-                  f"Lee tu encargo con `python3 {script} read_phase {wf} {phase}`.\n\n"
+                  f"Lee tu encargo con `python3 \"{script}\" read_phase {wf} {phase}`.\n\n"
                   f"{pre}{art}{SUBAGENT_CONTRACT}")
         return (f"{heading}\n\n"
                 f"Esta fase se delega al subagente '{agent}'. Usa la herramienta de subagentes de tu harness "

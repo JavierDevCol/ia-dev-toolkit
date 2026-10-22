@@ -169,6 +169,10 @@ class SacTest(unittest.TestCase):
         self.assertIn("execute dlg uno.md --delegated", out)
         self.assertFalse((self.state_dir / "dlg.state.json").exists())
 
+    def test_subagent_prompt_cita_ruta_del_script(self):
+        out = sac.run("execute", self.root, "dlg", "uno.md")
+        self.assertIn(f'python3 "{Path(sac.__file__).resolve()}" read_phase dlg uno.md', out)
+
     def test_subagent_delegated_registra(self):
         out = sac.run("execute", self.root, "dlg", "uno.md", delegated=True)
         self.assertNotIn("CUERPO-DLG", out)
