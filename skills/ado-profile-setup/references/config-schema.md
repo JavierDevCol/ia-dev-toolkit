@@ -53,6 +53,18 @@ Esta sección vive en `skills/memory_skill.json` bajo la clave `"ado"`:
 | `default_area` | ado-hu-publisher | Area Path por defecto |
 | `default_tags` | ado-hu-publisher | Tags por defecto (`;`-separados) |
 
+### `colaboradores` opcional (lo escribe ado-wi-comments al preguntar)
+
+Clave del perfil (al nivel de `user_email`), no de `config_extras`:
+
+```json
+"colaboradores": [
+  { "alias": "A", "nombre": "Nombre Apellido", "guid": "GUID-ADO", "email": "correo@dominio", "reasignar": true }
+]
+```
+
+`reasignar: true` → al mencionarlo, el WI se reasigna a su `email`.
+
 ## default_query — Case A (Saved Query)
 
 ```json
