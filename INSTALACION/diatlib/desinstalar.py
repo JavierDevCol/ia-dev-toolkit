@@ -65,6 +65,7 @@ def uninstall_project(project_path):
     others = [i.get("components", {}) for i in installs if i["platform"] != platform]
     # .SAC es compartido entre plataformas: conservar lo que otra instalación usa
     shared_wf = {w for c in others for w in c.get("workflows", [])}
+    legacy_names = {new: old for old, new in registro.RENAMED_SKILLS.items()}
     removed = 0
 
     for ctype, names in comps.items():
@@ -75,6 +76,9 @@ def uninstall_project(project_path):
                 continue
             if uninstall_component(ctype, n, project, platform):
                 removed += 1
+            # Instalación sin --update tras un rename: la carpeta en disco aún tiene el nombre viejo.
+            if ctype == "skills" and n in legacy_names:
+                removed += uninstall_component(ctype, legacy_names[n], project, platform)
 
     # Assets raíz compartidos de skills (memory_skill.json, references/…): quitarlos
     # solo si ya NO queda ninguna skill instalada.

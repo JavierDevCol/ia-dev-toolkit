@@ -20,6 +20,12 @@ from . import __version__
 
 _PLATFORMS = (".opencode", ".claude")
 
+# Skills renombradas (nombre viejo → nuevo). Se migran al cargar el registro para que
+# --update instale el nombre nuevo; instalar.py borra la carpeta vieja.
+RENAMED_SKILLS = {n: f"ado-{n}" for n in (
+    "hu-publisher", "pipeline-analyzer", "pr-creator",
+    "pr-reviewer", "profile-setup", "task-creator")}
+
 
 # ============================================================
 # INSTALACIONES
@@ -37,6 +43,10 @@ def load_installations():
     for i in items:
         if i.get("platform") not in _PLATFORMS:
             i["platform"] = ".opencode"
+        for key in ("selection", "components"):
+            names = i.get(key, {}).get("skills")
+            if isinstance(names, list):
+                i[key]["skills"] = list(dict.fromkeys(RENAMED_SKILLS.get(n, n) for n in names))
     return items
 
 
