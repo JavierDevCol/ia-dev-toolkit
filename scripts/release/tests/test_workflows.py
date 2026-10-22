@@ -145,6 +145,10 @@ class ReleaseTestWorkflowTest(unittest.TestCase):
             "borrar tag remoto -> tag anotado -> push del tag",
         )
 
+    def test_release_test_configures_git_identity_before_tagging(self):
+        # Sin identidad, el tag anotado falla con exit 128 (primer run real en develop).
+        self.assertLess(self.yaml.index("git config user.email"), self.yaml.index("git tag -a"))
+
     def test_release_test_move_step_skips_on_dry_run(self):
         self.assertIn("inputs.dry_run == true", self.yaml)
         self.assertIn("inputs.dry_run != true", self.yaml)
