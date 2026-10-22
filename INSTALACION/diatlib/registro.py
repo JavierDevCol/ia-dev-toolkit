@@ -18,6 +18,9 @@ from . import paths
 from . import __version__
 
 
+_PLATFORMS = (".opencode", ".claude")
+
+
 # ============================================================
 # INSTALACIONES
 # ============================================================
@@ -27,16 +30,27 @@ def load_installations():
     if not f.exists():
         return []
     try:
-        return json.loads(f.read_text(encoding="utf-8")).get("installations", [])
+        items = json.loads(f.read_text(encoding="utf-8")).get("installations", [])
     except Exception:
         return []
+    # Entradas antiguas (sin platform válida) = .opencode, la única instalable entonces.
+    for i in items:
+        if i.get("platform") not in _PLATFORMS:
+            i["platform"] = ".opencode"
+    return items
 
 
-def find_installation(project_path, installations=None):
-    """Devuelve la instalación de un proyecto, o None."""
+def find_installations(project_path, installations=None):
+    """Todas las instalaciones (una por plataforma) de una ruta."""
     installations = load_installations() if installations is None else installations
     target = str(Path(project_path).resolve())
-    return next((i for i in installations if i["project_path"] == target), None)
+    return [i for i in installations if i["project_path"] == target]
+
+
+def find_installation(project_path, platform=None, installations=None):
+    """Instalación de (ruta, plataforma), o None. platform=None: la primera por ruta."""
+    return next((i for i in find_installations(project_path, installations)
+                 if platform is None or i["platform"] == platform), None)
 
 
 def _merge_dict(old, new):
@@ -59,7 +73,8 @@ def save_installation(project_path, platform_dir, selection, components, sha, re
     installations = load_installations()
 
     idx = next((i for i, x in enumerate(installations)
-                if x["project_path"] == str(project_path)), None)
+                if x["project_path"] == project_path
+                    and x["platform"] == platform_dir), None)
 
     if idx is not None:
         prev = installations[idx]

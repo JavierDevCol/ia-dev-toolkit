@@ -24,7 +24,6 @@ from diatlib import paths, github, deps, registro, instalar, update, entorno
 from diatlib import menu
 from diatlib import ui
 
-PLATFORM_DEFAULT = ".opencode"
 # Skills de la metodología SAC (ciclo de vida de HU + arquitectura/calidad + soporte).
 # Nota: validar-ca entra por dependencia de ejecutar-plan.
 SAC_SKILLS = [
@@ -83,13 +82,21 @@ def _submenu_seeds(ctype, catalog):
     return [(ctype, n) for n in sel]
 
 
-def _gather_seeds(catalog):
+def ask_platform():
+    """Harness destino (carpeta de plataforma), o None si el usuario sale."""
+    return menu.menu_select("¿PARA QUÉ HARNESS?",
+                            [(".opencode", "OpenCode", ""), (".claude", "Claude Code", "")])
+
+
+def _gather_seeds(catalog, platform):
     """Menú principal en bucle. Devuelve (seeds, with_config).
     V/Volver regresa aquí; solo Q en el menú principal cancela."""
+    wf_desc = ("Workflows (+ skill exc-workflow-sac automática)" if platform == ".claude"
+               else "Workflows (+ plugins + commands automáticos)")
     main_options = [
         ("skills", "Skills", "Seleccionar skills específicas"),
         ("agents", "Agents", "Seleccionar agentes específicos"),
-        ("workflows", "Workflows", "Workflows (+ plugins + commands automáticos)"),
+        ("workflows", "Workflows", wf_desc),
         ("team_sac", "Team Dev SAC", "Stack SAC: agentes + workflows + skills SAC + config"),
         ("kit", "Kit Completo", "TODO el repo (incl. skills sueltas) + config"),
     ]
@@ -131,32 +138,26 @@ def _gather_seeds(catalog):
 def cmd_install(argv):
     ui.print_banner()
 
-    # Destino: ruta explícita o instalación global por agente
+    # 1) Harness primero; 2) destino: ruta explícita (proyecto) o global (home)
+    platform = ask_platform()
+    if platform is None:
+        ui.print_info("Cancelado.")
+        return
     args = [a for a in argv if not a.startswith("-")]
     if args:
-        project = Path(args[0]).resolve()
-        platform = PLATFORM_DEFAULT
+        project, is_global = Path(args[0]).resolve(), False
     else:
-        ui.print_warning("Sin ruta: instalación global según el agente.")
-        print("\n    [1] OpenCode\n    [2] Claude Code\n    [3] Gemini CLI\n    [4] Codex\n")
-        choice = input("  Selección: ").strip()
-        if choice == "1":
-            project, platform = Path.home(), ".opencode"
-            ui.print_info("OpenCode seleccionado")
-        elif choice in ("2", "3", "4"):
-            ui.print_warning("Implementación en curso para ese agente.")
-            return
-        else:
-            ui.print_error("Selección inválida")
-            return
+        ui.print_warning(f"Sin ruta: instalación global en ~/{platform}.")
+        project, is_global = Path.home(), True
 
     cache = ensure_cache()
     if not cache:
         return
 
-    catalog = github.scan_components(cache)
+    catalog = github.filter_catalog(github.scan_components(cache), platform, is_global)
+    dependencies = deps.for_platform(platform)
 
-    seeds, with_config = _gather_seeds(catalog)
+    seeds, with_config = _gather_seeds(catalog, platform)
     if not seeds and not with_config:
         ui.print_info("Nada seleccionado. Cancelado.")
         return
@@ -164,7 +165,8 @@ def cmd_install(argv):
     # Validar SOLO lo seleccionado contra el catálogo de la ref: lo no
     # relacionado con la elección no bloquea (puede pertenecer a otra ref).
     try:
-        for w in deps.validate_dependencies(catalog, seeds=seeds):
+        for w in deps.validate_dependencies(catalog, seeds=seeds,
+                                             dependencies=dependencies):
             ui.print_warning(w)
     except deps.DependencyError as e:
         ui.print_error(str(e))
@@ -172,8 +174,8 @@ def cmd_install(argv):
 
     # Ofrecer solo opcionales que NO estén ya incluidas en lo que se instalará
     # (p. ej. en "Kit Completo" todas las skills ya entran, así que no se ofrece nada)
-    _, already = deps.resolve_closure(seeds)
-    offered = deps.collect_optional(seeds)
+    _, already = deps.resolve_closure(seeds, dependencies)
+    offered = deps.collect_optional(seeds, dependencies)
     opt_options = [(f"{t}:{n}", n, f"opcional ({t})")
                    for t, names in offered.items() for n in names
                    if n not in already.get(t, [])]
@@ -184,7 +186,8 @@ def cmd_install(argv):
             seeds.append((t, n))
 
     selection = _seeds_to_dict(seeds, with_config)
-    installed = instalar.install_seeds(seeds, cache, project, platform, with_config=with_config)
+    installed = instalar.install_seeds(seeds, cache, project, platform, with_config=with_config,
+                                       dependencies=dependencies)
 
     remote_sha = registro.get_installed_sha()
     registro.save_installation(project, platform, selection, installed, remote_sha)
@@ -256,34 +259,36 @@ def _status_system():
 
 def _status_project(project):
     ui.print_banner()
-    inst = registro.find_installation(project)
-    if inst is None:
+    installs = registro.find_installations(project)
+    if not installs:
         ui.print_info(f"{project} no tiene componentes DIAT registrados.")
         return
-    print(f"  📦 Estado de {project}\n")
-    print(f"     Plataforma:  {inst['platform']}")
-    print(f"     Ref:         {inst.get('ref', 'main')}")
-    print(f"     Instalado:   {inst['installed_at']}")
-    local_sha = inst.get("sha")
     try:
         remote_sha = github.get_remote_sha()
     except github.RefNotFoundError as e:
         ui.print_error(str(e))
         return
-    if remote_sha and local_sha == remote_sha:
-        estado = "✅ al día"
-    elif remote_sha:
-        estado = f"⚠️  desactualizado ({(local_sha or '?')[:7]} → {remote_sha[:7]})"
-    else:
-        estado = "⚠️  sin conexión"
-    print(f"     Estado:      {estado}\n")
-    comps = inst.get("components", {})
-    for ctype in ("agents", "workflows", "skills", "plugins", "tools", "commands"):
-        names = comps.get(ctype, [])
-        if names:
-            print(f"     {ctype} ({len(names)}): {', '.join(names)}")
-    if comps.get("config"):
-        print("     config: ✅")
+    print(f"  📦 Estado de {project}\n")
+    for inst in installs:                           # una por plataforma (harness)
+        print(f"     Plataforma:  {inst['platform']}")
+        print(f"     Ref:         {inst.get('ref', 'main')}")
+        print(f"     Instalado:   {inst.get('installed_at', '?')}")
+        local_sha = inst.get("sha")
+        if remote_sha and local_sha == remote_sha:
+            estado = "✅ al día"
+        elif remote_sha:
+            estado = f"⚠️  desactualizado ({(local_sha or '?')[:7]} → {remote_sha[:7]})"
+        else:
+            estado = "⚠️  sin conexión"
+        print(f"     Estado:      {estado}\n")
+        comps = inst.get("components", {})
+        for ctype in ("agents", "workflows", "skills", "plugins", "tools", "commands"):
+            names = comps.get(ctype, [])
+            if names:
+                print(f"     {ctype} ({len(names)}): {', '.join(names)}")
+        if comps.get("config"):
+            print("     config: ✅")
+        print()
 
 
 # ============================================================

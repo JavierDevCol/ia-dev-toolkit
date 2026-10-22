@@ -251,3 +251,21 @@ def scan_components(cache_path=None):
                 if parse_frontmatter_ready(wf_md.read_text(encoding="utf-8")):
                     catalog["workflows"].add(d.name)
     return catalog
+
+
+def filter_catalog(catalog, platform, is_global):
+    """Copia del catálogo sin los componentes que no aplican a la plataforma/ámbito."""
+    c = {k: set(v) for k, v in catalog.items()}
+    for k in ("skills", "workflows", "plugins", "commands", "tools"):
+        c.setdefault(k, set())
+    if platform == ".opencode":
+        c["skills"].discard("exc-workflow-sac")
+    elif platform == ".claude":
+        for k in ("plugins", "commands", "tools"):
+            c[k] = set()
+    if is_global:
+        c["workflows"] = set()
+        c["skills"].discard("exc-workflow-sac")
+        c["plugins"].discard("workflow-sac")
+        c["commands"].discard("workflow-sac")
+    return c

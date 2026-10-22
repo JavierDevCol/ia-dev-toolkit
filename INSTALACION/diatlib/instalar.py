@@ -19,7 +19,7 @@ def install_component(ctype, name, cache, project, platform):
     """Copia un componente del cache al proyecto. Sobrescribe siempre.
     La forma (carpeta vs archivo) y la extensión salen de COMPONENT_LAYOUT."""
     cache, project = Path(cache), Path(project)
-    dest_base = paths.component_dest(ctype, project, platform)   # workflows -> .SAC/, resto -> .opencode/
+    dest_base = paths.component_dest(ctype, project, platform)   # workflows -> .SAC/, resto -> <platform>/
     dest_base.mkdir(parents=True, exist_ok=True)
     kind, spec = paths.COMPONENT_LAYOUT[ctype]         # dir: marcador · file: extensión
 

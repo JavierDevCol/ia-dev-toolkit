@@ -103,6 +103,10 @@ La tool **entrega y rastrea**; el agente **ejecuta** el markdown. Estado en `.SA
 | `status` | Progreso (⏳/🔄/✅) por fase. |
 | `reset` | Reinicia el progreso. |
 
+**En Claude Code** no hay plugin: se usa la skill `/exc-workflow-sac` (`skills/exc-workflow-sac/`),
+que ejecuta las mismas acciones vía `scripts/sac.py` (puerto Python de la tool). Comparte el
+estado en `.SAC/workflow-state/`, así que un workflow iniciado en OpenCode se retoma en Claude Code y viceversa.
+
 **Flujo recomendado:** `read` → repetir[ `next` → `execute` → (aprobación) → `approve` ] → `status`.
 
 ### Qué acciones tocan el estado

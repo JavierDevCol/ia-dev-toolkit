@@ -5,8 +5,8 @@ modo que si un componente ganó una dependencia entre versiones, esa dep se inst
 cmd_update resuelve el canal (R10: estable migra a la última release, -TEST fija el
 tag) antes de tocar la red y descarga solo si el repo cambió, saltando proyectos ya
 al día (por sha).
-Con ruta explícita, restringe la actualización a esa instalación (debe estar
-registrada; si no, dirige a `diat --install`) en vez de recorrer todo el registro.
+Con ruta explícita, restringe la actualización a las instalaciones de esa ruta (una
+por plataforma; debe haber al menos una, si no dirige a `diat --install`).
 """
 
 import re
@@ -17,8 +17,9 @@ from . import paths, github, deps, registro, instalar
 from . import ui
 
 
-def reinstall_components(installation, cache, dependencies=None):
-    """Re-resuelve las seeds del proyecto contra el catálogo nuevo e instala."""
+def reinstall_components(installation, cache):
+    """Re-resuelve las seeds del proyecto contra el catálogo nuevo e instala,
+    con el grafo de dependencias de SU plataforma (runner por harness)."""
     project = Path(installation["project_path"])
     platform = installation["platform"]
 
@@ -29,7 +30,8 @@ def reinstall_components(installation, cache, dependencies=None):
 
     # interactive=False: en --update no se re-entrevista (config ya respondida se preserva)
     return instalar.install_seeds(seeds, cache, project, platform,
-                                  with_config=with_config, dependencies=dependencies,
+                                  with_config=with_config,
+                                  dependencies=deps.for_platform(platform),
                                   interactive=False)
 
 
@@ -87,14 +89,18 @@ def cmd_update(argv=None):
         if ref != paths.DEFAULT_REF:
             registro.save_installed_version(ref[1:])     # espejo exacto del canal
         catalog = github.scan_components(cache)
-        # Validar solo lo que los proyectos registrados usan realmente:
+        # Validar solo lo que los proyectos registrados usan realmente, por
+        # instalación y con el grafo de su plataforma (el runner difiere):
         # seeds ausentes de la nueva ref se omiten con warning (no abortan).
-        seeds = [(t, n) for inst in installations
-                 for t, names in inst.get("selection", inst.get("components", {})).items()
-                 if isinstance(names, list) for n in names]
-        if seeds:
+        for inst in installations:
+            seeds = [(t, n) for t, names in inst.get("selection", inst.get("components", {})).items()
+                     if isinstance(names, list) for n in names]
+            if not seeds:
+                continue
             try:
-                for w in deps.validate_dependencies(catalog, seeds=seeds):
+                for w in deps.validate_dependencies(
+                        catalog, seeds=seeds,
+                        dependencies=deps.for_platform(inst["platform"])):
                     ui.print_warning(w)
             except deps.DependencyError as e:
                 ui.print_error(str(e))

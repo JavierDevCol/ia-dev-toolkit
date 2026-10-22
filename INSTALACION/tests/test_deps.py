@@ -57,12 +57,28 @@ class ValidateDependenciesC1Test(unittest.TestCase):
         # workflows:definir-vision-producto exige workflow-sac ausente del catálogo,
         # pero NO es alcanzable desde las seeds -> no bloquea.
         warnings = deps.validate_dependencies(self.catalog(),
-                                              seeds=[("skills", "ejecutar-plan")])
+                                              seeds=[("skills", "ejecutar-plan")],
+                                              dependencies=deps.for_platform(".opencode"))
         self.assertEqual(warnings, [])
 
     def test_sin_seeds_valida_grafo_completo(self):
         with self.assertRaises(deps.DependencyError):
-            deps.validate_dependencies(self.catalog(skills={"ejecutar-plan"}), seeds=None)
+            deps.validate_dependencies(self.catalog(skills={"ejecutar-plan"}), seeds=None,
+                                       dependencies=deps.for_platform(".opencode"))
+
+    def test_for_platform_opencode_requiere_plugin_y_command(self):
+        _, by = deps.resolve_closure([("workflows", "definir-vision-producto")], deps.for_platform(".opencode"))
+        self.assertEqual(by.get("plugins"), ["workflow-sac"]); self.assertEqual(by.get("commands"), ["workflow-sac"])
+        self.assertNotIn("skills", by)
+
+    def test_for_platform_claude_requiere_skill(self):
+        _, by = deps.resolve_closure([("workflows", "demo-delegacion")], deps.for_platform(".claude"))
+        self.assertEqual(by.get("skills"), ["exc-workflow-sac"]); self.assertEqual(by.get("agents"), ["PO"])
+        self.assertNotIn("plugins", by)
+
+    def test_for_platform_no_muta_el_grafo_base(self):
+        deps.for_platform(".claude")
+        self.assertNotIn("skills", deps.COMPONENT_DEPENDENCIES["workflows"]["definir-vision-producto"]["requires"])
 
     def test_tipo_no_recursivo_ausente_es_warning(self):
         warnings = deps.validate_dependencies(self.catalog(), seeds=[("tools", "tool-x")])

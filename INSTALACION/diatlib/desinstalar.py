@@ -1,20 +1,21 @@
 """Desinstalación:
-  - uninstall_project: quita TODOS los componentes DIAT de un proyecto (incl. config)
-    y borra su entrada del registro.
+  - uninstall_project: quita los componentes DIAT de UNA instalación (ruta, plataforma)
+    del proyecto (incl. config) y borra solo esa entrada del registro. Lo compartido
+    (.SAC/workflows, .SAC/config) se conserva si otra plataforma de la ruta lo usa.
   - uninstall_global: elimina DIAT por completo (CLI del bin + cache + PATH).
 """
 
 import shutil
 from pathlib import Path
 
-from . import paths, registro, entorno
+from . import paths, registro, entorno, menu
 from .ui import print_success, print_warning, print_info
 
 
 def uninstall_component(ctype, name, project, platform):
     """Elimina un componente instalado del proyecto. Devuelve True si borró algo."""
     kind, spec = paths.COMPONENT_LAYOUT.get(ctype, ("dir", None))
-    base = paths.component_dest(ctype, project, platform)   # workflows -> .SAC/, resto -> .opencode/
+    base = paths.component_dest(ctype, project, platform)   # workflows -> .SAC/, resto -> <platform>/
     if kind == "dir":
         target = base / name
         if target.exists():
@@ -29,7 +30,7 @@ def uninstall_component(ctype, name, project, platform):
 
 
 def _cleanup_empty(project, platform):
-    """Elimina carpetas de tipo vacías y las raíces (.opencode / .SAC) si quedan vacías.
+    """Elimina carpetas de tipo vacías y las raíces (<platform> / .SAC) si quedan vacías.
     Nunca borra dirs con datos del usuario (artifacts, HUs, estado): solo si están vacías."""
     project = Path(project)
     for base in (project / platform, project / paths.SAC_DIR):
@@ -43,21 +44,35 @@ def _cleanup_empty(project, platform):
 
 
 def uninstall_project(project_path):
-    """Quita TODOS los componentes DIAT del proyecto (incl. config) y su registro."""
+    """Quita los componentes DIAT de una instalación del proyecto (si hay varias
+    plataformas, pregunta cuál) y solo su entrada del registro."""
     project = Path(project_path).resolve()
-    inst = registro.find_installation(project)
-    if inst is None:
+    installs = registro.find_installations(project)
+    if not installs:
         print_info(f"{project} no tiene componentes DIAT registrados.")
         return
 
-    platform = inst["platform"]
+    if len(installs) > 1:
+        platform = menu.menu_select("¿QUÉ HARNESS DESINSTALAR?",
+                                    [(i["platform"], i["platform"], "") for i in installs])
+        if platform is None:
+            print_info("Cancelado.")
+            return
+    else:
+        platform = installs[0]["platform"]
+    inst = registro.find_installation(project, platform, installs)
     comps = inst.get("components", {})
+    others = [i.get("components", {}) for i in installs if i["platform"] != platform]
+    # .SAC es compartido entre plataformas: conservar lo que otra instalación usa
+    shared_wf = {w for c in others for w in c.get("workflows", [])}
     removed = 0
 
     for ctype, names in comps.items():
         if ctype == "config" or not isinstance(names, list):
             continue
         for n in names:
+            if ctype == "workflows" and n in shared_wf:
+                continue
             if uninstall_component(ctype, n, project, platform):
                 removed += 1
 
@@ -78,7 +93,7 @@ def uninstall_project(project_path):
 
     # config: se borra completa (decisión de alcance). Vive en .SAC/config/.
     cfg = project / paths.SAC_DIR / "config"
-    if comps.get("config") and cfg.exists():
+    if comps.get("config") and cfg.exists() and not any(c.get("config") for c in others):
         shutil.rmtree(cfg)
         removed += 1
 
@@ -86,10 +101,10 @@ def uninstall_project(project_path):
 
     # Quitar del registro
     installations = [i for i in registro.load_installations()
-                     if i["project_path"] != str(project)]
+                     if (i["project_path"], i["platform"]) != (str(project), platform)]
     registro.save_all_installations(installations, registro.get_installed_sha() or "")
 
-    print_success(f"Desinstalado de {project} ({removed} elementos)")
+    print_success(f"Desinstalado de {project / platform} ({removed} elementos)")
 
 
 def uninstall_global():
