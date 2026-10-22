@@ -37,9 +37,11 @@ Reads from `memory_skill.json` → `[ado].config.perfiles[perfil_activo]` (stand
 
 | Field | Source |
 |-------|--------|
-| `project_name` | `project_map.repos` |
+| `project_name` | `project_map.repos` (fallback `project_map.default`) |
 | `user_email` | `user_email` from active profile |
 | `base_reports_path` | `base_reports_path` from active profile |
+
+**Profile guard:** if `perfil_activo` is null, its profile is missing, or no project resolves, stop and ask the user to run `ado-profile-setup`.
 
 ### Standards Configuration
 

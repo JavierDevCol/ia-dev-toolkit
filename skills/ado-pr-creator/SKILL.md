@@ -25,7 +25,9 @@ Guided creation of Pull Requests in Azure DevOps with duplicate detection, branc
 
 ## Context Injection
 
-Reads `project_repos`, `project_workitems`, `user_email` from `memory_skill.json` → `[ado].config.perfiles[perfil_activo]` (standalone).
+Reads `user_email` and the projects from `memory_skill.json` → `[ado].config.perfiles[perfil_activo]` (standalone): repos project = `project_map.repos`, work items project = `project_map.workitems` (each falls back to `project_map.default`).
+
+**Profile guard:** if `perfil_activo` is null, its profile is missing, or no project resolves, stop and ask the user to run `ado-profile-setup`.
 
 Also read `CONFIG_USER.yaml` (path in `archivos.config_user`) and take `usuario.nombre` → **`{{usuario.nombre}}`**, needed to sign the PR body in Phase C. If empty, the file doesn't exist, or `usuario.incluir_firma_en_documentos` is `false`, omit the signature line; never invent a name.
 
@@ -48,7 +50,7 @@ digraph pr_flow {
 
 ### Phase A — Validate & resolve
 
-Ensure `project_repos` is resolved. If missing, stop and inform user.
+Apply the profile guard (Context Injection) and resolve the repos project from `project_map.repos`.
 
 ### Phase B — Resolve repo & branches
 
