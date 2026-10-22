@@ -9,7 +9,7 @@ ready: true
 ## Overview
 Ejecuta los workflows de `<proyecto>/.SAC/workflows/` fase por fase con gates de aprobación. Todo pasa por el script `sac.py` (estado en `.SAC/workflow-state/`, compartido con el plugin OpenCode).
 
-Comando (ejecutar desde el proyecto; si no existe `python3`, usar `python`):
+Comando (ejecutar desde la raíz del proyecto, donde está `.SAC/`; si no existe `python3`, usar `python`):
 
 ```
 python3 "${CLAUDE_SKILL_DIR}/scripts/sac.py" <acción> [workflow] [fase] [--delegated]
