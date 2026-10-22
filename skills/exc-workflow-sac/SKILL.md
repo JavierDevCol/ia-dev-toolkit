@@ -23,11 +23,11 @@ python3 "${CLAUDE_SKILL_DIR}/scripts/sac.py" <acción> [workflow] [fase] [--dele
    1. `next` → indica la siguiente fase. **Usa exactamente ese nombre; no lo adivines.**
    2. Si todas están aprobadas → terminar con `status`.
    3. `execute <workflow> <fase>` → sigue las instrucciones devueltas (el script bloquea si una fase previa no está aprobada).
-   4. Presenta el resultado y **espera el OK explícito del usuario**.
-   5. `approve <workflow> <fase>`.
+   4. Fase con `gate: approval`: presenta el resultado y **espera el OK explícito del usuario**; luego `approve <workflow> <fase>`.
+   5. Fase `[auto]`: no espera OK ni necesita `approve`; `execute` la aprueba sola cuando existe su entregable. Si `execute` indica que sigue en progreso, genera el artefacto y vuelve a ejecutar `execute`, o consulta al usuario.
 
 ## Reglas
-- **Nunca** ejecutes `approve` en una fase con `gate: approval` sin OK explícito del usuario. Las fases `[auto]` se aprueban solas.
+- **Nunca** ejecutes `approve` en una fase con `gate: approval` sin OK explícito del usuario. Las fases `[auto]` no requieren `approve`.
 - **Nunca** leas `fases/*.md` directamente: solo vía `execute` (registra estado y aplica gates).
 - **Delegación:** si `execute` indica delegar a un subagente, lánzalo con la herramienta `Agent` (`subagent_type: general-purpose`) usando el prompt **exacto** devuelto. Con su entregable, ejecuta `execute <workflow> <fase> --delegated`, preséntalo y pide OK antes de `approve`.
 
@@ -37,7 +37,7 @@ python3 "${CLAUDE_SKILL_DIR}/scripts/sac.py" <acción> [workflow] [fase] [--dele
 |--------|---------|
 | Listar workflows | `sac.py list` |
 | Leer workflow | `sac.py read <workflow>` |
-| Leer fase | `sac.py read_phase <workflow> <fase>` |
+| Leer fase (solo subagentes) | `sac.py read_phase <workflow> <fase>` |
 | Siguiente fase | `sac.py next <workflow>` |
 | Ejecutar fase | `sac.py execute <workflow> <fase> [--delegated]` |
 | Aprobar fase | `sac.py approve <workflow> <fase>` |

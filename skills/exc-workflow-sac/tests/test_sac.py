@@ -1,4 +1,5 @@
 import json
+import os
 import subprocess
 import sys
 import tempfile
@@ -171,7 +172,7 @@ class SacTest(unittest.TestCase):
 
     def test_subagent_prompt_cita_ruta_del_script(self):
         out = sac.run("execute", self.root, "dlg", "uno.md")
-        self.assertIn(f'python3 "{Path(sac.__file__).resolve()}" read_phase dlg uno.md', out)
+        self.assertIn(f'"{sys.executable}" "{Path(sac.__file__).resolve()}" read_phase dlg uno.md', out)
 
     def test_subagent_delegated_registra(self):
         out = sac.run("execute", self.root, "dlg", "uno.md", delegated=True)
@@ -192,6 +193,12 @@ class SacTest(unittest.TestCase):
         r = subprocess.run([sys.executable, SAC, "list"], cwd=tempfile.mkdtemp(), capture_output=True, text=True)
         self.assertEqual(r.returncode, 1)
         self.assertIn(".SAC", r.stdout + r.stderr)
+
+    def test_cli_salida_utf8_con_stdout_cp1252(self):
+        env = {**os.environ, "PYTHONIOENCODING": "cp1252", "PYTHONUTF8": "0"}
+        r = subprocess.run([sys.executable, SAC, "status", "wf"], cwd=self.root, capture_output=True, env=env)
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertRegex(r.stdout.decode("utf-8"), "[⛔✅🔄⏳]")
 
     def test_cli_con_raiz(self):
         r = subprocess.run([sys.executable, SAC, "next", "wf"], cwd=self.root / "src", capture_output=True, text=True)

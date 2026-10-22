@@ -272,7 +272,7 @@ def execute_phase(root, wf_dir, state_dir, wf, phase, delegated):
         art = f"Artefacto esperado: {meta['output']}\n\n" if meta.get("output") else ""
         script = Path(__file__).resolve()
         prompt = (f"Adopta el rol definido en `.claude/agents/{agent}.md` (léelo primero). "
-                  f"Lee tu encargo con `python3 \"{script}\" read_phase {wf} {phase}`.\n\n"
+                  f"Lee tu encargo con `\"{sys.executable}\" \"{script}\" read_phase {wf} {phase}`.\n\n"
                   f"{pre}{art}{SUBAGENT_CONTRACT}")
         return (f"{heading}\n\n"
                 f"Esta fase se delega al subagente '{agent}'. Usa la herramienta de subagentes de tu harness "
@@ -360,6 +360,9 @@ def run(action, root, workflow=None, phase=None, delegated=False):
 
 
 def main(argv):
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8")
     delegated = "--delegated" in argv
     args = [a for a in argv if a != "--delegated"]
     if not args:
