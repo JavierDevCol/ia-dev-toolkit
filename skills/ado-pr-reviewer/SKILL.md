@@ -43,7 +43,7 @@ Reads from `memory_skill.json` → `[ado].config.perfiles[perfil_activo]` (stand
 
 ### Standards Configuration
 
-Pass via `config_extras`: `coding_standards_path` and `architecture_guide_path` (use `[nombre_del_repo]` as placeholder). If files don't exist, skip standards — deliver conflicts + threads + health only.
+Read `coding_standards_path` and `architecture_guide_path` from the active profile's `config_extras` (use `[nombre_del_repo]` as placeholder). If either key is missing, ask the user once and persist the answer to `config_extras` so later reviews don't ask again. If files don't exist, skip standards — deliver conflicts + threads + health only.
 
 ### Report Paths
 
