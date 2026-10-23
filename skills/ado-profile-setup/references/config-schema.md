@@ -52,6 +52,7 @@ Esta sección vive en `skills/memory_skill.json` bajo la clave `"ado"`:
 | `default_iteration` | ado-hu-publisher | Iteración por defecto (solo si el usuario acepta guardarla) |
 | `default_area` | ado-hu-publisher | Area Path por defecto |
 | `default_tags` | ado-hu-publisher | Tags por defecto (`;`-separados) |
+| `ado_org` | ado-variable-groups, ado-variable-groups-write | Organización ADO para la REST API |
 
 ### `colaboradores` opcional (lo escribe ado-wi-comments al preguntar)
 
