@@ -65,8 +65,12 @@ class SacTest(unittest.TestCase):
     def write_state(self, state):
         (self.state_dir / "wf.state.json").write_text(json.dumps(state))
 
-    def test_find_root_desde_subdirectorio(self):
-        self.assertEqual(sac.find_root(self.root / "src" / "deep"), self.root)
+    def test_find_root_en_raiz_del_proyecto(self):
+        self.assertEqual(sac.find_root(self.root), self.root)
+
+    def test_find_root_no_sube_a_carpetas_padre(self):
+        # Un .SAC más arriba (p. ej. ~/.SAC) no pertenece al proyecto.
+        self.assertIsNone(sac.find_root(self.root / "src" / "deep"))
 
     def test_find_root_sin_sac_devuelve_none(self):
         self.assertIsNone(sac.find_root(Path(tempfile.mkdtemp())))
@@ -201,7 +205,7 @@ class SacTest(unittest.TestCase):
         self.assertRegex(r.stdout.decode("utf-8"), "[⛔✅🔄⏳]")
 
     def test_cli_con_raiz(self):
-        r = subprocess.run([sys.executable, SAC, "next", "wf"], cwd=self.root / "src", capture_output=True, text=True)
+        r = subprocess.run([sys.executable, SAC, "next", "wf"], cwd=self.root, capture_output=True, text=True)
         self.assertEqual(r.returncode, 0)
         self.assertIn("sac.py execute wf uno.md", r.stdout)
 

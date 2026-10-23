@@ -39,11 +39,9 @@ def agent_name(sub):
 
 
 def find_root(start):
+    # Solo la raíz del proyecto: un .SAC más arriba (p. ej. ~/.SAC) mezclaría estado entre proyectos.
     p = Path(start).resolve()
-    for d in (p, *p.parents):
-        if (d / ".SAC").is_dir():
-            return d
-    return None
+    return p if (p / ".SAC").is_dir() else None
 
 
 # ---------- validación ----------
@@ -370,7 +368,7 @@ def main(argv):
         return 2
     root = find_root(Path.cwd())
     if root is None:
-        print("⛔ No se encontró el directorio .SAC en el árbol actual.", file=sys.stderr)
+        print("⛔ No se encontró el directorio .SAC en el proyecto (ejecuta desde su raíz).", file=sys.stderr)
         return 1
     args += [None] * 3
     print(run(args[0], root, args[1], args[2], delegated))
