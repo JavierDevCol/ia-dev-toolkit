@@ -11,7 +11,7 @@ import sys
 import shutil
 from pathlib import Path
 
-from . import paths, deps
+from . import paths, deps, registro
 from .ui import print_warning, print_success
 
 
@@ -157,6 +157,7 @@ def install_shared_skill_assets(cache, project, platform):
 # se elimina el archivo legado que reemplaza (OpenCode V2 ignora `.opencode/tools/*.ts`).
 LEGACY_REPLACED = (
     ("plugins", "workflow-sac", "tools/workflow-sac.ts"),
+    *(("skills", new, f"skills/{old}") for old, new in registro.RENAMED_SKILLS.items()),
 )
 
 
@@ -166,7 +167,7 @@ def _remove_legacy_files(project, platform, installed):
         if cname in installed.get(ctype, []):
             legacy = Path(project) / platform / legacy_rel
             if legacy.exists():
-                legacy.unlink()
+                shutil.rmtree(legacy) if legacy.is_dir() else legacy.unlink()
                 print_warning(f"legado eliminado: {legacy_rel} (reemplazado por {ctype}:{cname})")
 
 

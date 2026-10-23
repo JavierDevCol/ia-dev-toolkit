@@ -80,6 +80,7 @@ Check if `[Reviewer Pending Path]/pending_reviews.json` contains a prior record 
 
 ## Phase C — Load Team Standards
 
+0. Resolve paths from `config_extras` of the active profile. If `coding_standards_path` or `architecture_guide_path` is missing, ask the user (one question, both paths; "none" is a valid answer) and save the answers to `config_extras` in `memory_skill.json`. A saved `"none"` means "no standards": treat it as a missing file, without asking again.
 1. Read `[coding_standards_path]`.
 2. Determine PR repository name (from Phase A).
 3. Read `[architecture_guide_path]` (replacing `[nombre_del_repo]` with actual repo name).

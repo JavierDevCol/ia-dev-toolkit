@@ -42,13 +42,13 @@ echo "  → ado-wi-comments debería publicar con emoji 🚀 y formato correcto"
 
 echo ""
 
-echo -e "${YELLOW}AWC-02: Mención a Alexander${NC}"
-echo "  → ado-wi-comments debería insertar GUID y reasignar WI"
+echo -e "${YELLOW}AWC-02: Mención a colaborador con reasignar${NC}"
+echo "  → ado-wi-comments debería insertar GUID del perfil y reasignar WI"
 
 echo ""
 
-echo -e "${YELLOW}AWC-03: Mención a Lady${NC}"
-echo "  → ado-wi-comments debería insertar GUID"
+echo -e "${YELLOW}AWC-03: Perfil sin colaboradores${NC}"
+echo "  → ado-wi-comments debería preguntar, resolver GUID y persistir en el perfil"
 
 echo ""
 

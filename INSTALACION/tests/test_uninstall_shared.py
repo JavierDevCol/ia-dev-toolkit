@@ -60,6 +60,15 @@ class UninstallSharedTest(unittest.TestCase):
         self.assertFalse((self.P / ".SAC/config").exists())
         self.assertEqual(registro.find_installations(self.P), [])
 
+    def test_desinstalar_sin_update_borra_carpeta_con_nombre_viejo(self):
+        old = self.P / ".claude/skills/pr-reviewer"
+        old.mkdir(parents=True)
+        (old / "SKILL.md").write_text("x", encoding="utf-8")
+        old_sel = {"skills": ["pr-reviewer"]}       # registro previo al rename
+        registro.save_installation(self.P, ".claude", old_sel, old_sel, "S")
+        self._uninstall(".claude")
+        self.assertFalse(old.exists())
+
 
 if __name__ == "__main__":
     unittest.main()

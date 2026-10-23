@@ -37,7 +37,23 @@ For each field, try patterns in priority order (P1 → P2 → P3 → Fallback). 
 |----------|---------|
 | P1 | `| **Iteration Path** |` in table |
 | P2 | `config_extras.default_iteration` or `default_sprint` from active profile |
-| P3 | Ask user |
+| P3 | Ask user, then offer to save it as `config_extras.default_iteration` — only if the user accepts (iterations change every sprint) |
+
+## System.AreaPath (Recommended)
+
+| Priority | Pattern |
+|----------|---------|
+| P1 | `| **Area Path** |` in table |
+| P2 | `config_extras.default_area` from active profile |
+| P3 | Ask user once (suggest the project root area) and persist to `config_extras.default_area` |
+
+## System.Tags (Optional)
+
+| Priority | Pattern |
+|----------|---------|
+| P1 | `| **Tags** |` in table (`;`-separated) |
+| P2 | `config_extras.default_tags` from active profile |
+| P3 | Omit field (don't ask) |
 
 ## Microsoft.VSTS.Common.Priority — Default: `2`
 
