@@ -6,8 +6,8 @@ comportamiento en OpenCode, Claude Code, Codex o cualquier harness.
 ## Regla de uso
 
 > **Antes de consultar configuración, intenta `memctl`.**
-> 1. Si `scripts/memctl.sh` (Unix) o `scripts/memctl.ps1` (Windows) existe y es
->    ejecutable, úsalo. La respuesta que devuelve ES la respuesta.
+> 1. Si `.SAC/memctl.sh` (Unix) o `.SAC/memctl.ps1` (Windows) existe, úsalo
+>    (en el repo fuente: `scripts/`). La respuesta que devuelve ES la respuesta.
 > 2. Si no existe o falla (motor ausente, entorno restringido), resuelve con las
 >    herramientas nativas del agente (`jq` / `yq` / lectura directa del archivo)
 >    respetando el mismo contrato de salida.
@@ -55,6 +55,32 @@ memctl list [fuente]          # claves de primer nivel, en orden de aparición
 - **Fuera de perfil** (secuencias `- `, anclas `&`/`*`, escalares de bloque
   `|`/`>`, tabulaciones, `\uXXXX`): **fallo ruidoso** (código 1), nunca se
   adivina ni se degrada en silencio.
+
+## Plantilla de bloque para SKILL.md
+
+Cada skill que necesita memoria incluye este bloque, con SOLO las claves que usa.
+`memory_skill.json` vive en la raíz de skills del proyecto (`$SKILL_DIR/../memory_skill.json`).
+memctl solo lee: la persistencia de datos sigue como la define cada skill.
+
+````markdown
+**Leer config con memctl** (solo lectura; su salida ES la respuesta):
+
+```sh
+M='MEMCTL_MEMORY="$SKILL_DIR/../memory_skill.json" sh .SAC/memctl.sh'
+$M get <clave>                 # memoria de skill (memory_skill.json)
+$M get <clave> user            # CONFIG_USER.yaml
+$M get <clave> system          # CONFIG_SYSTEM.yaml
+```
+
+- Exit 0 + `null` → dato no configurado: aplicar el flujo "pregunta una vez y persiste" de esta skill.
+- Exit 2 → clave o archivo inexistente: tratarlo como no configurado.
+- Exit 1 u otro fallo → leer el archivo directo con `jq`/`yq`. Nunca inventar valores.
+- Consultar solo las claves de esta skill; no volcar secciones completas con datos de terceros.
+````
+
+Perfiles ADO: el perfil es un mapa por nombre, así que se resuelve en dos pasos
+(`P=$($M get ado.config.perfil_activo)` y luego `$M get ado.config.perfiles.$P.<campo>`).
+Un nombre de perfil con `.` rompe la ruta.
 
 ## Mantenimiento
 
