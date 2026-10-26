@@ -8,7 +8,7 @@
 import shutil
 from pathlib import Path
 
-from . import paths, registro, entorno, menu
+from . import paths, registro, entorno, menu, instalar
 from .ui import print_success, print_warning, print_info
 
 
@@ -100,6 +100,8 @@ def uninstall_project(project_path):
     if comps.get("config") and cfg.exists() and not any(c.get("config") for c in others):
         shutil.rmtree(cfg)
         removed += 1
+        for name in instalar.MEMCTL_FILES:               # memctl viaja con la config
+            (project / paths.SAC_DIR / name).unlink(missing_ok=True)
 
     _cleanup_empty(project, platform)
 

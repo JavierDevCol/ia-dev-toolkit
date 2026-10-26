@@ -14,6 +14,8 @@ from pathlib import Path
 from . import paths, deps, registro
 from .ui import print_warning, print_success
 
+MEMCTL_FILES = ("memctl.sh", "memctl.ps1")
+
 
 def install_component(ctype, name, cache, project, platform):
     """Copia un componente del cache al proyecto. Sobrescribe siempre.
@@ -125,6 +127,16 @@ def _fill_config_user(path, answers):
     path.write_text("\n".join(out) + "\n", encoding="utf-8")
 
 
+def install_memctl(cache, project):
+    """Copia memctl.sh/.ps1 a .SAC/ (junto a .SAC/config/). Sobrescribe siempre: es código, no estado."""
+    dst = Path(project) / paths.SAC_DIR
+    dst.mkdir(parents=True, exist_ok=True)
+    for name in MEMCTL_FILES:
+        src = Path(cache) / "scripts" / name
+        if src.exists():
+            shutil.copy2(src, dst / name)
+
+
 # ============================================================
 # ASSETS RAÍZ COMPARTIDOS DE SKILLS
 # ============================================================
@@ -186,4 +198,5 @@ def install_seeds(seeds, cache, project, platform, with_config=False,
     if with_config:
         if install_sac_config(cache, project, platform, interactive=interactive):
             installed["config"] = True
+            install_memctl(cache, project)              # lee .SAC/config/ -> viaja con ella
     return installed
