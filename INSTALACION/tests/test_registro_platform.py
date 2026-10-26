@@ -52,6 +52,22 @@ class RegistroPlatformTest(unittest.TestCase):
         registro.save_installation(self.P, ".claude", {}, {}, "s")
         self.assertEqual(registro.find_installation(self.P)["platform"], ".claude")
 
+    def test_skills_renombradas_se_migran_al_cargar(self):
+        self._raw([{"project_path": str(self.P.resolve()), "platform": ".claude",
+                    "selection": {"skills": ["pr-reviewer", "ado-pr-reviewer", "otra"]},
+                    "components": {"skills": ["task-creator"]}}])
+        inst = registro.find_installation(self.P, ".claude")
+        self.assertEqual(inst["selection"]["skills"], ["ado-pr-reviewer", "otra"])
+        self.assertEqual(inst["components"]["skills"], ["ado-task-creator"])
+
+    def test_instalar_skill_renombrada_borra_carpeta_vieja(self):
+        from diatlib import instalar
+        old = self.P / ".claude" / "skills" / "pr-reviewer"
+        old.mkdir(parents=True)
+        (old / "SKILL.md").write_text("x")
+        instalar._remove_legacy_files(self.P, ".claude", {"skills": ["ado-pr-reviewer"]})
+        self.assertFalse(old.exists())
+
 
 if __name__ == "__main__":
     unittest.main()

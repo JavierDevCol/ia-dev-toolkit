@@ -77,8 +77,8 @@
    ```
    @env-config-audit sobre el diff origin/des..release/vX.Y.Z
    @ado-pipeline-analyzer build latest del pipeline <nombre_pipeline> en rama release/vX.Y.Z
-   @analizar-seguridad scope=project sobre release/vX.Y.Z
-   @analizar-calidad-codigo scope=project sobre release/vX.Y.Z
+   @analizar-seguridad scope=commits sobre release/vX.Y.Z
+   @analizar-calidad-codigo scope=commits sobre release/vX.Y.Z
    ```
 
 8. **Resumen final y notificación:** rellenar la **variante RELEASE** de `references/resumen-entrega.txt` (sustituir todos los placeholders, nunca dejar literales), mostrarla y guardarla como `resumen-entrega_release_vX.Y.Z.txt` en `{output_folder}/entrega_release/{nombre_repo}/{version}/`. La notificación al banco cierra el resumen — el PR a `des` lo crea el banco (Regla 6).

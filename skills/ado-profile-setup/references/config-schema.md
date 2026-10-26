@@ -44,6 +44,28 @@ Esta sección vive en `skills/memory_skill.json` bajo la clave `"ado"`:
 }
 ```
 
+### `config_extras` opcionales (los escriben las skills al preguntar, no profile-setup)
+
+| Clave | Skill | Uso |
+|-------|-------|-----|
+| `coding_standards_path`, `architecture_guide_path` | ado-pr-reviewer | Estándares a validar (`"none"` = sin estándares) |
+| `default_iteration` | ado-hu-publisher | Iteración por defecto (solo si el usuario acepta guardarla) |
+| `default_area` | ado-hu-publisher | Area Path por defecto |
+| `default_tags` | ado-hu-publisher | Tags por defecto (`;`-separados) |
+| `ado_org` | ado-variable-groups, ado-variable-groups-write | Organización ADO para la REST API |
+
+### `colaboradores` opcional (lo escribe ado-wi-comments al preguntar)
+
+Clave del perfil (al nivel de `user_email`), no de `config_extras`:
+
+```json
+"colaboradores": [
+  { "alias": "A", "nombre": "Nombre Apellido", "guid": "GUID-ADO", "email": "correo@dominio", "reasignar": true }
+]
+```
+
+`reasignar: true` → al mencionarlo, el WI se reasigna a su `email`.
+
 ## default_query — Case A (Saved Query)
 
 ```json

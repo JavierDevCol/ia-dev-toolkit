@@ -33,29 +33,45 @@ Analiza un PR/diff y clasifica variables, colas y secretos por ámbito (pipeline
 
 ## Implementation
 
+**Configuración:** leer `memory_skill.json` (`$SKILL_DIR/../memory_skill.json`):
+
+| Campo | Ubicación | Si falta |
+|-------|-----------|----------|
+| `ambientes` | `env-config-audit.config.ambientes` — lista **ordenada** = orden de promoción, ej. `["develop","des","pru","prepro","pro"]` | Preguntar una vez y persistir |
+| `user_name` | global | Preguntar una vez y persistir |
+| `incluir_firma_en_documentos` | global | `true` |
+| `output_folder` | global | Preguntar una vez y persistir |
+
+**Inicio (cada ejecución):** preguntar:
+1. **Repo:** sugerir el nombre del remoto git (`git remote get-url origin`); `{nombre_ms}` = nombre del repo.
+2. **Qué auditar:** un **ambiente de entrega** de `ambientes` o un **rango de diff** explícito (ej. `develop..release/v1.3.2`, se usa tal cual).
+   - Ambiente → destino = ese ambiente, origen = el anterior en la lista (las ramas se llaman igual que el ambiente). Ej. `pru` → `git diff origin/pru...origin/des`.
+   - Si la rama origen o destino no existe, o el ambiente es el primero de la lista: detenerse y preguntar qué rama usar.
+
 **Fase 0 — Tipo de análisis:** MS nuevo (inventario completo) o funcionalidad (solo delta del PR).
 
 **Fase A — Detección:** Analizar diff para variables en código, config, pipeline CI/CD, colas RabbitMQ, Redis, migraciones y secretos hardcodeados.
 
 **Fase B — Clasificación:** Para cada variable/cola/redis/migración, registrar nombre, ámbito, origen, acción y destino exacto. Usar tablas-template de `references/templates.md`.
 
-**Fase C — Entrevista:** Agrupar variables sin origen y preguntar al usuario. Confirmar VG por ambiente, path de Vault, ruta de salida.
+**Fase C — Entrevista:** Agrupar variables sin origen y preguntar al usuario. Nombres de VG y paths de Vault se toman de lo encontrado en el proyecto (`- group:` en el pipeline, rutas de Vault en config/código); no se consultan por defecto.
 
 **Fase D — Preview:** Mostrar resumen consolidado (ver `references/preview-example.md`). Solo incluir secciones con cambios.
 
-**Fase E — Generación:** Crear `config-entorno_{nombre_ms}_vX.Y.Z.md` según template `assets/template-config-entorno.md` — la versión es la del release o RC entregado (misma `vX.Y.Z`/`vX.Y.Z-rc.N` del flujo) y el ID del PR va en la cabecera del documento, no en el nombre. Leer también `CONFIG_USER.yaml` (ruta en `archivos.config_user`) y tomar `usuario.nombre` → **`{{usuario.nombre}}`**, necesario para firmar el documento. Si `usuario.incluir_firma_en_documentos` es `false`, omitir el bloque de firma. Si el nombre está vacío o el archivo no existe, omitir el sufijo de la firma; no inventar un nombre. Antes del pie `*Documento generado con env-config-audit skill*`, agregar:
+**Fase E — Generación:** Crear `config-entorno_{nombre_ms}_vX.Y.Z.md` según template `assets/template-config-entorno.md` — la versión es la del release o RC entregado (misma `vX.Y.Z`/`vX.Y.Z-rc.N` del flujo) y el ID del PR va en la cabecera del documento, no en el nombre. Firma con `user_name` → **`{{user_name}}`**; si `incluir_firma_en_documentos` es `false`, omitir el bloque de firma. No inventar un nombre. Antes del pie `*Documento generado con env-config-audit skill*`, agregar:
 ```
-> **Auditor:** {{usuario.nombre}}
+> **Auditor:** {{user_name}}
 > **Fecha:** {{fecha}}
 ```
-Sin `usuario.nombre` configurado, la línea queda `> **Auditor:**`.
+
+**Verificar existencia (solo si el usuario lo pide):** buscar en el proyecto los nombres de VG (`- group:` en `azure-pipelines.yml`/`.azuredevops/`) y los paths de Vault (config/código); consultar los VG con `ado-variable-groups` y Vault con `vault-manager` usando lo encontrado; reportar existe/falta por variable.
 
 **Reglas obligatorias:**
 1. Solo documentar configuración — nada de setup, infra, deploy, health checks
 2. Nunca asumir origen de variables — preguntar con archivo+línea
 3. Nunca incluir secretos reales; alertar si hay secretos commiteados
 4. Si el usuario no sabe el origen → `⚠️ Pendiente de definir`
-5. Usar `output_folder` global de `memory_skill.json` como ruta de salida. Si es `null`, preguntar al usuario la carpeta donde guardar los reportes de auditoría.
+5. Usar `output_folder` como ruta de salida (ver Configuración).
 
 ## Quick Reference
 

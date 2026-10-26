@@ -12,53 +12,62 @@ ready: true
 
 ## Overview
 
-Gestiona comentarios y menciones en Work Items de Azure DevOps con formato Markdown limpio yFlujo de aprobación obligatorio.
+Gestiona comentarios y menciones en Work Items de Azure DevOps con formato Markdown limpio y flujo de aprobación obligatorio.
 
 ## When to Use
 
 - Comentario de entrega formal (RELEASE, FEATURE, FIX, HOTFIX)
 - Comentario técnico o actualización de estado en un WI
-- Necesidad de mencionar colaboradores con formato nativo ADO (`@<GUID>`)
-- Reasignación de WI al mencionar a Alexander
+- Mencionar colaboradores con formato nativo ADO (`@<GUID>`) y reasignar el WI
 
 ### Cuándo NO usar
 
-- Para crear o modificar campos del WI (usar la skill de creación de WI)
+- Para crear o modificar campos del WI (usar `ado-hu-publisher` / `ado-task-creator`)
 - Para queries WIQL o búsqueda de WIs
 - Para gestionar PRs o builds
 
 ## Implementation
 
-### Plantilla
+### Plantillas
 
-- Plantilla de entrega: `{file:./assets/plantilla-entrega.md}`
+- Entrega: [assets/plantilla-entrega.md](assets/plantilla-entrega.md)
+- Técnico/general: [assets/plantilla-tecnico.md](assets/plantilla-tecnico.md)
 
 ### Reglas Universales
 
 **Formato:** Markdown plano, sin bloques de código contenedores. La plataforma interpreta estilos nativamente.
 
+**Colaboradores:** se leen de `memory_skill.json` → `[ado].config.perfiles[perfil_activo].colaboradores`:
+
+```json
+"colaboradores": [
+  { "alias": "A", "nombre": "Nombre Apellido", "guid": "GUID-ADO", "email": "correo@dominio", "reasignar": true }
+]
+```
+
 **Menciones ADO [OBLIGATORIO]**
 
-Antes de publicar **cualquier comentario**, preguntar:
+Antes de publicar **cualquier comentario**, preguntar con un menú armado desde `colaboradores`:
 
 > **¿Deseas etiquetar a alguno de estos colaboradores?**
-> - **[A]** Edgar Alexander Torres Erazo → `@<96517b2d-3823-62fd-ae74-0872c1c9c3a9>`
-> - **[L]** Lady Marcela Suarez Agudelo → `@<7c277620-4b79-652b-a18d-5d93dd85fff6>`
-> - **[AL]** Ambos
+> - **[alias]** nombre (una opción por colaborador; varias se combinan, ej. `A,L`)
+> - **[T]** Todos
 > - **[N]** Ninguno
 
-Insertar menciones seleccionadas **al inicio del comentario**, antes del cuerpo principal. Usar siempre formato `@<GUID>`.
+Insertar las menciones elegidas **al inicio del comentario** con formato `@<guid>`.
 
-**Reasignación Automática [OBLIGATORIO]**
+Si `colaboradores` no existe o está vacío: preguntar si desea mencionar a alguien. Si sí, pedir nombre y email, resolver el GUID con `core_get_identity_ids`, preguntar si al mencionarlo se reasigna el WI, y persistir el colaborador en el perfil activo.
 
-Si se menciona a Alexander (`[A]` o `[AL]`), reasignar el WI inmediatamente tras publicar:
+**Reasignación [OBLIGATORIO]**
+
+Si algún mencionado tiene `reasignar: true`, reasignar el WI tras publicar al `email` del primero de ellos:
 
 ```
 wit_update_work_item:
   id: [WI_ID]
   updates:
     - path: "/fields/System.AssignedTo"
-      value: "ettorres@bmm.com.co"
+      value: "[email]"
 ```
 
 **Firma [OPCIONAL]**
@@ -80,16 +89,23 @@ Si está vacío o el archivo no existe, omitir la línea; no inventar un nombre.
 **Flujo:**
 
 1. **Recopilar datos:** tipo de entrega, versión, repo, rama (opc), cambios, ruta artefactos, notas (opc)
-2. **Generar plantilla:** usar `{file:./assets/plantilla-entrega.md}`
+2. **Generar comentario:** con la plantilla de entrega
 3. **Preview y aprobación:** mostrar en bloque `` ```markdown ``, solicitar confirmación `[C]`/`[E]`
-4. **Menciones:** aplicar flujo de Reglas Universales §Menciones ADO
+4. **Menciones:** aplicar Reglas Universales §Menciones ADO
 5. **Publicar:** `wit_work_item_comment_write` → `action: add`, `format: Markdown`
 
-### Caso B: Comentarios Generales y Técnicos
+### Caso B: Comentarios Técnicos y Generales
 
-1. **Diseñar mensaje:** títulos, negritas o viñetas según amerite
+| Tipo | Emoji | Uso |
+|------|-------|-----|
+| ACTUALIZACIÓN | `📝` | Avance o cambio de estado |
+| ANÁLISIS | `🔍` | Hallazgos, causa raíz, diagnóstico |
+| BLOQUEO | `⛔` | Impedimento que requiere acción de otro |
+| CONSULTA | `❓` | Pregunta o validación pendiente |
+
+1. **Diseñar mensaje:** con la plantilla técnica; elegir tipo y eliminar "Siguiente paso" si no aplica
 2. **Preview obligatorio:** mostrar en bloque `` ```markdown ``, solicitar `[C]`/`[E]`
-3. **Menciones:** aplicar flujo de Reglas Universales §Menciones ADO
+3. **Menciones:** aplicar Reglas Universales §Menciones ADO
 4. **Publicar:** `wit_work_item_comment_write` → `action: add`, `format: Markdown`
 
 ## Quick Reference
@@ -98,8 +114,8 @@ Si está vacío o el archivo no existe, omitir la línea; no inventar un nombre.
 |-----------|-------------|-------------------|
 | Publicar comentario | `wit_work_item_comment_write` | `action: add`, `workItemId`, `text`, `format: Markdown` |
 | Reasignar WI | `wit_update_work_item` | `id`, `updates[0].path: /fields/System.AssignedTo` |
-| Mención Alexander | `@<96517b2d-3823-62fd-ae74-0872c1c9c3a9>` | Insertar al inicio del comentario |
-| Mención Lady | `@<7c277620-4b79-652b-a18d-5d93dd85fff6>` | Insertar al inicio del comentario |
+| Resolver GUID | `core_get_identity_ids` | email del colaborador |
+| Mención | `@<guid>` | Insertar al inicio del comentario |
 
 ## Common Mistakes
 
@@ -108,4 +124,5 @@ Si está vacío o el archivo no existe, omitir la línea; no inventar un nombre.
 - **WI cerrado:** No se pueden agregar comentarios; informar al usuario
 - **Reasignación fallida:** Si falla por permisos, notificar pero no bloquear publicación
 - **Publicar sin preview:** Siempre mostrar al usuario antes de confirmar
-- **Olvidar menciones:** Preguntar SIEMPRE por Alexander/Lady antes de cada comentario
+- **Olvidar menciones:** Preguntar SIEMPRE antes de cada comentario
+- **Hardcodear colaboradores:** Nunca escribir nombres, GUIDs o emails en la skill; solo en el perfil

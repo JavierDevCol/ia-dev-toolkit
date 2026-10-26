@@ -31,7 +31,11 @@ Identifies the target build, fetches run metadata/changes/stages/logs, classifie
 
 ## Context Injection
 
-Reads `project_name` (from `project_map.repos`/`pipelines`) and `base_reports_path` from `memory_skill.json` → `[ado].config.perfiles[perfil_activo]` (standalone).
+Reads the project and `base_reports_path` from `memory_skill.json` → `[ado].config.perfiles[perfil_activo]` (standalone). Project = `project_map.pipelines` (fallback `project_map.repos`, then `project_map.default`).
+
+**Profile guard:** if `perfil_activo` is null, its profile is missing, or no project resolves, stop and ask the user to run `ado-profile-setup`.
+
+**Missing profile fields:** if `base_reports_path` (absolute path) is missing from the active profile, ask the user once and persist the answer to that profile in `memory_skill.json` so later runs don't ask again.
 
 Leer también `CONFIG_USER.yaml` (ruta en `archivos.config_user`) y tomar `usuario.nombre` → **`{{usuario.nombre}}`**, necesario para firmar el reporte en la Fase D. Si está vacío, el archivo no existe, o `usuario.incluir_firma_en_documentos` es `false`, omitir la firma; no inventar un nombre.
 

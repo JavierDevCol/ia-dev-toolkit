@@ -18,7 +18,11 @@ Two-phase workflow for creating child tasks in Azure DevOps: design from a conte
 
 ## Implementation
 
-This skill reads the active profile + `config_extras` + `project_map` from `memory_skill.json` → `[ado].config.perfiles[perfil_activo]` (standalone). The user may provide project context explicitly, or it is read from the active profile.
+This skill reads the active profile + `config_extras` + `project_map` from `memory_skill.json` → `[ado].config.perfiles[perfil_activo]` (standalone). The user may provide project context explicitly; otherwise project = `project_map.workitems` (fallback `project_map.default`).
+
+**Profile guard:** if the user gave no project and `perfil_activo` is null, its profile is missing, or no project resolves, stop and ask the user to run `ado-profile-setup`.
+
+**Missing profile fields:** if `user_email` is missing from the active profile, ask the user once and persist the answer to that profile in `memory_skill.json` so later runs don't ask again.
 
 ### Phase 1 — Design
 

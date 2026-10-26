@@ -1,98 +1,74 @@
 ---
 name: bitacora-tecnica
 description: >
-  Use when documenting architecture, infrastructure, or system design
-  decisions, approved code modifications, structural changes, approved
-  refactors, business logic changes, dependency adjustments, or
-  complex/blocking error solutions.
+  Use when a work session has a clear goal and something crucial happens that
+  helps resume later or avoid repeating work (checks with results on DB/pods/logs,
+  files or classes touched, branch and commits, root causes, dead ends, pending
+  items), or when the user wants to resume a task ("retomar", "bitácora").
 ready: true
 ---
 
-# Bitácora de Sesiones de Trabajo
+# Bitácora Técnica
 
 ## Overview
 
-Registra progreso de sesiones de trabajo para retomar contexto de forma incremental.
+Bitácora corta de **checkpoints cruciales** de una sesión de trabajo: lo que sirve para retomar la tarea otro día o para no repetir acciones ya ejecutadas. No es un paso a paso ni un registro de decisiones (eso es `crear-adr`).
+
+La escritura la hace un **subagente** para no cargar la sesión con el contenido de la bitácora.
 
 ## When to Use
 
-- Fin de sesión: resumir lo realizado y pendientes
-- Checkpoint intermedio: guardar estado sin cerrar
-- Decisión técnica: documentar decisión y justificación
-- Inicio de sesión: retomar contexto de trabajo anterior
+- La sesión ya tiene un objetivo claro y ocurre algo crucial → registrar checkpoint
+- El usuario quiere retomar una tarea → leer la bitácora y resumir
 
-### Cuándo NO usar
-
-- Para documentación formal de proyecto (usar wiki o README)
-- Para logs de aplicación o monitoreo de producción
-- Para notas personales no relacionadas con tareas técnicas
+**Cuándo NO usar:**
+- Sesiones solo de consulta o sin objetivo claro
+- Decisiones de arquitectura → `crear-adr`; bugs/pendientes del backlog → `registrar-hallazgo`
 
 ## Implementation
 
-### Pregunta de gestión
+### Qué es crucial
 
-- Desea realizar seguimiento de la sesión de trabajo actual? **[S]** Sí · **[N]** No
-- Si es negativa, ignore todos los pasos siguientes de esta skill.
+Lo que ayuda a retomar o evita repetir algo ya hecho, en 1–2 líneas:
 
-### Plantilla
+| ✅ Registrar | ❌ No registrar |
+|---|---|
+| Verificación + resultado ("BD revisada: el registro X no existe") | Paso a paso de la sesión |
+| Archivos/clases tocados | Comandos sin resultado relevante |
+| Rama y commits | Decisiones de arquitectura |
+| Causa raíz encontrada · camino descartado ("reiniciar el pod no lo resuelve") | Secrets, JWTs, contraseñas, connection strings, PII |
+| Pendientes | |
 
-- Plantilla base: `{file:./assets/plantilla-bitacora.md}`
+### Cuándo iniciar
 
-### Ruta de Almacenamiento
+- No iniciar al abrir la sesión: solo cuando haya un objetivo claro.
+- Si la sesión es ambigua o muy sencilla, preguntar **una vez**: `¿Creo bitácora para esta sesión? [S/N]`.
+- Iniciada la bitácora, registrar cada checkpoint **en el momento** en que ocurre, no al final.
 
-```
-bitacora-tecnica/
-├── [slug-tarea]/
-│   ├── bitacora.md          ← Registro principal
-│   └── EVIDENCIAS/          ← Logs, queries, scripts, screenshots
-```
+### Delegar al subagente
 
-**Generación de slug:** `[ID]-[descripcion]` si hay ID de referencia, o `[descripcion-kebab-case]` si es general.
-
-### Al CREAR un registro
-
-Preguntar tipo de registro: **[F]** Fin de sesión · **[C]** Checkpoint · **[D]** Decisión técnica
-
-1. **Identificar tarea:** usar contexto o pedir descripción breve
-2. **Verificar si ya existe:** `ls bitacora-tecnica/[slug-tarea]/` → si existe, leer y agregar incrementalmente
-3. **Recopilar info:** archivos modificados (`git diff --name-only`), commits (`git log --oneline -5`), errores, decisiones, estado actual, pendientes
-4. **Generar registro:** crear o actualizar `bitacora.md` con la plantilla. Leer `usuario.nombre` e `incluir_firma_en_documentos` de `CONFIG_USER.yaml` (ruta en `archivos.config_user`); si `incluir_firma_en_documentos` es `true`, agregar al final del registro:
-
-   > **Generado y revisado por:** {{usuario.nombre}}
-   > **Fecha:** {{fecha}}
-
-   Si `usuario.nombre` está vacío o el archivo no existe, omitir la línea completa; no inventar un nombre.
-5. **Guardar evidencias:** SQL, logs, configs en `EVIDENCIAS/`
-
-### Al RETOMAR trabajo
-
-1. **Buscar bitácoras:** `ls bitacora-tecnica/` → si hay múltiples, preguntar cuál retomar
-2. **Leer bitácora:** `bitacora.md` completo + `EVIDENCIAS/`
-3. **Presentar resumen:**
+Lanzar un subagente (Claude Code: herramienta `Agent`, `general-purpose`; OpenCode: subagente vía `task`) con este prompt, donde `<skill-dir>` es la carpeta de este SKILL.md:
 
 ```
-📋 TAREA: [título]   |   📌 ÚLTIMO PUNTO: [dónde quedó]
-🔄 REALIZADO: • [acción]   |   ⏳ PENDIENTES: • [pendiente]
-⚠️ BLOQUEANTES: • [si existen]   |   🔗 EVIDENCIAS: [archivos]
+Lee <skill-dir>/references/escritor.md y sigue sus instrucciones.
+modo: crear | checkpoint | retomar | cerrar
+raiz_proyecto: <ruta absoluta>
+slug: <slug-kebab-case>
+titulo, objetivo, rama: <solo en modo crear>
+checkpoints: <1–2 líneas cada uno; solo en crear/checkpoint/cerrar>
 ```
 
-4. **Preguntar continuación:** **[C]** Continuar · **[A]** Actualizar registro · **[N]** Cerrar y crear nueva
+- **Slug** = ID = nombre de carpeta: `kebab-case` corto, sin fecha (ej. `hu-1234-timeout-pagos`).
+- El subagente responde solo `✅ creada|actualizada|cerrada: <ruta>` (en `retomar`, un resumen ≤10 líneas). No leer la bitácora en la sesión principal.
+- Si responde `⚠️ slug existe con otro objetivo`, preguntar al usuario: actualizar esa bitácora o usar otro slug.
 
-## Quick Reference
+### Retomar
 
-| Operación | Comando/Acción |
-|-----------|----------------|
-| Verificar bitácora existente | `ls bitacora-tecnica/[slug]/` |
-| Archivos modificados | `git diff --name-only` |
-| Últimos commits | `git log --oneline -5` |
-| Referenciar plantilla | `{file:./assets/plantilla-bitacora.md}` |
-| Guardar evidencias | `bitacora-tecnica/[slug]/EVIDENCIAS/` |
+Usuario dice "retomar [tarea]" → subagente en modo `retomar` (si no hay slug, lista las bitácoras y se pregunta cuál). Presentar el resumen y continuar.
 
 ## Common Mistakes
 
-- **Múltiples sesiones en paralelo:** Un directorio por tarea, no por sesión; usar bitácoras separadas
-- **Bitácora >300 líneas:** Dividir por fecha o crear resumen ejecutivo al inicio
-- **Pérdida de contexto:** Si la conversación es larga, leer solo "Estado Actual" y "Contexto para Retomar"
-- **Permisos de escritura:** Verificar acceso a `bitacora-tecnica/` antes de escribir
-- **Olvidar leer antes de escribir:** Siempre leer bitácora existente antes de agregar contenido
-- **Guardar secrets:** Prohibido guardar JWTs, contraseñas, connection strings o PII
+- **Escribir paso a paso:** solo checkpoints que eviten repetir trabajo o ayuden a retomar
+- **Acumular para el final:** registrar cada checkpoint cuando ocurre
+- **Crear bitácora en sesiones de consulta:** esperar objetivo claro o preguntar
+- **Leer la bitácora en la sesión principal:** delegar siempre al subagente

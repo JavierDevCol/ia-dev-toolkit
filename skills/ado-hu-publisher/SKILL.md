@@ -25,7 +25,11 @@ Publishes locally drafted User Stories (Markdown) to Azure DevOps: parse → pre
 
 ## Context Injection
 
-Reads `project_name`, `user_email`, `config_extras` (area, iteration, estimation, tags, process type) from `memory_skill.json` → `[ado].config.perfiles[perfil_activo]` (standalone).
+Reads `user_email`, `config_extras` (area, iteration, estimation, tags, process type) and the project from `memory_skill.json` → `[ado].config.perfiles[perfil_activo]` (standalone). Project = `project_map.workitems` (fallback `project_map.default`).
+
+**Profile guard:** if `perfil_activo` is null, its profile is missing, or no project resolves, stop and ask the user to run `ado-profile-setup`.
+
+**Missing profile fields:** if `user_email` is missing from the active profile, ask the user once and persist the answer to that profile in `memory_skill.json` so later runs don't ask again.
 
 ## Core Flow
 
