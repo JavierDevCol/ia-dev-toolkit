@@ -26,7 +26,19 @@ Captura incidencias (bugs, mejoras, deuda técnica) mediante análisis paralelo 
 
 ## Implementation
 
-1. **Cargar config** → leer `.SAC/config/CONFIG_SYSTEM.yaml` para rutas. Leer también `CONFIG_USER.yaml` (ruta en `archivos.config_user`) y tomar `usuario.nombre` → `{{usuario.nombre}}`, necesario para firmar el artefacto en el paso 7. Si está vacío o el archivo no existe, omitir el sufijo de la firma; no inventar un nombre.
+1. **Cargar config** con memctl (rutas y firma):
+
+```sh
+sh .SAC/memctl.sh get usuario.nombre
+sh .SAC/memctl.sh get usuario.incluir_firma_en_documentos
+sh .SAC/memctl.sh get archivos.backlog
+sh .SAC/memctl.sh get artifacts.hu_folder
+sh .SAC/memctl.sh get artifacts.pendientes
+```
+
+memctl es solo lectura y su salida ES la respuesta; si falla, leer `.SAC/config/sac.json` con `jq`; nunca inventar valores. `null`, vacío o exit 2 → no configurado.
+
+   `usuario.nombre` → `{{usuario.nombre}}`, necesario para firmar el artefacto en el paso 7. Si está vacío o la clave no existe, omitir el sufijo de la firma; no inventar un nombre.
 2. **Recibir hallazgo** → descripción del usuario + detectar proyecto + preguntar por evidencia (logs, stack traces)
 3. **Preguntas al usuario** → hacer UNA pregunta a la vez: afecta funcionalidad actual?, qué error observa?, cuándo ocurre?, qué HU relacionada?
 4. **Análisis paralelo** → ejecutar 2 sub-agentes simultáneamente:
