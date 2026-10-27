@@ -65,13 +65,23 @@ Comportamiento:
 | `diat` | Muestra la ayuda |
 | `diat --help` / `--h` | Ayuda detallada |
 | `diat --version` / `--v` | Versión instalada |
-| `diat --install [/ruta]` | Instala componentes en un proyecto (menú interactivo) |
-| `diat --install` | Instalación global según el agente (hoy: OpenCode) |
+| `diat --install [/ruta]` | Pregunta el harness (OpenCode / Claude Code) y luego instala: con ruta en `<ruta>/<plataforma>/`; sin ruta toma el directorio actual y avisa cuál es |
 | `diat --update [/ruta]` | Actualiza el CLI, el cache y reinstala en los proyectos registrados |
 | `diat --status [/ruta]` | Estado del sistema (sin ruta) o de un proyecto (con ruta) |
 | `diat --list` | Proyectos donde se instalaron componentes |
-| `diat --uninstall /ruta` | Quita todos los componentes DIAT de ese proyecto |
-| `diat --uninstall` | Desinstala DIAT por completo (CLI + cache + PATH) |
+| `diat --remove [/ruta]` | Menú para quitar skills, agents, workflows o el paquete Team Dev SAC de un proyecto (sin ruta, el directorio actual). No deja quitar un componente que otro instalado requiere |
+| `diat --uninstall /ruta` | Quita los componentes DIAT de ese proyecto (si hay OpenCode y Claude Code, pregunta cuál o usa `--platform`) |
+| `diat --uninstall` | Desinstala DIAT por completo (CLI + cache + PATH), con confirmación |
+
+### Flujo de `--install`
+1. **Harness:** OpenCode (`.opencode/`) o Claude Code (`.claude/`).
+2. **Destino:** siempre un proyecto: la `/ruta` indicada o, sin ella, el directorio actual (se muestra la ruta tomada antes de instalar). No existe instalación global.
+3. **Menú de componentes** (abajo).
+
+- **Workflows** van a `<proyecto>/.SAC/workflows/`.
+  Arrastran el ejecutor según el harness: plugin + command `workflow-sac` en OpenCode, skill `exc-workflow-sac` en Claude Code.
+- Un mismo proyecto puede tener **ambos harness** (el registro se indexa por ruta + plataforma).
+  Al desinstalar con los dos presentes se pregunta cuál quitar; `.SAC/workflows` y `.SAC/config` compartidos se conservan.
 
 ### El menú de `--install`
 Interactivo con flechas ↑/↓ y **ESPACIO** para marcar. Opciones:
@@ -115,7 +125,40 @@ Por cada proyecto registrado **re-resuelve las selecciones originales** contra e
 nuevo — así, si un componente ganó una dependencia entre versiones, esa nueva dependencia se
 instala sola. La configuración SAC ya respondida **no se sobrescribe**.
 
+### Configuración SAC: `.SAC/config/sac.json`
+
+Un único archivo JSON por proyecto reemplaza a `CONFIG_USER.yaml`, `CONFIG_SYSTEM.yaml` y `memory_skill.json`:
+usuario/idioma, rutas del sistema (`{project-root}` resuelto al instalar) y el estado de cada skill
+(`ado`, `handoff-release`, `env-config-audit`, `gh-pr-reviewer`). Las skills lo leen con `.SAC/memctl.sh`.
+
+- Se crea (o se fusiona) cada vez que se instalan skills o config: solo agrega claves nuevas de la plantilla, **nunca pisa valores del usuario**.
+- **Migración automática** desde el layout anterior: `CONFIG_USER.yaml` y los `memory_skill.json` de cada plataforma se fusionan en `sac.json` (gana el más reciente; los conflictos se avisan) y quedan renombrados a `*.legacy`. `CONFIG_SYSTEM.yaml` se regenera desde la plantilla.
+- Un `sac.json` con JSON inválido no se pisa: se copia a `sac.json.bad` y la instalación falla con un mensaje claro.
+
 ---
+
+### Quitar componentes (`--remove`)
+
+`diat --remove` abre un menú (Skills, Agents, Workflows, Team Dev SAC) con lo instalado en el proyecto. Reglas:
+- **Dependencias:** un componente no se quita si otro que sigue instalado lo requiere (p. ej. `sac-validar-ca` mientras esté `sac-ejecutar-plan`; el runner `exc-workflow-sac` mientras haya workflows). En la lista salen con 🔒 y "requerida por X". Quitar el dependiente y su dependencia a la vez sí se permite. Si algo queda bloqueado no se borra nada.
+- **Registro:** lo quitado sale también de la selección registrada, así que `diat --update` no lo repone.
+- **No toca** `sac.json`, `memctl.sh`, los workflows compartidos con otro harness ni tus skills propias. Para quitar todo el proyecto usa `diat --uninstall /ruta`.
+
+### Modo no interactivo (CI / scripts)
+
+`--install` salta los menús cuando recibe `--platform` y una selección. Un flag desconocido es un error (exit 2); la ruta debe existir y no puede ser el home.
+
+| Flag | Aplica a | Efecto |
+|---|---|---|
+| `--platform claude\|opencode` | install, uninstall | Harness destino (si se omite, se pregunta) |
+| `--skills a,b` · `--agents a,b` · `--workflows a,b` | install | Componentes concretos (error si no existen en el catálogo) |
+| `--team-sac` · `--kit` | install | Paquete Team Dev SAC / todo el repo (ambos con config) |
+| `--yes` / `-y` | install, uninstall | No preguntar (sin confirmaciones ni opcionales) |
+| `--dry-run` | install, uninstall | Muestra qué se instalaría o quitaría sin escribir ni borrar |
+
+Ejemplo: `diat --install ~/mi-proyecto --platform claude --team-sac --yes`.
+
+Códigos de salida: `0` ok · `1` error (ruta inválida, registro dañado, descarga) · `2` uso incorrecto · `130` cancelado (Ctrl-C).
 
 ## Estructura del proyecto
 
@@ -129,8 +172,14 @@ INSTALACION/
 │   ├── github.py        # descarga tarball, staging, sha, catálogo
 │   ├── deps.py          # grafo de dependencias + resolver transitivo
 │   ├── menu.py          # motor de menú stdlib (cross-platform)
-│   ├── registro.py      # instalacion.json (sha + selection)
-│   ├── instalar.py      # instalación de componentes + config
+│   ├── registro.py      # instalacion.json (sha + selection); escritura atómica, aborta si está dañado
+│   ├── atomico.py       # escritura atómica (tmp + os.replace)
+│   ├── cli_args.py      # argparse por comando (flags desconocidos = error)
+│   ├── desinstalar.py   # --uninstall (solo borra lo que DIAT copió)
+│   ├── quitar.py        # --remove: quitar componentes sin romper dependencias
+│   ├── instalar.py      # instalación de componentes + memctl
+│   ├── sac_config.py    # .SAC/config/sac.json: crear/fusionar sin pisar valores
+│   ├── migrar.py        # CONFIG_USER.yaml + memory_skill.json -> sac.json
 │   ├── update.py        # reinstalación + orquestación de --update
 │   └── entorno.py       # garantía de PATH (idempotente + auto-repair)
 └── bootstrap/           # install/uninstall .sh y .ps1
@@ -153,7 +202,7 @@ python3 diat --list
 Los módulos se prueban de forma aislada, p. ej.:
 ```bash
 python3 -c "from diatlib import deps, github; \
-  print(deps.resolve_closure([('skills','validar-ca')])[0])"
+  print(deps.resolve_closure([('skills','sac-validar-ca')])[0])"
 ```
 
 ### Requisitos

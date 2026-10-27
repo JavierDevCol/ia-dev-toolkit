@@ -80,6 +80,13 @@ jobs:
         run: |
           echo "Would move tag $TAG to $(git rev-parse HEAD) (dry_run: no git write)"
 
+      # Un tag anotado exige identidad de git; sin ella el paso falla con exit 128.
+      - name: Configure git identity
+        if: steps.plan.outputs.tag != '' && inputs.dry_run != true
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
       - name: Move -TEST tag to HEAD
         if: steps.plan.outputs.tag != '' && inputs.dry_run != true
         env:

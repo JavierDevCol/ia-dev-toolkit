@@ -15,13 +15,13 @@ CHECKLIST DE ENTREGA — Handoff vX.Y.Z
 [⚠] config-entorno generado (archivo config-entorno_{nombre_ms}_vX.Y.Z.md)
      → Ejecuta @env-config-audit sobre el diff origin/des..release/vX.Y.Z (Opción 1; en 2a/2b/2c usar el diff de su fase)
 [⚠] Auditoría de seguridad estática (SAST) ejecutada
-     → Ejecuta @analizar-seguridad scope=project sobre release/vX.Y.Z
+     → Ejecuta @sac-analizar-seguridad scope=commits sobre release/vX.Y.Z
 [⚠] Calidad de código verificada
-     → Ejecuta @analizar-calidad-codigo scope=project sobre release/vX.Y.Z
+     → Ejecuta @sac-analizar-calidad-codigo scope=commits sobre release/vX.Y.Z
 [ ] Artefactos listos para entregar al banco
 
-NOTA: Las skills @env-config-audit, @ado-pipeline-analyzer, @analizar-seguridad y
-@analizar-calidad-codigo se recomienda ejecutar en el mismo chat.
+NOTA: Las skills @env-config-audit, @ado-pipeline-analyzer, @sac-analizar-seguridad y
+@sac-analizar-calidad-codigo se recomienda ejecutar en el mismo chat.
 
 INSTRUCCIÓN DE USO (actualización del checklist):
 - Esta plantilla NO se modifica. La copia marcada es la que se entrega.

@@ -68,11 +68,21 @@ por estrategia — no inventar señales nuevas fuera de esa tabla.
 **Fase D — Reporte:** generar `ESTRATEGIA-PROMOCION-{nombre_repo}.md` con la plantilla
 `assets/template-ESTRATEGIA-PROMOCION.md`: tabla ranking (desc por score), detalle por
 estrategia (qué sumó, qué restó, qué cambiar para subir el score) y una recomendación
-top-1 explícita. Usar el `output_folder` global de `memory_skill.json` como ruta de
-salida; si es `null`, preguntar al usuario la carpeta y persistirla ahí.
+top-1 explícita. Guardarlo en `{documentacion_sac_path}/estrategia_promocion/` (crear la subcarpeta si no existe;
+nunca escribir fuera de `{documentacion_sac_path}`).
 
-Leer también `usuario.nombre` de `CONFIG_USER.yaml` (ruta en `archivos.config_user`) y,
-si `usuario.incluir_firma_en_documentos` es `true`, agregar al final del archivo:
+Leer la config con memctl y, si `usuario.incluir_firma_en_documentos` es `true`, agregar al final del archivo:
+
+Ejecutar cada comando: **su salida ES el valor del placeholder** de su fila y se usa tal cual en el resto de esta skill (no recalcular ni inventar rutas):
+
+| Placeholder / dato | Valor = salida de |
+|---|---|
+| `{{usuario.nombre}}` | `sh .SAC/memctl.sh get usuario.nombre` |
+| `usuario.incluir_firma_en_documentos` | `sh .SAC/memctl.sh get usuario.incluir_firma_en_documentos` |
+| `{documentacion_sac_path}` | `sh .SAC/memctl.sh get documentacion_sac_path` |
+
+memctl es solo lectura y su salida ES la respuesta; si memctl no existe (exit 127), leer `.SAC/config/sac.json` con `jq`; si sale con exit 1 (JSON inválido o vacío), detenerse y avisar: no leer ni editar el archivo a mano; nunca inventar valores. `null`, vacío o exit 2 → no configurado.
+
 
 > **Auditor:** {{usuario.nombre}}
 > **Fecha:** {{fecha}}

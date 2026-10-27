@@ -55,7 +55,7 @@ Se separa lo que el usuario **eligió** (`selection` = *seeds*) de lo que **qued
       },
       "components": {
         "workflows": ["definir-arquitectura-solucion"],
-        "skills": ["crear-adr", "tomar-contexto"],
+        "skills": ["sac-crear-adr", "sac-tomar-contexto"],
         "tools": ["workflow-sac", "workflow-discover"],
         "commands": ["workflow-sac"],
         "agents": [], "config": true
@@ -84,7 +84,7 @@ El cache (`~/.local/share/ia-dev-toolkit/`) contiene **solo** las 6 carpetas de 
 
 ## #1 — Resolución transitiva de dependencias
 
-**Problema:** `resolve_dependencies()` del v1 mira un solo nivel y no recursa → dependencias transitivas (`validar-ca → planificar-hu → tomar-contexto`) se pierden silenciosamente.
+**Problema:** `resolve_dependencies()` del v1 mira un solo nivel y no recursa → dependencias transitivas (`sac-validar-ca → sac-planificar-hu → sac-tomar-contexto`) se pierden silenciosamente.
 
 **Solución:** cierre transitivo con DFS post-orden (topológico) + detección de ciclos + validación estricta contra catálogo.
 
@@ -139,7 +139,7 @@ def validate_dependencies(dependencies, catalog):
         raise DependencyError("Dependencias inválidas:\n  - " + "\n  - ".join(errors))
 ```
 
-> Nota: `tomar-contexto` y compañía NO necesitan entrada en `COMPONENT_DEPENDENCIES`.
+> Nota: `sac-tomar-contexto` y compañía NO necesitan entrada en `COMPONENT_DEPENDENCIES`.
 > Solo necesitan existir como componente descargable (aparecer en el catálogo). Una skill
 > hoja sin deps propias se trata correctamente como hoja por el resolver.
 

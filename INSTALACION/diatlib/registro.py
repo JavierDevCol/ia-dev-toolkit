@@ -11,11 +11,32 @@ Reinstalar sobre un proyecto ya registrado FUSIONA selection/components con lo p
 """
 
 import json
+import os
+import shutil
 from datetime import datetime
 from pathlib import Path
 
 from . import paths
+from .atomico import write_text_atomic
 from . import __version__
+
+
+_PLATFORMS = (".opencode", ".claude")
+
+
+class RegistroError(Exception):
+    pass
+
+# Skills renombradas (nombre viejo → nuevo). Se migran al cargar el registro para que
+# --update instale el nombre nuevo; instalar.py borra la carpeta vieja.
+RENAMED_SKILLS = {n: f"ado-{n}" for n in (
+    "hu-publisher", "pipeline-analyzer", "pr-creator",
+    "pr-reviewer", "profile-setup", "task-creator")}
+RENAMED_SKILLS.update({n: f"sac-{n}" for n in (
+    "tomar-contexto", "iniciar-sprint", "refinar-hu", "validar-hu", "planificar-hu",
+    "ejecutar-plan", "validar-ca", "priorizar-backlog", "sincronizar-backlog",
+    "registrar-hallazgo", "init-reglas-arquitectonicas", "crear-adr",
+    "analizar-calidad-codigo", "analizar-seguridad")})
 
 
 # ============================================================
@@ -27,16 +48,37 @@ def load_installations():
     if not f.exists():
         return []
     try:
-        return json.loads(f.read_text(encoding="utf-8")).get("installations", [])
-    except Exception:
-        return []
+        items = json.loads(f.read_text(encoding="utf-8")).get("installations", [])
+        if not isinstance(items, list):
+            raise ValueError("'installations' no es una lista")
+    except (ValueError, AttributeError, OSError) as e:      # JSONDecodeError es ValueError
+        bad = f.with_name(f.name + ".bad")
+        shutil.copyfile(f, bad)                              # no se pisa el registro: se aborta
+        raise RegistroError(
+            f"El registro de instalaciones {f} está dañado ({e}); copia en {bad.name}. "
+            "Repáralo o bórralo (se perderá el listado de proyectos) y reintenta.")
+    # Entradas antiguas (sin platform válida) = .opencode, la única instalable entonces.
+    for i in items:
+        if i.get("platform") not in _PLATFORMS:
+            i["platform"] = ".opencode"
+        for key in ("selection", "components"):
+            names = i.get(key, {}).get("skills")
+            if isinstance(names, list):
+                i[key]["skills"] = list(dict.fromkeys(RENAMED_SKILLS.get(n, n) for n in names))
+    return items
 
 
-def find_installation(project_path, installations=None):
-    """Devuelve la instalación de un proyecto, o None."""
+def find_installations(project_path, installations=None):
+    """Todas las instalaciones (una por plataforma) de una ruta."""
     installations = load_installations() if installations is None else installations
     target = str(Path(project_path).resolve())
-    return next((i for i in installations if i["project_path"] == target), None)
+    return [i for i in installations if i["project_path"] == target]
+
+
+def find_installation(project_path, platform=None, installations=None):
+    """Instalación de (ruta, plataforma), o None. platform=None: la primera por ruta."""
+    return next((i for i in find_installations(project_path, installations)
+                 if platform is None or i["platform"] == platform), None)
 
 
 def _merge_dict(old, new):
@@ -59,7 +101,8 @@ def save_installation(project_path, platform_dir, selection, components, sha, re
     installations = load_installations()
 
     idx = next((i for i, x in enumerate(installations)
-                if x["project_path"] == str(project_path)), None)
+                if x["project_path"] == project_path
+                    and x["platform"] == platform_dir), None)
 
     if idx is not None:
         prev = installations[idx]
@@ -84,6 +127,21 @@ def save_installation(project_path, platform_dir, selection, components, sha, re
     _write(installations, sha)
 
 
+def remove_components(project_path, platform_dir, selected):
+    """Saca `selected` [(tipo, nombre)] de selection y components de esa instalación (para que
+    --update no los reponga)."""
+    installations = load_installations()
+    target = str(Path(project_path).resolve())
+    for inst in installations:
+        if inst["project_path"] == target and inst["platform"] == platform_dir:
+            for key in ("selection", "components"):
+                for ctype, name in selected:
+                    names = inst.get(key, {}).get(ctype)
+                    if isinstance(names, list) and name in names:
+                        names.remove(name)
+    _write(installations, get_installed_sha() or "")
+
+
 def save_all_installations(installations, sha):
     """Reescribe la lista completa (usado por --update)."""
     _write(installations, sha)
@@ -98,7 +156,7 @@ def _write(installations, sha):
         "last_update": datetime.now().isoformat(),
         "installations": installations,
     }
-    f.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
+    write_text_atomic(f, json.dumps(data, indent=2, ensure_ascii=False))
 
 
 # ============================================================

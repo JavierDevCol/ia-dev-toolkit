@@ -44,7 +44,7 @@
                 "plugins": []
             },
             "optional": {
-                "skills": ["tomar-contexto"]
+                "skills": ["sac-tomar-contexto"]
             }
         },
         "definir-arquitectura-solucion": {
@@ -55,7 +55,7 @@
                 "plugins": []
             },
             "optional": {
-                "skills": ["crear-adr"]
+                "skills": ["sac-crear-adr"]
             }
         },
         "gestionar-backlog-roadmap": {
@@ -66,7 +66,7 @@
                 "plugins": []
             },
             "optional": {
-                "skills": ["sincronizar-backlog"]
+                "skills": ["sac-sincronizar-backlog"]
             }
         }
     },
@@ -75,24 +75,24 @@
     "agents": {
         "PO": {
             "requires": {
-                "skills": ["refinar-hu", "validar-hu"],
+                "skills": ["sac-refinar-hu", "sac-validar-hu"],
                 "tools": [],
                 "commands": [],
                 "plugins": []
             },
             "optional": {
-                "skills": ["sincronizar-backlog", "planificar-hu"]
+                "skills": ["sac-sincronizar-backlog", "sac-planificar-hu"]
             }
         },
         "ARQUITECTO-SOFTWARE": {
             "requires": {
-                "skills": ["crear-adr", "init-reglas-arquitectonicas"],
+                "skills": ["sac-crear-adr", "sac-init-reglas-arquitectonicas"],
                 "tools": [],
                 "commands": [],
                 "plugins": []
             },
             "optional": {
-                "skills": ["analizar-calidad-codigo"]
+                "skills": ["sac-analizar-calidad-codigo"]
             }
         },
         "ARQUITECTO-DEVOPS": {
@@ -103,7 +103,7 @@
                 "plugins": []
             },
             "optional": {
-                "skills": ["tomar-contexto"]
+                "skills": ["sac-tomar-contexto"]
             }
         },
         "DESARROLLADOR": {
@@ -114,28 +114,28 @@
                 "plugins": []
             },
             "optional": {
-                "skills": ["analizar-calidad-codigo"]
+                "skills": ["sac-analizar-calidad-codigo"]
             }
         }
     },
 
     # Skills → dependencies
     "skills": {
-        "validar-ca": {
+        "sac-validar-ca": {
             "requires": {
-                "skills": ["planificar-hu"],
+                "skills": ["sac-planificar-hu"],
                 "workflows": [],
                 "tools": [],
                 "commands": [],
                 "plugins": []
             },
             "optional": {
-                "skills": ["registrar-hallazgo"]
+                "skills": ["sac-registrar-hallazgo"]
             }
         },
-        "ejecutar-plan": {
+        "sac-ejecutar-plan": {
             "requires": {
-                "skills": ["planificar-hu"],
+                "skills": ["sac-planificar-hu"],
                 "workflows": [],
                 "tools": [],
                 "commands": [],
@@ -143,7 +143,7 @@
             },
             "optional": {}
         },
-        "sincronizar-backlog": {
+        "sac-sincronizar-backlog": {
             "requires": {
                 "skills": [],
                 "workflows": [],
@@ -153,9 +153,9 @@
             },
             "optional": {}
         },
-        "planificar-hu": {
+        "sac-planificar-hu": {
             "requires": {
-                "skills": ["tomar-contexto"],
+                "skills": ["sac-tomar-contexto"],
                 "workflows": [],
                 "tools": [],
                 "commands": [],
@@ -163,9 +163,9 @@
             },
             "optional": {}
         },
-        "refinar-hu": {
+        "sac-refinar-hu": {
             "requires": {
-                "skills": ["tomar-contexto"],
+                "skills": ["sac-tomar-contexto"],
                 "workflows": [],
                 "tools": [],
                 "commands": [],
@@ -173,7 +173,7 @@
             },
             "optional": {}
         },
-        "analizar-calidad-codigo": {
+        "sac-analizar-calidad-codigo": {
             "requires": {
                 "skills": [],
                 "workflows": [],
@@ -380,12 +380,12 @@ print_banner() {
                 ══════════════════════════════════════════════════════════════════════
                 📋 SKILLS SAC DISPONIBLES
                 ══════════════════════════════════════════════════════════════════════
-                1. analizar-calidad-codigo             — Revisa código detectando code smells y violaciones | deps: .SAC/config/
-                2. ejecutar-plan                       — Implementa planes actualizando Plan.md | deps: .SAC/config/
-                3. init-reglas-arquitectonicas         — Genera reglas arquitectónicas del proyecto | deps: .SAC/config/
-                4. planificar-hu                       — Genera plan técnico desde HU aprobada | deps: .SAC/config/
-                5. refinar-hu                          — Refina HUs con criterios SMART y estimación | deps: .SAC/config/
-                6. registrar-hallazgo                  — Captura incidencias mediante análisis paralelo | deps: .SAC/config/
+                1. sac-analizar-calidad-codigo             — Revisa código detectando code smells y violaciones | deps: .SAC/config/
+                2. sac-ejecutar-plan                       — Implementa planes actualizando Plan.md | deps: .SAC/config/
+                3. sac-init-reglas-arquitectonicas         — Genera reglas arquitectónicas del proyecto | deps: .SAC/config/
+                4. sac-planificar-hu                       — Genera plan técnico desde HU aprobada | deps: .SAC/config/
+                5. sac-refinar-hu                          — Refina HUs con criterios SMART y estimación | deps: .SAC/config/
+                6. sac-registrar-hallazgo                  — Captura incidencias mediante análisis paralelo | deps: .SAC/config/
 
         
 

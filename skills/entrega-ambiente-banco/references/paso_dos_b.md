@@ -8,7 +8,7 @@
 - Ambiente afectado → sufijo de tag: PRU→`-pru`, PREPRO→`-prepro`, PRO→`-pro`.
 - Versión afectada `vX.Y.Z` (semver, Regla 2) y descripción del bug.
 
-**Outputs** (en `{output_folder}/entrega_release/{nombre_repo}/vX.Y.Z+1/`): `release-notes.md`, `resumen-entrega_hotfix_vX.Y.Z+1.txt` y rama `release/vX.Y.Z+1` en `origin`. El tag lo crea el banco (Regla 6).
+**Outputs** (en `{documentacion_sac_path}/entrega_release/{nombre_repo}/vX.Y.Z+1/`): `release-notes.md`, `resumen-entrega_hotfix_vX.Y.Z+1.txt` y rama `release/vX.Y.Z+1` en `origin`. El tag lo crea el banco (Regla 6).
 
 **Confirmaciones del usuario:** ✋ versión y ambiente antes del paso 1 · ✋ OK para crear el PR a develop · ✋ cierre del checklist como estado real.
 
@@ -47,10 +47,10 @@
 
 8. **Release notes desde cero** para `vX.Y.Z+1` (Regla 5):
    ```bash
-   mkdir -p "{output_folder}/entrega_release/{nombre_repo}/vX.Y.Z+1"
-   git log v<X.Y.Z>..HEAD --oneline --no-merges > "{output_folder}/entrega_release/{nombre_repo}/vX.Y.Z+1/release-notes.md"
+   mkdir -p "{documentacion_sac_path}/entrega_release/{nombre_repo}/vX.Y.Z+1"
+   git log v<X.Y.Z>..HEAD --oneline --no-merges > "{documentacion_sac_path}/entrega_release/{nombre_repo}/vX.Y.Z+1/release-notes.md"
    ```
 
 9. **Limpiar la rama hotfix** (tras el merge del PR): `git branch -d hotfix/<nombre>` y `git push origin --delete hotfix/<nombre>`.
 
-10. **Resumen y notificación:** rellenar la **variante HOTFIX** de `references/resumen-entrega.txt` (sustituir todos los placeholders), mostrarla y guardarla como `resumen-entrega_hotfix_vX.Y.Z+1.txt` en `{output_folder}/entrega_release/{nombre_repo}/vX.Y.Z+1/`.
+10. **Resumen y notificación:** rellenar la **variante HOTFIX** de `references/resumen-entrega.txt` (sustituir todos los placeholders), mostrarla y guardarla como `resumen-entrega_hotfix_vX.Y.Z+1.txt` en `{documentacion_sac_path}/entrega_release/{nombre_repo}/vX.Y.Z+1/`.

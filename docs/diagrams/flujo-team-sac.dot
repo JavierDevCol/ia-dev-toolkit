@@ -10,22 +10,22 @@ digraph flujo_team_sac {
   consolidador [label="Sub-agente\nconsolidador\n(crea scaffold real)", fillcolor="#BD10E0", fontcolor=white];
   nota_sprint0 [label="consolidacion.md:\nscaffold pendiente,\nprimeras HU de Sprint 0", fillcolor="#F8E71C"];
   gestionar_backlog [label="gestionar-backlog-roadmap\n(workflow)", fillcolor="#8E44AD", fontcolor=white];
-  iniciar_sprint [label="iniciar-sprint\n(materializa HU.md +\nbacklog_desarrollo.md)", fillcolor="#50E3C2"];
-  tomar_contexto [label="tomar-contexto", shape=oval, fillcolor="#4A90D9", fontcolor=white];
-  registrar_hallazgo [label="registrar-hallazgo\n(bug)", fillcolor="#F5A623"];
-  refinar_hu [label="refinar-hu\n(feature)", fillcolor="#7BC67E"];
+  sac_iniciar_sprint [label="sac-iniciar-sprint\n(materializa HU.md +\nbacklog_desarrollo.md)", fillcolor="#50E3C2"];
+  sac_tomar_contexto [label="sac-tomar-contexto", shape=oval, fillcolor="#4A90D9", fontcolor=white];
+  sac_registrar_hallazgo [label="sac-registrar-hallazgo\n(bug)", fillcolor="#F5A623"];
+  sac_refinar_hu [label="sac-refinar-hu\n(feature)", fillcolor="#7BC67E"];
   refinada [label="[R] Refinada", shape=ellipse, fillcolor="#F8E71C"];
-  validar_hu [label="validar-hu", fillcolor="#7BC67E"];
+  sac_validar_hu [label="sac-validar-hu", fillcolor="#7BC67E"];
   bloqueada [label="BLOQUEADA", fillcolor="#D0021B", fontcolor=white];
   aprobada [label="[A] Aprobada", shape=ellipse, fillcolor="#F8E71C"];
-  priorizar_backlog [label="priorizar-backlog\n(orden real por\ndependencias + prioridad)", fillcolor="#9B59B6", fontcolor=white];
-  planificar_hu [label="planificar-hu", fillcolor="#7BC67E"];
+  sac_priorizar_backlog [label="sac-priorizar-backlog\n(orden real por\ndependencias + prioridad)", fillcolor="#9B59B6", fontcolor=white];
+  sac_planificar_hu [label="sac-planificar-hu", fillcolor="#7BC67E"];
   planificada [label="[P] Planificada", shape=ellipse, fillcolor="#F8E71C"];
-  ejecutar_plan [label="ejecutar-plan", fillcolor="#7BC67E"];
-  validar_ca [label="validar-ca\n(granular por task +\nfinal integración/todos)", fillcolor="#50E3C2"];
+  sac_ejecutar_plan [label="sac-ejecutar-plan", fillcolor="#7BC67E"];
+  sac_validar_ca [label="sac-validar-ca\n(granular por task +\nfinal integración/todos)", fillcolor="#50E3C2"];
   detenido [label="DETENIDO\n(CA PARCIAL /\nNO CUMPLIDO)", fillcolor="#D0021B", fontcolor=white];
   completada [label="[X] Completada", shape=ellipse, fillcolor="#7ED321"];
-  sincronizar_backlog [label="sincronizar-backlog", fillcolor="#7BC67E"];
+  sac_sincronizar_backlog [label="sac-sincronizar-backlog", fillcolor="#7BC67E"];
   fin [label="Sprint cerrado", shape=oval, fillcolor="#4A90D9", fontcolor=white];
 
   idea -> definir_vision -> definir_arquitectura -> consolidar_q;
@@ -33,25 +33,25 @@ digraph flujo_team_sac {
   consolidar_q -> nota_sprint0 [label="NO"];
   consolidador -> gestionar_backlog;
   nota_sprint0 -> gestionar_backlog;
-  gestionar_backlog -> iniciar_sprint;
-  iniciar_sprint -> tomar_contexto;
-  tomar_contexto -> refinar_hu;
-  tomar_contexto -> registrar_hallazgo [label="si es bug"];
-  refinar_hu -> refinada;
-  registrar_hallazgo -> refinada [label="crea Refinamiento.md"];
-  refinada -> validar_hu;
-  validar_hu -> bloqueada [label="dependencia\nbloqueante"];
-  validar_hu -> aprobada [label="CA claros"];
-  aprobada -> priorizar_backlog [label="todas las HU\ndel sprint en [A]/[P]"];
-  priorizar_backlog -> planificar_hu [label="en el orden\nsugerido"];
-  planificar_hu -> planificada -> ejecutar_plan;
-  ejecutar_plan -> validar_ca [label="por task\n(granular)"];
-  validar_ca -> ejecutar_plan [label="CUMPLIDO"];
-  ejecutar_plan -> validar_ca [label="al completar\ntodas las tasks"];
-  validar_ca -> detenido [label="PARCIAL /\nNO CUMPLIDO"];
-  validar_ca -> completada [label="todos\nCUMPLIDO"];
-  completada -> sincronizar_backlog -> fin;
-  fin -> iniciar_sprint [label="siguiente sprint", style=dashed];
+  gestionar_backlog -> sac_iniciar_sprint;
+  sac_iniciar_sprint -> sac_tomar_contexto;
+  sac_tomar_contexto -> sac_refinar_hu;
+  sac_tomar_contexto -> sac_registrar_hallazgo [label="si es bug"];
+  sac_refinar_hu -> refinada;
+  sac_registrar_hallazgo -> refinada [label="crea Refinamiento.md"];
+  refinada -> sac_validar_hu;
+  sac_validar_hu -> bloqueada [label="dependencia\nbloqueante"];
+  sac_validar_hu -> aprobada [label="CA claros"];
+  aprobada -> sac_priorizar_backlog [label="todas las HU\ndel sprint en [A]/[P]"];
+  sac_priorizar_backlog -> sac_planificar_hu [label="en el orden\nsugerido"];
+  sac_planificar_hu -> planificada -> sac_ejecutar_plan;
+  sac_ejecutar_plan -> sac_validar_ca [label="por task\n(granular)"];
+  sac_validar_ca -> sac_ejecutar_plan [label="CUMPLIDO"];
+  sac_ejecutar_plan -> sac_validar_ca [label="al completar\ntodas las tasks"];
+  sac_validar_ca -> detenido [label="PARCIAL /\nNO CUMPLIDO"];
+  sac_validar_ca -> completada [label="todos\nCUMPLIDO"];
+  completada -> sac_sincronizar_backlog -> fin;
+  fin -> sac_iniciar_sprint [label="siguiente sprint", style=dashed];
 }
 
 
@@ -60,7 +60,7 @@ digraph flujo_team_sac {
 // No modifican flujo_skills_sac de arriba, solo lo detallan.
 // ============================================================
 
-// tomar-contexto — Fuente: skills/tomar-contexto/SKILL.md (Fases A/B/C
+// sac-tomar-contexto — Fuente: skills/sac-tomar-contexto/SKILL.md (Fases A/B/C
 // + flowchart "Detección de Workspace" ya existente, integrado aquí).
 digraph skill_tomar_contexto {
   rankdir=LR;
@@ -108,7 +108,7 @@ digraph skill_tomar_contexto {
   validar_usuario -> crear_artifacts [label="EDITAR"];
 }
 
-// refinar-hu — Fuente: skills/refinar-hu/SKILL.md (Implementation 1-4).
+// sac-refinar-hu — Fuente: skills/sac-refinar-hu/SKILL.md (Implementation 1-4).
 digraph skill_refinar_hu {
   rankdir=LR;
   node [fontname="Helvetica", fontsize=10, shape=box, style=filled];
@@ -152,7 +152,7 @@ digraph skill_refinar_hu {
   smart -> desglose -> estimar -> persistir -> fin;
 }
 
-// registrar-hallazgo — Fuente: skills/registrar-hallazgo/SKILL.md (Implementation 1-7).
+// sac-registrar-hallazgo — Fuente: skills/sac-registrar-hallazgo/SKILL.md (Implementation 1-7).
 digraph skill_registrar_hallazgo {
   rankdir=LR;
   node [fontname="Helvetica", fontsize=10, shape=box, style=filled];
@@ -187,7 +187,7 @@ digraph skill_registrar_hallazgo {
   clasificacion -> crear_pendiente [label="PENDIENTE"];
 }
 
-// validar-hu — Fuente: skills/validar-hu/SKILL.md (flowchart oficial de la skill).
+// sac-validar-hu — Fuente: skills/sac-validar-hu/SKILL.md (flowchart oficial de la skill).
 digraph skill_validar_hu {
   rankdir=LR;
   node [fontname="Helvetica", fontsize=10];
@@ -229,7 +229,7 @@ digraph skill_validar_hu {
   blocked -> persist;
 }
 
-// planificar-hu — Fuente: skills/planificar-hu/SKILL.md (Implementation 1-4).
+// sac-planificar-hu — Fuente: skills/sac-planificar-hu/SKILL.md (Implementation 1-4).
 digraph skill_planificar_hu {
   rankdir=LR;
   node [fontname="Helvetica", fontsize=10, shape=box, style=filled];
@@ -238,7 +238,7 @@ digraph skill_planificar_hu {
   start [label="Iniciar", shape=oval, fillcolor="#4A90D9", fontcolor=white];
   cargar [label="Cargar HU.md +\nRefinamiento/\nRefinamientoBug"];
   aprobada [label="¿✅ Aprobada?", shape=diamond, fillcolor="#F5A623"];
-  error [label="Error: ejecutar\n>validar_hu primero", fillcolor="#D0021B", fontcolor=white];
+  error [label="Error: ejecutar\n>sac_validar_hu primero", fillcolor="#D0021B", fontcolor=white];
 
   ambiguedades [label="¿Ambigüedades\n(tech/rutas/decisiones)?", shape=diamond, fillcolor="#F5A623"];
   pausar [label="PAUSAR", fillcolor="#D0021B", fontcolor=white];
@@ -267,14 +267,14 @@ digraph skill_planificar_hu {
   generar -> backbone -> fin;
 }
 
-// ejecutar-plan — Fuente: skills/ejecutar-plan/SKILL.md (Decision Flow oficial).
+// sac-ejecutar-plan — Fuente: skills/sac-ejecutar-plan/SKILL.md (Decision Flow oficial).
 digraph skill_ejecutar_plan {
   rankdir=LR
   node [fontname="Helvetica" fontsize=10]
 
   start [label="HU PENDIENTE" shape=ellipse style=filled fillcolor="#4A90D9" fontcolor=white]
   q1 [label="¿HU planificada\nen Plan.md?" shape=diamond style=filled fillcolor="#F5A623"]
-  stop [label="→ planificar_hu\nprimero" shape=box style=filled fillcolor="#D0021B" fontcolor=white]
+  stop [label="→ sac_planificar_hu\nprimero" shape=box style=filled fillcolor="#D0021B" fontcolor=white]
   q2 [label="¿Modo?" shape=diamond style=filled fillcolor="#F5A623"]
   completo [label="completo\nTodo sin pausas" shape=box style=filled fillcolor="#7ED321"]
   fase [label="fase_por_fase\nPausa entre fases" shape=box style=filled fillcolor="#7ED321"]
@@ -302,7 +302,7 @@ digraph skill_ejecutar_plan {
   q3 -> especifica [label="Sí\n(requiere --task_id)"]
 }
 
-// validar-ca — Fuente: skills/validar-ca/SKILL.md (flowchart oficial de la skill).
+// sac-validar-ca — Fuente: skills/sac-validar-ca/SKILL.md (flowchart oficial de la skill).
 digraph skill_validar_ca {
   rankdir=LR;
   node [fontname="Helvetica", fontsize=10];
@@ -360,7 +360,7 @@ digraph skill_validar_ca {
   hu_complete -> report;
 }
 
-// sincronizar-backlog — Fuente: skills/sincronizar-backlog/SKILL.md (flowchart oficial de la skill).
+// sac-sincronizar-backlog — Fuente: skills/sac-sincronizar-backlog/SKILL.md (flowchart oficial de la skill).
 digraph skill_sincronizar_backlog {
   rankdir=LR;
   node [fontname="Helvetica", fontsize=10];
@@ -392,7 +392,7 @@ digraph skill_sincronizar_backlog {
   plan_status -> blocked [label="BLOQUEADO"];
 }
 
-// iniciar-sprint — Fuente: skills/iniciar-sprint/SKILL.md (Implementation 1-5).
+// sac-iniciar-sprint — Fuente: skills/sac-iniciar-sprint/SKILL.md (Implementation 1-5).
 digraph skill_iniciar_sprint {
   rankdir=LR;
   node [fontname="Helvetica", fontsize=10, shape=box, style=filled];
@@ -420,7 +420,7 @@ digraph skill_iniciar_sprint {
   backlog_dev -> reporte;
 }
 
-// priorizar-backlog — Fuente: skills/priorizar-backlog/SKILL.md (flowchart oficial de la skill).
+// sac-priorizar-backlog — Fuente: skills/sac-priorizar-backlog/SKILL.md (flowchart oficial de la skill).
 digraph skill_priorizar_backlog {
   rankdir=LR;
   node [fontname="Helvetica", fontsize=10];

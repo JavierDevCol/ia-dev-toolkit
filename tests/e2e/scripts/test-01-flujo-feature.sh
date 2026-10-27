@@ -68,8 +68,8 @@ echo "  ESC-01: Flujo completo Feature"
 echo "=========================================="
 echo ""
 
-# ---- PASO 1: tomar-contexto ----
-echo -e "${YELLOW}PASO 1: tomar-contexto${NC}"
+# ---- PASO 1: sac-tomar-contexto ----
+echo -e "${YELLOW}PASO 1: sac-tomar-contexto${NC}"
 echo "  Verificando que el workspace mock tiene la estructura esperada..."
 
 # Verificar que el workspace tiene marcadores
@@ -77,22 +77,21 @@ assert_file_exists "$WS/pom.xml" "Marcador de proyecto (pom.xml) existe"
 
 # Verificar que .SAC/config existe
 assert_dir_exists "$WS/.SAC/config" "Directorio .SAC/config existe"
-assert_file_exists "$WS/.SAC/config/CONFIG_SYSTEM.yaml" "CONFIG_SYSTEM.yaml existe"
-assert_file_exists "$WS/.SAC/config/CONFIG_USER.yaml" "CONFIG_USER.yaml existe"
+assert_file_exists "$WS/.SAC/config/sac.json" "sac.json existe"
 
-# Verificar que CONFIG_SYSTEM tiene rutas correctas
-assert_file_contains "$WS/.SAC/config/CONFIG_SYSTEM.yaml" "$WS" "CONFIG_SYSTEM.yaml tiene rutas del proyecto"
+# Verificar que sac.json tiene rutas correctas
+assert_file_contains "$WS/.SAC/config/sac.json" "$WS" "sac.json tiene rutas del proyecto"
 
 echo ""
 
-# ---- PASO 2: refinar-hu (simular creación de HU) ----
-echo -e "${YELLOW}PASO 2: refinar-hu (simular creación de HU)${NC}"
+# ---- PASO 2: sac-refinar-hu (simular creación de HU) ----
+echo -e "${YELLOW}PASO 2: sac-refinar-hu (simular creación de HU)${NC}"
 echo "  Creando artifacts/HU/HU-001/ con HU.md y Refinamiento.md..."
 
 HU_DIR="$WS/artifacts/HU/HU-001"
 mkdir -p "$HU_DIR"
 
-# Crear HU.md (simula lo que haría refinar-hu)
+# Crear HU.md (simula lo que haría sac-refinar-hu)
 cat > "$HU_DIR/HU.md" << 'EOF'
 # HU-001: Login con OAuth2
 
@@ -123,7 +122,7 @@ Como usuario, quiero poder autenticarme con OAuth2 para acceder al sistema de fo
 | **Total** | **22h** | **13** |
 EOF
 
-# Crear Refinamiento.md (simula lo que haría refinar-hu)
+# Crear Refinamiento.md (simula lo que haría sac-refinar-hu)
 cat > "$HU_DIR/Refinamiento.md" << 'EOF'
 # Refinamiento: HU-001
 
@@ -174,7 +173,7 @@ cat > "$HU_DIR/Refinamiento.md" << 'EOF'
 
 ## Aprobación
 
-<!-- Esta sección se llena por validar-hu -->
+<!-- Esta sección se llena por sac-validar-hu -->
 EOF
 
 assert_file_exists "$HU_DIR/HU.md" "HU.md creado"
@@ -184,11 +183,11 @@ assert_file_contains "$HU_DIR/Refinamiento.md" "CA-01" "Refinamiento.md contiene
 
 echo ""
 
-# ---- PASO 3: validar-hu (simular aprobación) ----
-echo -e "${YELLOW}PASO 3: validar-hu (simular aprobación)${NC}"
+# ---- PASO 3: sac-validar-hu (simular aprobación) ----
+echo -e "${YELLOW}PASO 3: sac-validar-hu (simular aprobación)${NC}"
 echo "  Agregando aprobación a Refinamiento.md..."
 
-# Simular lo que haría validar-hu
+# Simular lo que haría sac-validar-hu
 cat >> "$HU_DIR/Refinamiento.md" << 'EOF'
 
 ## Aprobación
@@ -198,18 +197,18 @@ cat >> "$HU_DIR/Refinamiento.md" << 'EOF'
 > **Validador:** Tester
 > **Fecha:** 2026-08-27
 > **Observaciones:** Ninguna
-> **Siguiente:** >planificar_hu HU-001
+> **Siguiente:** >sac_planificar_hu HU-001
 EOF
 
 assert_file_contains "$HU_DIR/Refinamiento.md" "✅ Aprobada" "Refinamiento.md tiene aprobación"
 
 echo ""
 
-# ---- PASO 4: planificar-hu (simular creación de Plan.md) ----
-echo -e "${YELLOW}PASO 4: planificar-hu (simular creación de Plan.md)${NC}"
+# ---- PASO 4: sac-planificar-hu (simular creación de Plan.md) ----
+echo -e "${YELLOW}PASO 4: sac-planificar-hu (simular creación de Plan.md)${NC}"
 echo "  Creando Plan.md desde plantilla..."
 
-# Simular lo que haría planificar-hu
+# Simular lo que haría sac-planificar-hu
 cat > "$HU_DIR/Plan.md" << 'EOF'
 # Plan de Implementación: HU-001
 
@@ -251,8 +250,8 @@ assert_file_contains "$HU_DIR/Plan.md" "EJEC-01" "Plan.md tiene tareas definidas
 
 echo ""
 
-# ---- PASO 5: ejecutar-plan (simular ejecución) ----
-echo -e "${YELLOW}PASO 5: ejecutar-plan (simular ejecución)${NC}"
+# ---- PASO 5: sac-ejecutar-plan (simular ejecución) ----
+echo -e "${YELLOW}PASO 5: sac-ejecutar-plan (simular ejecución)${NC}"
 echo "  Simulando ejecución del plan..."
 
 # Simular cambio de estado a EN_PROGRESO
@@ -303,8 +302,8 @@ assert_file_contains "$HU_DIR/Tracking.md" "FINALIZADO" "Tracking.md cambió a F
 
 echo ""
 
-# ---- PASO 6: sincronizar-backlog (verificar estados) ----
-echo -e "${YELLOW}PASO 6: sincronizar-backlog (verificar estados)${NC}"
+# ---- PASO 6: sac-sincronizar-backlog (verificar estados) ----
+echo -e "${YELLOW}PASO 6: sac-sincronizar-backlog (verificar estados)${NC}"
 echo "  Verificando que los archivos reflejan el estado correcto..."
 
 # Verificar que HU.md existe

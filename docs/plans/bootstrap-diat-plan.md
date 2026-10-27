@@ -91,8 +91,8 @@ diat --install [/ruta]
   [ ] 4. DESARROLLADOR         — Desarrollador
 
   🔧 SKILLS SAC:
-  [ ] 5. tomar-contexto        — Detecta tecnología y arquitectura
-  [ ] 6. refinar-hu            — Refina HUs con criterios SMART
+  [ ] 5. sac-tomar-contexto        — Detecta tecnología y arquitectura
+  [ ] 6. sac-refinar-hu            — Refina HUs con criterios SMART
   ...
 
   📋 WORKFLOWS:
@@ -262,7 +262,7 @@ def show_install_menu():
     # Categorías de componentes
     categories = {
         "👤 AGENTES": ["PO", "ARQUITECTO-SOFTWARE", "ARQUITECTO-DEVOPS", "DESARROLLADOR"],
-        "🔧 SKILLS SAC": ["tomar-contexto", "refinar-hu", "validar-hu", ...],
+        "🔧 SKILLS SAC": ["sac-tomar-contexto", "sac-refinar-hu", "sac-validar-hu", ...],
         "📋 WORKFLOWS": ["definir-vision-producto", "definir-arquitectura-solucion", ...],
         "🛠️ TOOLS": ["workflow-discover"]
     }

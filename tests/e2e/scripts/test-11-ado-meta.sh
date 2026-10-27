@@ -42,13 +42,13 @@ echo "  → ado-wi-comments debería publicar con emoji 🚀 y formato correcto"
 
 echo ""
 
-echo -e "${YELLOW}AWC-02: Mención a Alexander${NC}"
-echo "  → ado-wi-comments debería insertar GUID y reasignar WI"
+echo -e "${YELLOW}AWC-02: Mención a colaborador con reasignar${NC}"
+echo "  → ado-wi-comments debería insertar GUID del perfil y reasignar WI"
 
 echo ""
 
-echo -e "${YELLOW}AWC-03: Mención a Lady${NC}"
-echo "  → ado-wi-comments debería insertar GUID"
+echo -e "${YELLOW}AWC-03: Perfil sin colaboradores${NC}"
+echo "  → ado-wi-comments debería preguntar, resolver GUID y persistir en el perfil"
 
 echo ""
 
@@ -93,8 +93,8 @@ echo "  → pr-config-audit debería alertar siempre, nunca incluir valores real
 
 echo ""
 
-echo -e "${YELLOW}PCA-05: Sin memory_skill.json${NC}"
-echo "  → pr-config-audit debería preguntar carpeta de salida"
+echo -e "${YELLOW}PCA-05: Salida de documentos${NC}"
+echo "  → la salida debe quedar bajo documentacion_sac_path (sin preguntar carpeta)"
 
 echo ""
 

@@ -32,9 +32,9 @@ echo "=========================================="
 echo ""
 
 # ============================================
-# crear-adr
+# sac-crear-adr
 # ============================================
-echo -e "${YELLOW}━━━ crear-adr ━━━${NC}"
+echo -e "${YELLOW}━━━ sac-crear-adr ━━━${NC}"
 echo ""
 
 echo -e "${YELLOW}CADR-01: Happy path — crear ADR MADR${NC}"
@@ -100,13 +100,13 @@ echo "  → Si usuario pide y-statement, usar assets/adr_y_statement.md"
 
 echo ""
 
-echo -e "${YELLOW}CADR-05: Sin memory_skill.json${NC}"
-echo "  → Si no existe, preguntar carpeta y crear memory_skill.json"
+echo -e "${YELLOW}CADR-05: Sin .SAC/config/sac.json${NC}"
+echo "  → Instalación SAC incompleta: indicar ejecutar diat (no crear sac.json a mano)"
 
 echo ""
 
-echo -e "${YELLOW}CADR-06: output_folder es null${NC}"
-echo "  → Si memory_skill.json existe pero sin output_folder, preguntar y persistir"
+echo -e "${YELLOW}CADR-06: carpeta de ADR inexistente${NC}"
+echo "  → Si {adr_folder} no existe, crearla bajo documentacion_sac_path (no preguntar carpeta)"
 
 echo ""
 
@@ -287,7 +287,7 @@ echo "  → git-doc-sync debería hacer push selectivo de archivos elegidos"
 
 echo ""
 
-echo -e "${YELLOW}GDS-02: Sin memory_skill.json${NC}"
+echo -e "${YELLOW}GDS-02: Sin sac.json${NC}"
 echo "  → git-doc-sync debería preguntar nombre, ruta, ramas"
 
 echo ""
@@ -329,7 +329,7 @@ Fallidos: $FAIL
 Estado: $([ $FAIL -eq 0 ] && echo "PASS" || echo "FAIL")
 
 Skills testeadas:
-- crear-adr: CADR-01 a CADR-08
+- sac-crear-adr: CADR-01 a CADR-08
 - bitacora-tecnica: BT-01 a BT-06
 - crear-workflow: CW-01 a CW-04
 - mermaid-diagram: MD-01 a MD-06

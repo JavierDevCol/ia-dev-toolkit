@@ -50,7 +50,16 @@ Genera READMEs profesionales validando la estructura del proyecto. Nunca genera 
 2. **Recopilar información** — Preguntar: nombre, descripción, instalación, uso, licencia, créditos.
 3. **Generar README** — Incluir obligatorias + auto-detectadas. Seguir template en references/readme-template.md.
 
-   Leer también `CONFIG_USER.yaml` (ruta en `archivos.config_user`) y tomar `usuario.nombre` e `incluir_firma_en_documentos`. Si `incluir_firma_en_documentos` es `true` y `usuario.nombre` no está vacío, agregar al final del README:
+   Leer con memctl `usuario.nombre` y `usuario.incluir_firma_en_documentos`:
+
+```sh
+sh .SAC/memctl.sh get usuario.nombre
+sh .SAC/memctl.sh get usuario.incluir_firma_en_documentos
+```
+
+memctl es solo lectura y su salida ES la respuesta; si memctl no existe (exit 127), leer `.SAC/config/sac.json` con `jq`; si sale con exit 1 (JSON inválido o vacío), detenerse y avisar: no leer ni editar el archivo a mano; nunca inventar valores. `null`, vacío o exit 2 → no configurado.
+
+   Si `usuario.incluir_firma_en_documentos` es `true` y `usuario.nombre` no está vacío, agregar al final del README:
    ```
    > **Generado y revisado por:** {{usuario.nombre}}
    ```

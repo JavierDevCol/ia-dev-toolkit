@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "usuario": {
+    "nombre": "",
+    "incluir_firma_en_documentos": true
+  },
+  "idiomas": {
+    "documentacion": "",
+    "comunicacion": ""
+  },
+  "documentacion_sac_path": "{project-root}/artifacts",
+  "archivos": {
+    "backlog": "{project-root}/artifacts/backlog_desarrollo.md",
+    "reglas_arquitectonicas": "{project-root}/artifacts/reglas_arquitectonicas.md",
+    "workspace": "{project-root}/artifacts/workspace.md"
+  },
+  "artifacts": {
+    "hu_folder": "{project-root}/artifacts/HU",
+    "adr_folder": "{project-root}/artifacts/ADR",
+    "code_smells_folder": "{project-root}/artifacts/code_smells",
+    "lecciones_aprendidas": "{project-root}/artifacts/lecciones_aprendidas.md",
+    "pendientes": "{project-root}/artifacts/pendientes.md",
+    "pendientes_folder": "{project-root}/artifacts/pendientes",
+    "deuda_tecnica_folder": "{project-root}/artifacts/deuda_tecnica",
+    "contextos_folder": "{project-root}/artifacts/contextos"
+  },
+  "multi_proyecto": {
+    "patron_contexto": "contexto_proyecto_{nombre}.md"
+  },
+  "ado": {
+    "config": {
+      "perfil_activo": null,
+      "perfiles": {}
+    },
+    "memory": {}
+  },
+  "handoff-release": {
+    "config": {
+      "environments": {
+        "dev": "DEV",
+        "staging": "STAGING",
+        "prod": "PROD"
+      },
+      "roles": {
+        "preparer": "Equipo Dev",
+        "deployer": "Equipo Ops"
+      },
+      "branch_format": "release/vX.Y.Z",
+      "tag_format": "vX.Y.Z-{env}"
+    },
+    "memory": {}
+  },
+  "env-config-audit": {
+    "config": {
+      "ambientes": []
+    },
+    "memory": {}
+  },
+  "gh-pr-reviewer": {
+    "config": {
+      "coding_standards_path": null,
+      "architecture_guide_path": null
+    },
+    "memory": {}
+  }
+}

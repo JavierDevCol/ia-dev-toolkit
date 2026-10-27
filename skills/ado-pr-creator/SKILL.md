@@ -1,0 +1,114 @@
+---
+name: ado-pr-creator
+description: >-
+  Use when the user wants to create a Pull Request in Azure DevOps, merge branches,
+  assign reviewers, or link work items to a new PR. Triggers on "create PR",
+  "open pull request", "new PR", "generate PR", or requests to propose a merge between branches.
+ready: true
+---
+
+# ADO PR Creator
+
+Guided creation of Pull Requests in Azure DevOps with duplicate detection, branch validation, and mandatory preview before publishing.
+
+## When to Use
+
+- User wants to create/open a new PR
+- User wants to assign reviewers or link work items to a PR
+- User pastes an ADO repo URL asking to create a PR
+
+**When NOT to use:**
+
+- Reviewing or approving existing PRs
+- Updating/abandoning PRs that already exist
+- Merging completed PRs
+
+## Context Injection
+
+Reads `user_email` and the projects from the active profile: repos project = `project_map.repos`, work items project = `project_map.workitems` (each falls back to `project_map.default`).
+
+Read the config with memctl (read-only; its output IS the answer; if memctl is missing (exit 127) read `.SAC/config/sac.json` with `jq`; on exit 1 (invalid or empty JSON) stop and tell the user: do not read or edit the file by hand; never invent values):
+
+```sh
+P=$(sh .SAC/memctl.sh get ado.config.perfil_activo)   # active profile name
+sh .SAC/memctl.sh get ado.config.perfiles.$P.user_email
+sh .SAC/memctl.sh get ado.config.perfiles.$P.project_map.repos        # fallback: project_map.default
+sh .SAC/memctl.sh get ado.config.perfiles.$P.project_map.workitems    # fallback: project_map.default
+sh .SAC/memctl.sh get usuario.nombre
+sh .SAC/memctl.sh get usuario.incluir_firma_en_documentos
+```
+
+`null` or exit 2 → not configured. Profile names must not contain `.` (memctl uses it as path separator).
+
+**Profile guard:** if `perfil_activo` is null, its profile is missing, or no project resolves, stop and ask the user to run `ado-profile-setup`.
+
+**Missing profile fields:** if `user_email` is missing from the active profile, ask the user once and persist the answer to that profile in `.SAC/config/sac.json` (`ado.config.perfiles.<profile>`, editing only that section) so later runs don't ask again.
+
+Also take `usuario.nombre` → **`{{usuario.nombre}}`** (commands above), needed to sign the PR body in Phase C. If empty, the key doesn't exist, or `usuario.incluir_firma_en_documentos` is `false`, omit the signature line; never invent a name.
+
+## Core Flow
+
+```dot
+digraph pr_flow {
+    "Validate profile" [shape=box];
+    "Resolve repo" [shape=box];
+    "Resolve branches" [shape=box];
+    "Collect PR data" [shape=box];
+    "Check duplicates" [shape=box];
+    "Preview & confirm" [shape=box];
+    "Create PR" [shape=box];
+    "Post-create actions" [shape=box];
+
+    "Validate profile" -> "Resolve repo" -> "Resolve branches" -> "Collect PR data" -> "Check duplicates" -> "Preview & confirm" -> "Create PR" -> "Post-create actions";
+}
+```
+
+### Phase A — Validate & resolve
+
+Apply the profile guard (Context Injection) and resolve the repos project from `project_map.repos`.
+
+### Phase B — Resolve repo & branches
+
+1. **Repo:** User-specified → `ado_repo_repository` (get). Otherwise try `git remote get-url origin`. Fallback: list repos and ask user.
+2. **Source branch:** User-specified → `git branch --show-current` → ask user.
+3. **Target branch:** User-specified → list environment branches (develop, qa, staging, main, etc.) → ask user.
+4. Validate both exist with `ado_repo_branch` (get). Reject if `source = target`.
+5. **Rule:** Strip `refs/heads/` for display; re-add only for API calls.
+
+### Phase C — Collect PR data
+
+- **Title:** Conventional Commits `type(scope): summary`. Validate or propose correction.
+- **Description:** Draft with Summary, Main Changes, Expected Commits, Validation, Breaking Changes, Work Items.
+- **Reviewers** and **Work Items:** Optional.
+- If `usuario.incluir_firma_en_documentos` is `true`, append to the description: `> **Generado por:** {{usuario.nombre}}`. Without `{{usuario.nombre}}` configured, omit this line entirely.
+
+### Phase D — Duplicate check & preview
+
+1. Search active PRs via `ado_repo_pull_request` (list) for same source→target. If duplicate, show existing instead of creating.
+2. Present preview table with repo, branches, title, reviewers, work items.
+3. Require explicit `[S]` confirmation. Never publish without it.
+
+### Phase E — Create PR & post-actions
+
+1. `ado_repo_pull_request` (create) with `refs/heads/{source}` → `refs/heads/{target}`.
+2. Add reviewers via `ado_repo_pull_request` (update_reviewers) if any.
+3. Link work items via `ado_wit_work_item_link_write` (link_to_pull_request) if any.
+4. Report: PR URL, ID, branch flow, reviewers, work items.
+5. Offer: review the new PR, view active PRs, or done.
+
+## Quick Reference
+
+| Error | Response |
+|-------|----------|
+| No diff between branches | "No changes to propose between [source] and [target]." |
+| Source branch missing remotely | "Branch not published in ADO. Push it first." |
+| Reviewer resolution fails | Continue without them, report which failed |
+| Work item link fails | Don't cancel PR, report which weren't linked |
+| 401/403 | Inform user, don't auto-retry more than once |
+
+## Common Mistakes
+
+- **Not stripping/re-adding `refs/heads/`** — strip for display, re-add for API calls.
+- **Assuming target branch:** Always ask user after showing environment branches.
+- **Skipping duplicate check:** Always verify no active PR exists for same source→target.
+- **Blocking on non-critical failures:** Reviewers or work item link failures shouldn't cancel creation.

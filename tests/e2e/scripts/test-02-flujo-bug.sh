@@ -70,15 +70,15 @@ echo "  ESC-02: Flujo completo Bug"
 echo "=========================================="
 echo ""
 
-# ---- PASO 1: registrar-hallazgo (simular creación de bug) ----
-echo -e "${YELLOW}PASO 1: registrar-hallazgo (simular creación de bug)${NC}"
+# ---- PASO 1: sac-registrar-hallazgo (simular creación de bug) ----
+echo -e "${YELLOW}PASO 1: sac-registrar-hallazgo (simular creación de bug)${NC}"
 echo "  Creando BUG-001/ con Refinamiento.md desde assets..."
 
 BUG_DIR="$WS/artifacts/HU/BUG-001"
 mkdir -p "$BUG_DIR"
 
-# Copiar RefinamientoBug.md como Refinamiento.md (simula registrar-hallazgo)
-REGLA_ASSETS="$HOME/Documentos/squad-skills/skills/registrar-hallazgo/assets/RefinamientoBug.md"
+# Copiar RefinamientoBug.md como Refinamiento.md (simula sac-registrar-hallazgo)
+REGLA_ASSETS="$HOME/Documentos/squad-skills/skills/sac-registrar-hallazgo/assets/RefinamientoBug.md"
 if [ -f "$REGLA_ASSETS" ]; then
     cp "$REGLA_ASSETS" "$BUG_DIR/Refinamiento.md"
     log_ok "RefinamientoBug.md copiado como Refinamiento.md"
@@ -123,7 +123,7 @@ El offset en la consulta SQL no se está aplicando correctamente. El parámetro 
 
 ## Aprobación
 
-<!-- Esta sección se llena por validar-hu -->
+<!-- Esta sección se llena por sac-validar-hu -->
 EOF
 fi
 
@@ -133,8 +133,8 @@ assert_file_contains "$BUG_DIR/Refinamiento.md" "Causa Raíz" "Refinamiento.md c
 
 echo ""
 
-# ---- PASO 2: planificar-hu (planificar bug) ----
-echo -e "${YELLOW}PASO 2: planificar-hu (planificar bug)${NC}"
+# ---- PASO 2: sac-planificar-hu (planificar bug) ----
+echo -e "${YELLOW}PASO 2: sac-planificar-hu (planificar bug)${NC}"
 echo "  Creando Plan.md para BUG-001..."
 
 cat > "$BUG_DIR/Plan.md" << 'EOF'
@@ -175,8 +175,8 @@ assert_file_contains "$BUG_DIR/Plan.md" "Bugfix" "Plan.md identifica tipo Bugfix
 
 echo ""
 
-# ---- PASO 3: ejecutar-plan (simular ejecución del fix) ----
-echo -e "${YELLOW}PASO 3: ejecutar-plan (simular ejecución del fix)${NC}"
+# ---- PASO 3: sac-ejecutar-plan (simular ejecución del fix) ----
+echo -e "${YELLOW}PASO 3: sac-ejecutar-plan (simular ejecución del fix)${NC}"
 echo "  Simulando ejecución del plan de bug..."
 
 # Simular cambio de estado

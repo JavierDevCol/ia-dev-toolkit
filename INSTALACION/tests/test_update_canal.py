@@ -4,7 +4,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from diatlib import paths, registro, update
+from diatlib import paths, registro, update, sac_config
 from _helpers import _load_cli
 
 
@@ -56,17 +56,17 @@ class UpdateCanalR10Test(unittest.TestCase):
         registro.save_installed_sha("OLD")
         proyecto = Path(self._tmp.name) / "proj"
         registro.save_installation(proyecto, ".opencode",
-                                   {"skills": ["ejecutar-plan"]}, {}, "OLD",
+                                   {"skills": ["sac-ejecutar-plan"]}, {}, "OLD",
                                    ref="v2.0.0")
         out = io.StringIO()
         with patch("diatlib.github.get_remote_sha", return_value="NEW123"), \
              patch("diatlib.github.download_and_stage",
                    return_value=paths.get_cache_dir()) as dl, \
              patch("diatlib.github.scan_components",
-                   return_value={"skills": {"ejecutar-plan"}}), \
+                   return_value={"skills": {"sac-ejecutar-plan"}}), \
              patch("diatlib.github.get_latest_release_tag", return_value="v2.1.1"):
             with redirect_stdout(out):
-                update.cmd_update([])       # valida -> falta validar-ca -> aborta
+                update.cmd_update([])       # valida -> falta sac-validar-ca -> aborta
         dl.assert_called_once_with(ref="v2.1.1")
         self.assertIn("Dependencias inválidas", out.getvalue())
         # lo staged queda etiquetado con el canal NUEVO pese al abort
@@ -139,6 +139,45 @@ class StatusReleaseTest(unittest.TestCase):                 # R10 display
              redirect_stdout(out):
             cli._status_system()
         self.assertNotIn("Release:", out.getvalue())
+
+
+class UpdateSacJsonInvalidoTest(unittest.TestCase):
+    """Un sac.json ilegible en un proyecto no aborta el resto ni deja el registro sin guardar."""
+
+    def setUp(self):
+        self._home = os.environ.get("HOME")
+        self._tmp = tempfile.TemporaryDirectory()
+        os.environ["HOME"] = self._tmp.name
+        paths.get_cache_dir().mkdir(parents=True, exist_ok=True)
+
+    def tearDown(self):
+        os.environ["HOME"] = self._home
+        self._tmp.cleanup()
+
+    def test_proyecto_con_sac_json_invalido_no_aborta_el_resto(self):
+        paths.get_ref_file().write_text("v2.0.0", encoding="utf-8")
+        registro.save_installed_sha("NEW")
+        registro.save_installed_ref("v2.0.0")
+        malo, bueno = Path(self._tmp.name) / "malo", Path(self._tmp.name) / "bueno"
+        for pr in (malo, bueno):
+            pr.mkdir()
+            registro.save_installation(pr, ".claude", {"skills": ["x"]}, {"skills": ["x"]}, "OLD", ref="v2.0.0")
+
+        def reinstall(inst, cache):
+            if Path(inst["project_path"]).name == "malo":
+                raise sac_config.SacConfigError("sac.json no es JSON válido")
+            return {"skills": ["x"]}
+
+        out = io.StringIO()
+        with patch("diatlib.github.get_remote_sha", return_value="NEW"), \
+             patch("diatlib.github.get_latest_release_tag", return_value="v2.0.0"), \
+             patch.object(update, "reinstall_components", side_effect=reinstall), \
+             redirect_stdout(out):
+            update.cmd_update([])
+        self.assertIn("sac.json no es JSON válido", out.getvalue())
+        por_nombre = {Path(i["project_path"]).name: i["sha"] for i in registro.load_installations()}
+        self.assertEqual(por_nombre["malo"], "OLD")         # no se marcó como actualizado
+        self.assertEqual(por_nombre["bueno"], "NEW")        # el resto sí, y el registro se guardó
 
 
 if __name__ == "__main__":

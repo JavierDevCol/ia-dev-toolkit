@@ -70,22 +70,33 @@ START: User requests release handoff
 
 ## Implementation
 
-### Configuración global (`memory_skill.json`)
+### Configuración global (`.SAC/config/sac.json`)
 
-Antes de generar artefactos, leer `$SKILL_DIR/../memory_skill.json` y tomar los tres campos globales (raíz del JSON):
+Antes de generar artefactos, leer con memctl estos tres campos globales:
+
+Ejecutar cada comando: **su salida ES el valor del placeholder** de su fila y se usa tal cual en el resto de esta skill (no recalcular ni inventar rutas):
+
+| Placeholder / dato | Valor = salida de |
+|---|---|
+| `{{usuario.nombre}}` | `sh .SAC/memctl.sh get usuario.nombre` |
+| `usuario.incluir_firma_en_documentos` | `sh .SAC/memctl.sh get usuario.incluir_firma_en_documentos` |
+| `{documentacion_sac_path}` | `sh .SAC/memctl.sh get documentacion_sac_path` |
+
+memctl es solo lectura y su salida ES la respuesta; si memctl no existe (exit 127), leer `.SAC/config/sac.json` con `jq`; si sale con exit 1 (JSON inválido o vacío), detenerse y avisar: no leer ni editar el archivo a mano; nunca inventar valores. `null`, vacío o exit 2 → no configurado.
+
 
 | Campo | Para qué se usa | Comportamiento si falta |
 |-------|-----------------|-------------------------|
-| `output_folder` | Base de **todas** las rutas de entrega: `{output_folder}/entrega_release/...` | `null` o archivo inexistente → preguntar la carpeta al usuario y **persistirla** en `output_folder` |
-| `user_name` | Firma de los resúmenes de entrega → placeholder **`{{user_name}}`** | Vacío o archivo inexistente → la línea queda `> **Release Manager:**` sin sufijo. **No inventar un nombre** |
-| `incluir_firma_en_documentos` | Activa o desactiva el bloque de firma | `false` → omitir el bloque completo. Cualquier otro valor (o ausente) → incluirlo |
+| `documentacion_sac_path` | Base de **todas** las rutas de entrega: `{documentacion_sac_path}/entrega_release/...` | `null` o exit 2 → no preguntar ni escribir fuera: avisar "No hay instalación SAC" (ejecutar `diat`) |
+| `usuario.nombre` | Firma de los resúmenes de entrega → placeholder **`{{usuario.nombre}}`** | Vacío o clave inexistente → la línea queda `> **Release Manager:**` sin sufijo. **No inventar un nombre** |
+| `usuario.incluir_firma_en_documentos` | Activa o desactiva el bloque de firma | `false` → omitir el bloque completo. Cualquier otro valor (o ausente) → incluirlo |
 
 **Bloque de firma.** Todo `resumen-entrega_*.txt` (Opción 1 paso 8, Opción 2b paso 10, Opción 2c paso 7) cierra con:
 ```
-> **Release Manager:** {{user_name}}
+> **Release Manager:** {{usuario.nombre}}
 > **Fecha:** {{fecha}}
 ```
-Sustituir `{{user_name}}` por el valor leído. Con `user_name` sin configurar, la línea queda `> **Release Manager:**`.
+Sustituir `{{usuario.nombre}}` por el valor leído. Con `usuario.nombre` sin configurar, la línea queda `> **Release Manager:**`.
 
 ### Skills sugeridas: comandos exactos
 
@@ -151,8 +162,8 @@ Cada fase referencia sus archivos de apoyo (`references/flujo-hotfix.sh`, `refer
 |-------|----------|-------------------|------------------|
 | `env-config-audit` |  analiza el diff | Checklist opción 1, 2a, 2b, 2c | Opción 1: `@env-config-audit sobre el diff origin/des..release/vX.Y.Z` · 2a: `@env-config-audit sobre el diff develop..<rama>` · 2b: `@env-config-audit sobre el diff develop..hotfix/<hotfix>` · 2c: `@env-config-audit sobre el diff origin/des..release/vX.Y.Z` |
 | `ado-pipeline-analyzer` | Valida build, tests, cobertura, DAST, SonarQube.| Checklist opción 1 | `@ado-pipeline-analyzer build latest del pipeline <nombre_pipeline> en rama develop` |
-| `analizar-seguridad` | Auditoría estática (SAST) de todo lo que se va a promover.  | Checklist opción 1, `scope=project` | `@analizar-seguridad scope=project sobre release/vX.Y.Z` |
-| `analizar-calidad-codigo` | Code smells y violaciones arquitectónicas del release completo  | Checklist opción 1, `scope=project` | `@analizar-calidad-codigo scope=project sobre release/vX.Y.Z` |
+| `sac-analizar-seguridad` | Auditoría estática (SAST) de todo lo que se va a promover.  | Checklist opción 1, `scope=commits` | `@sac-analizar-seguridad scope=commits sobre release/vX.Y.Z` |
+| `sac-analizar-calidad-codigo` | Code smells y violaciones arquitectónicas de los cambios del release  | Checklist opción 1, `scope=commits` | `@sac-analizar-calidad-codigo scope=commits sobre release/vX.Y.Z` |
 | `auto-versioning` | Calcula la versión siguiente según SemVer (breaking→MAJOR, feature→MINOR, fix→PATCH) | Regla 2 (inputs de Opción 1 y 2b) | `@auto-versioning calcular próxima versión desde el último tag (sin crear tag)` |
 
 Al ejecutar estas skills, **reflejar su resultado en el checklist de entrega** (marcar `[✓]`/`[✗]` sobre la copia de la entrega, nunca sobre la plantilla) — ver instrucción de uso al final de `references/checklist-entrega.txt`.

@@ -1,0 +1,120 @@
+"""Config SAC unificada: .SAC/config/sac.json (usuario + rutas del sistema + estado de skills).
+
+- ensure_sac_config: crea desde la plantilla o fusiona (solo agrega claves que faltan).
+- resolve_project_root: reemplaza {project-root} sobre el árbol YA parseado (JSON siempre válido).
+- deep_merge_missing: núcleo de la fusión; nunca pisa valores del usuario.
+"""
+
+import json
+import os
+import shutil
+import sys
+import time
+from pathlib import Path
+
+from . import paths
+from .atomico import write_text_atomic
+
+CONFIG_NAME = "sac.json"
+
+
+class SacConfigError(Exception):
+    pass
+
+
+def sac_config_path(project):
+    return Path(project) / paths.SAC_DIR / "config" / CONFIG_NAME
+
+
+def deep_merge_missing(base, template):
+    """Devuelve base con las claves de template que le faltan. No reemplaza valores
+    existentes ni toca listas (son datos del usuario)."""
+    out = dict(base)
+    for k, v in template.items():
+        if k not in out:
+            out[k] = v
+        elif isinstance(out[k], dict) and isinstance(v, dict):
+            out[k] = deep_merge_missing(out[k], v)
+    return out
+
+
+def _rebase(tree, viejo, nuevo):
+    """Cambia el prefijo `viejo` por `nuevo` en los strings del árbol (rutas derivadas de la raíz)."""
+    if isinstance(tree, str):
+        return nuevo + tree[len(viejo):] if tree == viejo or tree.startswith(viejo + "/") else tree
+    if isinstance(tree, dict):
+        return {k: _rebase(v, viejo, nuevo) for k, v in tree.items()}
+    return tree
+
+
+def resolve_project_root(tree, project):
+    """Reemplaza {project-root} en los strings del árbol parseado."""
+    if isinstance(tree, str):
+        return tree.replace("{project-root}", str(project))
+    if isinstance(tree, dict):
+        return {k: resolve_project_root(v, project) for k, v in tree.items()}
+    if isinstance(tree, list):
+        return [resolve_project_root(v, project) for v in tree]
+    return tree
+
+
+def _ask_project_config(project, interactive):
+    """Entrevista para usuario/idioma. Sin TTY -> valores por defecto."""
+    default_user = os.environ.get("USER") or os.environ.get("USERNAME") or "Usuario"
+    if not (interactive and sys.stdin.isatty()):
+        return {"nombre": default_user, "idioma": "es"}
+
+    print(f"\n{'═' * 60}")
+    print("  📝 CONFIGURACIÓN DEL PROYECTO")
+    print(f"{'═' * 60}")
+    print("  (Enter = valor por defecto)\n")
+    nombre = input(f"  Tu nombre [{default_user}]: ").strip() or default_user
+    print("\n  Idioma:  [1] Español (es)  [2] English (en)  [3] Português (pt)")
+    idioma = {"1": "es", "2": "en", "3": "pt"}.get(input("  Selección [1]: ").strip(), "es")
+    return {"nombre": nombre, "idioma": idioma}
+
+
+def _write(path, tree):
+    write_text_atomic(path, json.dumps(tree, indent=2, ensure_ascii=False) + "\n")
+
+
+def ensure_sac_config(cache, project, interview=False, interactive=True):
+    """Crea .SAC/config/sac.json desde la plantilla del cache, o lo fusiona si ya existe.
+    - Existe: agrega solo claves nuevas de la plantilla; no entrevista.
+    - Nuevo: resuelve {project-root}; con interview=True rellena usuario/idiomas.
+    - Existente inválido: lo respalda como sac.json.bad, NO lo pisa y lanza SacConfigError.
+    Devuelve la ruta de sac.json."""
+    src = Path(cache) / "config" / "config" / CONFIG_NAME
+    if not src.exists():
+        raise SacConfigError(f"plantilla {CONFIG_NAME} no está en el cache ({src})")
+    tpl = resolve_project_root(json.loads(src.read_text(encoding="utf-8")), project)
+    dst = sac_config_path(project)
+    dst.parent.mkdir(parents=True, exist_ok=True)
+
+    if dst.exists():
+        try:
+            actual = json.loads(dst.read_bytes().decode("utf-8-sig"))     # tolera BOM de editores Windows
+            if not isinstance(actual, dict):
+                raise ValueError("la raíz no es un objeto")
+        except ValueError as e:                        # JSONDecodeError es ValueError
+            bad = dst.with_name(CONFIG_NAME + ".bad")
+            if bad.exists():                           # no pisar una copia anterior
+                bad = dst.with_name(f"{CONFIG_NAME}.bad.{int(time.time())}")
+            shutil.copyfile(dst, bad)                  # byte a byte: también si está cortado a mitad de un carácter
+            raise SacConfigError(
+                f"{dst} no es JSON válido ({e}); copia en {bad.name}. Corrígelo o bórralo y reinstala.")
+        raiz = actual.get("documentacion_sac_path")      # claves nuevas se derivan de la raíz del usuario
+        if isinstance(raiz, str) and raiz:
+            tpl = _rebase(tpl, tpl["documentacion_sac_path"], raiz)
+        merged = deep_merge_missing(actual, tpl)
+        if merged != actual:
+            _write(dst, merged)
+        return dst
+
+    if interview:
+        a = _ask_project_config(project, interactive)
+        tpl["usuario"]["nombre"] = a["nombre"]
+        tpl["idiomas"]["documentacion"] = a["idioma"]
+        tpl["idiomas"]["comunicacion"] = a["idioma"]
+    _write(dst, tpl)
+    return dst

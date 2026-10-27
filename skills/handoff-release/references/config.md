@@ -2,9 +2,21 @@
 
 ## Carga de configuración
 
-Buscar `memory_skill.json` con `glob **/memory_skill.json`. Si no existe, crear en `skills/memory_skill.json` (al mismo nivel que las carpetas de skills). Leer sección `[handoff-release]` del archivo. Si campos son `null`, usar los defaults indicados.
+Leer la sección `handoff-release` de `.SAC/config/sac.json` con memctl (solo lectura; su salida ES la respuesta; si memctl no existe (exit 127), leer `.SAC/config/sac.json` con `jq`; si sale con exit 1 (JSON inválido o vacío), detenerse y avisar: no leer ni editar el archivo a mano; nunca inventar valores):
 
-**Ruta de artefactos:** usar `output_folder` global de `memory_skill.json`. Si es `null`, preguntar al usuario la carpeta donde guardar artefactos de releases.
+Ejecutar cada comando: **su salida ES el valor del placeholder** de su fila y se usa tal cual en el resto de esta skill (no recalcular ni inventar rutas):
+
+| Placeholder / dato | Valor = salida de |
+|---|---|
+| `handoff-release.config.environments.dev` (.staging / .prod) | `sh .SAC/memctl.sh get handoff-release.config.environments.dev` |
+| `handoff-release.config.roles.preparer` (.deployer) | `sh .SAC/memctl.sh get handoff-release.config.roles.preparer` |
+| `handoff-release.config.branch_format` | `sh .SAC/memctl.sh get handoff-release.config.branch_format` |
+| `handoff-release.config.tag_format` | `sh .SAC/memctl.sh get handoff-release.config.tag_format` |
+| `{documentacion_sac_path}` | `sh .SAC/memctl.sh get documentacion_sac_path` |
+
+Si un campo es `null` o memctl sale con exit 2, usar los defaults indicados. Si `.SAC/config/sac.json` no existe, la instalación SAC está incompleta: indicar al usuario que ejecute `diat`; no crear el archivo a mano.
+
+**Ruta de artefactos:** guardar en `{documentacion_sac_path}/handoff_release/` (crear la subcarpeta si no existe; nunca escribir fuera de `{documentacion_sac_path}`).
 
 ## Configuración (`config`)
 
@@ -22,4 +34,4 @@ Buscar `memory_skill.json` con `glob **/memory_skill.json`. Si no existe, crear 
 
 1. Mostrar configuración actual (ambientes, responsables, formatos).
 2. Preguntar qué cambiar: [E] Ambientes / [R] Responsables / [F] Formatos / [G] Guardar / [C] Cancelar.
-3. Guardar cambios en `memory_skill.json` → sección `[handoff-release].config`.
+3. Guardar cambios en `.SAC/config/sac.json` → sección `handoff-release.config` (editando solo esa sección).

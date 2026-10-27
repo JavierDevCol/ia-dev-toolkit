@@ -199,7 +199,7 @@ claude mcp add --scope user --transport http <nombre> <url>
 - **Paquete:** `@azure-devops/mcp@latest`
 - **Organización:** `GestionRequerimientos`
 - **Herramientas:** 90 tools en 9 categorías
-- **Uso:** Skills ADO (orchestrator, hu-publisher, task-creator, pr-creator, pr-reviewer, pipeline-analyzer, profile-setup)
+- **Uso:** Skills ADO (orchestrator, ado-hu-publisher, ado-task-creator, ado-pr-creator, ado-pr-reviewer, ado-pipeline-analyzer, ado-profile-setup)
 
 ### Context7
 

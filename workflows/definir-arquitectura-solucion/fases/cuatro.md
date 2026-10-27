@@ -37,7 +37,7 @@ Si `./artifacts/ADR/ADR-004-devops-y-comunicacion.md` ya existe:
 
 Documento formal `./artifacts/ADR/ADR-004-devops-y-comunicacion.md` generado tras recibir el visto bueno del usuario.
 
-Leer también `CONFIG_USER.yaml` (ruta en `archivos.config_user`) y tomar `usuario.nombre` → **`{{usuario.nombre}}`**, necesario para firmar el ADR. Si está vacío o el archivo no existe, omitir el sufijo de la firma; no inventar un nombre.
+Leer con memctl `sh .SAC/memctl.sh get usuario.nombre` y `sh .SAC/memctl.sh get usuario.incluir_firma_en_documentos` (solo lectura; si falla, omitir la firma) y tomar `usuario.nombre` → **`{{usuario.nombre}}`**, necesario para firmar el ADR. Si está vacío o la clave no existe, omitir el sufijo de la firma; no inventar un nombre.
 
 Al final del ADR generado, agregar:
 

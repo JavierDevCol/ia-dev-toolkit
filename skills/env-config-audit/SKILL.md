@@ -33,29 +33,55 @@ Analiza un PR/diff y clasifica variables, colas y secretos por ámbito (pipeline
 
 ## Implementation
 
+**Configuración:** leer con memctl (`.SAC/config/sac.json`; solo lectura, su salida ES la respuesta; `null`/exit 2 → falta; si memctl no existe (exit 127), leer con `jq`; exit 1 (JSON inválido o vacío) → detenerse y avisar, sin leer ni editar el archivo a mano; la persistencia edita solo la clave o sección indicada):
+
+Ejecutar cada comando: **su salida ES el valor del placeholder** de su fila y se usa tal cual en el resto de esta skill (no recalcular ni inventar rutas):
+
+| Placeholder / dato | Valor = salida de |
+|---|---|
+| `env-config-audit.config.ambientes` | `sh .SAC/memctl.sh get env-config-audit.config.ambientes` |
+| `{{usuario.nombre}}` | `sh .SAC/memctl.sh get usuario.nombre` |
+| `usuario.incluir_firma_en_documentos` | `sh .SAC/memctl.sh get usuario.incluir_firma_en_documentos` |
+| `{documentacion_sac_path}` | `sh .SAC/memctl.sh get documentacion_sac_path` |
+
+
+| Campo | Ubicación | Si falta |
+|-------|-----------|----------|
+| `ambientes` | `env-config-audit.config.ambientes` — lista **ordenada** = orden de promoción, ej. `["develop","des","pru","prepro","pro"]` | Preguntar una vez y persistir |
+| `usuario.nombre` | global | Preguntar una vez y persistir en `usuario.nombre` |
+| `usuario.incluir_firma_en_documentos` | global | `true` |
+| `documentacion_sac_path` | global | No preguntar: es la raíz de salida; si falta, avisar "No hay instalación SAC" |
+
+**Inicio (cada ejecución):** preguntar:
+1. **Repo:** sugerir el nombre del remoto git (`git remote get-url origin`); `{nombre_ms}` = nombre del repo.
+2. **Qué auditar:** un **ambiente de entrega** de `ambientes` o un **rango de diff** explícito (ej. `develop..release/v1.3.2`, se usa tal cual).
+   - Ambiente → destino = ese ambiente, origen = el anterior en la lista (las ramas se llaman igual que el ambiente). Ej. `pru` → `git diff origin/pru...origin/des`.
+   - Si la rama origen o destino no existe, o el ambiente es el primero de la lista: detenerse y preguntar qué rama usar.
+
 **Fase 0 — Tipo de análisis:** MS nuevo (inventario completo) o funcionalidad (solo delta del PR).
 
 **Fase A — Detección:** Analizar diff para variables en código, config, pipeline CI/CD, colas RabbitMQ, Redis, migraciones y secretos hardcodeados.
 
 **Fase B — Clasificación:** Para cada variable/cola/redis/migración, registrar nombre, ámbito, origen, acción y destino exacto. Usar tablas-template de `references/templates.md`.
 
-**Fase C — Entrevista:** Agrupar variables sin origen y preguntar al usuario. Confirmar VG por ambiente, path de Vault, ruta de salida.
+**Fase C — Entrevista:** Agrupar variables sin origen y preguntar al usuario. Nombres de VG y paths de Vault se toman de lo encontrado en el proyecto (`- group:` en el pipeline, rutas de Vault en config/código); no se consultan por defecto.
 
 **Fase D — Preview:** Mostrar resumen consolidado (ver `references/preview-example.md`). Solo incluir secciones con cambios.
 
-**Fase E — Generación:** Crear `config-entorno_{nombre_ms}_vX.Y.Z.md` según template `assets/template-config-entorno.md` — la versión es la del release o RC entregado (misma `vX.Y.Z`/`vX.Y.Z-rc.N` del flujo) y el ID del PR va en la cabecera del documento, no en el nombre. Leer también `CONFIG_USER.yaml` (ruta en `archivos.config_user`) y tomar `usuario.nombre` → **`{{usuario.nombre}}`**, necesario para firmar el documento. Si `usuario.incluir_firma_en_documentos` es `false`, omitir el bloque de firma. Si el nombre está vacío o el archivo no existe, omitir el sufijo de la firma; no inventar un nombre. Antes del pie `*Documento generado con env-config-audit skill*`, agregar:
+**Fase E — Generación:** Crear `config-entorno_{nombre_ms}_vX.Y.Z.md` según template `assets/template-config-entorno.md` — la versión es la del release o RC entregado (misma `vX.Y.Z`/`vX.Y.Z-rc.N` del flujo) y el ID del PR va en la cabecera del documento, no en el nombre. Firma con `usuario.nombre` → **`{{usuario.nombre}}`**; si `usuario.incluir_firma_en_documentos` es `false`, omitir el bloque de firma. No inventar un nombre. Antes del pie `*Documento generado con env-config-audit skill*`, agregar:
 ```
 > **Auditor:** {{usuario.nombre}}
 > **Fecha:** {{fecha}}
 ```
-Sin `usuario.nombre` configurado, la línea queda `> **Auditor:**`.
+
+**Verificar existencia (solo si el usuario lo pide):** buscar en el proyecto los nombres de VG (`- group:` en `azure-pipelines.yml`/`.azuredevops/`) y los paths de Vault (config/código); consultar los VG con `ado-variable-groups` y Vault con `vault-manager` usando lo encontrado; reportar existe/falta por variable.
 
 **Reglas obligatorias:**
 1. Solo documentar configuración — nada de setup, infra, deploy, health checks
 2. Nunca asumir origen de variables — preguntar con archivo+línea
 3. Nunca incluir secretos reales; alertar si hay secretos commiteados
 4. Si el usuario no sabe el origen → `⚠️ Pendiente de definir`
-5. Usar `output_folder` global de `memory_skill.json` como ruta de salida. Si es `null`, preguntar al usuario la carpeta donde guardar los reportes de auditoría.
+5. Guardar solo en `{documentacion_sac_path}/config_entorno/` (crear la subcarpeta si no existe).
 
 ## Quick Reference
 
