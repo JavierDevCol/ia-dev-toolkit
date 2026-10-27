@@ -4,15 +4,10 @@
     "nombre": "Tester",
     "rol": "developer"
   },
+  "documentacion_sac_path": "/home/javier-garcia/Documentos/squad-skills/tests/e2e/scripts/../fixtures/workspace-multi/artifacts",
   "proyecto": {
     "nombre": "multi-test",
     "tipo": "multi"
-  },
-  "rutas": {
-    "artifacts_folder": "/home/javier-garcia/Documentos/squad-skills/tests/e2e/scripts/../fixtures/workspace-multi/artifacts",
-    "config_folder": "/home/javier-garcia/Documentos/squad-skills/tests/e2e/scripts/../fixtures/workspace-multi/.SAC/config",
-    "herramientas_folder": "/home/javier-garcia/Documentos/squad-skills/tests/e2e/scripts/../fixtures/workspace-multi/.SAC/herramientas",
-    "agentes_folder": "/home/javier-garcia/Documentos/squad-skills/tests/e2e/scripts/../fixtures/workspace-multi/.SAC/agentes"
   },
   "archivos": {
     "backlog": "/home/javier-garcia/Documentos/squad-skills/tests/e2e/scripts/../fixtures/workspace-multi/artifacts/backlog_desarrollo.md",

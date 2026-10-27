@@ -48,7 +48,8 @@ class ConvertFixtureTest(unittest.TestCase):
             self.assertEqual(tree["schema_version"], 1)
             self.assertEqual(tree["artifacts"]["hu_folder"], "{WORKSPACE}/artifacts/HU")   # placeholder intacto
             self.assertEqual(tree["archivos"], {"backlog": "{WORKSPACE}/artifacts/backlog_desarrollo.md"})
-            self.assertEqual(tree["rutas"], {"artifacts_folder": "{WORKSPACE}/artifacts"})
+            self.assertEqual(tree["documentacion_sac_path"], "{WORKSPACE}/artifacts")
+            self.assertNotIn("rutas", tree)
             self.assertEqual(tree["usuario"]["nombre"], "Javier Garcia")
             self.assertIs(tree["usuario"]["incluir_firma_en_documentos"], True)
             self.assertEqual(tree["proyecto"]["nombre"], "mi-proyecto")

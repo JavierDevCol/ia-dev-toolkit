@@ -36,6 +36,15 @@ def deep_merge_missing(base, template):
     return out
 
 
+def _rebase(tree, viejo, nuevo):
+    """Cambia el prefijo `viejo` por `nuevo` en los strings del árbol (rutas derivadas de la raíz)."""
+    if isinstance(tree, str):
+        return nuevo + tree[len(viejo):] if tree == viejo or tree.startswith(viejo + "/") else tree
+    if isinstance(tree, dict):
+        return {k: _rebase(v, viejo, nuevo) for k, v in tree.items()}
+    return tree
+
+
 def resolve_project_root(tree, project):
     """Reemplaza {project-root} en los strings del árbol parseado."""
     if isinstance(tree, str):
@@ -90,6 +99,9 @@ def ensure_sac_config(cache, project, interview=False, interactive=True):
             shutil.copyfile(dst, bad)                  # byte a byte: también si está cortado a mitad de un carácter
             raise SacConfigError(
                 f"{dst} no es JSON válido ({e}); copia en {bad.name}. Corrígelo o bórralo y reinstala.")
+        raiz = actual.get("documentacion_sac_path")      # claves nuevas se derivan de la raíz del usuario
+        if isinstance(raiz, str) and raiz:
+            tpl = _rebase(tpl, tpl["documentacion_sac_path"], raiz)
         merged = deep_merge_missing(actual, tpl)
         if merged != actual:
             _write(dst, merged)

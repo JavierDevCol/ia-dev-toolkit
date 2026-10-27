@@ -8,13 +8,7 @@
     "documentacion": "",
     "comunicacion": ""
   },
-  "output_folder": null,
-  "rutas_override": {
-    "artifacts_folder": ""
-  },
-  "rutas": {
-    "artifacts_folder": "{project-root}/artifacts"
-  },
+  "documentacion_sac_path": "{project-root}/artifacts",
   "archivos": {
     "backlog": "{project-root}/artifacts/backlog_desarrollo.md",
     "reglas_arquitectonicas": "{project-root}/artifacts/reglas_arquitectonicas.md",

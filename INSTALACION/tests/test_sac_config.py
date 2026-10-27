@@ -7,8 +7,8 @@ REPO = Path(__file__).resolve().parents[2]
 from diatlib import sac_config, instalar  # noqa: E402
 from _helpers import _cache_con_plantilla  # noqa: E402
 SKILL_SECTIONS = ("ado", "handoff-release", "env-config-audit", "gh-pr-reviewer")
-RESERVED = {"schema_version", "usuario", "idiomas", "proyecto", "output_folder", "rutas",
-            "rutas_override", "archivos", "artifacts", "rutas_reglas", "reglas", "multi_proyecto"}
+RESERVED = {"schema_version", "usuario", "idiomas", "documentacion_sac_path",
+            "archivos", "artifacts", "multi_proyecto"}
 
 
 class PlantillaTest(unittest.TestCase):
@@ -25,15 +25,21 @@ class PlantillaTest(unittest.TestCase):
         self.assertIsNone(t["ado"]["config"]["perfil_activo"])
         self.assertIsNone(t["gh-pr-reviewer"]["config"]["coding_standards_path"])
         self.assertNotIn("config_user", t["archivos"])
-        self.assertNotIn("output_folder", t["rutas"])
-        self.assertIsNone(t["output_folder"])
+        self.assertEqual(t["documentacion_sac_path"], "{project-root}/artifacts")
+
+    def test_una_sola_raiz_de_documentacion(self):
+        t = self.t
+        for k in ("rutas", "rutas_override", "output_folder"):
+            self.assertNotIn(k, t)
+        raiz = t["documentacion_sac_path"]
+        for sec in ("archivos", "artifacts"):
+            for k, v in t[sec].items():
+                self.assertTrue(v.startswith(raiz + "/"), f"{sec}.{k} fuera de documentacion_sac_path: {v}")
 
     def test_plantilla_sin_campos_muertos(self):
         t = self.t
         for sec in ("proyecto", "rutas_reglas", "reglas"):
             self.assertNotIn(sec, t)
-        for k in ("config_folder", "herramientas_folder", "agentes_folder"):
-            self.assertNotIn(k, t["rutas"])
         self.assertNotIn("bugs_folder", t["artifacts"])
         self.assertEqual(set(t["multi_proyecto"]), {"patron_contexto"})
         for k in ("code_smells_folder", "pendientes_folder", "deuda_tecnica_folder", "lecciones_aprendidas"):
@@ -50,6 +56,16 @@ class PlantillaTest(unittest.TestCase):
 
 
 class EnsureSacConfigTest(unittest.TestCase):
+    def test_claves_derivadas_siguen_la_raiz_del_usuario(self):
+        self.setUp()
+        self.dst.parent.mkdir(parents=True)
+        self.dst.write_text('{"documentacion_sac_path": "/x/docs"}', encoding="utf-8")
+        sac_config.ensure_sac_config(self.cache, self.proj)
+        t = json.loads(self.dst.read_text(encoding="utf-8"))
+        self.assertEqual(t["documentacion_sac_path"], "/x/docs")
+        self.assertEqual(t["artifacts"]["hu_folder"], "/x/docs/HU")
+        self.assertEqual(t["archivos"]["backlog"], "/x/docs/backlog_desarrollo.md")
+
     def setUp(self):
         self._tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self._tmp.cleanup)

@@ -3,7 +3,8 @@
 
 Uso: python3 scripts/migrar_fixtures_sac.py <raiz> [<raiz>...]
 Solo del repo (no se instala). Conserva los placeholders del fixture ({WORKSPACE}...) y
-las claves que ya traía; elimina archivos.config_user y rutas.output_folder (ya no existen).
+las claves que ya traía; elimina archivos.config_user y rutas.output_folder (ya no existen) y convierte
+rutas.artifacts_folder en la raíz única documentacion_sac_path.
 """
 import json
 import sys
@@ -29,6 +30,10 @@ def convert_dir(cfg):
             kept = {k: v for k, v in vals.items() if (sec, k) not in DESCARTADAS}
             if kept:
                 tree[sec] = kept
+    ruta = tree.pop("rutas", {}).get("artifacts_folder")
+    tree.pop("rutas_override", None)
+    if ruta:
+        tree["documentacion_sac_path"] = ruta
     (cfg / "sac.json").write_text(json.dumps(tree, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     for f in (system, user):
         f.unlink(missing_ok=True)

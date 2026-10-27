@@ -4,15 +4,10 @@
     "nombre": "Tester",
     "rol": "developer"
   },
+  "documentacion_sac_path": "/home/javier-garcia/Documentos/squad-skills/tests/e2e/scripts/../fixtures/workspace-mono/artifacts",
   "proyecto": {
     "nombre": "mi-proyecto",
     "tipo": "mono"
-  },
-  "rutas": {
-    "artifacts_folder": "/home/javier-garcia/Documentos/squad-skills/tests/e2e/scripts/../fixtures/workspace-mono/artifacts",
-    "config_folder": "/home/javier-garcia/Documentos/squad-skills/tests/e2e/scripts/../fixtures/workspace-mono/.SAC/config",
-    "herramientas_folder": "/home/javier-garcia/Documentos/squad-skills/tests/e2e/scripts/../fixtures/workspace-mono/.SAC/herramientas",
-    "agentes_folder": "/home/javier-garcia/Documentos/squad-skills/tests/e2e/scripts/../fixtures/workspace-mono/.SAC/agentes"
   },
   "archivos": {
     "backlog": "/home/javier-garcia/Documentos/squad-skills/tests/e2e/scripts/../fixtures/workspace-mono/artifacts/backlog_desarrollo.md",

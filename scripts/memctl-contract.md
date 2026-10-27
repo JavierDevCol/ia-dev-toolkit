@@ -83,8 +83,8 @@ Perfiles ADO: el perfil es un mapa por nombre, así que se resuelve en dos pasos
 ## Nombres reservados de `sac.json`
 
 Ninguna sección de skill puede usar estos nombres:
-`schema_version, usuario, idiomas, proyecto, output_folder, rutas, rutas_override,
-archivos, artifacts, rutas_reglas, reglas, multi_proyecto`.
+`schema_version, usuario, idiomas, documentacion_sac_path, archivos, artifacts,
+multi_proyecto`.
 Las secciones de skill viven al tope del archivo (`ado`, `handoff-release`,
 `env-config-audit`, `gh-pr-reviewer`).
 

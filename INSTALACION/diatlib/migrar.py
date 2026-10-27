@@ -2,7 +2,7 @@
 
 Legado: .SAC/config/CONFIG_USER.yaml, CONFIG_SYSTEM.yaml y <plataforma>/skills/memory_skill.json.
 - CONFIG_SYSTEM.yaml NO se migra (se regenera desde la plantilla).
-- Se genera un sac.json PARCIAL (usuario/idiomas/rutas_override/output_folder/secciones de skill);
+- Se genera un sac.json PARCIAL (usuario/idiomas/documentacion_sac_path/secciones de skill);
   ensure_sac_config completa el resto desde la plantilla.
 - Solo migra si sac.json aún no existe. Los legados se renombran a *.legacy tras escribir.
 """
@@ -118,10 +118,9 @@ def migrate_legacy(project):
     tree = {"schema_version": 1, "usuario": {"nombre": nombre, "incluir_firma_en_documentos": firma}}
     if "idiomas" in yu:
         tree["idiomas"] = {k: v or "" for k, v in yu["idiomas"].items()}
-    if "rutas_override" in yu:                            # override de carpeta de artifacts (lo lee tomar-contexto)
-        tree["rutas_override"] = {k: v or "" for k, v in yu["rutas_override"].items()}
-    if "output_folder" in mem:
-        tree["output_folder"] = mem["output_folder"]
+    raiz = (yu.get("rutas_override") or {}).get("artifacts_folder")   # override legado -> raíz única de documentos
+    if raiz:
+        tree["documentacion_sac_path"] = str(Path(project) / raiz)     # relativa -> bajo el proyecto; absoluta queda igual
     for k, v in mem.items():
         if k not in _RAIZ_LEGADA:
             tree[k] = v

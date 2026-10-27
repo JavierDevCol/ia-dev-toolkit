@@ -50,10 +50,17 @@ class MigrarTest(unittest.TestCase):
         self.assertTrue((self.p / ".SAC/config/CONFIG_USER.yaml.legacy").exists())
         self.assertFalse((self.p / ".SAC/config/CONFIG_USER.yaml").exists())
 
-    def test_rutas_override_se_migra(self):
+    def test_rutas_override_pasa_a_documentacion_sac_path(self):
         self.yaml_user(USER_YAML + 'rutas_override:\n  artifacts_folder: "docs/artifacts"\n')
         migrar.migrate_legacy(self.p)
-        self.assertEqual(self.sac()["rutas_override"], {"artifacts_folder": "docs/artifacts"})
+        t = self.sac()
+        self.assertEqual(t["documentacion_sac_path"], str(self.p / "docs/artifacts"))   # relativa -> bajo el proyecto
+        self.assertNotIn("rutas_override", t)
+
+    def test_override_vacio_no_fija_raiz(self):
+        self.yaml_user(USER_YAML + 'rutas_override:\n  artifacts_folder: ""\n')
+        migrar.migrate_legacy(self.p)
+        self.assertNotIn("documentacion_sac_path", self.sac())
 
     def test_yaml_con_comentarios_y_comillas(self):
         self.yaml_user('usuario:\n  nombre: "A # B"   # c\n  incluir_firma_en_documentos: true\n')
@@ -79,7 +86,7 @@ class MigrarTest(unittest.TestCase):
         migrar.migrate_legacy(self.p)
         t = self.sac()
         self.assertEqual(t["usuario"], {"nombre": "Beto", "incluir_firma_en_documentos": False})
-        self.assertEqual(t["output_folder"], "/out")
+        self.assertNotIn("output_folder", t)                  # ya no existe: todo va bajo documentacion_sac_path
         self.assertNotIn("user_name", t)
         self.assertTrue((self.p / ".claude/skills/memory_skill.json.legacy").exists())
 
@@ -93,18 +100,19 @@ class MigrarTest(unittest.TestCase):
         self.assertEqual(avisos, [])
 
     def test_conflicto_mtime_avisa(self):
-        self.memory(".claude", {"output_folder": "/nuevo"}, mtime=2000)
-        self.memory(".opencode", {"output_folder": "/viejo"}, mtime=1000)
+        self.memory(".claude", {"ado": {"config": {"perfil_activo": "nuevo"}}}, mtime=2000)
+        self.memory(".opencode", {"ado": {"config": {"perfil_activo": "viejo"}}}, mtime=1000)
         avisos = migrar.migrate_legacy(self.p)
-        self.assertEqual(self.sac()["output_folder"], "/nuevo")
+        self.assertEqual(self.sac()["ado"]["config"]["perfil_activo"], "nuevo")
         self.assertEqual(len(avisos), 1)
-        self.assertIn("output_folder", avisos[0])
+        self.assertIn("perfil_activo", avisos[0])
 
     def test_no_migra_system_yaml(self):
         (self.p / ".SAC/config/CONFIG_SYSTEM.yaml").write_text('rutas:\n  artifacts_folder: "/otro"\n', encoding="utf-8")
         self.yaml_user()
         migrar.migrate_legacy(self.p)
         self.assertNotIn("rutas", self.sac())
+        self.assertNotIn("documentacion_sac_path", self.sac())
         self.assertTrue((self.p / ".SAC/config/CONFIG_SYSTEM.yaml.legacy").exists())
 
     def test_idempotente_sin_legado(self):
