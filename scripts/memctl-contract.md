@@ -9,7 +9,7 @@ comportamiento en OpenCode, Claude Code, Codex o cualquier harness.
 > 1. Si `.SAC/memctl.sh` (Unix) o `.SAC/memctl.ps1` (Windows) existe, úsalo
 >    (en el repo fuente: `scripts/`). La respuesta que devuelve ES la respuesta.
 > 2. Si no existe (exit 127), resuelve con `jq` / lectura directa del archivo respetando el
->    mismo contrato de salida (en instalación global, prueba `~/.SAC/memctl.sh`). Si memctl
+>    mismo contrato de salida. Si memctl
 >    existe y sale con **exit 1** (JSON inválido, truncado o vacío): detente y avisa; **no leas
 >    ni edites el archivo a mano**.
 > 3. Nunca inventes un valor. Si la clave no existe o el formato no se puede
@@ -78,7 +78,7 @@ en el resto de la skill (no recalcular ni inventar rutas):
 
 - Exit 0 + `null` → dato no configurado: aplicar el flujo "pregunta una vez y persiste" de esta skill.
 - Exit 2 → clave o archivo inexistente: tratarlo como no configurado.
-- Exit 127 (memctl no existe) → leer `.SAC/config/sac.json` con `jq`, o usar `~/.SAC/memctl.sh` en instalación global.
+- Exit 127 (memctl no existe) → leer `.SAC/config/sac.json` con `jq`.
 - Exit 1 (JSON inválido, truncado o vacío) → detenerse y avisar al usuario: no leer ni editar el archivo a mano. Nunca inventar valores.
 - Consultar solo las claves de esta skill; no volcar secciones completas con datos de terceros.
 ````
