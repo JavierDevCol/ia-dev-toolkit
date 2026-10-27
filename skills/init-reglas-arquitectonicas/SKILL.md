@@ -29,7 +29,7 @@ Genera un set de reglas arquitectónicas para el proyecto mediante un cuestionar
 **Flujo completo:** Ver [references/proceso.md](references/proceso.md) para pasos detallados del cuestionario y generación.
 
 **Resumen:**
-1. Cargar config desde `.SAC/config/CONFIG_SYSTEM.yaml` y contexto del proyecto
+1. Cargar config con memctl (`sh .SAC/memctl.sh get archivos.reglas_arquitectonicas`, ver `references/proceso.md`) y contexto del proyecto
 2. Detectar si existen reglas → ofrecer Ver / Editar / Regenerar
 3. Ejecutar cuestionario pregunta por pregunta (8 secciones, ver tabla abajo)
 4. Mostrar documento completo → esperar confirmación OK
