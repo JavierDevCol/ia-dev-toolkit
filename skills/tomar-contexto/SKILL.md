@@ -63,26 +63,28 @@ digraph workspace_detection {
 ## Implementation
 
 ### Fase A: Cargar y Confirmar
-1. Leer la config con memctl (`documentacion_sac_path` = raíz única donde se crean todas las carpetas y archivos; `hu_folder`, `contextos_folder`, `adr_folder`, `code_smells_folder`, `deuda_tecnica_folder`, `pendientes_folder`, `lecciones_aprendidas` = `artifacts.*`; `backlog`, `reglas_arquitectonicas`, `workspace` = `archivos.*`; `patron_contexto` = `multi_proyecto.patron_contexto`; idioma y `usuario.nombre` → `{{usuario.nombre}}`, usado en la Fase C si `usuario.incluir_firma_en_documentos` es `true`):
+1. Leer la config con memctl (`{documentacion_sac_path}` es la raíz única donde se crean todas las carpetas y archivos; `{{usuario.nombre}}` se usa en la Fase C si `usuario.incluir_firma_en_documentos` es `true`):
 
-```sh
-sh .SAC/memctl.sh get usuario.nombre
-sh .SAC/memctl.sh get usuario.incluir_firma_en_documentos
-sh .SAC/memctl.sh get documentacion_sac_path
-sh .SAC/memctl.sh get artifacts.hu_folder
-sh .SAC/memctl.sh get artifacts.contextos_folder
-sh .SAC/memctl.sh get artifacts.adr_folder
-sh .SAC/memctl.sh get artifacts.code_smells_folder
-sh .SAC/memctl.sh get artifacts.deuda_tecnica_folder
-sh .SAC/memctl.sh get artifacts.pendientes_folder
-sh .SAC/memctl.sh get artifacts.lecciones_aprendidas
-sh .SAC/memctl.sh get archivos.workspace
-sh .SAC/memctl.sh get archivos.backlog
-sh .SAC/memctl.sh get archivos.reglas_arquitectonicas
-sh .SAC/memctl.sh get multi_proyecto.patron_contexto
-sh .SAC/memctl.sh get idiomas.documentacion
-sh .SAC/memctl.sh get idiomas.comunicacion
-```
+Ejecutar cada comando: **su salida ES el valor del placeholder** de su fila y se usa tal cual en el resto de esta skill (no recalcular ni inventar rutas):
+
+| Placeholder / dato | Valor = salida de |
+|---|---|
+| `{{usuario.nombre}}` | `sh .SAC/memctl.sh get usuario.nombre` |
+| `usuario.incluir_firma_en_documentos` | `sh .SAC/memctl.sh get usuario.incluir_firma_en_documentos` |
+| `{documentacion_sac_path}` | `sh .SAC/memctl.sh get documentacion_sac_path` |
+| `{hu_folder}` | `sh .SAC/memctl.sh get artifacts.hu_folder` |
+| `{contextos_folder}` | `sh .SAC/memctl.sh get artifacts.contextos_folder` |
+| `{adr_folder}` | `sh .SAC/memctl.sh get artifacts.adr_folder` |
+| `{code_smells_folder}` | `sh .SAC/memctl.sh get artifacts.code_smells_folder` |
+| `{deuda_tecnica_folder}` | `sh .SAC/memctl.sh get artifacts.deuda_tecnica_folder` |
+| `{pendientes_folder}` | `sh .SAC/memctl.sh get artifacts.pendientes_folder` |
+| `{lecciones_aprendidas}` | `sh .SAC/memctl.sh get artifacts.lecciones_aprendidas` |
+| `{workspace}` | `sh .SAC/memctl.sh get archivos.workspace` |
+| `{backlog}` | `sh .SAC/memctl.sh get archivos.backlog` |
+| `{reglas_arquitectonicas}` | `sh .SAC/memctl.sh get archivos.reglas_arquitectonicas` |
+| `{patron_contexto}` | `sh .SAC/memctl.sh get multi_proyecto.patron_contexto` |
+| `idiomas.documentacion` | `sh .SAC/memctl.sh get idiomas.documentacion` |
+| `idiomas.comunicacion` | `sh .SAC/memctl.sh get idiomas.comunicacion` |
 
 memctl es solo lectura y su salida ES la respuesta; si memctl no existe (exit 127), leer `.SAC/config/sac.json` con `jq` o usar `~/.SAC/memctl.sh` (instalación global); si sale con exit 1 (JSON inválido o vacío), detenerse y avisar: no leer ni editar el archivo a mano; nunca inventar valores. `null`, vacío o exit 2 → no configurado.
 
