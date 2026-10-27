@@ -69,6 +69,7 @@ Comportamiento:
 | `diat --update [/ruta]` | Actualiza el CLI, el cache y reinstala en los proyectos registrados |
 | `diat --status [/ruta]` | Estado del sistema (sin ruta) o de un proyecto (con ruta) |
 | `diat --list` | Proyectos donde se instalaron componentes |
+| `diat --remove [/ruta]` | Menú para quitar skills, agents, workflows o el paquete Team Dev SAC de un proyecto (sin ruta, el directorio actual). No deja quitar un componente que otro instalado requiere |
 | `diat --uninstall /ruta` | Quita los componentes DIAT de ese proyecto (si hay OpenCode y Claude Code, pregunta cuál o usa `--platform`) |
 | `diat --uninstall` | Desinstala DIAT por completo (CLI + cache + PATH), con confirmación |
 
@@ -136,6 +137,13 @@ usuario/idioma, rutas del sistema (`{project-root}` resuelto al instalar) y el e
 
 ---
 
+### Quitar componentes (`--remove`)
+
+`diat --remove` abre un menú (Skills, Agents, Workflows, Team Dev SAC) con lo instalado en el proyecto. Reglas:
+- **Dependencias:** un componente no se quita si otro que sigue instalado lo requiere (p. ej. `sac-validar-ca` mientras esté `sac-ejecutar-plan`; el runner `exc-workflow-sac` mientras haya workflows). En la lista salen con 🔒 y "requerida por X". Quitar el dependiente y su dependencia a la vez sí se permite. Si algo queda bloqueado no se borra nada.
+- **Registro:** lo quitado sale también de la selección registrada, así que `diat --update` no lo repone.
+- **No toca** `sac.json`, `memctl.sh`, los workflows compartidos con otro harness ni tus skills propias. Para quitar todo el proyecto usa `diat --uninstall /ruta`.
+
 ### Modo no interactivo (CI / scripts)
 
 `--install` salta los menús cuando recibe `--platform` y una selección. Un flag desconocido es un error (exit 2); la ruta debe existir y no puede ser el home.
@@ -168,6 +176,7 @@ INSTALACION/
 │   ├── atomico.py       # escritura atómica (tmp + os.replace)
 │   ├── cli_args.py      # argparse por comando (flags desconocidos = error)
 │   ├── desinstalar.py   # --uninstall (solo borra lo que DIAT copió)
+│   ├── quitar.py        # --remove: quitar componentes sin romper dependencias
 │   ├── instalar.py      # instalación de componentes + memctl
 │   ├── sac_config.py    # .SAC/config/sac.json: crear/fusionar sin pisar valores
 │   ├── migrar.py        # CONFIG_USER.yaml + memory_skill.json -> sac.json

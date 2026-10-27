@@ -11,7 +11,8 @@ Uso:
     diat --update  [/ruta]    Actualizar componentes
     diat --status  [/ruta]    Estado del sistema o de un proyecto
     diat --list               Proyectos con componentes instalados
-    diat --uninstall [/ruta]  Quitar componentes de un proyecto; sin ruta, desinstala DIAT entero
+    diat --remove [/ruta]     Quitar skills, agents, workflows o el paquete SAC (menú; respeta dependencias)
+    diat --uninstall [/ruta]  Quitar TODO lo de un proyecto; sin ruta, desinstala DIAT entero
         [--platform claude|opencode] [--yes] [--dry-run]
 """
 
@@ -23,7 +24,7 @@ from pathlib import Path
 # Hacer importable el paquete diatlib (está junto a este script, en el bin)
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from diatlib import paths, github, deps, registro, instalar, update, entorno, sac_config, cli_args
+from diatlib import paths, github, deps, registro, instalar, update, entorno, sac_config, cli_args, quitar
 from diatlib import menu
 from diatlib import ui
 
@@ -169,13 +170,13 @@ def _seeds_from_flags(args, catalog):
     return list(dict.fromkeys(seeds)), bool(args.team_sac or args.kit), unknown
 
 
-def _resolve_destino(path_arg):
+def _resolve_destino(path_arg, accion="instalará"):
     """Proyecto destino validado, o None (con el error ya impreso). Nunca crea carpetas ni usa ~."""
     if path_arg:
         project = Path(path_arg).resolve()
     else:
         project = Path.cwd()
-        ui.print_warning(f"Sin ruta: se instalará en el directorio actual: {project}")
+        ui.print_warning(f"Sin ruta: se {accion} en el directorio actual: {project}")
     if not project.exists():
         ui.print_error(f"La ruta no existe: {project}")
         return None
@@ -183,7 +184,7 @@ def _resolve_destino(path_arg):
         ui.print_error(f"La ruta no es un directorio: {project}")
         return None
     if project == Path.home().resolve():
-        ui.print_error(f"No se instala en el home ({project}): indica la carpeta de un proyecto.")
+        ui.print_error(f"No se opera sobre el home ({project}): indica la carpeta de un proyecto.")
         return None
     return project
 
@@ -282,6 +283,80 @@ def cmd_install(argv):
         names = installed.get(ctype, [])
         if names:
             print(f"     {ctype} ({len(names)}): {', '.join(names)}")
+
+
+def _team_members(platform):
+    """Componentes del paquete Team Dev SAC (+ sus dependencias), sin red: catálogo del cache local."""
+    try:
+        cat = github.scan_components(paths.get_cache_dir())
+    except Exception:
+        cat = {}
+    members = ({("skills", s) for s in SAC_SKILLS} |
+               {("agents", a) for a in cat.get("agents", ())} |
+               {("workflows", w) for w in cat.get("workflows", ())})
+    return quitar.team_closure(members, platform)
+
+
+def cmd_remove(argv):
+    args = cli_args.parse_remove(argv)
+    ui.print_banner()
+    project = _resolve_destino(args.path, accion="quitará")
+    if project is None:
+        return
+    platform = ask_platform()
+    if platform is None:
+        ui.print_info("Cancelado.")
+        return
+    installed = quitar.installed_by_type(project, platform)
+    if not any(installed.values()):
+        ui.print_info(f"No hay componentes instalados en {project / platform}.")
+        return
+    pistas = quitar.required_by(installed, deps.for_platform(platform))
+
+    options = [("skills", "Skills", f"{len(installed['skills'])} instaladas"),
+               ("agents", "Agents", f"{len(installed['agents'])} instalados"),
+               ("workflows", "Workflows", f"{len(installed['workflows'])} instalados"),
+               ("team_sac", "Team Dev SAC", "Quitar el paquete SAC (sus componentes instalados)")]
+    while True:
+        choice = menu.menu_select(f"QUITAR COMPONENTES — {project / platform}", options)
+        if choice is None:
+            ui.print_info("Cancelado.")
+            return
+        if choice == "team_sac":
+            miembros = _team_members(platform)
+            selected = sorted((t, n) for t, names in installed.items() for n in names if (t, n) in miembros)
+        else:
+            names = sorted(installed[choice])
+            if not names:
+                ui.print_info(f"No hay {choice} instalados.")
+                continue
+            opts = []
+            for n in names:
+                dependientes = pistas.get((choice, n), [])
+                desc = ("🔒 requerida por " + ", ".join(d for _, d in dependientes)) if dependientes else ""
+                opts.append((n, n, desc))
+            picked = menu.multiselect(f"{choice.upper()} INSTALADAS (para quitar)", opts)
+            selected = sorted((choice, n) for n in (picked or ()))
+        if not selected:
+            ui.print_info("No hay nada que quitar con esa elección. Volviendo al menú...")
+            continue
+        break
+
+    bloqueados = quitar.blocked(selected, installed, deps.for_platform(platform))
+    if bloqueados:
+        ui.print_error("No se quitó nada: hay componentes requeridos por otros que seguirían instalados.")
+        for (t, n), dependientes in bloqueados.items():
+            print(f"     {t}:{n} es requerido por {', '.join(f'{dt}:{dn}' for dt, dn in dependientes)}")
+        print("     Quita también esos dependientes (o desmarca el componente) y reintenta.")
+        return
+    print(f"\n  Se quitarán {len(selected)} componente(s) de {project / platform}:")
+    for t, n in selected:
+        print(f"     {t}:{n}")
+    if input("  ¿Continuar? (s/N): ").strip().lower() != "s":
+        ui.print_info("Cancelado.")
+        return
+    quitar.remove_components(project, platform, selected)
+    ui.print_success(f"Quitados {len(selected)} componente(s). `--update` no los volverá a instalar.")
 
 
 def _seeds_to_dict(seeds, with_config):
@@ -480,6 +555,8 @@ def main():
             cmd_status(rest)
         elif cmd in ("--list", "-l"):
             cmd_list(rest)
+        elif cmd in ("--remove", "-r"):
+            cmd_remove(rest)
         elif cmd in ("--uninstall",):
             cmd_uninstall(rest)
         else:
