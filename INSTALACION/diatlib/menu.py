@@ -78,14 +78,16 @@ def _draw(lines, prev_count):
 # ============================================================
 # MULTISELECCIÓN  (submenús)
 # ============================================================
-def multiselect(title, options, preselected=None):
+def multiselect(title, options, preselected=None, disabled=None):
     """options: [(value, label, description), ...] -> set de values o None.
+    disabled: values que se muestran con ✅ (p. ej. ya instaladas) y no se pueden marcar.
     ↑↓ mover · ESPACIO toggle · T todas · N ninguna · V volver · Q salir."""
+    disabled = set(disabled or [])
     if not sys.stdin.isatty():
-        return _numeric_fallback(title, options, preselected)
+        return _numeric_fallback(title, options, preselected, disabled)
 
     enable_ansi_windows()
-    selected = set(preselected or [])
+    selected = set(preselected or []) - disabled
     cursor, prev = 0, 0
 
     def frame():
@@ -93,12 +95,18 @@ def multiselect(title, options, preselected=None):
                f"  📦 {title}   {GREEN}({len(selected)} seleccionada/s){NC}",
                f"{CYAN}{'═'*70}{NC}"]
         for i, (val, label, desc) in enumerate(options):
+            if val in disabled:                       # ya instalada: visible, no seleccionable
+                lead = f"{WHITE}❯{NC}" if i == cursor else " "
+                out.append(f"{lead} {GREEN}✅{NC}  {DIM}{label:<30} ya instalada{NC}")
+                continue
             mark = f"{GREEN}[X]{NC}" if val in selected else "[ ]"
             if i == cursor:
                 out.append(f"{WHITE}❯{NC} {mark} {WHITE}{label:<30}{NC} {DIM}{desc}{NC}")
             else:
                 out.append(f"  {mark} {label:<30} {DIM}{desc}{NC}")
         out.append(f"{CYAN}{'─'*70}{NC}")
+        if disabled:
+            out.append(f"  {GREEN}✅{NC} = ya instalada (no seleccionable)")
         out.append(f"  [ESPACIO] marcar · ↑↓ mover · [T] todas · [N] ninguna · "
                    f"{GREEN}[ENTER] instalar{NC} · [V] volver")
         return out
@@ -115,11 +123,13 @@ def multiselect(title, options, preselected=None):
                     cursor = (cursor + 1) % len(options)
                 elif k == SPACE:
                     v = options[cursor][0]
+                    if v in disabled:
+                        continue
                     selected.discard(v) if v in selected else selected.add(v)
                 elif k == ENTER:
                     return selected
                 elif k == (CHAR, "t"):
-                    selected = {o[0] for o in options}
+                    selected = {o[0] for o in options} - disabled
                 elif k == (CHAR, "n"):
                     selected = set()
                 elif k == QUIT or k == (CHAR, "v"):
@@ -173,15 +183,15 @@ def menu_select(title, options):
 # ============================================================
 # FALLBACKS  (sin TTY: pipes, CI)
 # ============================================================
-def _numeric_fallback(title, options, preselected=None):
+def _numeric_fallback(title, options, preselected=None, disabled=frozenset()):
     print(f"\n  {title}")
-    for i, (_, label, desc) in enumerate(options, 1):
-        print(f"   {i}. {label} — {desc}")
+    for i, (val, label, desc) in enumerate(options, 1):
+        print(f"   {i}. ✅ {label} — ya instalada" if val in disabled else f"   {i}. {label} — {desc}")
     raw = input("  Números separados por coma (vacío = ninguno): ").strip()
     if not raw:
-        return set(preselected or [])
+        return set(preselected or []) - set(disabled)
     idx = {int(x) for x in raw.replace(" ", "").split(",") if x.isdigit()}
-    return {options[i-1][0] for i in idx if 1 <= i <= len(options)}
+    return {options[i-1][0] for i in idx if 1 <= i <= len(options)} - set(disabled)
 
 
 def _numeric_fallback_single(title, options):

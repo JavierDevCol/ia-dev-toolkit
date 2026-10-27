@@ -72,14 +72,21 @@ def ensure_cache():
 # ============================================================
 # --install
 # ============================================================
-def _submenu_seeds(ctype, catalog):
-    """Devuelve lista de seeds, o None si el usuario eligió Volver/Salir."""
+def _submenu_seeds(ctype, catalog, installed=None):
+    """Devuelve lista de seeds, o None si el usuario eligió Volver/Salir.
+    installed: nombres ya instalados; se muestran con ✅ y no se pueden marcar."""
     names = sorted(catalog.get(ctype, []))
     if not names:
         ui.print_warning(f"No hay {ctype} disponibles")
         return None
     options = [(n, n, "") for n in names]
-    sel = menu.multiselect(f"{ctype.upper()} DISPONIBLES", options)
+    if installed is None:
+        sel = menu.multiselect(f"{ctype.upper()} DISPONIBLES", options)
+    elif all(n in installed for n in names):
+        ui.print_info(f"Todas las {ctype} ya están instaladas. Usa `diat --update` para actualizarlas.")
+        return None
+    else:
+        sel = menu.multiselect(f"{ctype.upper()} DISPONIBLES", options, disabled=set(installed))
     if sel is None:                     # Volver / salir del submenú
         return None
     return [(ctype, n) for n in sel]
@@ -91,7 +98,7 @@ def ask_platform():
                             [(".opencode", "OpenCode", ""), (".claude", "Claude Code", "")])
 
 
-def _gather_seeds(catalog, platform):
+def _gather_seeds(catalog, platform, project=None):
     """Menú principal en bucle. Devuelve (seeds, with_config).
     V/Volver regresa aquí; solo Q en el menú principal cancela."""
     wf_desc = ("Workflows (+ skill exc-workflow-sac automática)" if platform == ".claude"
@@ -109,7 +116,9 @@ def _gather_seeds(catalog, platform):
             return [], False                        # salir del instalador
 
         if choice in ("skills", "agents", "workflows"):
-            seeds = _submenu_seeds(choice, catalog)
+            installed = (instalar.installed_components("skills", project, platform)
+                         if choice == "skills" and project else None)
+            seeds = _submenu_seeds(choice, catalog, installed=installed)
             if seeds is None:                       # Volver -> re-menú
                 continue
             if not seeds:                           # ENTER sin marcar nada -> re-menú
@@ -212,7 +221,7 @@ def cmd_install(argv):
             ui.print_info("Cancelado.")
             return
     else:
-        seeds, with_config = _gather_seeds(catalog, platform)
+        seeds, with_config = _gather_seeds(catalog, platform, project)
     if not seeds and not with_config:
         ui.print_info("Nada seleccionado. Cancelado.")
         return

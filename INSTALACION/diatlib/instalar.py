@@ -48,6 +48,17 @@ def install_component(ctype, name, cache, project, platform):
     return True
 
 
+def installed_components(ctype, project, platform):
+    """Nombres de los componentes de `ctype` ya presentes en <proyecto>/<plataforma> (según el disco)."""
+    kind, spec = paths.COMPONENT_LAYOUT[ctype]
+    base = paths.component_dest(ctype, Path(project), platform)
+    if not base.is_dir():
+        return set()
+    if kind == "dir":
+        return {d.name for d in base.iterdir() if d.is_dir() and (d / spec).exists()}
+    return {f.stem for f in base.iterdir() if f.is_file() and f.suffix == spec}
+
+
 def install_memctl(cache, project):
     """Copia memctl.sh/.ps1 a .SAC/ (junto a .SAC/config/). Sobrescribe siempre: es código, no estado."""
     dst = Path(project) / paths.SAC_DIR
