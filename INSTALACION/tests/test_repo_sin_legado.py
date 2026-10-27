@@ -108,7 +108,10 @@ class ConfigUsadaTest(unittest.TestCase):
                 todo = "\n".join(textos)
                 reglas = dict(PLACEHOLDERS)
                 for rx, clave in reglas.items():
-                    if re.search(rx, todo) and f"memctl.sh get {clave}" not in todo:
+                    fila = re.escape("`" + rx.replace("\\", "") + "`") + r"[^\n|]*\|[^\n]*memctl\.sh get " + re.escape(clave) + r"(?![\w.])"
+                    if clave == "usuario.nombre":                 # firma: basta el comando (el enlace va en prosa)
+                        fila = re.escape(f"memctl.sh get {clave}")
+                    if re.search(rx, todo) and not re.search(fila, todo):   # fila de tabla: placeholder | comando
                         huecos.append(f"{d.name}: {clave}")
         self.assertEqual(huecos, [])
 

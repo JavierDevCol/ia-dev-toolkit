@@ -59,15 +59,22 @@ devuelve datos parciales.
 ## Plantilla de bloque para SKILL.md
 
 Cada skill que necesita config o memoria incluye este bloque, con SOLO las claves que usa.
+Los placeholders de ruta se escriben en forma corta (`{hu_folder}`, no `{artifacts.hu_folder}`) y todo
+lo que la skill cree vive bajo `{documentacion_sac_path}`; cada placeholder de ruta lleva su fila en la tabla.
 memctl solo lee: la persistencia de datos sigue como la define cada skill (edición
 directa de `.SAC/config/sac.json`, únicamente bajo su propia sección).
 
 ````markdown
 **Leer config con memctl** (solo lectura; su salida ES la respuesta):
 
-```sh
-sh .SAC/memctl.sh get <clave>        # ej: usuario.nombre, artifacts.hu_folder, ado.config.perfil_activo
-```
+Ejecutar cada comando: **su salida ES el valor del placeholder** de su fila y se usa tal cual
+en el resto de la skill (no recalcular ni inventar rutas):
+
+| Placeholder / dato | Valor = salida de |
+|---|---|
+| `{hu_folder}` | `sh .SAC/memctl.sh get artifacts.hu_folder` |
+| `{{usuario.nombre}}` | `sh .SAC/memctl.sh get usuario.nombre` |
+| `ado.config.perfil_activo` | `sh .SAC/memctl.sh get ado.config.perfil_activo` |
 
 - Exit 0 + `null` → dato no configurado: aplicar el flujo "pregunta una vez y persiste" de esta skill.
 - Exit 2 → clave o archivo inexistente: tratarlo como no configurado.
