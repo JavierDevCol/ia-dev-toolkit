@@ -65,7 +65,7 @@ Comportamiento:
 | `diat` | Muestra la ayuda |
 | `diat --help` / `--h` | Ayuda detallada |
 | `diat --version` / `--v` | Versión instalada |
-| `diat --install [/ruta]` | Pregunta el harness (OpenCode / Claude Code) y luego instala: con ruta en `<ruta>/<plataforma>/` (proyecto), sin ruta en `~/<plataforma>/` (global) |
+| `diat --install [/ruta]` | Pregunta el harness (OpenCode / Claude Code) y luego instala: con ruta en `<ruta>/<plataforma>/`; sin ruta toma el directorio actual y avisa cuál es |
 | `diat --update [/ruta]` | Actualiza el CLI, el cache y reinstala en los proyectos registrados |
 | `diat --status [/ruta]` | Estado del sistema (sin ruta) o de un proyecto (con ruta) |
 | `diat --list` | Proyectos donde se instalaron componentes |
@@ -74,10 +74,10 @@ Comportamiento:
 
 ### Flujo de `--install`
 1. **Harness:** OpenCode (`.opencode/`) o Claude Code (`.claude/`).
-2. **Alcance:** global (sin ruta → `~/<plataforma>/`) o proyecto (con ruta → `<ruta>/<plataforma>/`).
+2. **Destino:** siempre un proyecto: la `/ruta` indicada o, sin ella, el directorio actual (se muestra la ruta tomada antes de instalar). No existe instalación global.
 3. **Menú de componentes** (abajo).
 
-- **Workflows** solo se ofrecen en instalaciones por proyecto (no globales) y van a `<proyecto>/.SAC/workflows/`.
+- **Workflows** van a `<proyecto>/.SAC/workflows/`.
   Arrastran el ejecutor según el harness: plugin + command `workflow-sac` en OpenCode, skill `exc-workflow-sac` en Claude Code.
 - Un mismo proyecto puede tener **ambos harness** (el registro se indexa por ruta + plataforma).
   Al desinstalar con los dos presentes se pregunta cuál quitar; `.SAC/workflows` y `.SAC/config` compartidos se conservan.
