@@ -58,11 +58,27 @@ class InstallHarnessTest(_Base):
         self.assertEqual(save.call_args.args[1], ".claude")
         self.assertEqual(g.call_args.args[1], ".claude")
 
-    def test_install_global_filtra_workflows(self):
-        m, ec, inst, save, g = self._install([], ".claude")
-        cat = g.call_args.args[0]
-        self.assertEqual(cat["workflows"], set())
-        self.assertNotIn("exc-workflow-sac", cat["skills"])
+    def test_install_sin_ruta_usa_cwd_y_avisa(self):
+        buf, cwd0 = io.StringIO(), os.getcwd()
+        os.chdir(self.P)
+        try:
+            cli = self.cli
+            with patch.object(cli.menu, "menu_select", return_value=".claude"), \
+                 patch.object(cli, "ensure_cache", return_value=paths.get_cache_dir()), \
+                 patch.object(cli.github, "scan_components", return_value=CAT), \
+                 patch.object(cli.instalar, "install_seeds", return_value={}) as inst, \
+                 patch.object(cli.registro, "save_installation"), \
+                 patch.object(cli, "_gather_seeds", return_value=([("skills", "a")], False)) as g, \
+                 redirect_stdout(buf):
+                cli.cmd_install([])
+            esperado = Path.cwd()
+        finally:
+            os.chdir(cwd0)
+        self.assertEqual(inst.call_args.args[2], esperado)
+        self.assertIn(str(esperado), buf.getvalue())            # avisa qué ruta tomó
+        self.assertNotEqual(esperado, Path.home())              # nunca instala en ~
+        self.assertIn("workflows", g.call_args.args[0])         # sin filtro global: workflows disponibles
+        self.assertEqual(g.call_args.args[0]["workflows"], {"demo-delegacion"})
 
     def test_gather_seeds_descripcion_workflows_por_plataforma(self):
         for plat, txt in ((".opencode", "plugins + commands"), (".claude", "exc-workflow-sac")):
