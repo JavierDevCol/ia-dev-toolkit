@@ -58,11 +58,27 @@ class InstallHarnessTest(_Base):
         self.assertEqual(save.call_args.args[1], ".claude")
         self.assertEqual(g.call_args.args[1], ".claude")
 
-    def test_install_global_filtra_workflows(self):
-        m, ec, inst, save, g = self._install([], ".claude")
-        cat = g.call_args.args[0]
-        self.assertEqual(cat["workflows"], set())
-        self.assertNotIn("exc-workflow-sac", cat["skills"])
+    def test_install_sin_ruta_usa_cwd_y_avisa(self):
+        buf, cwd0 = io.StringIO(), os.getcwd()
+        os.chdir(self.P)
+        try:
+            cli = self.cli
+            with patch.object(cli.menu, "menu_select", return_value=".claude"), \
+                 patch.object(cli, "ensure_cache", return_value=paths.get_cache_dir()), \
+                 patch.object(cli.github, "scan_components", return_value=CAT), \
+                 patch.object(cli.instalar, "install_seeds", return_value={}) as inst, \
+                 patch.object(cli.registro, "save_installation"), \
+                 patch.object(cli, "_gather_seeds", return_value=([("skills", "a")], False)) as g, \
+                 redirect_stdout(buf):
+                cli.cmd_install([])
+            esperado = Path.cwd()
+        finally:
+            os.chdir(cwd0)
+        self.assertEqual(inst.call_args.args[2], esperado)
+        self.assertIn(str(esperado), buf.getvalue())            # avisa qué ruta tomó
+        self.assertNotEqual(esperado, Path.home())              # nunca instala en ~
+        self.assertIn("workflows", g.call_args.args[0])         # sin filtro global: workflows disponibles
+        self.assertEqual(g.call_args.args[0]["workflows"], {"demo-delegacion"})
 
     def test_gather_seeds_descripcion_workflows_por_plataforma(self):
         for plat, txt in ((".opencode", "plugins + commands"), (".claude", "exc-workflow-sac")):
@@ -99,6 +115,27 @@ class UpdatePorPlataformaTest(_Base):
             else:
                 self.assertIn("workflow-sac", req["plugins"])
         self.assertTrue(all(i["sha"] == "NEW" for i in registro.find_installations(self.P)))
+
+
+class StatusInstalacionGlobalAntiguaTest(_Base):
+    def _status(self):
+        out = io.StringIO()
+        with patch("diatlib.github.get_remote_sha", return_value="S"), \
+             patch("diatlib.github.get_latest_release_tag", return_value="v2.1.1"), \
+             redirect_stdout(out):
+            self.cli._status_system()
+        return out.getvalue()
+
+    def test_status_avisa_de_instalacion_global_antigua(self):
+        registro.save_installation(Path.home(), ".claude", {}, {}, "S")
+        txt = self._status()
+        self.assertIn("global", txt)
+        self.assertIn("diat --uninstall", txt)
+        self.assertIn(str(Path.home().resolve()), txt)
+
+    def test_status_sin_global_no_avisa(self):
+        registro.save_installation(self.P, ".claude", {}, {}, "S")
+        self.assertNotIn("global", self._status())
 
 
 class StatusProyectoTest(_Base):

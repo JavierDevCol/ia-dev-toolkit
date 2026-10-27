@@ -33,7 +33,7 @@ Analiza un PR/diff y clasifica variables, colas y secretos por ámbito (pipeline
 
 ## Implementation
 
-**Configuración:** leer con memctl (`.SAC/config/sac.json`; solo lectura, su salida ES la respuesta; `null`/exit 2 → falta; si memctl no existe (exit 127), leer con `jq` o usar `~/.SAC/memctl.sh`; exit 1 (JSON inválido o vacío) → detenerse y avisar, sin leer ni editar el archivo a mano; la persistencia edita solo la clave o sección indicada):
+**Configuración:** leer con memctl (`.SAC/config/sac.json`; solo lectura, su salida ES la respuesta; `null`/exit 2 → falta; si memctl no existe (exit 127), leer con `jq`; exit 1 (JSON inválido o vacío) → detenerse y avisar, sin leer ni editar el archivo a mano; la persistencia edita solo la clave o sección indicada):
 
 Ejecutar cada comando: **su salida ES el valor del placeholder** de su fila y se usa tal cual en el resto de esta skill (no recalcular ni inventar rutas):
 

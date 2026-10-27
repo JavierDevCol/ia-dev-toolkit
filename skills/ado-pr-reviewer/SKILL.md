@@ -41,7 +41,7 @@ Reads from the active profile (`ado.config.perfiles.<perfil_activo>`):
 | `user_email` | `user_email` from active profile |
 | `base_reports_path` | `base_reports_path` from active profile |
 
-Read the config with memctl (read-only; its output IS the answer; if memctl is missing (exit 127) read `.SAC/config/sac.json` with `jq` or use `~/.SAC/memctl.sh` (global install); on exit 1 (invalid or empty JSON) stop and tell the user: do not read or edit the file by hand; never invent values):
+Read the config with memctl (read-only; its output IS the answer; if memctl is missing (exit 127) read `.SAC/config/sac.json` with `jq`; on exit 1 (invalid or empty JSON) stop and tell the user: do not read or edit the file by hand; never invent values):
 
 ```sh
 P=$(sh .SAC/memctl.sh get ado.config.perfil_activo)   # active profile name

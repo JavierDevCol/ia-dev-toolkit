@@ -38,7 +38,7 @@ Ejecutar cada comando: **su salida ES el valor del placeholder** de su fila y se
 | `{hu_folder}` | `sh .SAC/memctl.sh get artifacts.hu_folder` |
 | `{pendientes}` | `sh .SAC/memctl.sh get artifacts.pendientes` |
 
-memctl es solo lectura y su salida ES la respuesta; si memctl no existe (exit 127), leer `.SAC/config/sac.json` con `jq` o usar `~/.SAC/memctl.sh` (instalación global); si sale con exit 1 (JSON inválido o vacío), detenerse y avisar: no leer ni editar el archivo a mano; nunca inventar valores. `null`, vacío o exit 2 → no configurado.
+memctl es solo lectura y su salida ES la respuesta; si memctl no existe (exit 127), leer `.SAC/config/sac.json` con `jq`; si sale con exit 1 (JSON inválido o vacío), detenerse y avisar: no leer ni editar el archivo a mano; nunca inventar valores. `null`, vacío o exit 2 → no configurado.
 
    `usuario.nombre` → `{{usuario.nombre}}`, necesario para firmar el artefacto en el paso 7. Si está vacío o la clave no existe, omitir el sufijo de la firma; no inventar un nombre.
 2. **Recibir hallazgo** → descripción del usuario + detectar proyecto + preguntar por evidencia (logs, stack traces)

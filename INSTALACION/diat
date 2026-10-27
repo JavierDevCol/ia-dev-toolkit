@@ -5,7 +5,7 @@ Uso:
     diat                      Ver comandos disponibles
     diat --help   / --h       Ayuda detallada
     diat --version / --v      Versión actual
-    diat --install [/ruta]    Instalar componentes (proyecto o global)
+    diat --install [/ruta]    Instalar componentes (en /ruta o en el directorio actual)
     diat --update  [/ruta]    Actualizar componentes
     diat --status  [/ruta]    Estado del sistema o de un proyecto
     diat --list               Proyectos con componentes instalados
@@ -138,23 +138,23 @@ def _gather_seeds(catalog, platform):
 def cmd_install(argv):
     ui.print_banner()
 
-    # 1) Harness primero; 2) destino: ruta explícita (proyecto) o global (home)
+    # 1) Harness primero; 2) destino: ruta explícita o, sin ella, el directorio actual (nunca ~)
     platform = ask_platform()
     if platform is None:
         ui.print_info("Cancelado.")
         return
     args = [a for a in argv if not a.startswith("-")]
     if args:
-        project, is_global = Path(args[0]).resolve(), False
+        project = Path(args[0]).resolve()
     else:
-        ui.print_warning(f"Sin ruta: instalación global en ~/{platform}.")
-        project, is_global = Path.home(), True
+        project = Path.cwd()
+        ui.print_warning(f"Sin ruta: se instalará en el directorio actual: {project}")
 
     cache = ensure_cache()
     if not cache:
         return
 
-    catalog = github.filter_catalog(github.scan_components(cache), platform, is_global)
+    catalog = github.filter_catalog(github.scan_components(cache), platform)
     dependencies = deps.for_platform(platform)
 
     seeds, with_config = _gather_seeds(catalog, platform)
@@ -259,6 +259,12 @@ def _status_system():
     else:
         print(f"  Repo:    ⚠️  hay actualización ({(local_sha or '?')[:7]} → {remote_sha[:7]})")
     print(f"\n  Proyectos registrados: {len(registro.load_installations())}")
+    home = Path.home().resolve()
+    antiguas = registro.find_installations(home)
+    if antiguas:                                    # la instalación global ya no se admite
+        plats = ", ".join(i["platform"] for i in antiguas)
+        ui.print_warning(f"Instalación global antigua en {home} ({plats}): ya no se admite. "
+                         "Quítala con 'diat --uninstall ~' e instala por proyecto.")
 
 
 def _status_project(project):

@@ -126,6 +126,11 @@ class ConfigUsadaTest(unittest.TestCase):
                 for f in _mds(b) for m in legado.finditer(f.read_text(encoding="utf-8"))]
         self.assertEqual(usos, [])
 
+    def test_sin_fallback_a_instalacion_global(self):
+        usos = [str(f.relative_to(REPO)) for b in ("skills", "workflows", "scripts")
+                for f in _mds(b) if re.search(r"~/\.SAC|instalación global|global install", f.read_text(encoding="utf-8"))]
+        self.assertEqual(usos, [])
+
 
 if __name__ == "__main__":
     unittest.main()
