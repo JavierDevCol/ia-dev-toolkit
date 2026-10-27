@@ -53,6 +53,15 @@ def install_memctl(cache, project):
 # ============================================================
 # ASSETS RAÍZ COMPARTIDOS DE SKILLS
 # ============================================================
+def shared_skill_asset_names(cache):
+    """Nombres de los assets RAÍZ compartidos de skills/ (lo que install_shared_skill_assets copia)."""
+    src = Path(cache) / "skills"
+    if not src.exists():
+        return []
+    return [i.name for i in src.iterdir()
+            if not (i.is_dir() and (i / "SKILL.md").exists()) and i.name != "memory_skill.json"]
+
+
 def install_shared_skill_assets(cache, project, platform):
     """Copia los assets RAÍZ compartidos de skills/ (references/…) a la raíz de skills del
     proyecto. memory_skill.json YA NO se copia: la config vive en .SAC/config/sac.json."""

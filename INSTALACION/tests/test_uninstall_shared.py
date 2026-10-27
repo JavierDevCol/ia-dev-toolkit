@@ -70,6 +70,42 @@ class UninstallSharedTest(unittest.TestCase):
         self.assertFalse(old.exists())
 
 
+class UninstallNoBorraLoAjenoTest(unittest.TestCase):
+    """Al quitar la última skill solo se borran los assets compartidos que DIAT copió."""
+
+    def setUp(self):
+        self._home = os.environ.get("HOME")
+        self._tmp = tempfile.TemporaryDirectory()
+        os.environ["HOME"] = self._tmp.name
+        cache = paths.get_cache_dir()
+        (cache / "skills/references").mkdir(parents=True)
+        (cache / "skills/references/guia.md").write_text("g", encoding="utf-8")
+        (cache / "skills/demo").mkdir()
+        (cache / "skills/demo/SKILL.md").write_text("x", encoding="utf-8")
+        paths.get_ref_file().write_text("v2.1.1", encoding="utf-8")
+        self.P = Path(self._tmp.name) / "proj"
+        for rel in (".claude/skills/demo/SKILL.md", ".claude/skills/references/guia.md",
+                    ".claude/skills/mi-borrador/notas.md", ".claude/skills/mis-notas.txt"):
+            f = self.P / rel
+            f.parent.mkdir(parents=True, exist_ok=True)
+            f.write_text("x", encoding="utf-8")
+        sel = {"skills": ["demo"]}
+        registro.save_installation(self.P, ".claude", sel, sel, "S")
+
+    def tearDown(self):
+        os.environ["HOME"] = self._home
+        self._tmp.cleanup()
+
+    def test_conserva_skill_en_borrador_y_notas_del_usuario(self):
+        with redirect_stdout(io.StringIO()):
+            desinstalar.uninstall_project(self.P)
+        sk = self.P / ".claude/skills"
+        self.assertFalse((sk / "demo").exists())
+        self.assertFalse((sk / "references").exists())           # asset compartido de DIAT: se borra
+        self.assertTrue((sk / "mi-borrador/notas.md").exists())   # ajeno: se conserva
+        self.assertTrue((sk / "mis-notas.txt").exists())
+
+
 class UninstallSacJsonTest(unittest.TestCase):
     """sac.json y memctl se borran con la última instalación que usa skills o config."""
 

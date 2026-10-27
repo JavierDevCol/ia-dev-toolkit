@@ -87,12 +87,15 @@ def uninstall_project(project_path):
         if skills_dir.exists():
             has_skills = any((d / "SKILL.md").exists()
                              for d in skills_dir.iterdir() if d.is_dir())
-            if not has_skills:
-                for item in list(skills_dir.iterdir()):
-                    if item.is_file():
+            if not has_skills:                   # solo lo que DIAT copió: nunca contenido del usuario
+                for name in instalar.shared_skill_asset_names(paths.get_cache_dir()):
+                    item = skills_dir / name
+                    if item.is_dir() and not item.is_symlink():
+                        shutil.rmtree(item)
+                    elif item.exists() or item.is_symlink():
                         item.unlink()
                     else:
-                        shutil.rmtree(item)
+                        continue
                     removed += 1
 
     # sac.json + memctl + legados (.SAC/config/): se borran con la ÚLTIMA instalación del
