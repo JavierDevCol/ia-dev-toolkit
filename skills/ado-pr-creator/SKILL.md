@@ -25,13 +25,26 @@ Guided creation of Pull Requests in Azure DevOps with duplicate detection, branc
 
 ## Context Injection
 
-Reads `user_email` and the projects from `memory_skill.json` → `[ado].config.perfiles[perfil_activo]` (standalone): repos project = `project_map.repos`, work items project = `project_map.workitems` (each falls back to `project_map.default`).
+Reads `user_email` and the projects from the active profile: repos project = `project_map.repos`, work items project = `project_map.workitems` (each falls back to `project_map.default`).
+
+Read the config with memctl (read-only; its output IS the answer; on failure read `.SAC/config/sac.json` with `jq`; never invent values):
+
+```sh
+P=$(sh .SAC/memctl.sh get ado.config.perfil_activo)   # active profile name
+sh .SAC/memctl.sh get ado.config.perfiles.$P.user_email
+sh .SAC/memctl.sh get ado.config.perfiles.$P.project_map.repos        # fallback: project_map.default
+sh .SAC/memctl.sh get ado.config.perfiles.$P.project_map.workitems    # fallback: project_map.default
+sh .SAC/memctl.sh get usuario.nombre
+sh .SAC/memctl.sh get usuario.incluir_firma_en_documentos
+```
+
+`null` or exit 2 → not configured. Profile names must not contain `.` (memctl uses it as path separator).
 
 **Profile guard:** if `perfil_activo` is null, its profile is missing, or no project resolves, stop and ask the user to run `ado-profile-setup`.
 
-**Missing profile fields:** if `user_email` is missing from the active profile, ask the user once and persist the answer to that profile in `memory_skill.json` so later runs don't ask again.
+**Missing profile fields:** if `user_email` is missing from the active profile, ask the user once and persist the answer to that profile in `.SAC/config/sac.json` (`ado.config.perfiles.<profile>`, editing only that section) so later runs don't ask again.
 
-Also read `CONFIG_USER.yaml` (path in `archivos.config_user`) and take `usuario.nombre` → **`{{usuario.nombre}}`**, needed to sign the PR body in Phase C. If empty, the file doesn't exist, or `usuario.incluir_firma_en_documentos` is `false`, omit the signature line; never invent a name.
+Also take `usuario.nombre` → **`{{usuario.nombre}}`** (commands above), needed to sign the PR body in Phase C. If empty, the key doesn't exist, or `usuario.incluir_firma_en_documentos` is `false`, omit the signature line; never invent a name.
 
 ## Core Flow
 
