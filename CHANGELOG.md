@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Changed
+- **BREAKING** refactor(skills): the 14 SAC skills now carry the `sac-` prefix, like `ado-*`: `sac-tomar-contexto`, `sac-iniciar-sprint`, `sac-refinar-hu`, `sac-validar-hu`, `sac-planificar-hu`, `sac-ejecutar-plan`, `sac-validar-ca`, `sac-priorizar-backlog`, `sac-sincronizar-backlog`, `sac-registrar-hallazgo`, `sac-init-reglas-arquitectonicas`, `sac-crear-adr`, `sac-analizar-calidad-codigo`, `sac-analizar-seguridad`. `git-branch-commit`, `bitacora-tecnica` and `exc-workflow-sac` keep their names.
+- **BREAKING** triggers follow the new names: `>validar_ca` is now `>sac_validar_ca`, `>tomar_contexto` is `>sac_tomar_contexto`, and so on.
+- Migration: `diat --update` converts the registered names and removes the old skill folders; skills you wrote yourself are left untouched.
+
 ## [1.1.1] - 2026-10-21
 
 ### Changed
