@@ -8,18 +8,20 @@
 
 - Leer la config con memctl (solo lectura; su salida ES la respuesta; si memctl no existe (exit 127), leer `.SAC/config/sac.json` con `jq` o usar `~/.SAC/memctl.sh` (instalación global); si sale con exit 1 (JSON inválido o vacío), detenerse y avisar: no leer ni editar el archivo a mano; nunca inventar valores):
 
-```sh
-sh .SAC/memctl.sh get archivos.reglas_arquitectonicas
-sh .SAC/memctl.sh get archivos.workspace
-sh .SAC/memctl.sh get artifacts.contextos_folder
-sh .SAC/memctl.sh get artifacts.adr_folder
-sh .SAC/memctl.sh get documentacion_sac_path
-sh .SAC/memctl.sh get idiomas.documentacion
-sh .SAC/memctl.sh get usuario.nombre
-sh .SAC/memctl.sh get usuario.incluir_firma_en_documentos
-```
+Ejecutar cada comando: **su salida ES el valor del placeholder** de su fila y se usa tal cual en el resto de esta skill (no recalcular ni inventar rutas):
 
-  `idiomas.documentacion` (`es|en|pt`) es el idioma; vacío o exit 2 → preguntar. `{contextos_folder}` = `artifacts.contextos_folder`; `{adr_folder}` (plantilla) = `artifacts.adr_folder`; `{documentacion_sac_path}` = `documentacion_sac_path`.
+| Placeholder / dato | Valor = salida de |
+|---|---|
+| `{reglas_arquitectonicas}` | `sh .SAC/memctl.sh get archivos.reglas_arquitectonicas` |
+| `{workspace}` | `sh .SAC/memctl.sh get archivos.workspace` |
+| `{contextos_folder}` | `sh .SAC/memctl.sh get artifacts.contextos_folder` |
+| `{adr_folder}` | `sh .SAC/memctl.sh get artifacts.adr_folder` |
+| `{documentacion_sac_path}` | `sh .SAC/memctl.sh get documentacion_sac_path` |
+| `idiomas.documentacion` | `sh .SAC/memctl.sh get idiomas.documentacion` |
+| `{{usuario.nombre}}` | `sh .SAC/memctl.sh get usuario.nombre` |
+| `usuario.incluir_firma_en_documentos` | `sh .SAC/memctl.sh get usuario.incluir_firma_en_documentos` |
+
+  `idiomas.documentacion` (`es|en|pt`) es el idioma; vacío o exit 2 → preguntar.
 - **Plantilla propia:** leer `{file:./assets/reglas_arquitectonicas_plantilla.md}`
 - Verificar que existe contexto del proyecto:
   - Buscar `{workspace}` o archivo de contexto en `{contextos_folder}/`
