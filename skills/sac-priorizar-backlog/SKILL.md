@@ -1,5 +1,5 @@
 ---
-name: priorizar-backlog
+name: sac-priorizar-backlog
 description: >
   Use when the backlog has several HUs in [A] Aprobada or [P] Planificada
   and it's not clear which to execute first, especially when the ID/title
@@ -28,7 +28,7 @@ Calcula un orden de ejecución sugerido para las HUs del backlog combinando el g
 ## Flowchart
 
 ```dot
-digraph priorizar_backlog {
+digraph sac_priorizar_backlog {
   rankdir=LR;
   node [fontname="Helvetica", fontsize=10];
   edge [fontname="Helvetica", fontsize=9];

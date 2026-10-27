@@ -18,7 +18,7 @@ digraph flujo_team_sac {
   sac_validar_hu [label="sac-validar-hu", fillcolor="#7BC67E"];
   bloqueada [label="BLOQUEADA", fillcolor="#D0021B", fontcolor=white];
   aprobada [label="[A] Aprobada", shape=ellipse, fillcolor="#F8E71C"];
-  priorizar_backlog [label="priorizar-backlog\n(orden real por\ndependencias + prioridad)", fillcolor="#9B59B6", fontcolor=white];
+  sac_priorizar_backlog [label="sac-priorizar-backlog\n(orden real por\ndependencias + prioridad)", fillcolor="#9B59B6", fontcolor=white];
   sac_planificar_hu [label="sac-planificar-hu", fillcolor="#7BC67E"];
   planificada [label="[P] Planificada", shape=ellipse, fillcolor="#F8E71C"];
   sac_ejecutar_plan [label="sac-ejecutar-plan", fillcolor="#7BC67E"];
@@ -42,8 +42,8 @@ digraph flujo_team_sac {
   refinada -> sac_validar_hu;
   sac_validar_hu -> bloqueada [label="dependencia\nbloqueante"];
   sac_validar_hu -> aprobada [label="CA claros"];
-  aprobada -> priorizar_backlog [label="todas las HU\ndel sprint en [A]/[P]"];
-  priorizar_backlog -> sac_planificar_hu [label="en el orden\nsugerido"];
+  aprobada -> sac_priorizar_backlog [label="todas las HU\ndel sprint en [A]/[P]"];
+  sac_priorizar_backlog -> sac_planificar_hu [label="en el orden\nsugerido"];
   sac_planificar_hu -> planificada -> sac_ejecutar_plan;
   sac_ejecutar_plan -> sac_validar_ca [label="por task\n(granular)"];
   sac_validar_ca -> sac_ejecutar_plan [label="CUMPLIDO"];
@@ -420,7 +420,7 @@ digraph skill_iniciar_sprint {
   backlog_dev -> reporte;
 }
 
-// priorizar-backlog — Fuente: skills/priorizar-backlog/SKILL.md (flowchart oficial de la skill).
+// sac-priorizar-backlog — Fuente: skills/sac-priorizar-backlog/SKILL.md (flowchart oficial de la skill).
 digraph skill_priorizar_backlog {
   rankdir=LR;
   node [fontname="Helvetica", fontsize=10];

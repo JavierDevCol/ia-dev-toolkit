@@ -69,7 +69,7 @@ Si `usuario.incluir_firma_en_documentos` es `true` y `usuario.nombre` no está v
 📁 HUs creadas: [X] ([lista de IDs])
 ⏭️  Ya existían (omitidas): [lista o "ninguna"]
 🔴 Bloqueadas (según dependencies_matrix.md): [lista o "ninguna"]
-Siguiente paso: >sac_refinar_hu [ID-HU] por cada una, en el orden de >priorizar_backlog
+Siguiente paso: >sac_refinar_hu [ID-HU] por cada una, en el orden de >sac_priorizar_backlog
 
 > **Generado y revisado por:** {{usuario.nombre}}
 ```
