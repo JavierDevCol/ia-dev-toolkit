@@ -9,12 +9,12 @@ sh .SAC/memctl.sh get handoff-release.config.environments.dev      # .staging / 
 sh .SAC/memctl.sh get handoff-release.config.roles.preparer        # .deployer
 sh .SAC/memctl.sh get handoff-release.config.branch_format
 sh .SAC/memctl.sh get handoff-release.config.tag_format
-sh .SAC/memctl.sh get output_folder
+sh .SAC/memctl.sh get documentacion_sac_path
 ```
 
 Si un campo es `null` o memctl sale con exit 2, usar los defaults indicados. Si `.SAC/config/sac.json` no existe, la instalación SAC está incompleta: indicar al usuario que ejecute `diat`; no crear el archivo a mano.
 
-**Ruta de artefactos:** usar `output_folder` global. Si es `null`, preguntar al usuario la carpeta donde guardar artefactos de releases y persistirla en `output_folder` de `.SAC/config/sac.json` (editando solo esa clave).
+**Ruta de artefactos:** guardar en `{documentacion_sac_path}/handoff_release/` (crear la subcarpeta si no existe; nunca escribir fuera de `{documentacion_sac_path}`).
 
 ## Configuración (`config`)
 
