@@ -164,7 +164,7 @@
 | Backlog | {backlog} | [⏳ Pendiente / ✅ Configurado] | [fecha] |
 | ADRs | {adr_folder} | [⏳ Pendiente / ✅ Configurado] | [fecha] |
 
-> 💡 Para configurar reglas arquitectónicas: `>init_reglas_arquitectonicas`
+> 💡 Para configurar reglas arquitectónicas: `>sac_init_reglas_arquitectonicas`
 
 ---
 

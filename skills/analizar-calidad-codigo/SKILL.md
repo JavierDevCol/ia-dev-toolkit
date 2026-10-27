@@ -14,7 +14,7 @@ Revisa código mediante sub-agentes en paralelo para detectar code smells y viol
 - Antes de un release (scope `project`) para revisión de cumplimiento completa.
 - Para revisar un archivo concreto (scope `archivo`).
 
-**Cuándo NO usar:** si el usuario solo quiere ejecutar tests; si no hay reglas y se prefiere configurarlas primero con `>init-reglas-arquitectonicas`.
+**Cuándo NO usar:** si el usuario solo quiere ejecutar tests; si no hay reglas y se prefiere configurarlas primero con `>sac-init-reglas-arquitectonicas`.
 
 ## Implementation
 1. **Cargar configuración con memctl:** leer `archivos.reglas_arquitectonicas`, `documentacion_sac_path` y el nombre del usuario. Mostrar scope/modo/archivos/reglas al usuario. `usuario.nombre` → `{{usuario.nombre}}`, necesario para firmar el reporte en el paso 5. Si `usuario.incluir_firma_en_documentos` es `false`, omitir el bloque de firma; si el nombre está vacío o la clave no existe, omitir el sufijo de la firma; no inventar un nombre.
@@ -76,4 +76,4 @@ Sin hallazgos: `✅ Sin hallazgos — código cumple estándares`.
 |-------|-------|----------|
 | Sin commits en rama | Rama sin cambios | Usar scope `project` o `archivo` |
 | Archivo no encontrado | Ruta incorrecta | Verificar ruta |
-| Sin reglas arquitectónicas | No configuradas | Ejecutar `>init-reglas-arquitectonicas` |
+| Sin reglas arquitectónicas | No configuradas | Ejecutar `>sac-init-reglas-arquitectonicas` |

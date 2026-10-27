@@ -86,7 +86,7 @@
         },
         "ARQUITECTO-SOFTWARE": {
             "requires": {
-                "skills": ["crear-adr", "init-reglas-arquitectonicas"],
+                "skills": ["crear-adr", "sac-init-reglas-arquitectonicas"],
                 "tools": [],
                 "commands": [],
                 "plugins": []
@@ -382,7 +382,7 @@ print_banner() {
                 ══════════════════════════════════════════════════════════════════════
                 1. analizar-calidad-codigo             — Revisa código detectando code smells y violaciones | deps: .SAC/config/
                 2. sac-ejecutar-plan                       — Implementa planes actualizando Plan.md | deps: .SAC/config/
-                3. init-reglas-arquitectonicas         — Genera reglas arquitectónicas del proyecto | deps: .SAC/config/
+                3. sac-init-reglas-arquitectonicas         — Genera reglas arquitectónicas del proyecto | deps: .SAC/config/
                 4. sac-planificar-hu                       — Genera plan técnico desde HU aprobada | deps: .SAC/config/
                 5. sac-refinar-hu                          — Refina HUs con criterios SMART y estimación | deps: .SAC/config/
                 6. sac-registrar-hallazgo                  — Captura incidencias mediante análisis paralelo | deps: .SAC/config/

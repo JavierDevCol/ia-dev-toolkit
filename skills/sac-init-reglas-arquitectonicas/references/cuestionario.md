@@ -1,6 +1,6 @@
 # Cuestionario de Reglas Arquitectónicas
 
-> Referencia completa de preguntas para la skill `init-reglas-arquitectonicas`.
+> Referencia completa de preguntas para la skill `sac-init-reglas-arquitectonicas`.
 > Cada pregunta tiene: id, texto, tipo, opciones, sugerido, y aplica_a (opcional).
 
 ---

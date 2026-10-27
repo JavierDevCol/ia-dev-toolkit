@@ -1,5 +1,5 @@
 ---
-name: init-reglas-arquitectonicas
+name: sac-init-reglas-arquitectonicas
 description: >
   Use when defining or updating the project's architectural rules, or
   when other skills require them as context. Triggers on new projects

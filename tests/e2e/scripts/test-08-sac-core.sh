@@ -1,5 +1,5 @@
 #!/bin/bash
-# test-08-sac-core.sh — ESC-08: Pruebas SAC Core (init-reglas-arquitectonicas, sac-validar-ca, analizar-calidad-codigo)
+# test-08-sac-core.sh — ESC-08: Pruebas SAC Core (sac-init-reglas-arquitectonicas, sac-validar-ca, analizar-calidad-codigo)
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -37,9 +37,9 @@ echo "=========================================="
 echo ""
 
 # ============================================
-# init-reglas-arquitectonicas
+# sac-init-reglas-arquitectonicas
 # ============================================
-echo -e "${YELLOW}━━━ init-reglas-arquitectonicas ━━━${NC}"
+echo -e "${YELLOW}━━━ sac-init-reglas-arquitectonicas ━━━${NC}"
 echo ""
 
 echo -e "${YELLOW}IRA-01: Happy path — crear reglas desde cero${NC}"
@@ -94,18 +94,18 @@ IRA02_DIR="$FIXTURES_DIR/workspace-no-context"
 rm -rf "$IRA02_DIR"
 mkdir -p "$IRA02_DIR/.SAC/config"
 assert_file_not_exists "$IRA02_DIR/.SAC/workspace.md" "workspace.md NO existe"
-echo "  → init-reglas-arquitectonicas debería fallar: 'Ejecutar >sac_tomar_contexto primero'"
+echo "  → sac-init-reglas-arquitectonicas debería fallar: 'Ejecutar >sac_tomar_contexto primero'"
 
 echo ""
 
 echo -e "${YELLOW}IRA-03: Reglas ya existen (modo editar)${NC}"
 assert_file_exists "$IRA01_DIR/reglas_arquitectonicas.md" "reglas_arquitectonicas.md existe"
-echo "  → init-reglas-arquitectonicas debería ofrecer: [V] Ver / [E] Editar / [R] Regenerar"
+echo "  → sac-init-reglas-arquitectonicas debería ofrecer: [V] Ver / [E] Editar / [R] Regenerar"
 
 echo ""
 
 echo -e "${YELLOW}IRA-04: Reglas ya existen con --force${NC}"
-echo "  → init-reglas-arquitectonicas --force debería regenerar sin preguntar"
+echo "  → sac-init-reglas-arquitectonicas --force debería regenerar sin preguntar"
 
 echo ""
 
@@ -282,7 +282,7 @@ echo "  → Debería usar reglas_arquitectonicas.md y reportar violaciones"
 echo ""
 
 echo -e "${YELLOW}AQC-06: Sin reglas arquitectónicas${NC}"
-echo "  → Si no existe reglas_arquitectonicas.md, error: 'Ejecutar >init-reglas-arquitectonicas'"
+echo "  → Si no existe reglas_arquitectonicas.md, error: 'Ejecutar >sac-init-reglas-arquitectonicas'"
 
 echo ""
 
@@ -318,7 +318,7 @@ Fallidos: $FAIL
 Estado: $([ $FAIL -eq 0 ] && echo "PASS" || echo "FAIL")
 
 Skills testeadas:
-- init-reglas-arquitectonicas: IRA-01 a IRA-06
+- sac-init-reglas-arquitectonicas: IRA-01 a IRA-06
 - sac-validar-ca: VCA-01 a VCA-08
 - analizar-calidad-codigo: AQC-01 a AQC-08
 EOF

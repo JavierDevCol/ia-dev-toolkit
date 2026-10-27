@@ -6,6 +6,6 @@ Fallidos: 0
 Estado: PASS
 
 Skills testeadas:
-- init-reglas-arquitectonicas: IRA-01 a IRA-06
+- sac-init-reglas-arquitectonicas: IRA-01 a IRA-06
 - sac-validar-ca: VCA-01 a VCA-08
 - analizar-calidad-codigo: AQC-01 a AQC-08

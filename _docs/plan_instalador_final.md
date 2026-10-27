@@ -360,7 +360,7 @@ Al seleccionar esta opción se instala todo el paquete SAC:
 ══════════════════════════════════════════════════════════════════════
 1. analizar-calidad-codigo   — Revisa código detectando code smells y violaciones | deps: config/
 2. sac-ejecutar-plan             — Implementa planes actualizando Plan.md               | deps: config/
-3. init-reglas-arquitectonicas — Genera reglas arquitectónicas del proyecto         | deps: config/
+3. sac-init-reglas-arquitectonicas — Genera reglas arquitectónicas del proyecto         | deps: config/
 4. sac-planificar-hu             — Genera plan técnico desde HU aprobada                | deps: config/
 5. sac-refinar-hu                — Refina HUs con criterios SMART y estimación          | deps: config/
 6. sac-registrar-hallazgo        — Captura incidencias mediante análisis paralelo       | deps: config/
@@ -433,7 +433,7 @@ COMPONENT_DEPENDENCIES = {
             "optional": {"skills": ["sac-sincronizar-backlog", "sac-planificar-hu"]},
         },
         "ARQUITECTO-SOFTWARE": {
-            "requires": {"skills": ["crear-adr", "init-reglas-arquitectonicas"],
+            "requires": {"skills": ["crear-adr", "sac-init-reglas-arquitectonicas"],
                          "tools": [], "commands": [], "plugins": []},
             "optional": {"skills": ["analizar-calidad-codigo"]},
         },
