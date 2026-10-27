@@ -95,16 +95,17 @@ esac
 engine_jq() {
   command -v jq >/dev/null 2>&1 || return 1
   if [ "$MODO" = list ]; then
-    jq -r 'if type == "object" then keys_unsorted[] else error("raiz no es objeto") end' "$FILE" 2>/dev/null
+    jq -r -s 'if length != 1 then error("se esperaba un único documento JSON") else .[0] | if type == "object" then keys_unsorted[] else error("raiz no es objeto") end end' "$FILE" 2>/dev/null
     return $?
   fi
-  jq -c --arg p "$RUTA" '
+  jq -c -s --arg p "$RUTA" '
     def dig($segs):
       reduce $segs[] as $s (.;
         if type == "object" and has($s) then .[$s]
         elif type == "array" and ($s | test("^[0-9]+$")) and (($s | tonumber) < length) then .[($s | tonumber)]
         else error("missing") end);
-    try (($p | if . == "" then [] else split(".") end) as $s | dig($s)) catch empty
+    (if length != 1 then error("se esperaba un único documento JSON") else .[0] end)
+    | try (($p | if . == "" then [] else split(".") end) as $s | dig($s)) catch empty
   ' "$FILE" 2>/dev/null
 }
 
@@ -264,6 +265,7 @@ function value_path() {
     }
 
     if (c == " " || c == "\t" || c == "\r") continue
+    seen = 1
 
     if (c == "\"") {
       if (expect == "key_or_end") {
@@ -352,6 +354,7 @@ function value_path() {
 }
 END {
   if (capture) exit 0
+  if (!seen) fail("archivo vacío")
   if (instr) fail("string sin cerrar")
   if (depth > 0) fail("JSON truncado o mal formado")
 }

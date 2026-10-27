@@ -130,6 +130,7 @@ function Serializar($v, [int]$nivel) {
 function Cargar-Json([string]$f) {
   try {
     $crudo = Get-Content -LiteralPath $f -Raw -Encoding UTF8
+    if ([string]::IsNullOrWhiteSpace($crudo)) { Die 1 "JSON vacío ($f)" }
     return (Normalizar ($crudo | ConvertFrom-Json))
   } catch {
     Die 1 "JSON mal formado o motor insuficiente ($f)"

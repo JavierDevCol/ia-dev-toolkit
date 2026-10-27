@@ -60,6 +60,9 @@ EOF
 
 # JSON truncado (simula una edicion interrumpida) y layout instalado (script junto a config/sac.json)
 printf '{"usuario": {"nombre": "Ana"' > "$FIX/truncado.json"
+: > "$FIX/vacio.json"
+printf '  \n\n' > "$FIX/blancos.json"
+printf '{"a":1}\n{"usuario":{"nombre":"x"}}\n' > "$FIX/doble.json"
 mkdir -p "$FIX/instalado/config"
 cp "$FIX/config/config/sac.json" "$FIX/instalado/config/sac.json"
 
@@ -156,6 +159,13 @@ EOF
   XFILE="$FIX/truncado.json"
   check "JSON truncado -> exit 1 (fallo ruidoso)" 1 get usuario.nombre <<'EOF'
 EOF
+  for f in vacio blancos doble; do
+    XFILE="$FIX/$f.json"
+    check "archivo $f -> get exit 1 (fallo ruidoso)" 1 get usuario.nombre <<'EOF'
+EOF
+    check "archivo $f -> list exit 1 (fallo ruidoso)" 1 list <<'EOF'
+EOF
+  done
   XFILE="$FIX/config/config/sac.json"
   check "MEMCTL_FILE sobrescribe la ruta" 0 get usuario.incluir_firma_en_documentos <<'EOF'
 true
