@@ -127,6 +127,21 @@ def save_installation(project_path, platform_dir, selection, components, sha, re
     _write(installations, sha)
 
 
+def remove_components(project_path, platform_dir, selected):
+    """Saca `selected` [(tipo, nombre)] de selection y components de esa instalación (para que
+    --update no los reponga)."""
+    installations = load_installations()
+    target = str(Path(project_path).resolve())
+    for inst in installations:
+        if inst["project_path"] == target and inst["platform"] == platform_dir:
+            for key in ("selection", "components"):
+                for ctype, name in selected:
+                    names = inst.get(key, {}).get(ctype)
+                    if isinstance(names, list) and name in names:
+                        names.remove(name)
+    _write(installations, get_installed_sha() or "")
+
+
 def save_all_installations(installations, sha):
     """Reescribe la lista completa (usado por --update)."""
     _write(installations, sha)

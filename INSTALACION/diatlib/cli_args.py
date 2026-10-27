@@ -48,5 +48,11 @@ def parse_uninstall(argv):
     return p.parse_args(argv)
 
 
+def parse_remove(argv):
+    p = _parser("--remove", "Quita skills, agents, workflows o el paquete SAC con un menú (respeta dependencias).")
+    p.add_argument("path", nargs="?", help="proyecto (por defecto, el directorio actual)")
+    return p.parse_args(argv)
+
+
 def parse_none(prog, argv):
     return _parser(prog, "").parse_args(argv)
