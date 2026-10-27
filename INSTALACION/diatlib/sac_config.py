@@ -7,6 +7,7 @@
 
 import json
 import os
+import shutil
 import sys
 from pathlib import Path
 
@@ -83,12 +84,12 @@ def ensure_sac_config(cache, project, interview=False, interactive=True):
 
     if dst.exists():
         try:
-            actual = json.loads(dst.read_text(encoding="utf-8"))
+            actual = json.loads(dst.read_bytes().decode("utf-8"))
             if not isinstance(actual, dict):
                 raise ValueError("la raíz no es un objeto")
         except ValueError as e:                        # JSONDecodeError es ValueError
             bad = dst.with_name(CONFIG_NAME + ".bad")
-            bad.write_text(dst.read_text(encoding="utf-8"), encoding="utf-8")
+            shutil.copyfile(dst, bad)                  # byte a byte: también si está cortado a mitad de un carácter
             raise SacConfigError(
                 f"{dst} no es JSON válido ({e}); copia en {bad.name}. Corrígelo o bórralo y reinstala.")
         merged = deep_merge_missing(actual, tpl)

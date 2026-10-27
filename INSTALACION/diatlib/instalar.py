@@ -101,6 +101,12 @@ def install_seeds(seeds, cache, project, platform, with_config=False,
     """Resuelve las seeds (deps transitivas), instala en orden (deps primero) y
     devuelve el dict {tipo: [nombres]} de lo REALMENTE instalado."""
     order, _by_type = deps.resolve_closure(seeds, dependencies)
+    if any(t == "skills" for t, _ in order) or with_config:
+        # Primero la config: si sac.json es ilegible (SacConfigError) no queda nada copiado a medias.
+        for aviso in migrar.migrate_legacy(project):    # CONFIG_*.yaml / memory_skill.json -> sac.json
+            print_warning(aviso)
+        sac_config.ensure_sac_config(cache, project, interview=with_config, interactive=interactive)
+        install_memctl(cache, project)                  # memctl lee sac.json -> viaja con él
     installed = {}
     for ctype, cname in order:
         if install_component(ctype, cname, cache, project, platform):
@@ -108,11 +114,6 @@ def install_seeds(seeds, cache, project, platform, with_config=False,
     _remove_legacy_files(project, platform, installed)
     if installed.get("skills"):
         install_shared_skill_assets(cache, project, platform)   # references/…
-    if installed.get("skills") or with_config:
-        for aviso in migrar.migrate_legacy(project):    # CONFIG_*.yaml / memory_skill.json -> sac.json
-            print_warning(aviso)
-        sac_config.ensure_sac_config(cache, project, interview=with_config, interactive=interactive)
-        install_memctl(cache, project)                  # memctl lee sac.json -> viaja con él
     if with_config:
         installed["config"] = True
     return installed

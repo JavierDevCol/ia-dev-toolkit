@@ -13,7 +13,7 @@ import re
 from datetime import datetime
 from pathlib import Path
 
-from . import paths, github, deps, registro, instalar
+from . import paths, github, deps, registro, instalar, sac_config
 from . import ui
 
 
@@ -114,7 +114,7 @@ def cmd_update(argv=None):
         ui.print_info("No hay proyectos registrados. Usa `diat --install /ruta`.")
         return
 
-    updated = skipped = missing = 0
+    updated = skipped = missing = failed = 0
     for inst in installations:
         project = Path(inst["project_path"])
         if target_path is not None and project != target_path:
@@ -128,7 +128,12 @@ def cmd_update(argv=None):
             skipped += 1
             continue
         ui.print_info(f"Reinstalando en {project}...")
-        inst["components"] = reinstall_components(inst, cache)
+        try:
+            inst["components"] = reinstall_components(inst, cache)
+        except sac_config.SacConfigError as e:
+            ui.print_error(f"{project}: {e}")
+            failed += 1
+            continue
         inst["sha"] = remote_sha
         inst["ref"] = ref
         inst["installed_at"] = datetime.now().isoformat()
@@ -138,5 +143,6 @@ def cmd_update(argv=None):
 
     print(f"\n{'═' * 70}")
     ui.print_success("ACTUALIZACIÓN COMPLETADA")
-    print(f"     {updated} actualizados · {skipped} al día · {missing} no encontrados")
+    print(f"     {updated} actualizados · {skipped} al día · {missing} no encontrados"
+          + (f" · {failed} con sac.json inválido (corrígelos y reintenta)" if failed else ""))
     print(f"{'═' * 70}\n")

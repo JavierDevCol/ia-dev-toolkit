@@ -87,6 +87,15 @@ class EnsureSacConfigTest(unittest.TestCase):
         self.assertEqual(self.dst.read_text(encoding="utf-8"), '{"usuario": {"nombre": "Ana"')
         self.assertTrue((self.dst.parent / "sac.json.bad").exists())
 
+    def test_json_cortado_en_caracter_acentuado_se_respalda(self):
+        self.dst.parent.mkdir(parents=True)
+        crudo = b'{"usuario":{"nombre":"Jos\xc3'                  # 'é' cortado a la mitad
+        self.dst.write_bytes(crudo)
+        with self.assertRaises(sac_config.SacConfigError):
+            sac_config.ensure_sac_config(self.cache, self.proj)
+        self.assertEqual(self.dst.read_bytes(), crudo)
+        self.assertEqual((self.dst.parent / "sac.json.bad").read_bytes(), crudo)
+
     def test_entrevista_rellena_usuario_solo_en_nuevo(self):
         sac_config.ensure_sac_config(self.cache, self.proj, interview=True, interactive=False)
         t = json.loads(self.dst.read_text(encoding="utf-8"))
@@ -105,6 +114,18 @@ class EnsureSacConfigTest(unittest.TestCase):
 
 
 class InstallSeedsSacTest(unittest.TestCase):
+    def test_sac_json_invalido_aborta_antes_de_copiar_componentes(self):
+        with tempfile.TemporaryDirectory() as t:
+            cache = _cache_con_plantilla(t)
+            (cache / "skills/demo").mkdir(parents=True)
+            (cache / "skills/demo/SKILL.md").write_text("x", encoding="utf-8")
+            proj = Path(t) / "proj"
+            (proj / ".SAC/config").mkdir(parents=True)
+            (proj / ".SAC/config/sac.json").write_text('{"usuario": ', encoding="utf-8")
+            with self.assertRaises(sac_config.SacConfigError):
+                instalar.install_seeds([("skills", "demo")], cache, proj, ".claude", with_config=False, interactive=False)
+            self.assertFalse((proj / ".claude/skills/demo").exists())      # nada a medias
+
     def test_solo_skills_sin_config_crea_sac_json_y_memctl(self):
         with tempfile.TemporaryDirectory() as t:
             cache = _cache_con_plantilla(t)
