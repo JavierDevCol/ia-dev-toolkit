@@ -20,7 +20,7 @@ from pathlib import Path
 # Hacer importable el paquete diatlib (está junto a este script, en el bin)
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from diatlib import paths, github, deps, registro, instalar, update, entorno
+from diatlib import paths, github, deps, registro, instalar, update, entorno, sac_config
 from diatlib import menu
 from diatlib import ui
 
@@ -186,8 +186,12 @@ def cmd_install(argv):
             seeds.append((t, n))
 
     selection = _seeds_to_dict(seeds, with_config)
-    installed = instalar.install_seeds(seeds, cache, project, platform, with_config=with_config,
-                                       dependencies=dependencies)
+    try:
+        installed = instalar.install_seeds(seeds, cache, project, platform, with_config=with_config,
+                                           dependencies=dependencies)
+    except sac_config.SacConfigError as e:
+        ui.print_error(str(e))
+        return
 
     remote_sha = registro.get_installed_sha()
     registro.save_installation(project, platform, selection, installed, remote_sha)

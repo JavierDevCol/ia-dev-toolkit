@@ -70,7 +70,18 @@ digraph priorizar_backlog {
 
 ## Implementation
 
-1. **Cargar config** → leer `.SAC/config/CONFIG_SYSTEM.yaml` para rutas. Leer también `CONFIG_USER.yaml` (ruta en `archivos.config_user`) y tomar `usuario.nombre` → **`{{usuario.nombre}}`**, necesario para firmar el reporte en el paso 10. Si está vacío, el archivo no existe, o `usuario.incluir_firma_en_documentos` es `false`, omitir la firma; no inventar un nombre.
+1. **Cargar config** con memctl (rutas y firma):
+
+```sh
+sh .SAC/memctl.sh get usuario.nombre
+sh .SAC/memctl.sh get usuario.incluir_firma_en_documentos
+sh .SAC/memctl.sh get archivos.backlog
+sh .SAC/memctl.sh get artifacts.hu_folder
+```
+
+memctl es solo lectura y su salida ES la respuesta; si memctl no existe (exit 127), leer `.SAC/config/sac.json` con `jq` o usar `~/.SAC/memctl.sh` (instalación global); si sale con exit 1 (JSON inválido o vacío), detenerse y avisar: no leer ni editar el archivo a mano; nunca inventar valores. `null`, vacío o exit 2 → no configurado.
+
+   `usuario.nombre` → **`{{usuario.nombre}}`**, necesario para firmar el reporte en el paso 10. Si está vacío, la clave no existe, o `usuario.incluir_firma_en_documentos` es `false`, omitir la firma; no inventar un nombre.
 2. **Cargar backlog** → extraer HUs de la tabla `## 📇 Índice Rápido`; filtrar por `--proyecto` / `--id_hu`
 3. **Filtrar candidatas** → Estado ∈ `[A] Aprobada`, `[P] Planificada` (usar `--incluir_refinadas` para sumar `[R] Refinada`)
 4. **Leer dependencias** → por cada candidata, leer **solo** `Refinamiento.md`; si el archivo no existe, usar `HU.md` en su lugar (fallback por archivo faltante, no por sección faltante). Extraer la tabla `## Dependencias` / `### Dependencias`. Si el archivo elegido no tiene esa sección, asumir sin dependencias declaradas — no caer al otro archivo, no inventar ninguna. `Plan.md` nunca es fuente de dependencias, ignorarlo en este paso.

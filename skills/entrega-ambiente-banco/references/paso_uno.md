@@ -8,7 +8,7 @@
 - Versión de la entrega `vX.Y.Z` — sugerirla con `@auto-versioning` (Regla 2) y validar formato semver. Si `vX.Y.Z` ya existe como tag → ver paso 5.
 - `nombre_repo` del repositorio que se entrega.
 
-**Outputs** (en `{output_folder}/entrega_release/{nombre_repo}/{version}/`):
+**Outputs** (en `{documentacion_sac_path}/entrega_release/{nombre_repo}/{version}/`):
 - `release-notes.md`, `checklist-entrega_vX.Y.Z.txt`, `resumen-entrega_release_vX.Y.Z.txt`
 - Rama `release/vX.Y.Z` publicada en `origin`. El tag `vX.Y.Z` **no** lo creamos en CEIBA — lo genera el banco en DES (Regla 6).
 
@@ -37,8 +37,8 @@
 
    Escribir el resultado directamente en el artefacto (crear la carpeta antes):
    ```bash
-   mkdir -p "{output_folder}/entrega_release/{nombre_repo}/{version}"
-   git log vPREV..HEAD --oneline --no-merges > "{output_folder}/entrega_release/{nombre_repo}/{version}/release-notes.md"
+   mkdir -p "{documentacion_sac_path}/entrega_release/{nombre_repo}/{version}"
+   git log vPREV..HEAD --oneline --no-merges > "{documentacion_sac_path}/entrega_release/{nombre_repo}/{version}/release-notes.md"
    ```
    Se generan **desde cero** en cada release (Regla 5).
 
@@ -71,7 +71,7 @@
 
 7. **Checklist de entrega** (`references/checklist-entrega.txt`):
    a. Mostrarlo **sustituyendo `vX.Y.Z` por la versión real** en todas las líneas (incluida la de `env-config-audit`) antes de mostrarlo — nunca dejar el placeholder literal. Los items ⚠️ requieren skills externas (ver tabla "Skills complementarias" en `SKILL.md`).
-   b. **Marcar los ítems a medida que se ejecuten esas skills**, aplicando la INSTRUCCIÓN DE USO del propio checklist sobre la copia de entrega (nunca sobre la plantilla). Guardar la copia marcada en `{output_folder}/entrega_release/{nombre_repo}/{version}/checklist-entrega_vX.Y.Z.txt`; debe reflejar el estado real al cierre.
+   b. **Marcar los ítems a medida que se ejecuten esas skills**, aplicando la INSTRUCCIÓN DE USO del propio checklist sobre la copia de entrega (nunca sobre la plantilla). Guardar la copia marcada en `{documentacion_sac_path}/entrega_release/{nombre_repo}/{version}/checklist-entrega_vX.Y.Z.txt`; debe reflejar el estado real al cierre.
 
    Al sugerir cada skill, mostrar su comando exacto listo para copiar (con la versión real ya sustituida):
    ```
@@ -81,4 +81,4 @@
    @analizar-calidad-codigo scope=commits sobre release/vX.Y.Z
    ```
 
-8. **Resumen final y notificación:** rellenar la **variante RELEASE** de `references/resumen-entrega.txt` (sustituir todos los placeholders, nunca dejar literales), mostrarla y guardarla como `resumen-entrega_release_vX.Y.Z.txt` en `{output_folder}/entrega_release/{nombre_repo}/{version}/`. La notificación al banco cierra el resumen — el PR a `des` lo crea el banco (Regla 6).
+8. **Resumen final y notificación:** rellenar la **variante RELEASE** de `references/resumen-entrega.txt` (sustituir todos los placeholders, nunca dejar literales), mostrarla y guardarla como `resumen-entrega_release_vX.Y.Z.txt` en `{documentacion_sac_path}/entrega_release/{nombre_repo}/{version}/`. La notificación al banco cierra el resumen — el PR a `des` lo crea el banco (Regla 6).

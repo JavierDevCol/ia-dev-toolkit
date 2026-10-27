@@ -1,6 +1,6 @@
 ---
 name: tomar-contexto
-description: Use when {archivos.workspace} (workspace.md) is missing, outdated, or context is needed before refining HUs, planning, or DevOps diagnostics.
+description: Use when {workspace} (workspace.md) is missing, outdated, or context is needed before refining HUs, planning, or DevOps diagnostics.
 ready: true
 ---
 
@@ -10,12 +10,12 @@ ready: true
 Genera el contexto del proyecto (workspace, scorecard, diagramas y archivos de artifacts) detectando tecnología, arquitectura y DevOps a partir de la configuración del sistema.
 
 ## When to Use
-- No existe `{archivos.workspace}` (workspace.md) o el contexto tiene más de 7 días.
+- No existe `{workspace}` (workspace.md) o el contexto tiene más de 7 días.
 - El usuario solicita analizar o inicializar un proyecto (mono o multi-proyecto).
 - Se requiere contexto previo para refinar HUs, planificar o diagnosticar DevOps.
 
 **Cuándo NO usar:**
-- `{archivos.workspace}` existe Y tiene < 7 días Y usuario no pidió regenerar.
+- `{workspace}` existe Y tiene < 7 días Y usuario no pidió regenerar.
 - Usuario solo quiere editar un archivo existente (usar skill específica).
 - Ya se ejecutó `tomar_contexto` en esta sesión (evitar duplicar).
 
@@ -63,7 +63,32 @@ digraph workspace_detection {
 ## Implementation
 
 ### Fase A: Cargar y Confirmar
-1. Leer `.SAC/config/CONFIG_SYSTEM.yaml` (`artifacts_folder`, `hu_folder`, `contextos_folder`, `adr_folder`) y `CONFIG_USER.yaml` (idioma, overrides, `usuario.nombre` → `{{usuario.nombre}}`, usado en la Fase C si `usuario.incluir_firma_en_documentos` es `true`). Sin `.SAC/config/` → avisar "No hay instalación SAC".
+1. Leer la config con memctl (`{documentacion_sac_path}` es la raíz única donde se crean todas las carpetas y archivos; `{{usuario.nombre}}` se usa en la Fase C si `usuario.incluir_firma_en_documentos` es `true`):
+
+Ejecutar cada comando: **su salida ES el valor del placeholder** de su fila y se usa tal cual en el resto de esta skill (no recalcular ni inventar rutas):
+
+| Placeholder / dato | Valor = salida de |
+|---|---|
+| `{{usuario.nombre}}` | `sh .SAC/memctl.sh get usuario.nombre` |
+| `usuario.incluir_firma_en_documentos` | `sh .SAC/memctl.sh get usuario.incluir_firma_en_documentos` |
+| `{documentacion_sac_path}` | `sh .SAC/memctl.sh get documentacion_sac_path` |
+| `{hu_folder}` | `sh .SAC/memctl.sh get artifacts.hu_folder` |
+| `{contextos_folder}` | `sh .SAC/memctl.sh get artifacts.contextos_folder` |
+| `{adr_folder}` | `sh .SAC/memctl.sh get artifacts.adr_folder` |
+| `{code_smells_folder}` | `sh .SAC/memctl.sh get artifacts.code_smells_folder` |
+| `{deuda_tecnica_folder}` | `sh .SAC/memctl.sh get artifacts.deuda_tecnica_folder` |
+| `{pendientes_folder}` | `sh .SAC/memctl.sh get artifacts.pendientes_folder` |
+| `{lecciones_aprendidas}` | `sh .SAC/memctl.sh get artifacts.lecciones_aprendidas` |
+| `{workspace}` | `sh .SAC/memctl.sh get archivos.workspace` |
+| `{backlog}` | `sh .SAC/memctl.sh get archivos.backlog` |
+| `{reglas_arquitectonicas}` | `sh .SAC/memctl.sh get archivos.reglas_arquitectonicas` |
+| `{patron_contexto}` | `sh .SAC/memctl.sh get multi_proyecto.patron_contexto` |
+| `idiomas.documentacion` | `sh .SAC/memctl.sh get idiomas.documentacion` |
+| `idiomas.comunicacion` | `sh .SAC/memctl.sh get idiomas.comunicacion` |
+
+memctl es solo lectura y su salida ES la respuesta; si memctl no existe (exit 127), leer `.SAC/config/sac.json` con `jq` o usar `~/.SAC/memctl.sh` (instalación global); si sale con exit 1 (JSON inválido o vacío), detenerse y avisar: no leer ni editar el archivo a mano; nunca inventar valores. `null`, vacío o exit 2 → no configurado.
+
+   Todo lo que esta skill cree debe quedar dentro de `{documentacion_sac_path}`. Sin `.SAC/config/sac.json` (memctl sale con exit 2) → avisar "No hay instalación SAC".
 2. Plantillas propias desde `{file:./assets/}` (backlog, contexto, workspace, lecciones_aprendidas, pendientes).
 3. Si existe contexto y no hay `--force` → preguntar [U] usar / [R] regenerar.
 4. Mostrar profundidad (`--profundidad_analisis`: basico/completo/exhaustivo) y proyectos detectados; esperar confirmación.

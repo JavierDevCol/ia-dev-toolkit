@@ -85,7 +85,17 @@ digraph validar_ca {
 
 ## Implementation
 
-1. **Cargar config** → leer `.SAC/config/CONFIG_SYSTEM.yaml` para rutas. Leer también `CONFIG_USER.yaml` (ruta en `archivos.config_user`) y tomar `usuario.nombre` → `{{usuario.nombre}}`, necesario para firmar el reporte en el paso 8. Si está vacío o el archivo no existe, omitir el sufijo de la firma; no inventar un nombre.
+1. **Cargar config** con memctl (rutas y firma):
+
+```sh
+sh .SAC/memctl.sh get usuario.nombre
+sh .SAC/memctl.sh get usuario.incluir_firma_en_documentos
+sh .SAC/memctl.sh get artifacts.hu_folder
+```
+
+memctl es solo lectura y su salida ES la respuesta; si memctl no existe (exit 127), leer `.SAC/config/sac.json` con `jq` o usar `~/.SAC/memctl.sh` (instalación global); si sale con exit 1 (JSON inválido o vacío), detenerse y avisar: no leer ni editar el archivo a mano; nunca inventar valores. `null`, vacío o exit 2 → no configurado.
+
+   `usuario.nombre` → `{{usuario.nombre}}`, necesario para firmar el reporte en el paso 8. Si está vacío o la clave no existe, omitir el sufijo de la firma; no inventar un nombre.
 2. **Cargar fuentes** → Refinamiento.md (CAs), Plan.md (estado), HU.md (modo)
 3. **Determinar CAs** → Plano: todos; Particionada: granulares/integración/todos
 4. **Evaluar cada CA** contra el código, con evidencia ejecutada cuando sea posible

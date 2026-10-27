@@ -24,9 +24,21 @@ Refina una HU definiendo criterios de aceptación SMART, estimación y desglose 
 
 ### 1. Configuración y modo
 
-Leer config, detectar workspace (multi/proyecto). Verificar `{hu_folder}/[ID-HU]/`: existe → **MODO_AJUSTE**; no existe → **MODO_NUEVO**.
+Leer config con memctl (`{hu_folder}` = `artifacts.hu_folder`), detectar workspace (multi/proyecto). Verificar `{hu_folder}/[ID-HU]/`: existe → **MODO_AJUSTE**; no existe → **MODO_NUEVO**.
 
-Leer también `CONFIG_USER.yaml` (ruta en `archivos.config_user`) y tomar `usuario.nombre` → **`{{usuario.nombre}}`**, necesario para firmar el Refinamiento en el paso 4. Si está vacío o el archivo no existe, omitir el sufijo de la firma; no inventar un nombre.
+Comandos de config y firma:
+
+Ejecutar cada comando: **su salida ES el valor del placeholder** de su fila y se usa tal cual en el resto de esta skill (no recalcular ni inventar rutas):
+
+| Placeholder / dato | Valor = salida de |
+|---|---|
+| `{{usuario.nombre}}` | `sh .SAC/memctl.sh get usuario.nombre` |
+| `usuario.incluir_firma_en_documentos` | `sh .SAC/memctl.sh get usuario.incluir_firma_en_documentos` |
+| `{hu_folder}` | `sh .SAC/memctl.sh get artifacts.hu_folder` |
+
+memctl es solo lectura y su salida ES la respuesta; si memctl no existe (exit 127), leer `.SAC/config/sac.json` con `jq` o usar `~/.SAC/memctl.sh` (instalación global); si sale con exit 1 (JSON inválido o vacío), detenerse y avisar: no leer ni editar el archivo a mano; nunca inventar valores. `null`, vacío o exit 2 → no configurado.
+
+`usuario.nombre` → **`{{usuario.nombre}}`**, necesario para firmar el Refinamiento en el paso 4. Si está vacío o la clave no existe, omitir el sufijo de la firma; no inventar un nombre.
 
 **SI Tipo = Bug:** pre-poblar con archivos afectados, CA base "bug no se reproduce", incorporar Causa Raíz.
 

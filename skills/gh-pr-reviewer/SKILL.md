@@ -42,7 +42,14 @@ Same as `gh-pr-creator`: `curl -H "Authorization: Bearer $GITHUB_TOKEN" -H "Acce
 
 ### Standards Configuration
 
-Ask the user (once) for `coding_standards_path` and `architecture_guide_path`. If files don't exist, skip standards — deliver conflicts + comments + health only.
+Read `coding_standards_path` and `architecture_guide_path` with memctl (read-only; its output IS the answer; if memctl is missing (exit 127) read `.SAC/config/sac.json` with `jq` or use `~/.SAC/memctl.sh` (global install); on exit 1 (invalid or empty JSON) stop and tell the user: do not read or edit the file by hand; never invent values):
+
+```sh
+sh .SAC/memctl.sh get gh-pr-reviewer.config.coding_standards_path
+sh .SAC/memctl.sh get gh-pr-reviewer.config.architecture_guide_path
+```
+
+If either is `null` (or exit 2), ask the user once (one question, both paths; "none" is a valid answer) and persist the answers to `gh-pr-reviewer.config` in `.SAC/config/sac.json`, editing only that section. A saved `"none"` means "no standards": treat it as a missing file, without asking again. If files don't exist, skip standards — deliver conflicts + comments + health only.
 
 ### Report Paths
 

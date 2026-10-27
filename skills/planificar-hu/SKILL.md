@@ -24,10 +24,21 @@ Genera un plan técnico de implementación a partir de una HU aprobada, alineado
 
 ### 1. Configuración y carga
 
-- Leer `.SAC/config/CONFIG_SYSTEM.yaml` → `artifacts.hu_folder`.
+- Leer con memctl `artifacts.hu_folder` y la firma:
+
+Ejecutar cada comando: **su salida ES el valor del placeholder** de su fila y se usa tal cual en el resto de esta skill (no recalcular ni inventar rutas):
+
+| Placeholder / dato | Valor = salida de |
+|---|---|
+| `{{usuario.nombre}}` | `sh .SAC/memctl.sh get usuario.nombre` |
+| `usuario.incluir_firma_en_documentos` | `sh .SAC/memctl.sh get usuario.incluir_firma_en_documentos` |
+| `{hu_folder}` | `sh .SAC/memctl.sh get artifacts.hu_folder` |
+
+memctl es solo lectura y su salida ES la respuesta; si memctl no existe (exit 127), leer `.SAC/config/sac.json` con `jq` o usar `~/.SAC/memctl.sh` (instalación global); si sale con exit 1 (JSON inválido o vacío), detenerse y avisar: no leer ni editar el archivo a mano; nunca inventar valores. `null`, vacío o exit 2 → no configurado.
+
 - Cargar `HU.md`, extraer `Tipo`. **Bug**: si existe `RefinamientoBug.md` (creado por `>registrar_hallazgo`), leerlo; si no existe, leer `Refinamiento.md` (el bug se refinó vía `>refinar_hu`). **Funcional** → leer `Refinamiento.md`. En ambos casos, verificar `## Aprobación` con `✅ Aprobada`.
 - Cargar contexto del proyecto, HUs relacionadas, componentes reutilizables.
-- Leer también `CONFIG_USER.yaml` (ruta en `archivos.config_user`) y tomar `usuario.nombre` → **`{{usuario.nombre}}`**, necesario para firmar el plan en el paso 4. Si está vacío o el archivo no existe, omitir el sufijo de la firma; no inventar un nombre.
+- `usuario.nombre` → **`{{usuario.nombre}}`**, necesario para firmar el plan en el paso 4. Si está vacío o la clave no existe, omitir el sufijo de la firma; no inventar un nombre.
 
 ### 2. Ambigüedades y fases
 

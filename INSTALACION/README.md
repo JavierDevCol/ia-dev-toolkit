@@ -124,6 +124,16 @@ Por cada proyecto registrado **re-resuelve las selecciones originales** contra e
 nuevo — así, si un componente ganó una dependencia entre versiones, esa nueva dependencia se
 instala sola. La configuración SAC ya respondida **no se sobrescribe**.
 
+### Configuración SAC: `.SAC/config/sac.json`
+
+Un único archivo JSON por proyecto reemplaza a `CONFIG_USER.yaml`, `CONFIG_SYSTEM.yaml` y `memory_skill.json`:
+usuario/idioma, rutas del sistema (`{project-root}` resuelto al instalar) y el estado de cada skill
+(`ado`, `handoff-release`, `env-config-audit`, `gh-pr-reviewer`). Las skills lo leen con `.SAC/memctl.sh`.
+
+- Se crea (o se fusiona) cada vez que se instalan skills o config: solo agrega claves nuevas de la plantilla, **nunca pisa valores del usuario**.
+- **Migración automática** desde el layout anterior: `CONFIG_USER.yaml` y los `memory_skill.json` de cada plataforma se fusionan en `sac.json` (gana el más reciente; los conflictos se avisan) y quedan renombrados a `*.legacy`. `CONFIG_SYSTEM.yaml` se regenera desde la plantilla.
+- Un `sac.json` con JSON inválido no se pisa: se copia a `sac.json.bad` y la instalación falla con un mensaje claro.
+
 ---
 
 ## Estructura del proyecto
@@ -139,7 +149,9 @@ INSTALACION/
 │   ├── deps.py          # grafo de dependencias + resolver transitivo
 │   ├── menu.py          # motor de menú stdlib (cross-platform)
 │   ├── registro.py      # instalacion.json (sha + selection)
-│   ├── instalar.py      # instalación de componentes + config
+│   ├── instalar.py      # instalación de componentes + memctl
+│   ├── sac_config.py    # .SAC/config/sac.json: crear/fusionar sin pisar valores
+│   ├── migrar.py        # CONFIG_USER.yaml + memory_skill.json -> sac.json
 │   ├── update.py        # reinstalación + orquestación de --update
 │   └── entorno.py       # garantía de PATH (idempotente + auto-repair)
 └── bootstrap/           # install/uninstall .sh y .ps1

@@ -6,11 +6,25 @@
 
 ## 1. Cargar Configuración
 
-- Leer `.SAC/config/CONFIG_SYSTEM.yaml` → obtener `archivos.reglas_arquitectonicas`, `archivos.workspace`
-- Leer `.SAC/config/CONFIG_USER.yaml` (si existe) → obtener idioma
+- Leer la config con memctl (solo lectura; su salida ES la respuesta; si memctl no existe (exit 127), leer `.SAC/config/sac.json` con `jq` o usar `~/.SAC/memctl.sh` (instalación global); si sale con exit 1 (JSON inválido o vacío), detenerse y avisar: no leer ni editar el archivo a mano; nunca inventar valores):
+
+Ejecutar cada comando: **su salida ES el valor del placeholder** de su fila y se usa tal cual en el resto de esta skill (no recalcular ni inventar rutas):
+
+| Placeholder / dato | Valor = salida de |
+|---|---|
+| `{reglas_arquitectonicas}` | `sh .SAC/memctl.sh get archivos.reglas_arquitectonicas` |
+| `{workspace}` | `sh .SAC/memctl.sh get archivos.workspace` |
+| `{contextos_folder}` | `sh .SAC/memctl.sh get artifacts.contextos_folder` |
+| `{adr_folder}` | `sh .SAC/memctl.sh get artifacts.adr_folder` |
+| `{documentacion_sac_path}` | `sh .SAC/memctl.sh get documentacion_sac_path` |
+| `idiomas.documentacion` | `sh .SAC/memctl.sh get idiomas.documentacion` |
+| `{{usuario.nombre}}` | `sh .SAC/memctl.sh get usuario.nombre` |
+| `usuario.incluir_firma_en_documentos` | `sh .SAC/memctl.sh get usuario.incluir_firma_en_documentos` |
+
+  `idiomas.documentacion` (`es|en|pt`) es el idioma; vacío o exit 2 → preguntar.
 - **Plantilla propia:** leer `{file:./assets/reglas_arquitectonicas_plantilla.md}`
 - Verificar que existe contexto del proyecto:
-  - Buscar `{archivos.workspace}` o archivo de contexto en `{contextos_folder}/`
+  - Buscar `{workspace}` o archivo de contexto en `{contextos_folder}/`
   - Si NO existe → Informar: "Necesito conocer el proyecto primero. Ejecuta >tomar_contexto"
   - Extraer stack tecnológico y arquitectura del contexto
 
@@ -81,8 +95,8 @@
 
 ## 7. Generar Archivo de Reglas
 
-- Crear `{artifacts_folder}/` si no existe
-- Generar `{archivos.reglas_arquitectonicas}` desde `{file:./assets/reglas_arquitectonicas_plantilla.md}`
+- Crear `{documentacion_sac_path}/` si no existe
+- Generar `{reglas_arquitectonicas}` desde `{file:./assets/reglas_arquitectonicas_plantilla.md}`
 - Incluir metadata: fecha, versión, aprobado_por
 
 ## 8. Actualizar Contexto del Proyecto
@@ -93,7 +107,7 @@
 - Agregar referencia:
   ```
   ### Reglas Arquitectónicas
-  - **Archivo:** {archivos.reglas_arquitectonicas}
+  - **Archivo:** {reglas_arquitectonicas}
   - **Generado:** {fecha}
   - **Versión:** 1.0
   - **Estado:** ✅ Configurado
@@ -112,7 +126,7 @@
 ```
 ✅ REGLAS ARQUITECTÓNICAS CONFIGURADAS
 
-📁 Archivo generado: {archivos.reglas_arquitectonicas}
+📁 Archivo generado: {reglas_arquitectonicas}
 📝 Contexto actualizado: (ver workspace)
 
 📊 Configuración aplicada:

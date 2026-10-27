@@ -37,7 +37,16 @@ Gestiona comentarios y menciones en Work Items de Azure DevOps con formato Markd
 
 **Formato:** Markdown plano, sin bloques de código contenedores. La plataforma interpreta estilos nativamente.
 
-**Colaboradores:** se leen de `memory_skill.json` → `[ado].config.perfiles[perfil_activo].colaboradores`:
+**Colaboradores:** se leen del perfil activo con memctl (devuelve el array completo; filtrar por `alias`, no por índice):
+
+```sh
+P=$(sh .SAC/memctl.sh get ado.config.perfil_activo)   # nombre del perfil activo
+sh .SAC/memctl.sh get ado.config.perfiles.$P.colaboradores
+```
+
+memctl es solo lectura y su salida ES la respuesta; si memctl no existe (exit 127), leer `.SAC/config/sac.json` con `jq` o usar `~/.SAC/memctl.sh` (instalación global); si sale con exit 1 (JSON inválido o vacío), detenerse y avisar: no leer ni editar el archivo a mano; nunca inventar valores. `null` o exit 2 → no configurado. El nombre de perfil no puede contener `.` (memctl lo usa como separador de ruta).
+
+Estructura:
 
 ```json
 "colaboradores": [
@@ -56,7 +65,7 @@ Antes de publicar **cualquier comentario**, preguntar con un menú armado desde 
 
 Insertar las menciones elegidas **al inicio del comentario** con formato `@<guid>`.
 
-Si `colaboradores` no existe o está vacío: preguntar si desea mencionar a alguien. Si sí, pedir nombre y email, resolver el GUID con `core_get_identity_ids`, preguntar si al mencionarlo se reasigna el WI, y persistir el colaborador en el perfil activo.
+Si `colaboradores` no existe o está vacío: preguntar si desea mencionar a alguien. Si sí, pedir nombre y email, resolver el GUID con `core_get_identity_ids`, preguntar si al mencionarlo se reasigna el WI, y persistir el colaborador en `ado.config.perfiles.<perfil>.colaboradores` de `.SAC/config/sac.json` (editando solo esa sección).
 
 **Reasignación [OBLIGATORIO]**
 
@@ -72,7 +81,7 @@ wit_update_work_item:
 
 **Firma [OPCIONAL]**
 
-Leer `usuario.nombre` e `incluir_firma_en_documentos` de `CONFIG_USER.yaml` (ruta en `archivos.config_user`). Si `incluir_firma_en_documentos` es `true` y `usuario.nombre` no está vacío, agregar al final del comentario, antes de publicarlo:
+Leer `sh .SAC/memctl.sh get usuario.nombre` y `sh .SAC/memctl.sh get usuario.incluir_firma_en_documentos`. Si `incluir_firma_en_documentos` es `true` y `usuario.nombre` no está vacío, agregar al final del comentario, antes de publicarlo:
 
 > **Generado y revisado por:** {{usuario.nombre}}
 

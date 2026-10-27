@@ -57,7 +57,7 @@ digraph handoffrelease {
    ejecuta esta skill, correrlas manualmente antes de entregar. Guardar en
    `RESUMEN_ENTREGA_release ({repo}).txt`.
 
-   Leer también `CONFIG_USER.yaml` (ruta en `archivos.config_user`) y tomar `usuario.nombre`. Si `usuario.incluir_firma_en_documentos` es `true` y `usuario.nombre` no está vacío, cerrar el resumen con:
+   Leer con memctl `usuario.nombre` y `usuario.incluir_firma_en_documentos` (`sh .SAC/memctl.sh get usuario.nombre`). Si `usuario.incluir_firma_en_documentos` es `true` y `usuario.nombre` no está vacío, cerrar el resumen con:
    ```
    > **Release Manager:** {{usuario.nombre}}
    > **Fecha:** {{fecha}}

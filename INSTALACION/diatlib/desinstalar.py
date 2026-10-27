@@ -8,7 +8,7 @@
 import shutil
 from pathlib import Path
 
-from . import paths, registro, entorno, menu
+from . import paths, registro, entorno, menu, instalar
 from .ui import print_success, print_warning, print_info
 
 
@@ -80,7 +80,7 @@ def uninstall_project(project_path):
             if ctype == "skills" and n in legacy_names:
                 removed += uninstall_component(ctype, legacy_names[n], project, platform)
 
-    # Assets raíz compartidos de skills (memory_skill.json, references/…): quitarlos
+    # Assets raíz compartidos de skills (references/…): quitarlos
     # solo si ya NO queda ninguna skill instalada.
     if comps.get("skills"):
         skills_dir = paths.component_dest("skills", project, platform)
@@ -95,11 +95,16 @@ def uninstall_project(project_path):
                         shutil.rmtree(item)
                     removed += 1
 
-    # config: se borra completa (decisión de alcance). Vive en .SAC/config/.
-    cfg = project / paths.SAC_DIR / "config"
-    if comps.get("config") and cfg.exists() and not any(c.get("config") for c in others):
-        shutil.rmtree(cfg)
-        removed += 1
+    # sac.json + memctl + legados (.SAC/config/): se borran con la ÚLTIMA instalación del
+    # proyecto que use skills o config (decisión de alcance: config completa, como antes).
+    usa_sac = lambda c: bool(c.get("config") or c.get("skills"))
+    if usa_sac(comps) and not any(usa_sac(c) for c in others):
+        cfg = project / paths.SAC_DIR / "config"
+        if cfg.exists():
+            shutil.rmtree(cfg)
+            removed += 1
+        for name in instalar.MEMCTL_FILES:
+            (project / paths.SAC_DIR / name).unlink(missing_ok=True)
 
     _cleanup_empty(project, platform)
 

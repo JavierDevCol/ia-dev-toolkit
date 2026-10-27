@@ -26,7 +26,21 @@ Captura incidencias (bugs, mejoras, deuda técnica) mediante análisis paralelo 
 
 ## Implementation
 
-1. **Cargar config** → leer `.SAC/config/CONFIG_SYSTEM.yaml` para rutas. Leer también `CONFIG_USER.yaml` (ruta en `archivos.config_user`) y tomar `usuario.nombre` → `{{usuario.nombre}}`, necesario para firmar el artefacto en el paso 7. Si está vacío o el archivo no existe, omitir el sufijo de la firma; no inventar un nombre.
+1. **Cargar config** con memctl (rutas y firma):
+
+Ejecutar cada comando: **su salida ES el valor del placeholder** de su fila y se usa tal cual en el resto de esta skill (no recalcular ni inventar rutas):
+
+| Placeholder / dato | Valor = salida de |
+|---|---|
+| `{{usuario.nombre}}` | `sh .SAC/memctl.sh get usuario.nombre` |
+| `usuario.incluir_firma_en_documentos` | `sh .SAC/memctl.sh get usuario.incluir_firma_en_documentos` |
+| `{backlog}` | `sh .SAC/memctl.sh get archivos.backlog` |
+| `{hu_folder}` | `sh .SAC/memctl.sh get artifacts.hu_folder` |
+| `{pendientes}` | `sh .SAC/memctl.sh get artifacts.pendientes` |
+
+memctl es solo lectura y su salida ES la respuesta; si memctl no existe (exit 127), leer `.SAC/config/sac.json` con `jq` o usar `~/.SAC/memctl.sh` (instalación global); si sale con exit 1 (JSON inválido o vacío), detenerse y avisar: no leer ni editar el archivo a mano; nunca inventar valores. `null`, vacío o exit 2 → no configurado.
+
+   `usuario.nombre` → `{{usuario.nombre}}`, necesario para firmar el artefacto en el paso 7. Si está vacío o la clave no existe, omitir el sufijo de la firma; no inventar un nombre.
 2. **Recibir hallazgo** → descripción del usuario + detectar proyecto + preguntar por evidencia (logs, stack traces)
 3. **Preguntas al usuario** → hacer UNA pregunta a la vez: afecta funcionalidad actual?, qué error observa?, cuándo ocurre?, qué HU relacionada?
 4. **Análisis paralelo** → ejecutar 2 sub-agentes simultáneamente:
@@ -36,7 +50,7 @@ Captura incidencias (bugs, mejoras, deuda técnica) mediante análisis paralelo 
 6. **Presentar sugerencia** → evidencia encontrada, clasificación, confianza, severidad; pedir confirmación
 7. **Crear artefacto** → si acepta:
    - BUG: crear `{hu_folder}/BUG-NNN/`, copiar `{file:./assets/RefinamientoBug.md}` como `Refinamiento.md`, agregar en backlog con estado [P]
-   - PENDIENTE: crear entrada en `{artifacts.pendientes}` con categoría y prioridad
+   - PENDIENTE: crear entrada en `{pendientes}` con categoría y prioridad
 
    Si `usuario.incluir_firma_en_documentos` es `true`, agregar al final del artefacto creado:
    ```

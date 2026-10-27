@@ -25,7 +25,7 @@ Archivo: `<raiz_proyecto>/bitacora-tecnica/<slug>/bitacora.md`. Plantilla: `../a
 **cerrar**
 1. Igual que `checkpoint` con los checkpoints recibidos.
 2. Cambiar `**Estado:**` a `Cerrada`.
-3. Firma: leer `<raiz_proyecto>/.SAC/config/CONFIG_SYSTEM.yaml` → `archivos.config_user`; si `usuario.incluir_firma_en_documentos` es `true` y `usuario.nombre` no está vacío, agregar al final `> **Generado y revisado por:** <nombre> · <fecha>`. Si falta algo, omitir la firma; no inventar un nombre.
+3. Firma: ejecutar con `<raiz_proyecto>` como directorio de trabajo `sh .SAC/memctl.sh get usuario.nombre` y `sh .SAC/memctl.sh get usuario.incluir_firma_en_documentos` (memctl solo lee; si falla, omitir la firma); si `usuario.incluir_firma_en_documentos` es `true` y `usuario.nombre` no está vacío, agregar al final `> **Generado y revisado por:** <nombre> · <fecha>`. Si falta algo, omitir la firma; no inventar un nombre.
 
 **retomar**
 1. Sin slug → listar `bitacora-tecnica/*/bitacora.md` con su título y estado, y responder esa lista.

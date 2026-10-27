@@ -56,7 +56,7 @@ INSTRUCCIONES DE EJECUCIÓN:
 
 > `gestionar-backlog-roadmap` lee este archivo en su Fase 1 (Ingesta) para decidir si genera Enablers de scaffold base en Sprint 0 o si los omite porque ya fueron consolidados aquí.
 
-Leer también `CONFIG_USER.yaml` (ruta en `archivos.config_user`) y tomar `usuario.nombre` → **`{{usuario.nombre}}`**, necesario para firmar `consolidacion.md`. Si está vacío o el archivo no existe, omitir el sufijo de la firma; no inventar un nombre.
+Leer con memctl `sh .SAC/memctl.sh get usuario.nombre` y `sh .SAC/memctl.sh get usuario.incluir_firma_en_documentos` (solo lectura; si falla, omitir la firma) y tomar `usuario.nombre` → **`{{usuario.nombre}}`**, necesario para firmar `consolidacion.md`. Si está vacío o la clave no existe, omitir el sufijo de la firma; no inventar un nombre.
 
 Al final de `consolidacion.md`, agregar (tanto si el usuario respondió SI como NO):
 

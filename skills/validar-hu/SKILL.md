@@ -70,7 +70,18 @@ digraph validar_hu {
 
 Leer config, `HU.md`, `Refinamiento.md`, contexto del proyecto, ADR si `ADR_Ref` definido. Bug Crítica → `nivel_validacion='basico'` automático.
 
-Leer también `CONFIG_USER.yaml` (ruta en `archivos.config_user`) y tomar `usuario.nombre` → **`{{usuario.nombre}}`**, necesario para firmar el veredicto en el paso 5. Si está vacío o el archivo no existe, omitir el sufijo de la firma; no inventar un nombre.
+Config y firma con memctl:
+
+```sh
+sh .SAC/memctl.sh get usuario.nombre
+sh .SAC/memctl.sh get usuario.incluir_firma_en_documentos
+sh .SAC/memctl.sh get artifacts.hu_folder
+sh .SAC/memctl.sh get artifacts.adr_folder
+```
+
+memctl es solo lectura y su salida ES la respuesta; si memctl no existe (exit 127), leer `.SAC/config/sac.json` con `jq` o usar `~/.SAC/memctl.sh` (instalación global); si sale con exit 1 (JSON inválido o vacío), detenerse y avisar: no leer ni editar el archivo a mano; nunca inventar valores. `null`, vacío o exit 2 → no configurado.
+
+`usuario.nombre` → **`{{usuario.nombre}}`**, necesario para firmar el veredicto en el paso 5. Si está vacío o la clave no existe, omitir el sufijo de la firma; no inventar un nombre.
 
 ### 2. Dependencias y viabilidad (corto circuito)
 

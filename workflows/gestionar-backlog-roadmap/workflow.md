@@ -31,7 +31,7 @@ Actúas como **Product Owner técnico** gestionando la evolución del backlog. E
 - Antes de crear cualquier ítem nuevo, compara contra lo ya existente — nunca regeneres lo aprobado en sprints anteriores (ver Reglas de Sincronización abajo).
 - **Cero alucinación:** si falta un dato para calcular WSJF o Story Points, pregúntalo al usuario o márcalo `Supuesto (no confirmado)` — nunca inventes un score.
 - **NUNCA** des por aprobada una fase sin la validación explícita del usuario (respeta los `gate: approval`).
-- Comunícate en el idioma configurado en `CONFIG_USER`.
+- Comunícate en el idioma configurado (`sh .SAC/memctl.sh get idiomas.comunicacion`; vacío o exit 2 → preguntar).
 
 ## 🔄 Reglas Estrictas de Sincronización (Delta Sync)
 
@@ -72,7 +72,7 @@ Cada artefacto se genera aplicando su plantilla en `./plantillas/`, respetando e
 
 Verifica que cada HU/Story nueva tenga su dependencia técnica declarada (si aplica), que `dependencies_matrix.md` y `backlog_roadmap.md` reflejen el Delta sin haber tocado el histórico aprobado, y que ninguna HU de negocio quede programada en el mismo Sprint que su Enabler bloqueante.
 
-Leer también `CONFIG_USER.yaml` (ruta en `archivos.config_user`) y tomar `usuario.nombre` → **`{{usuario.nombre}}`**, necesario para firmar los artefactos generados como Product Owner. Si está vacío o el archivo no existe, omitir el sufijo de la firma; no inventar un nombre.
+Leer con memctl `sh .SAC/memctl.sh get usuario.nombre` y `sh .SAC/memctl.sh get usuario.incluir_firma_en_documentos` (solo lectura; si falla, omitir la firma) y tomar `usuario.nombre` → **`{{usuario.nombre}}`**, necesario para firmar los artefactos generados como Product Owner. Si está vacío o la clave no existe, omitir el sufijo de la firma; no inventar un nombre.
 
 ---
 

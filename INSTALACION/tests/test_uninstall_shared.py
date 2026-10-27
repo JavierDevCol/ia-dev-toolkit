@@ -70,5 +70,50 @@ class UninstallSharedTest(unittest.TestCase):
         self.assertFalse(old.exists())
 
 
+class UninstallSacJsonTest(unittest.TestCase):
+    """sac.json y memctl se borran con la última instalación que usa skills o config."""
+
+    def setUp(self):
+        self._home = os.environ.get("HOME")
+        self._tmp = tempfile.TemporaryDirectory()
+        os.environ["HOME"] = self._tmp.name
+        paths.get_cache_dir().mkdir(parents=True, exist_ok=True)
+        paths.get_ref_file().write_text("v2.1.1", encoding="utf-8")
+        self.P = Path(self._tmp.name) / "proj"
+        for rel in (".SAC/config/sac.json", ".SAC/config/CONFIG_USER.yaml.legacy",
+                    ".SAC/memctl.sh", ".SAC/memctl.ps1",
+                    ".claude/skills/demo/SKILL.md", ".opencode/skills/demo/SKILL.md"):
+            f = self.P / rel
+            f.parent.mkdir(parents=True, exist_ok=True)
+            f.write_text("x", encoding="utf-8")
+
+    def tearDown(self):
+        os.environ["HOME"] = self._home
+        self._tmp.cleanup()
+
+    def _uninstall(self, choice):
+        with patch.object(menu, "menu_select", return_value=choice), redirect_stdout(io.StringIO()):
+            desinstalar.uninstall_project(self.P)
+
+    def test_skills_sin_config_borran_sac_json_y_memctl_al_final(self):
+        sel = {"skills": ["demo"]}                       # sin flag "config": instalación solo de skills
+        registro.save_installation(self.P, ".claude", sel, sel, "S")
+        self._uninstall(None)
+        self.assertFalse((self.P / ".SAC/config").exists())
+        self.assertFalse((self.P / ".SAC/memctl.sh").exists())
+        self.assertFalse((self.P / ".SAC/memctl.ps1").exists())
+
+    def test_otra_plataforma_con_skills_conserva_sac_json_y_memctl(self):
+        sel = {"skills": ["demo"]}
+        registro.save_installation(self.P, ".claude", sel, sel, "S")
+        registro.save_installation(self.P, ".opencode", sel, sel, "S")
+        self._uninstall(".claude")
+        self.assertTrue((self.P / ".SAC/config/sac.json").exists())
+        self.assertTrue((self.P / ".SAC/memctl.sh").exists())
+        self._uninstall(None)
+        self.assertFalse((self.P / ".SAC/config").exists())
+        self.assertFalse((self.P / ".SAC/memctl.sh").exists())
+
+
 if __name__ == "__main__":
     unittest.main()

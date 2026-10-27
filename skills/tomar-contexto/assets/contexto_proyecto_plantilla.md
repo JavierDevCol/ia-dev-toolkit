@@ -160,9 +160,9 @@
 
 | Artefacto | Ubicación | Estado | Fecha |
 |-----------|-----------|--------|-------|
-| Reglas Arquitectónicas | {{archivos.reglas_arquitectonicas}} | [⏳ Pendiente / ✅ Configurado] | [fecha] |
-| Backlog | {{archivos.backlog}} | [⏳ Pendiente / ✅ Configurado] | [fecha] |
-| ADRs | {{artifacts.adr_folder}} | [⏳ Pendiente / ✅ Configurado] | [fecha] |
+| Reglas Arquitectónicas | {reglas_arquitectonicas} | [⏳ Pendiente / ✅ Configurado] | [fecha] |
+| Backlog | {backlog} | [⏳ Pendiente / ✅ Configurado] | [fecha] |
+| ADRs | {adr_folder} | [⏳ Pendiente / ✅ Configurado] | [fecha] |
 
 > 💡 Para configurar reglas arquitectónicas: `>init_reglas_arquitectonicas`
 

@@ -33,7 +33,7 @@ Input → Resolve PR → Extract data → Load standards → Analyze → Report 
 
 ### Context
 
-Reads from `memory_skill.json` → `[ado].config.perfiles[perfil_activo]` (standalone):
+Reads from the active profile (`ado.config.perfiles.<perfil_activo>`):
 
 | Field | Source |
 |-------|--------|
@@ -41,9 +41,22 @@ Reads from `memory_skill.json` → `[ado].config.perfiles[perfil_activo]` (stand
 | `user_email` | `user_email` from active profile |
 | `base_reports_path` | `base_reports_path` from active profile |
 
+Read the config with memctl (read-only; its output IS the answer; if memctl is missing (exit 127) read `.SAC/config/sac.json` with `jq` or use `~/.SAC/memctl.sh` (global install); on exit 1 (invalid or empty JSON) stop and tell the user: do not read or edit the file by hand; never invent values):
+
+```sh
+P=$(sh .SAC/memctl.sh get ado.config.perfil_activo)   # active profile name
+sh .SAC/memctl.sh get ado.config.perfiles.$P.user_email
+sh .SAC/memctl.sh get ado.config.perfiles.$P.project_map.repos   # fallback: project_map.default
+sh .SAC/memctl.sh get ado.config.perfiles.$P.base_reports_path
+sh .SAC/memctl.sh get ado.config.perfiles.$P.config_extras.coding_standards_path
+sh .SAC/memctl.sh get ado.config.perfiles.$P.config_extras.architecture_guide_path
+```
+
+`null` or exit 2 → not configured. Profile names must not contain `.` (memctl uses it as path separator).
+
 **Profile guard:** if `perfil_activo` is null, its profile is missing, or no project resolves, stop and ask the user to run `ado-profile-setup`.
 
-**Missing profile fields:** if `user_email` or `base_reports_path` (absolute path) is missing from the active profile, ask the user once and persist the answer to that profile in `memory_skill.json` so later runs don't ask again.
+**Missing profile fields:** if `user_email` or `base_reports_path` (absolute path) is missing from the active profile, ask the user once and persist the answer to that profile in `.SAC/config/sac.json` (`ado.config.perfiles.<profile>`, editing only that section) so later runs don't ask again.
 
 ### Standards Configuration
 

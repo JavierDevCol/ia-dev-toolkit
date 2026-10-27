@@ -30,10 +30,10 @@ digraph crearadr {
   madr [label="MADR\n(defecto)" shape=box style=filled fillcolor="#7ED321"]
   nygard [label="Nygard" shape=box style=filled fillcolor="#9B59B6"]
   ystmt [label="Y-Statement" shape=box style=filled fillcolor="#9B59B6"]
-  q2 [label="¿Existe\nmemory_skill.json?" shape=diamond style=filled fillcolor="#F5A623"]
-  use_mem [label="Usar output_folder\nde memory" shape=box style=filled fillcolor="#7ED321"]
-  ask [label="Preguntar carpeta\nal usuario" shape=box style=filled fillcolor="#F5A623"]
-  save [label="Guardar ADR\n+ actualizar memory" shape=box style=filled fillcolor="#4A90D9" fontcolor=white]
+  q2 [label="¿Existe\nadr_folder?" shape=diamond style=filled fillcolor="#F5A623"]
+  use_mem [label="Usar adr_folder\nde sac.json" shape=box style=filled fillcolor="#7ED321"]
+  ask [label="Crear {adr_folder}\n(bajo documentacion_sac_path)" shape=box style=filled fillcolor="#F5A623"]
+  save [label="Guardar ADR" shape=box style=filled fillcolor="#4A90D9" fontcolor=white]
 
   start -> q1
   q1 -> madr [label="Ninguno\n(defecto)"]
@@ -42,8 +42,8 @@ digraph crearadr {
   madr -> q2
   nygard -> q2
   ystmt -> q2
-  q2 -> use_mem [label="Sí\ncon output_folder"]
-  q2 -> ask [label="No o null"]
+  q2 -> use_mem [label="Sí"]
+  q2 -> ask [label="No existe\nla carpeta"]
   use_mem -> save
   ask -> save
 }
@@ -53,7 +53,17 @@ digraph crearadr {
 
 ### 1. Reunir la decisión (preguntar solo lo que falte)
 
-Leer también `CONFIG_USER.yaml` (ruta en `archivos.config_user`) y tomar `usuario.nombre` → **`{{usuario.nombre}}`**, necesario para firmar el ADR en el paso 6. Si está vacío o el archivo no existe, omitir el sufijo de la firma; no inventar un nombre.
+Leer la config con memctl y tomar `usuario.nombre` → **`{{usuario.nombre}}`**, necesario para firmar el ADR en el paso 6. Si está vacío o la clave no existe, omitir el sufijo de la firma; no inventar un nombre.
+
+Ejecutar cada comando: **su salida ES el valor del placeholder** de su fila y se usa tal cual en el resto de esta skill (no recalcular ni inventar rutas):
+
+| Placeholder / dato | Valor = salida de |
+|---|---|
+| `{{usuario.nombre}}` | `sh .SAC/memctl.sh get usuario.nombre` |
+| `usuario.incluir_firma_en_documentos` | `sh .SAC/memctl.sh get usuario.incluir_firma_en_documentos` |
+| `{adr_folder}` | `sh .SAC/memctl.sh get artifacts.adr_folder` |
+
+memctl es solo lectura y su salida ES la respuesta; si memctl no existe (exit 127), leer `.SAC/config/sac.json` con `jq` o usar `~/.SAC/memctl.sh` (instalación global); si sale con exit 1 (JSON inválido o vacío), detenerse y avisar: no leer ni editar el archivo a mano; nunca inventar valores. `null`, vacío o exit 2 → no configurado.
 
 Elicita estos 6 elementos antes de escribir:
 | Elemento | Pregunta |
@@ -76,11 +86,9 @@ Si el usuario no aporta drivers/opciones/consecuencias, pregúntalos — **no lo
 ### 3. Resolver el destino (NO inventes la carpeta)
 
 Orden estricto:
-1. Si existe `memory_skill.json` en la raíz de `skills/` (`$SKILL_DIR/../memory_skill.json`) y tiene campo `output_folder` (global) → usar esa carpeta.
-2. Si `output_folder` es `null` o no existe → **preguntar al usuario la carpeta** donde vive la colección de ADRs.
-3. **Si la carpeta no existe, créala** antes de guardar el ADR.
-4. Si existe `memory_skill.json`, **persistir** la carpeta en `output_folder` (global) y `last_number` en `[crear-adr].memory` tras guardar.
-5. Si no existe `memory_skill.json`, **créalalo** con el campo `output_folder` y la sección `[crear-adr]`.
+1. `{adr_folder}` = salida de `sh .SAC/memctl.sh get artifacts.adr_folder` (siempre dentro de `documentacion_sac_path`). No preguntar la carpeta ni guardar fuera de ella.
+2. **Si la carpeta no existe, créala** antes de guardar el ADR.
+3. Si `.SAC/config/sac.json` no existe, la instalación SAC está incompleta: indicar al usuario que ejecute `diat`; no crear el archivo a mano.
 
 ### 4. Numeración
 
@@ -106,14 +114,14 @@ Si `usuario.incluir_firma_en_documentos` es `true`, agregar al final del ADR:
 
 Sin `usuario.nombre` configurado, la línea queda `> **Arquitecto:**`.
 
-Guarda el archivo, actualiza `memory_skill.json` si existe, y reporta:
+Guarda el archivo en `{adr_folder}` y reporta:
 `✅ ADR NNNN: [título] | Formato: [formato] | Ruta: [ruta] | Estado: [estado]`
 
 ## Errores Comunes
 
 | Excusa | Realidad |
 |--------|----------|
-| "Guardo donde parezca lógico" | Ubicación NO determinística → resolver desde `memory_skill.json` o preguntar |
+| "Guardo donde parezca lógico" | Ubicación NO determinística → usar `{adr_folder}` (`memctl get artifacts.adr_folder`) |
 | "Uso la estructura estándar que recuerdo" | Debes usar la plantilla exacta de `assets/` correspondiente |
 | "Omito Decisores/Validación porque no me los dieron" | Son campos obligatorios → preguntar |
 | "Reinicio en 001" | Numeración = máximo existente + 1 |
@@ -123,7 +131,7 @@ Guarda el archivo, actualiza `memory_skill.json` si existe, y reporta:
 
 | Acción | Resultado |
 |--------|-----------|
-| `crea un ADR para <decisión>` | MADR default → `<output_folder>/NNNN-titulo-slug.md` |
+| `crea un ADR para <decisión>` | MADR default → `{adr_folder}/NNNN-titulo-slug.md` |
 | `...con formato nygard` | `assets/adr_nygard.md` |
 | `...y-statement` | `assets/adr_y_statement.md` |
-| Sin `memory_skill.json` ni `[crear-adr]` | Pregunta carpeta y la persiste |
+| `{adr_folder}` no existe | La crea bajo `documentacion_sac_path` |

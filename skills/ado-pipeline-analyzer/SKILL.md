@@ -31,13 +31,25 @@ Identifies the target build, fetches run metadata/changes/stages/logs, classifie
 
 ## Context Injection
 
-Reads the project and `base_reports_path` from `memory_skill.json` → `[ado].config.perfiles[perfil_activo]` (standalone). Project = `project_map.pipelines` (fallback `project_map.repos`, then `project_map.default`).
+Reads the project and `base_reports_path` from the active profile. Project = `project_map.pipelines` (fallback `project_map.repos`, then `project_map.default`).
+
+Read the config with memctl (read-only; its output IS the answer; if memctl is missing (exit 127) read `.SAC/config/sac.json` with `jq` or use `~/.SAC/memctl.sh` (global install); on exit 1 (invalid or empty JSON) stop and tell the user: do not read or edit the file by hand; never invent values):
+
+```sh
+P=$(sh .SAC/memctl.sh get ado.config.perfil_activo)   # active profile name
+sh .SAC/memctl.sh get ado.config.perfiles.$P.project_map.pipelines   # fallback: project_map.repos, then project_map.default
+sh .SAC/memctl.sh get ado.config.perfiles.$P.base_reports_path
+sh .SAC/memctl.sh get usuario.nombre
+sh .SAC/memctl.sh get usuario.incluir_firma_en_documentos
+```
+
+`null` or exit 2 → not configured. Profile names must not contain `.` (memctl uses it as path separator).
 
 **Profile guard:** if `perfil_activo` is null, its profile is missing, or no project resolves, stop and ask the user to run `ado-profile-setup`.
 
-**Missing profile fields:** if `base_reports_path` (absolute path) is missing from the active profile, ask the user once and persist the answer to that profile in `memory_skill.json` so later runs don't ask again.
+**Missing profile fields:** if `base_reports_path` (absolute path) is missing from the active profile, ask the user once and persist the answer to that profile in `.SAC/config/sac.json` (`ado.config.perfiles.<profile>`, editing only that section) so later runs don't ask again.
 
-Leer también `CONFIG_USER.yaml` (ruta en `archivos.config_user`) y tomar `usuario.nombre` → **`{{usuario.nombre}}`**, necesario para firmar el reporte en la Fase D. Si está vacío, el archivo no existe, o `usuario.incluir_firma_en_documentos` es `false`, omitir la firma; no inventar un nombre.
+Tomar `usuario.nombre` → **`{{usuario.nombre}}`** (comando de arriba), necesario para firmar el reporte en la Fase D. Si está vacío, la clave no existe, o `usuario.incluir_firma_en_documentos` es `false`, omitir la firma; no inventar un nombre.
 
 ## Core Flow
 

@@ -136,6 +136,6 @@
 
 ---
 
-> **Archivo:** `{{artifacts.hu_folder}}/[ID-HU]/Refinamiento.md`
+> **Archivo:** `{hu_folder}/[ID-HU]/Refinamiento.md`
 > **Creado por:** `>refinar_hu`
 > **Actualizado por:** `>validar_hu`

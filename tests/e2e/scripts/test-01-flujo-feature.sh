@@ -77,11 +77,10 @@ assert_file_exists "$WS/pom.xml" "Marcador de proyecto (pom.xml) existe"
 
 # Verificar que .SAC/config existe
 assert_dir_exists "$WS/.SAC/config" "Directorio .SAC/config existe"
-assert_file_exists "$WS/.SAC/config/CONFIG_SYSTEM.yaml" "CONFIG_SYSTEM.yaml existe"
-assert_file_exists "$WS/.SAC/config/CONFIG_USER.yaml" "CONFIG_USER.yaml existe"
+assert_file_exists "$WS/.SAC/config/sac.json" "sac.json existe"
 
-# Verificar que CONFIG_SYSTEM tiene rutas correctas
-assert_file_contains "$WS/.SAC/config/CONFIG_SYSTEM.yaml" "$WS" "CONFIG_SYSTEM.yaml tiene rutas del proyecto"
+# Verificar que sac.json tiene rutas correctas
+assert_file_contains "$WS/.SAC/config/sac.json" "$WS" "sac.json tiene rutas del proyecto"
 
 echo ""
 

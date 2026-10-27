@@ -61,8 +61,8 @@ CLI_PACKAGE = "diatlib"
 # ============================================================
 # LAYOUT DE COMPONENTES  (verificado contra el repo real)
 # ============================================================
-# Las 7 carpetas de componentes que se copian al cache.
-COMPONENT_DIRS = ("skills", "agents", "workflows", "tools", "commands", "plugins", "config")
+# Las 7 carpetas de componentes + scripts/ (memctl) que se copian al cache.
+COMPONENT_DIRS = ("skills", "agents", "workflows", "tools", "commands", "plugins", "config", "scripts")
 
 # Tipos cuyas dependencias hay que resolver recursivamente.
 RECURSIVE_TYPES = {"skills", "agents", "workflows"}

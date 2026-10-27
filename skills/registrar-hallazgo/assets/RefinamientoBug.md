@@ -155,6 +155,6 @@
 
 ---
 
-> **Archivo:** `{{artifacts.hu_folder}}/BUG-NNN/RefinamientoBug.md`
+> **Archivo:** `{hu_folder}/BUG-NNN/RefinamientoBug.md`
 > **Creado por:** `>registrar_bug`
 > **Actualizado por:** `>planificar_hu`, `>ejecutar_plan`
