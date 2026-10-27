@@ -75,7 +75,7 @@
     "agents": {
         "PO": {
             "requires": {
-                "skills": ["refinar-hu", "validar-hu"],
+                "skills": ["sac-refinar-hu", "validar-hu"],
                 "tools": [],
                 "commands": [],
                 "plugins": []
@@ -163,7 +163,7 @@
             },
             "optional": {}
         },
-        "refinar-hu": {
+        "sac-refinar-hu": {
             "requires": {
                 "skills": ["sac-tomar-contexto"],
                 "workflows": [],
@@ -384,7 +384,7 @@ print_banner() {
                 2. ejecutar-plan                       — Implementa planes actualizando Plan.md | deps: .SAC/config/
                 3. init-reglas-arquitectonicas         — Genera reglas arquitectónicas del proyecto | deps: .SAC/config/
                 4. planificar-hu                       — Genera plan técnico desde HU aprobada | deps: .SAC/config/
-                5. refinar-hu                          — Refina HUs con criterios SMART y estimación | deps: .SAC/config/
+                5. sac-refinar-hu                          — Refina HUs con criterios SMART y estimación | deps: .SAC/config/
                 6. registrar-hallazgo                  — Captura incidencias mediante análisis paralelo | deps: .SAC/config/
 
         

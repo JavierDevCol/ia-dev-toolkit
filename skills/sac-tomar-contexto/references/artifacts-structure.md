@@ -6,8 +6,8 @@ Usar las rutas cargadas con memctl desde `.SAC/config/sac.json` (`documentacion_
 {documentacion_sac_path}/
 ├── HU/
 │   └── [ID-HU]/
-│       ├── HU.md              (desde skills/refinar-hu/assets/HU.md)
-│       ├── Refinamiento.md    (desde skills/refinar-hu/assets/Refinamiento.md)
+│       ├── HU.md              (desde skills/sac-refinar-hu/assets/HU.md)
+│       ├── Refinamiento.md    (desde skills/sac-refinar-hu/assets/Refinamiento.md)
 │       ├── RefinamientoBug.md (solo bugs, desde skills/registrar-hallazgo/assets/RefinamientoBug.md)
 │       ├── Plan.md            (desde skills/planificar-hu/assets/Plan.md)
 │       └── Tracking.md        (desde skills/ejecutar-plan/assets/Tracking.md)

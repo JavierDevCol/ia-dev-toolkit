@@ -43,4 +43,4 @@
 ---
 
 > **Archivo:** `{hu_folder}/[ID-HU]/HU.md`
-> **Creado por:** `>refinar_hu` o `>registrar_bug`
+> **Creado por:** `>sac_refinar_hu` o `>registrar_bug`

@@ -137,5 +137,5 @@ Ejecutar cada comando: **su salida ES el valor del placeholder** de su fila y se
 
 💡 Los agentes consultarán estas reglas para tomar decisiones consistentes.
 
-Siguiente: >refinar_hu o >validar_hu
+Siguiente: >sac_refinar_hu o >validar_hu
 ```

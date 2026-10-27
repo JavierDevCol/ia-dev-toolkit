@@ -10,7 +10,7 @@ Verificar que las skills del pipeline SAC funcionan correctamente de punta a pun
 ## Pipeline bajo prueba
 
 ```
-sac-tomar-contexto → refinar-hu → validar-hu → planificar-hu → ejecutar-plan → sincronizar-backlog
+sac-tomar-contexto → sac-refinar-hu → validar-hu → planificar-hu → ejecutar-plan → sincronizar-backlog
                                                        ↗
                               registrar-hallazgo (bugs)
 ```
@@ -20,7 +20,7 @@ sac-tomar-contexto → refinar-hu → validar-hu → planificar-hu → ejecutar-
 ### ESC-01: Flujo completo Feature (happy path)
 ```
 1. sac-tomar-contexto    → crea workspace.md, contexto_proyecto.md, backlog
-2. refinar-hu        → crea HU.md + Refinamiento.md (estado [R])
+2. sac-refinar-hu        → crea HU.md + Refinamiento.md (estado [R])
 3. validar-hu        → aprueba HU, agrega ✅ Aprobada (estado [A])
 4. planificar-hu     → crea Plan.md (estado [P])
 5. ejecutar-plan     → ejecuta plan, crea Tracking.md (estado [E] → [X])
@@ -47,7 +47,7 @@ sac-tomar-contexto → refinar-hu → validar-hu → planificar-hu → ejecutar-
 ```
 1. ejecutar-plan con Plan.md COMPLETADO → ERROR esperado
 2. planificar-hu con HU en [R] (sin aprobación) → ERROR esperado
-3. refinar-hu con HU en [A] (ya aprobada) → SKIP esperado
+3. sac-refinar-hu con HU en [A] (ya aprobada) → SKIP esperado
 ```
 
 ### ESC-05: Detección mono vs multi-proyecto

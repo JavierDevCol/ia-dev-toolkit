@@ -5,7 +5,7 @@ description: >
   (backlog_roadmap.md, EPIC-BUS-XX.MD, EPIC-ENABLER-XX.md) already exist
   and it's time to materialize the HUs/Stories of a Sprint into individual
   artifacts/HU/[ID]/ folders and the operational backlog_desarrollo.md,
-  before anyone runs refinar-hu on them.
+  before anyone runs sac-refinar-hu on them.
 ready: true
 ---
 
@@ -13,7 +13,7 @@ ready: true
 
 ## Overview
 
-Materializa las HUs/Stories asignadas a un Sprint (definidas en `backlog_roadmap.md` + las épicas del workflow `gestionar-backlog-roadmap`) en la estructura operativa que el ciclo de vida SAC espera: una carpeta `artifacts/HU/[ID-HU]/` con su `HU.md` base por cada una, y el índice `backlog_desarrollo.md` actualizado. **No refina, no valida, no planifica, no ejecuta** — deja cada HU en estado `[ ]` Pendiente, lista para que el usuario corra `>refinar_hu` manualmente.
+Materializa las HUs/Stories asignadas a un Sprint (definidas en `backlog_roadmap.md` + las épicas del workflow `gestionar-backlog-roadmap`) en la estructura operativa que el ciclo de vida SAC espera: una carpeta `artifacts/HU/[ID-HU]/` con su `HU.md` base por cada una, y el índice `backlog_desarrollo.md` actualizado. **No refina, no valida, no planifica, no ejecuta** — deja cada HU en estado `[ ]` Pendiente, lista para que el usuario corra `>sac_refinar_hu` manualmente.
 
 ## When to Use
 
@@ -23,8 +23,8 @@ Materializa las HUs/Stories asignadas a un Sprint (definidas en `backlog_roadmap
 
 **Cuándo NO usar:**
 - No existe `artifacts/backlog_roadmap.md` → ejecutar el workflow `gestionar-backlog-roadmap` primero.
-- La HU ya tiene carpeta en `artifacts/HU/[ID-HU]/` → ya fue inicializada; usar `>refinar_hu` directamente.
-- Se busca refinar, validar, planificar o ejecutar una HU → usar `refinar-hu`/`validar-hu`/`planificar-hu`/`ejecutar-plan`. Esta skill **nunca** los invoca.
+- La HU ya tiene carpeta en `artifacts/HU/[ID-HU]/` → ya fue inicializada; usar `>sac_refinar_hu` directamente.
+- Se busca refinar, validar, planificar o ejecutar una HU → usar `sac-refinar-hu`/`validar-hu`/`planificar-hu`/`ejecutar-plan`. Esta skill **nunca** los invoca.
 
 ## Implementation
 
@@ -43,7 +43,7 @@ Cruzar contra `artifacts/HU/dependencies_matrix.md`: si el ítem aparece como �
 ### 3. Crear carpeta y `HU.md` base
 
 - Si `artifacts/HU/[ID-HU]/` **ya existe** → no sobreescribir; reportar como "ya inicializada" y continuar con la siguiente.
-- Si no existe → crear la carpeta y generar `HU.md` desde `{file:../refinar-hu/assets/HU.md}`, poblando: ID, Título, Tipo (`Feature` si viene de `EPIC-BUS`, `Deuda Técnica`/enabler si viene de `EPIC-ENABLER`), Prioridad (heredada del ranking WSJF de la épica), Descripción (Como/Quiero/Para) y la tabla de Dependencias (la "Dependencia Técnica" declarada en la épica). Dejar Complejidad/Story Points/Estimación como `[Pendiente — se define en refinar_hu]`.
+- Si no existe → crear la carpeta y generar `HU.md` desde `{file:../sac-refinar-hu/assets/HU.md}`, poblando: ID, Título, Tipo (`Feature` si viene de `EPIC-BUS`, `Deuda Técnica`/enabler si viene de `EPIC-ENABLER`), Prioridad (heredada del ranking WSJF de la épica), Descripción (Como/Quiero/Para) y la tabla de Dependencias (la "Dependencia Técnica" declarada en la épica). Dejar Complejidad/Story Points/Estimación como `[Pendiente — se define en sac_refinar_hu]`.
 - **No crear `Refinamiento.md`.** Su ausencia es justamente lo que mantiene el estado en `[ ]` Pendiente (ver "Detección de estado por archivos" en `backlog_desarrollo_plantilla.md`).
 
 ### 4. Generar o actualizar `backlog_desarrollo.md`
@@ -69,7 +69,7 @@ Si `usuario.incluir_firma_en_documentos` es `true` y `usuario.nombre` no está v
 📁 HUs creadas: [X] ([lista de IDs])
 ⏭️  Ya existían (omitidas): [lista o "ninguna"]
 🔴 Bloqueadas (según dependencies_matrix.md): [lista o "ninguna"]
-Siguiente paso: >refinar_hu [ID-HU] por cada una, en el orden de >priorizar_backlog
+Siguiente paso: >sac_refinar_hu [ID-HU] por cada una, en el orden de >priorizar_backlog
 
 > **Generado y revisado por:** {{usuario.nombre}}
 ```
@@ -90,6 +90,6 @@ Siguiente paso: >refinar_hu [ID-HU] por cada una, en el orden de >priorizar_back
 | Error | Causa | Solución |
 |-------|-------|----------|
 | Sobreescribe una HU ya refinada | No verificó si la carpeta ya existía | Chequear siempre `artifacts/HU/[ID-HU]/` antes de crear |
-| Invoca `refinar_hu` automáticamente | Confundir "inicializar" con "refinar" | Esta skill solo prepara el andamiaje; el refinamiento es un paso manual posterior |
+| Invoca `sac_refinar_hu` automáticamente | Confundir "inicializar" con "refinar" | Esta skill solo prepara el andamiaje; el refinamiento es un paso manual posterior |
 | Regenera `backlog_desarrollo.md` completo | Ignora HUs de sprints anteriores | Edición quirúrgica: solo agregar filas nuevas, misma regla Delta Sync que usa `gestionar-backlog-roadmap` |
 | Falta `backlog_roadmap.md` | El workflow de backlog no corrió | Avisar y sugerir ejecutar `gestionar-backlog-roadmap` primero |

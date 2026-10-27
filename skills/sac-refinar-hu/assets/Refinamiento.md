@@ -137,5 +137,5 @@
 ---
 
 > **Archivo:** `{hu_folder}/[ID-HU]/Refinamiento.md`
-> **Creado por:** `>refinar_hu`
+> **Creado por:** `>sac_refinar_hu`
 > **Actualizado por:** `>validar_hu`

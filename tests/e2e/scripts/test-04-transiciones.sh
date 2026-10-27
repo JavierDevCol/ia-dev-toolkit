@@ -112,8 +112,8 @@ echo "  → planificar-hu debería rechazar: 'Ejecutar >validar_hu primero'"
 
 echo ""
 
-# ---- TEST 3: refinar-hu con HU en [A] (ya aprobada) ----
-echo -e "${YELLOW}TEST 3: refinar-hu con HU en [A] (ya aprobada)${NC}"
+# ---- TEST 3: sac-refinar-hu con HU en [A] (ya aprobada) ----
+echo -e "${YELLOW}TEST 3: sac-refinar-hu con HU en [A] (ya aprobada)${NC}"
 echo "  Verificando que NO se puede refinar una HU ya aprobada..."
 
 TEST3_DIR="$WS/artifacts/HU/HU-TRANS-03"
@@ -141,7 +141,7 @@ EOF
 
 assert_file_contains "$TEST3_DIR/HU.md" "\[A\] Aprobada" "HU.md tiene estado [A]"
 assert_file_contains "$TEST3_DIR/Refinamiento.md" "✅ Aprobada" "Refinamiento.md tiene aprobación"
-echo "  → refinar-hu debería rechazar: 'HU ya aprobada, usar >planificar_hu'"
+echo "  → sac-refinar-hu debería rechazar: 'HU ya aprobada, usar >planificar_hu'"
 
 echo ""
 

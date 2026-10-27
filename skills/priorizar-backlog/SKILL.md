@@ -21,7 +21,7 @@ Calcula un orden de ejecución sugerido para las HUs del backlog combinando el g
 - Se sospecha una dependencia circular entre HUs o una referencia a una HU que no existe en el backlog
 
 **Cuándo NO usar:**
-- Backlog no existe o no tiene `Índice Rápido` (ejecutar `>refinar_hu` primero)
+- Backlog no existe o no tiene `Índice Rápido` (ejecutar `>sac_refinar_hu` primero)
 - Solo hay una HU candidata (`[A]`/`[P]`) — no hay nada que ordenar
 - El backlog está desincronizado (ejecutar `>sincronizar_backlog` primero; esta skill confía en el `Estado` del Índice Rápido)
 

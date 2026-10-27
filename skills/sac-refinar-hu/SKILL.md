@@ -1,5 +1,5 @@
 ---
-name: refinar-hu
+name: sac-refinar-hu
 description: >
   Use when the user provides a HU for refinement or requests refining
   an existing HU.

@@ -87,7 +87,7 @@ assert_file_not_exists "$TEST1_DIR/Refinamiento.md" "Refinamiento.md NO existe (
 
 # Verificar que la skill detectaría el error
 # (En ejecución real, planificar-hu leería HU.md y buscaría Refinamiento.md)
-echo "  → planificar-hu debería fallar con: 'Ejecutar >refinar_hu primero'"
+echo "  → planificar-hu debería fallar con: 'Ejecutar >sac_refinar_hu primero'"
 
 echo ""
 
@@ -142,7 +142,7 @@ EOF
 assert_file_exists "$TEST3_DIR/HU.md" "HU.md existe"
 assert_file_not_exists "$TEST3_DIR/Refinamiento.md" "Refinamiento.md NO existe"
 
-echo "  → validar-hu debería fallar con: 'Ejecutar >refinar_hu primero'"
+echo "  → validar-hu debería fallar con: 'Ejecutar >sac_refinar_hu primero'"
 
 echo ""
 

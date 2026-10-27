@@ -362,7 +362,7 @@ Al seleccionar esta opción se instala todo el paquete SAC:
 2. ejecutar-plan             — Implementa planes actualizando Plan.md               | deps: config/
 3. init-reglas-arquitectonicas — Genera reglas arquitectónicas del proyecto         | deps: config/
 4. planificar-hu             — Genera plan técnico desde HU aprobada                | deps: config/
-5. refinar-hu                — Refina HUs con criterios SMART y estimación          | deps: config/
+5. sac-refinar-hu                — Refina HUs con criterios SMART y estimación          | deps: config/
 6. registrar-hallazgo        — Captura incidencias mediante análisis paralelo       | deps: config/
 ```
 
@@ -428,7 +428,7 @@ COMPONENT_DEPENDENCIES = {
     # Agents -> dependencies
     "agents": {
         "PO": {
-            "requires": {"skills": ["refinar-hu", "validar-hu"],
+            "requires": {"skills": ["sac-refinar-hu", "validar-hu"],
                          "tools": [], "commands": [], "plugins": []},
             "optional": {"skills": ["sincronizar-backlog", "planificar-hu"]},
         },
@@ -469,7 +469,7 @@ COMPONENT_DEPENDENCIES = {
                          "tools": [], "commands": [], "plugins": []},
             "optional": {},
         },
-        "refinar-hu": {
+        "sac-refinar-hu": {
             "requires": {"skills": ["sac-tomar-contexto"], "workflows": [],
                          "tools": [], "commands": [], "plugins": []},
             "optional": {},

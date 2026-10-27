@@ -19,7 +19,7 @@ Detecta y corrige discrepancias entre el estado del backlog y los artefactos en 
 - Se necesita reporte rápido de estados
 
 **Cuándo NO usar:**
-- Backlog no existe (ejecutar >refinar_hu primero)
+- Backlog no existe (ejecutar >sac_refinar_hu primero)
 - Artefactos corruptos o con estructura inválida
 
 ## Flowchart
@@ -113,12 +113,12 @@ memctl es solo lectura y su salida ES la respuesta; si memctl no existe (exit 12
 
 | Error | Causa | Solución |
 |-------|-------|----------|
-| Backlog no encontrado | No existe | Ejecutar >refinar_hu para crear backlog |
+| Backlog no encontrado | No existe | Ejecutar >sac_refinar_hu para crear backlog |
 | HU no encontrada | ID incorrecto | Verificar ID con la lista de HUs |
 | Artefacto corrupto | Estructura incorrecta | Revisar manualmente el archivo |
 | Estado ambiguo | Artefactos no coinciden | Revisar manualmente |
 
 ## Después de ejecutar
 
-- `>refinar_hu [ID-HU]` → refinar HUs Pendientes
+- `>sac_refinar_hu [ID-HU]` → refinar HUs Pendientes
 - `>planificar_hu [ID-HU]` → planificar HUs Aprobadas

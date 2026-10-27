@@ -36,7 +36,7 @@
 
 ```
 [ ] Pendiente
-  ↓ >refinar_hu (REFINADOR)
+  ↓ >sac_refinar_hu (REFINADOR)
 [R] Refinada
   ↓ >validar_hu (ONAD)
 [A] Aprobada

@@ -13,7 +13,7 @@ digraph flujo_team_sac {
   sac_iniciar_sprint [label="sac-iniciar-sprint\n(materializa HU.md +\nbacklog_desarrollo.md)", fillcolor="#50E3C2"];
   sac_tomar_contexto [label="sac-tomar-contexto", shape=oval, fillcolor="#4A90D9", fontcolor=white];
   registrar_hallazgo [label="registrar-hallazgo\n(bug)", fillcolor="#F5A623"];
-  refinar_hu [label="refinar-hu\n(feature)", fillcolor="#7BC67E"];
+  sac_refinar_hu [label="sac-refinar-hu\n(feature)", fillcolor="#7BC67E"];
   refinada [label="[R] Refinada", shape=ellipse, fillcolor="#F8E71C"];
   validar_hu [label="validar-hu", fillcolor="#7BC67E"];
   bloqueada [label="BLOQUEADA", fillcolor="#D0021B", fontcolor=white];
@@ -35,9 +35,9 @@ digraph flujo_team_sac {
   nota_sprint0 -> gestionar_backlog;
   gestionar_backlog -> sac_iniciar_sprint;
   sac_iniciar_sprint -> sac_tomar_contexto;
-  sac_tomar_contexto -> refinar_hu;
+  sac_tomar_contexto -> sac_refinar_hu;
   sac_tomar_contexto -> registrar_hallazgo [label="si es bug"];
-  refinar_hu -> refinada;
+  sac_refinar_hu -> refinada;
   registrar_hallazgo -> refinada [label="crea Refinamiento.md"];
   refinada -> validar_hu;
   validar_hu -> bloqueada [label="dependencia\nbloqueante"];
@@ -108,7 +108,7 @@ digraph skill_tomar_contexto {
   validar_usuario -> crear_artifacts [label="EDITAR"];
 }
 
-// refinar-hu — Fuente: skills/refinar-hu/SKILL.md (Implementation 1-4).
+// sac-refinar-hu — Fuente: skills/sac-refinar-hu/SKILL.md (Implementation 1-4).
 digraph skill_refinar_hu {
   rankdir=LR;
   node [fontname="Helvetica", fontsize=10, shape=box, style=filled];

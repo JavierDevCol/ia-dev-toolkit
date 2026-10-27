@@ -84,14 +84,14 @@ assert_file_contains "$WS/.SAC/config/sac.json" "$WS" "sac.json tiene rutas del 
 
 echo ""
 
-# ---- PASO 2: refinar-hu (simular creación de HU) ----
-echo -e "${YELLOW}PASO 2: refinar-hu (simular creación de HU)${NC}"
+# ---- PASO 2: sac-refinar-hu (simular creación de HU) ----
+echo -e "${YELLOW}PASO 2: sac-refinar-hu (simular creación de HU)${NC}"
 echo "  Creando artifacts/HU/HU-001/ con HU.md y Refinamiento.md..."
 
 HU_DIR="$WS/artifacts/HU/HU-001"
 mkdir -p "$HU_DIR"
 
-# Crear HU.md (simula lo que haría refinar-hu)
+# Crear HU.md (simula lo que haría sac-refinar-hu)
 cat > "$HU_DIR/HU.md" << 'EOF'
 # HU-001: Login con OAuth2
 
@@ -122,7 +122,7 @@ Como usuario, quiero poder autenticarme con OAuth2 para acceder al sistema de fo
 | **Total** | **22h** | **13** |
 EOF
 
-# Crear Refinamiento.md (simula lo que haría refinar-hu)
+# Crear Refinamiento.md (simula lo que haría sac-refinar-hu)
 cat > "$HU_DIR/Refinamiento.md" << 'EOF'
 # Refinamiento: HU-001
 

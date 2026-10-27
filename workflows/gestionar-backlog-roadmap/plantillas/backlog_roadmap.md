@@ -29,7 +29,7 @@ type: summary_report
 | `EPIC-ENABLER-01` | Enabler | Setup de Arquitectura Base | Sprint 0 (tentativo) | 12.5 | `READY` |
 | `EPIC-BUS-01` | Negocio | Gestión de Usuarios y Auth | Sprint 1 (tentativo) | 8.0 | `BLOCKED` |
 
-> **Tentativo vs. Confirmado:** el Sprint asignado es tentativo hasta que la HU/Story pase a `[R] Refinada` (skill `refinar-hu`). A partir de ahí se considera confirmado para ese Sprint.
+> **Tentativo vs. Confirmado:** el Sprint asignado es tentativo hasta que la HU/Story pase a `[R] Refinada` (skill `sac-refinar-hu`). A partir de ahí se considera confirmado para ese Sprint.
 
 ---
 

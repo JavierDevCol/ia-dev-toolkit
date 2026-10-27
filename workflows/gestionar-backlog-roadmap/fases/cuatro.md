@@ -30,7 +30,7 @@ Antes de aplicar cualquier porcentaje, confirma la **velocidad del equipo** (sto
 - Instanciar `./plantillas/backlog_roadmap.md` y escribir/actualizar `./artifacts/backlog_roadmap.md`.
 - Completa la tabla **"Registro de Sprints"** de `backlog_roadmap.md` con fecha de inicio/fin de cada Sprint y su estado (`🔵 En Curso`, `⚪ Planificado`, `✅ Cerrado`). Solo un Sprint puede estar `🔵 En Curso`.
 - En la tabla de Priorización WSJF y en cada HU/Story (`EPIC-BUS-XX.MD`, `EPIC-ENABLER-XX.md`), registra el **Sprint Asignado**.
-- **Tentativo vs. Confirmado:** si la HU/Story aún no está `[R] Refinada` (según `refinar-hu`), el Sprint asignado es una propuesta (`Sprint-N (tentativo)`). Una vez refinada, se marca como confirmado y ya no se reordena salvo re-priorización explícita.
+- **Tentativo vs. Confirmado:** si la HU/Story aún no está `[R] Refinada` (según `sac-refinar-hu`), el Sprint asignado es una propuesta (`Sprint-N (tentativo)`). Una vez refinada, se marca como confirmado y ya no se reordena salvo re-priorización explícita.
 - Al sincronizar (Delta Sync), respeta el Sprint confirmado de HUs ya refinadas/planificadas — solo reasigna Sprint a ítems que siguen `[N]` sin refinar.
 
 ---
