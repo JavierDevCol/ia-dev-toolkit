@@ -24,9 +24,19 @@ Refina una HU definiendo criterios de aceptación SMART, estimación y desglose 
 
 ### 1. Configuración y modo
 
-Leer config, detectar workspace (multi/proyecto). Verificar `{hu_folder}/[ID-HU]/`: existe → **MODO_AJUSTE**; no existe → **MODO_NUEVO**.
+Leer config con memctl (`{hu_folder}` = `artifacts.hu_folder`), detectar workspace (multi/proyecto). Verificar `{hu_folder}/[ID-HU]/`: existe → **MODO_AJUSTE**; no existe → **MODO_NUEVO**.
 
-Leer también `CONFIG_USER.yaml` (ruta en `archivos.config_user`) y tomar `usuario.nombre` → **`{{usuario.nombre}}`**, necesario para firmar el Refinamiento en el paso 4. Si está vacío o el archivo no existe, omitir el sufijo de la firma; no inventar un nombre.
+Comandos de config y firma:
+
+```sh
+sh .SAC/memctl.sh get usuario.nombre
+sh .SAC/memctl.sh get usuario.incluir_firma_en_documentos
+sh .SAC/memctl.sh get artifacts.hu_folder
+```
+
+memctl es solo lectura y su salida ES la respuesta; si falla, leer `.SAC/config/sac.json` con `jq`; nunca inventar valores. `null`, vacío o exit 2 → no configurado.
+
+`usuario.nombre` → **`{{usuario.nombre}}`**, necesario para firmar el Refinamiento en el paso 4. Si está vacío o la clave no existe, omitir el sufijo de la firma; no inventar un nombre.
 
 **SI Tipo = Bug:** pre-poblar con archivos afectados, CA base "bug no se reproduce", incorporar Causa Raíz.
 
