@@ -70,15 +70,15 @@ echo "  ESC-02: Flujo completo Bug"
 echo "=========================================="
 echo ""
 
-# ---- PASO 1: registrar-hallazgo (simular creación de bug) ----
-echo -e "${YELLOW}PASO 1: registrar-hallazgo (simular creación de bug)${NC}"
+# ---- PASO 1: sac-registrar-hallazgo (simular creación de bug) ----
+echo -e "${YELLOW}PASO 1: sac-registrar-hallazgo (simular creación de bug)${NC}"
 echo "  Creando BUG-001/ con Refinamiento.md desde assets..."
 
 BUG_DIR="$WS/artifacts/HU/BUG-001"
 mkdir -p "$BUG_DIR"
 
-# Copiar RefinamientoBug.md como Refinamiento.md (simula registrar-hallazgo)
-REGLA_ASSETS="$HOME/Documentos/squad-skills/skills/registrar-hallazgo/assets/RefinamientoBug.md"
+# Copiar RefinamientoBug.md como Refinamiento.md (simula sac-registrar-hallazgo)
+REGLA_ASSETS="$HOME/Documentos/squad-skills/skills/sac-registrar-hallazgo/assets/RefinamientoBug.md"
 if [ -f "$REGLA_ASSETS" ]; then
     cp "$REGLA_ASSETS" "$BUG_DIR/Refinamiento.md"
     log_ok "RefinamientoBug.md copiado como Refinamiento.md"

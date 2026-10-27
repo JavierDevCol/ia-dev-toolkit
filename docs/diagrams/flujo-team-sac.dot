@@ -12,7 +12,7 @@ digraph flujo_team_sac {
   gestionar_backlog [label="gestionar-backlog-roadmap\n(workflow)", fillcolor="#8E44AD", fontcolor=white];
   sac_iniciar_sprint [label="sac-iniciar-sprint\n(materializa HU.md +\nbacklog_desarrollo.md)", fillcolor="#50E3C2"];
   sac_tomar_contexto [label="sac-tomar-contexto", shape=oval, fillcolor="#4A90D9", fontcolor=white];
-  registrar_hallazgo [label="registrar-hallazgo\n(bug)", fillcolor="#F5A623"];
+  sac_registrar_hallazgo [label="sac-registrar-hallazgo\n(bug)", fillcolor="#F5A623"];
   sac_refinar_hu [label="sac-refinar-hu\n(feature)", fillcolor="#7BC67E"];
   refinada [label="[R] Refinada", shape=ellipse, fillcolor="#F8E71C"];
   sac_validar_hu [label="sac-validar-hu", fillcolor="#7BC67E"];
@@ -36,9 +36,9 @@ digraph flujo_team_sac {
   gestionar_backlog -> sac_iniciar_sprint;
   sac_iniciar_sprint -> sac_tomar_contexto;
   sac_tomar_contexto -> sac_refinar_hu;
-  sac_tomar_contexto -> registrar_hallazgo [label="si es bug"];
+  sac_tomar_contexto -> sac_registrar_hallazgo [label="si es bug"];
   sac_refinar_hu -> refinada;
-  registrar_hallazgo -> refinada [label="crea Refinamiento.md"];
+  sac_registrar_hallazgo -> refinada [label="crea Refinamiento.md"];
   refinada -> sac_validar_hu;
   sac_validar_hu -> bloqueada [label="dependencia\nbloqueante"];
   sac_validar_hu -> aprobada [label="CA claros"];
@@ -152,7 +152,7 @@ digraph skill_refinar_hu {
   smart -> desglose -> estimar -> persistir -> fin;
 }
 
-// registrar-hallazgo — Fuente: skills/registrar-hallazgo/SKILL.md (Implementation 1-7).
+// sac-registrar-hallazgo — Fuente: skills/sac-registrar-hallazgo/SKILL.md (Implementation 1-7).
 digraph skill_registrar_hallazgo {
   rankdir=LR;
   node [fontname="Helvetica", fontsize=10, shape=box, style=filled];

@@ -23,7 +23,7 @@ Revisa código mediante sub-agentes en paralelo para detectar vulnerabilidades d
 - Pruebas activas contra una app corriendo (escaneo de puertos, fuzzing, exploits reales) — aclarar el límite y sugerir herramientas (ZAP, Burp, nmap) para que el usuario las ejecute
 - Solo se necesita inventariar variables de entorno/secretos por ámbito → usar `env-config-audit`
 - Solo se necesita revisar mantenibilidad/code smells → usar `analizar-calidad-codigo`
-- El usuario quiere registrar un hallazgo ya conocido → usar `registrar-hallazgo`
+- El usuario quiere registrar un hallazgo ya conocido → usar `sac-registrar-hallazgo`
 
 ## Implementation
 
@@ -64,7 +64,7 @@ Si `usuario.nombre` está vacío o la clave no existe, omitir el sufijo (`> **Au
 1. Solo análisis estático — nunca ejecutar código, escanear red ni invocar herramientas externas.
 2. Si detecta secretos hardcodeados, reportar el hallazgo puntual (severidad Crítica) y remitir a `env-config-audit` para el inventario completo — no duplicar ese flujo.
 3. Nunca inventar CVEs ni afirmar que una versión es vulnerable sin evidencia — si no se puede confirmar, marcar `⚠️ Verificar manualmente`.
-4. No crear BUG/PENDIENTE automáticamente — el reporte es informativo; el usuario decide si usa `registrar-hallazgo` después.
+4. No crear BUG/PENDIENTE automáticamente — el reporte es informativo; el usuario decide si usa `sac-registrar-hallazgo` después.
 5. Toda evidencia debe citar archivo y línea exacta — nunca un hallazgo genérico sin ubicación.
 
 ## Quick Reference

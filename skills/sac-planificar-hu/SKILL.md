@@ -36,7 +36,7 @@ Ejecutar cada comando: **su salida ES el valor del placeholder** de su fila y se
 
 memctl es solo lectura y su salida ES la respuesta; si memctl no existe (exit 127), leer `.SAC/config/sac.json` con `jq`; si sale con exit 1 (JSON inválido o vacío), detenerse y avisar: no leer ni editar el archivo a mano; nunca inventar valores. `null`, vacío o exit 2 → no configurado.
 
-- Cargar `HU.md`, extraer `Tipo`. **Bug**: si existe `RefinamientoBug.md` (creado por `>registrar_hallazgo`), leerlo; si no existe, leer `Refinamiento.md` (el bug se refinó vía `>sac_refinar_hu`). **Funcional** → leer `Refinamiento.md`. En ambos casos, verificar `## Aprobación` con `✅ Aprobada`.
+- Cargar `HU.md`, extraer `Tipo`. **Bug**: si existe `RefinamientoBug.md` (creado por `>sac_registrar_hallazgo`), leerlo; si no existe, leer `Refinamiento.md` (el bug se refinó vía `>sac_refinar_hu`). **Funcional** → leer `Refinamiento.md`. En ambos casos, verificar `## Aprobación` con `✅ Aprobada`.
 - Cargar contexto del proyecto, HUs relacionadas, componentes reutilizables.
 - `usuario.nombre` → **`{{usuario.nombre}}`**, necesario para firmar el plan en el paso 4. Si está vacío o la clave no existe, omitir el sufijo de la firma; no inventar un nombre.
 

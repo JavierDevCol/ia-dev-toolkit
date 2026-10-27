@@ -130,7 +130,7 @@
                 "plugins": []
             },
             "optional": {
-                "skills": ["registrar-hallazgo"]
+                "skills": ["sac-registrar-hallazgo"]
             }
         },
         "sac-ejecutar-plan": {
@@ -385,7 +385,7 @@ print_banner() {
                 3. init-reglas-arquitectonicas         — Genera reglas arquitectónicas del proyecto | deps: .SAC/config/
                 4. sac-planificar-hu                       — Genera plan técnico desde HU aprobada | deps: .SAC/config/
                 5. sac-refinar-hu                          — Refina HUs con criterios SMART y estimación | deps: .SAC/config/
-                6. registrar-hallazgo                  — Captura incidencias mediante análisis paralelo | deps: .SAC/config/
+                6. sac-registrar-hallazgo                  — Captura incidencias mediante análisis paralelo | deps: .SAC/config/
 
         
 

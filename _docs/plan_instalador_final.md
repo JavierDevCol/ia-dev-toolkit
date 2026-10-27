@@ -363,7 +363,7 @@ Al seleccionar esta opción se instala todo el paquete SAC:
 3. init-reglas-arquitectonicas — Genera reglas arquitectónicas del proyecto         | deps: config/
 4. sac-planificar-hu             — Genera plan técnico desde HU aprobada                | deps: config/
 5. sac-refinar-hu                — Refina HUs con criterios SMART y estimación          | deps: config/
-6. registrar-hallazgo        — Captura incidencias mediante análisis paralelo       | deps: config/
+6. sac-registrar-hallazgo        — Captura incidencias mediante análisis paralelo       | deps: config/
 ```
 
 ### 4.4 Kit Completo — Agents + Skills + Workflows + Config
@@ -452,7 +452,7 @@ COMPONENT_DEPENDENCIES = {
         "sac-validar-ca": {
             "requires": {"skills": ["sac-planificar-hu"], "workflows": [],
                          "tools": [], "commands": [], "plugins": []},
-            "optional": {"skills": ["registrar-hallazgo"]},
+            "optional": {"skills": ["sac-registrar-hallazgo"]},
         },
         "sac-ejecutar-plan": {
             "requires": {"skills": ["sac-planificar-hu"], "workflows": [],

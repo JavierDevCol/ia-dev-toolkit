@@ -12,7 +12,7 @@ Verificar que las skills del pipeline SAC funcionan correctamente de punta a pun
 ```
 sac-tomar-contexto → sac-refinar-hu → sac-validar-hu → sac-planificar-hu → sac-ejecutar-plan → sac-sincronizar-backlog
                                                        ↗
-                              registrar-hallazgo (bugs)
+                              sac-registrar-hallazgo (bugs)
 ```
 
 ## Escenarios de prueba
@@ -30,7 +30,7 @@ sac-tomar-contexto → sac-refinar-hu → sac-validar-hu → sac-planificar-hu �
 ### ESC-02: Flujo completo Bug
 ```
 1. sac-tomar-contexto    → crea workspace
-2. registrar-hallazgo → crea BUG-001/ con Refinamiento.md desde assets
+2. sac-registrar-hallazgo → crea BUG-001/ con Refinamiento.md desde assets
 3. sac-planificar-hu     → planifica bug (estado [P])
 4. sac-ejecutar-plan     → ejecuta fix (estado [E] → [X])
 ```

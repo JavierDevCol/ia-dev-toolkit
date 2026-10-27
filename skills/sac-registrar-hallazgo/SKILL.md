@@ -1,5 +1,5 @@
 ---
-name: registrar-hallazgo
+name: sac-registrar-hallazgo
 description: >
   Use when a bug, improvement, or technical debt is discovered during development
   and needs to be logged as BUG or PENDIENTE.

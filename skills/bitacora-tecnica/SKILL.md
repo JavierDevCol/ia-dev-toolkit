@@ -23,7 +23,7 @@ La escritura la hace un **subagente** para no cargar la sesión con el contenido
 
 **Cuándo NO usar:**
 - Sesiones solo de consulta o sin objetivo claro
-- Decisiones de arquitectura → `crear-adr`; bugs/pendientes del backlog → `registrar-hallazgo`
+- Decisiones de arquitectura → `crear-adr`; bugs/pendientes del backlog → `sac-registrar-hallazgo`
 
 ## Implementation
 
