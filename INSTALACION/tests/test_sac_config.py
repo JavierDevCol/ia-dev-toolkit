@@ -5,6 +5,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 REPO = Path(__file__).resolve().parents[2]
 from diatlib import sac_config, instalar  # noqa: E402
+from _helpers import _cache_con_plantilla  # noqa: E402
 SKILL_SECTIONS = ("ado", "handoff-release", "env-config-audit", "gh-pr-reviewer")
 RESERVED = {"schema_version", "usuario", "idiomas", "proyecto", "output_folder", "rutas",
             "rutas_override", "archivos", "artifacts", "rutas_reglas", "reglas", "multi_proyecto"}
@@ -36,17 +37,6 @@ class PlantillaTest(unittest.TestCase):
     def test_no_quedan_claves_de_firma_legadas_en_raiz(self):
         self.assertNotIn("user_name", self.t)
         self.assertNotIn("incluir_firma_en_documentos", self.t)
-
-
-def _cache_con_plantilla(tmp):
-    cache = Path(tmp) / "cache"
-    (cache / "config/config").mkdir(parents=True)
-    (cache / "config/config/sac.json").write_text(
-        (REPO / "config/config/sac.json").read_text(encoding="utf-8"), encoding="utf-8")
-    (cache / "scripts").mkdir()
-    for n in instalar.MEMCTL_FILES:
-        (cache / "scripts" / n).write_text((REPO / "scripts" / n).read_text(encoding="utf-8"), encoding="utf-8")
-    return cache
 
 
 class EnsureSacConfigTest(unittest.TestCase):

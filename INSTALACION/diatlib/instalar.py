@@ -9,7 +9,7 @@
 import shutil
 from pathlib import Path
 
-from . import paths, deps, registro, sac_config
+from . import paths, deps, registro, sac_config, migrar
 from .ui import print_warning, print_success
 
 MEMCTL_FILES = ("memctl.sh", "memctl.ps1")
@@ -109,6 +109,8 @@ def install_seeds(seeds, cache, project, platform, with_config=False,
     if installed.get("skills"):
         install_shared_skill_assets(cache, project, platform)   # references/…
     if installed.get("skills") or with_config:
+        for aviso in migrar.migrate_legacy(project):    # CONFIG_*.yaml / memory_skill.json -> sac.json
+            print_warning(aviso)
         sac_config.ensure_sac_config(cache, project, interview=with_config, interactive=interactive)
         install_memctl(cache, project)                  # memctl lee sac.json -> viaja con él
     if with_config:
