@@ -57,20 +57,20 @@ class ContratoMemctlTest(unittest.TestCase):
 
 
 SECCIONES_SKILL = {"schema_version", "ado", "handoff-release", "env-config-audit", "gh-pr-reviewer"}
-PLACEHOLDERS = {                       # placeholder de ruta -> clave memctl que la skill debe consultar
-    r"\{(?:artifacts\.)?hu_folder\}": "artifacts.hu_folder",
-    r"\{(?:artifacts\.)?adr_folder\}": "artifacts.adr_folder",
-    r"\{archivos\.backlog\}": "archivos.backlog",
-    r"\{archivos\.workspace\}": "archivos.workspace",
-    r"\{archivos\.reglas_arquitectonicas\}": "archivos.reglas_arquitectonicas",
-    r"\{(?:artifacts\.)?contextos_folder\}": "artifacts.contextos_folder",
-    r"\{artifacts\.pendientes\}": "artifacts.pendientes",
-    r"\{(?:rutas\.)?artifacts_folder\}": "rutas.artifacts_folder",
+PLACEHOLDERS = {                       # placeholder de ruta (forma corta única) -> clave memctl
+    r"\{hu_folder\}": "artifacts.hu_folder",
+    r"\{adr_folder\}": "artifacts.adr_folder",
+    r"\{contextos_folder\}": "artifacts.contextos_folder",
+    r"\{pendientes\}": "artifacts.pendientes",
+    r"\{backlog\}": "archivos.backlog",
+    r"\{workspace\}": "archivos.workspace",
+    r"\{reglas_arquitectonicas\}": "archivos.reglas_arquitectonicas",
+    r"\{artifacts_folder\}": "rutas.artifacts_folder",
     r"\{output_folder\}": "output_folder",
     r"\{\{usuario\.nombre\}\}": "usuario.nombre",
 }
-# {{archivos.x}} / {{artifacts.x}} en plantillas también son placeholders de ruta
-PLACEHOLDERS_PLANTILLA = {r"\{\{(archivos\.[a-z_]+|artifacts\.[a-z_]+)\}\}": None}
+# Forma larga {artifacts.x} / {archivos.x} (simple o doble llave): prohibida, solo existe la corta
+FORMA_LARGA = re.compile(r"\{\{?(?:archivos|artifacts)\.[a-z_]+\}\}?")
 
 
 def _hojas(d, p=""):
@@ -108,12 +108,15 @@ class ConfigUsadaTest(unittest.TestCase):
                 textos = [f.read_text(encoding="utf-8") for f in _mds(f"{base}/{d.name}")]
                 todo = "\n".join(textos)
                 reglas = dict(PLACEHOLDERS)
-                for m in re.finditer(PLACEHOLDERS_PLANTILLA and r"\{\{((?:archivos|artifacts)\.[a-z_]+)\}\}", todo):
-                    reglas[re.escape("{{" + m.group(1) + "}}")] = m.group(1)
                 for rx, clave in reglas.items():
                     if re.search(rx, todo) and f"memctl.sh get {clave}" not in todo:
                         huecos.append(f"{d.name}: {clave}")
         self.assertEqual(huecos, [])
+
+    def test_placeholders_de_ruta_solo_en_forma_corta(self):
+        largas = [f"{f.relative_to(REPO)}: {m.group()}" for b in ("skills", "workflows")
+                  for f in _mds(b) for m in FORMA_LARGA.finditer(f.read_text(encoding="utf-8"))]
+        self.assertEqual(largas, [])
 
 
 if __name__ == "__main__":
