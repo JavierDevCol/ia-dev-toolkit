@@ -63,7 +63,7 @@ digraph workspace_detection {
 ## Implementation
 
 ### Fase A: Cargar y Confirmar
-1. Leer la config con memctl (`artifacts_folder` = `rutas.artifacts_folder`; `hu_folder`, `contextos_folder`, `adr_folder` = `artifacts.*`; idioma, override y `usuario.nombre` → `{{usuario.nombre}}`, usado en la Fase C si `usuario.incluir_firma_en_documentos` es `true`):
+1. Leer la config con memctl (`artifacts_folder` = `rutas.artifacts_folder`; `hu_folder`, `contextos_folder`, `adr_folder`, `code_smells_folder`, `deuda_tecnica_folder`, `pendientes_folder`, `lecciones_aprendidas` = `artifacts.*`; `backlog`, `reglas_arquitectonicas`, `workspace` = `archivos.*`; `patron_contexto` = `multi_proyecto.patron_contexto`; idioma, override y `usuario.nombre` → `{{usuario.nombre}}`, usado en la Fase C si `usuario.incluir_firma_en_documentos` es `true`):
 
 ```sh
 sh .SAC/memctl.sh get usuario.nombre
@@ -73,7 +73,14 @@ sh .SAC/memctl.sh get rutas_override.artifacts_folder
 sh .SAC/memctl.sh get artifacts.hu_folder
 sh .SAC/memctl.sh get artifacts.contextos_folder
 sh .SAC/memctl.sh get artifacts.adr_folder
+sh .SAC/memctl.sh get artifacts.code_smells_folder
+sh .SAC/memctl.sh get artifacts.deuda_tecnica_folder
+sh .SAC/memctl.sh get artifacts.pendientes_folder
+sh .SAC/memctl.sh get artifacts.lecciones_aprendidas
 sh .SAC/memctl.sh get archivos.workspace
+sh .SAC/memctl.sh get archivos.backlog
+sh .SAC/memctl.sh get archivos.reglas_arquitectonicas
+sh .SAC/memctl.sh get multi_proyecto.patron_contexto
 sh .SAC/memctl.sh get idiomas.documentacion
 sh .SAC/memctl.sh get idiomas.comunicacion
 ```

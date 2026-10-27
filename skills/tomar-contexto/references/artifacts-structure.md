@@ -17,18 +17,18 @@ Usar las rutas cargadas con memctl desde `.SAC/config/sac.json` (`rutas.*`, `art
 ├── {deuda_tecnica_folder relative}/
 ├── {pendientes_folder relative}/
 ├── backlog_desarrollo.md      (desde assets/backlog_desarrollo_plantilla.md)
-├── lecciones_aprendidas.md    (desde assets/lecciones_aprendidas_plantilla.md)
+├── lecciones_aprendidas.md    (`{lecciones_aprendidas}`, desde assets/lecciones_aprendidas_plantilla.md)
 ├── pendientes.md              (desde assets/pendientes_plantilla.md)
 └── workspace.md               (desde assets/workspace_plantilla.md)
 ```
 
 ## Crear carpetas del sistema
-- Crear `{artifacts_folder}/` y subcarpetas: `HU/`, `ADR/`, `code_smells/`, `{contextos_folder}/`, `deuda_tecnica/`, `pendientes/`.
+- Crear `{artifacts_folder}/` y subcarpetas desde las rutas de memctl: `{hu_folder}`, `{adr_folder}`, `{code_smells_folder}`, `{contextos_folder}`, `{deuda_tecnica_folder}`, `{pendientes_folder}`.
 - No crear `.SAC/config/` ni `sac.json`: los instala `diat`. Si falta → avisar "No hay instalación SAC".
 
 ## Generar archivos de contexto
 - **Mono-Proyecto:** `{contextos_folder}/contexto_proyecto.md` (desde `{file:./assets/contexto_proyecto_plantilla.md}`) + `{archivos.workspace}` (Tipo: Mono-Proyecto).
-- **Multi-Proyecto:** por cada proyecto `{contextos_folder}/contexto_proyecto_{nombre}.md`, documentando relaciones en "Dependencias de Proyecto"; `{archivos.workspace}` con Tipo: Multi-Proyecto.
+- **Multi-Proyecto:** por cada proyecto `{contextos_folder}/` + `{patron_contexto}` (`multi_proyecto.patron_contexto`, p. ej. `contexto_proyecto_{nombre}.md`), documentando relaciones en "Dependencias de Proyecto"; `{archivos.workspace}` con Tipo: Multi-Proyecto.
 
 ## Formato de salida
 **Mono-Proyecto:**
