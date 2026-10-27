@@ -97,7 +97,7 @@ sh .SAC/memctl.sh get usuario.nombre
 sh .SAC/memctl.sh get usuario.incluir_firma_en_documentos
 ```
 
-memctl es solo lectura y su salida ES la respuesta; si memctl no existe (exit 127), leer `.SAC/config/sac.json` con `jq` o usar `~/.SAC/memctl.sh` (instalación global); si sale con exit 1 (JSON inválido o vacío), detenerse y avisar: no leer ni editar el archivo a mano; nunca inventar valores. `null`, vacío o exit 2 → no configurado.
+memctl es solo lectura y su salida ES la respuesta; si memctl no existe (exit 127), leer `.SAC/config/sac.json` con `jq`; si sale con exit 1 (JSON inválido o vacío), detenerse y avisar: no leer ni editar el archivo a mano; nunca inventar valores. `null`, vacío o exit 2 → no configurado.
  Si `usuario.incluir_firma_en_documentos` es `false`, omitir el campo `meta`. Si el nombre está vacío o la clave no existe, omitir `evaluador` dentro de `meta`; no inventar un nombre. Agregar a `benchmark.json` un campo `meta: { "evaluador": "{{usuario.nombre}}", "fecha": "{{fecha}}" }` junto a `run_summary`.
 
 ### Paso 7 — Iterar
