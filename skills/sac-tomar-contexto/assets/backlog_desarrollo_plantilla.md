@@ -38,7 +38,7 @@
 [ ] Pendiente
   ↓ >sac_refinar_hu (REFINADOR)
 [R] Refinada
-  ↓ >validar_hu (ONAD)
+  ↓ >sac_validar_hu (ONAD)
 [A] Aprobada
   ↓ >planificar_hu (ARCHDEV)
 [P] Planificada

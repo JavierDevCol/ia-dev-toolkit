@@ -125,7 +125,7 @@
 ---
 
 <!-- La sección "## Aprobación" NO se crea aquí: un refinamiento recién creado no puede
-     nacer aprobado. La agrega >validar_hu al emitir veredicto APROBADA. -->
+     nacer aprobado. La agrega >sac_validar_hu al emitir veredicto APROBADA. -->
 
 ## Historial
 
@@ -138,4 +138,4 @@
 
 > **Archivo:** `{hu_folder}/[ID-HU]/Refinamiento.md`
 > **Creado por:** `>sac_refinar_hu`
-> **Actualizado por:** `>validar_hu`
+> **Actualizado por:** `>sac_validar_hu`

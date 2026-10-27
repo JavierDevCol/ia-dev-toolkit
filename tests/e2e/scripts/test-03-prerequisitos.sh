@@ -124,9 +124,9 @@ echo "  → ejecutar-plan debería fallar con: 'Ejecutar >planificar_hu primero'
 
 echo ""
 
-# ---- TEST 3: validar-hu sin HU refinada ----
-echo -e "${YELLOW}TEST 3: validar-hu sin HU refinada${NC}"
-echo "  Verificando que validar-hu NO puede ejecutar sin Refinamiento.md..."
+# ---- TEST 3: sac-validar-hu sin HU refinada ----
+echo -e "${YELLOW}TEST 3: sac-validar-hu sin HU refinada${NC}"
+echo "  Verificando que sac-validar-hu NO puede ejecutar sin Refinamiento.md..."
 
 TEST3_DIR="$WS/artifacts/HU/HU-TEST-03"
 mkdir -p "$TEST3_DIR"
@@ -142,7 +142,7 @@ EOF
 assert_file_exists "$TEST3_DIR/HU.md" "HU.md existe"
 assert_file_not_exists "$TEST3_DIR/Refinamiento.md" "Refinamiento.md NO existe"
 
-echo "  → validar-hu debería fallar con: 'Ejecutar >sac_refinar_hu primero'"
+echo "  → sac-validar-hu debería fallar con: 'Ejecutar >sac_refinar_hu primero'"
 
 echo ""
 

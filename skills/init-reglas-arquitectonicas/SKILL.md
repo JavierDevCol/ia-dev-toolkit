@@ -18,7 +18,7 @@ Genera un set de reglas arquitectónicas para el proyecto mediante un cuestionar
 **Activar cuando:**
 - Se inicia un proyecto nuevo y no existen reglas arquitectónicas
 - Se necesita actualizar o expandir reglas existentes
-- Otros skills (sac_refinar_hu, validar_hu) las requieren como contexto
+- Otros skills (sac_refinar_hu, sac_validar_hu) las requieren como contexto
 
 **NO activar cuando:**
 - Ya existen reglas y no se necesita modificar

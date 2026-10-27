@@ -29,7 +29,7 @@ from diatlib import ui
 SAC_SKILLS = [
     "sac-tomar-contexto",                                              # contexto del proyecto
     "sac-iniciar-sprint",                                              # materializa HU del sprint activo
-    "sac-refinar-hu", "validar-hu", "planificar-hu", "ejecutar-plan",  # ciclo de vida de HU
+    "sac-refinar-hu", "sac-validar-hu", "planificar-hu", "ejecutar-plan",  # ciclo de vida de HU
     "priorizar-backlog",                                           # orden real de ejecucion (dependencias + prioridad)
     "sincronizar-backlog", "registrar-hallazgo",                   # backlog y hallazgos
     "init-reglas-arquitectonicas", "crear-adr", "analizar-calidad-codigo", "analizar-seguridad",  # arquitectura/calidad

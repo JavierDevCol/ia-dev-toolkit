@@ -428,7 +428,7 @@ COMPONENT_DEPENDENCIES = {
     # Agents -> dependencies
     "agents": {
         "PO": {
-            "requires": {"skills": ["sac-refinar-hu", "validar-hu"],
+            "requires": {"skills": ["sac-refinar-hu", "sac-validar-hu"],
                          "tools": [], "commands": [], "plugins": []},
             "optional": {"skills": ["sincronizar-backlog", "planificar-hu"]},
         },

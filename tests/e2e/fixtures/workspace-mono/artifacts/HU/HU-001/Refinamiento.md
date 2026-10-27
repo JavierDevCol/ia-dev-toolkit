@@ -47,7 +47,7 @@
 
 ## Aprobación
 
-<!-- Esta sección se llena por validar-hu -->
+<!-- Esta sección se llena por sac-validar-hu -->
 
 ## Aprobación
 

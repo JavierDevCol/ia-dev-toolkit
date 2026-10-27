@@ -135,7 +135,7 @@
 
 ## Aprobación
 
-<!-- Generado por >validar_hu al aprobar (bugs saltan validación directa) -->
+<!-- Generado por >sac_validar_hu al aprobar (bugs saltan validación directa) -->
 
 | Campo | Valor |
 |-------|-------|

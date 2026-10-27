@@ -339,7 +339,7 @@ echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━�
 echo ""
 echo "  HU.md dice [R] Refinada, Refinamiento.md sin aprobación"
 echo "  Skill: planificar-hu"
-echo "  Comportamiento esperado: rechazar con 'Ejecutar >validar_hu primero'"
+echo "  Comportamiento esperado: rechazar con 'Ejecutar >sac_validar_hu primero'"
 echo ""
 
 ESC3_DIR="$WS/artifacts/HU/HU-ESC7-03"
@@ -395,7 +395,7 @@ echo "  → planificar-hu debería:"
 echo "    - Leer HU.md → detectar [R] Refinada"
 echo "    - Leer Refinamiento.md → buscar '✅ Aprobada'"
 echo "    - NO encontrar aprobación"
-echo "    - Rechazar con: 'Ejecutar >validar_hu HU-ESC7-03 primero'"
+echo "    - Rechazar con: 'Ejecutar >sac_validar_hu HU-ESC7-03 primero'"
 
 echo ""
 

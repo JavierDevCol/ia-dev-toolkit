@@ -173,7 +173,7 @@ cat > "$HU_DIR/Refinamiento.md" << 'EOF'
 
 ## Aprobación
 
-<!-- Esta sección se llena por validar-hu -->
+<!-- Esta sección se llena por sac-validar-hu -->
 EOF
 
 assert_file_exists "$HU_DIR/HU.md" "HU.md creado"
@@ -183,11 +183,11 @@ assert_file_contains "$HU_DIR/Refinamiento.md" "CA-01" "Refinamiento.md contiene
 
 echo ""
 
-# ---- PASO 3: validar-hu (simular aprobación) ----
-echo -e "${YELLOW}PASO 3: validar-hu (simular aprobación)${NC}"
+# ---- PASO 3: sac-validar-hu (simular aprobación) ----
+echo -e "${YELLOW}PASO 3: sac-validar-hu (simular aprobación)${NC}"
 echo "  Agregando aprobación a Refinamiento.md..."
 
-# Simular lo que haría validar-hu
+# Simular lo que haría sac-validar-hu
 cat >> "$HU_DIR/Refinamiento.md" << 'EOF'
 
 ## Aprobación

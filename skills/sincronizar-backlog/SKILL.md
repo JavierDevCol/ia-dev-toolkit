@@ -105,7 +105,7 @@ memctl es solo lectura y su salida ES la respuesta; si memctl no existe (exit 12
 | `[X] Completada` | Plan.md con Estado = `COMPLETADO` |
 | `[B] Bloqueada` | Refinamiento CON `## Bloqueo de Validación` (sin `## Aprobación`) **O** Plan.md con Estado = `BLOQUEADO` |
 
-**`[B]` no requiere `Plan.md`.** Una HU puede bloquearse en `>validar_hu` antes de llegar a planificación — el Refinamiento queda con `## Bloqueo de Validación` y nunca se genera `Plan.md`. Comprobar esa sección ANTES de asumir que "sin Plan.md" implica `[R]`.
+**`[B]` no requiere `Plan.md`.** Una HU puede bloquearse en `>sac_validar_hu` antes de llegar a planificación — el Refinamiento queda con `## Bloqueo de Validación` y nunca se genera `Plan.md`. Comprobar esa sección ANTES de asumir que "sin Plan.md" implica `[R]`.
 
 **Prioridad:** completada → bloqueada → en_ejecucion → planificada → aprobada → refinada → pendiente
 

@@ -75,7 +75,7 @@
     "agents": {
         "PO": {
             "requires": {
-                "skills": ["sac-refinar-hu", "validar-hu"],
+                "skills": ["sac-refinar-hu", "sac-validar-hu"],
                 "tools": [],
                 "commands": [],
                 "plugins": []

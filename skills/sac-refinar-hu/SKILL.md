@@ -18,7 +18,7 @@ Refina una HU definiendo criterios de aceptación SMART, estimación y desglose 
 - Solicitud de re-refinamiento (modo ajuste)
 - HU sin `Refinamiento.md` o con estado `[N]`
 
-**Cuándo NO usar:** HU en `[R]` sin cambios → `>validar_hu`; HU en `[A]` o `[P]` → ya pasó este flujo; sin contexto → `>sac_tomar_contexto`.
+**Cuándo NO usar:** HU en `[R]` sin cambios → `>sac_validar_hu`; HU en `[A]` o `[P]` → ya pasó este flujo; sin contexto → `>sac_tomar_contexto`.
 
 ## Implementation
 
@@ -80,7 +80,7 @@ Si `usuario.incluir_firma_en_documentos` es `true`, agregar al final de `Refinam
 Sin `usuario.nombre` configurado, la línea queda `> **Refinador**`.
 
 ```
-✅ REFINAMIENTO COMPLETADO: [ID-HU] | CA: [X] | SP: [Z] | Siguiente: >validar_hu [ID-HU]
+✅ REFINAMIENTO COMPLETADO: [ID-HU] | CA: [X] | SP: [Z] | Siguiente: >sac_validar_hu [ID-HU]
 ```
 
 ## Quick Reference

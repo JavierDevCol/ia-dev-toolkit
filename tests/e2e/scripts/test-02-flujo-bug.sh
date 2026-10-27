@@ -123,7 +123,7 @@ El offset en la consulta SQL no se está aplicando correctamente. El parámetro 
 
 ## Aprobación
 
-<!-- Esta sección se llena por validar-hu -->
+<!-- Esta sección se llena por sac-validar-hu -->
 EOF
 fi
 

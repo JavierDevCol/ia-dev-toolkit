@@ -90,7 +90,7 @@ echo ""
 # ============================================
 # TEST 1: Estado [R] Refinada
 # Archivos: HU.md + Refinamiento.md con ## Aprobación vacía
-# Skill que detecta: validar-hu
+# Skill que detecta: sac-validar-hu
 # ============================================
 echo -e "${YELLOW}TEST 1: Estado [R] Refinada${NC}"
 echo "  Archivos requeridos: HU.md + Refinamiento.md (sin aprobación)"
@@ -128,8 +128,8 @@ assert_file_contains "$TEST1_DIR/HU.md" "\[R\] Refinada" "HU.md tiene estado [R]
 assert_file_contains "$TEST1_DIR/Refinamiento.md" "<!-- Pendiente" "Refinamiento.md tiene aprobación vacía"
 assert_file_not_contains "$TEST1_DIR/Refinamiento.md" "✅ Aprobada" "Refinamiento.md NO tiene ✅ Aprobada"
 
-echo "  → validar-hu debería detectar: [R] Refinada (lista para validar)"
-echo "  → planificar-hu debería rechazar: 'Ejecutar >validar_hu primero'"
+echo "  → sac-validar-hu debería detectar: [R] Refinada (lista para validar)"
+echo "  → planificar-hu debería rechazar: 'Ejecutar >sac_validar_hu primero'"
 
 echo ""
 

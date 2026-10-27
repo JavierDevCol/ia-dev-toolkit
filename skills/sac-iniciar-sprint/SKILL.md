@@ -24,7 +24,7 @@ Materializa las HUs/Stories asignadas a un Sprint (definidas en `backlog_roadmap
 **Cuándo NO usar:**
 - No existe `artifacts/backlog_roadmap.md` → ejecutar el workflow `gestionar-backlog-roadmap` primero.
 - La HU ya tiene carpeta en `artifacts/HU/[ID-HU]/` → ya fue inicializada; usar `>sac_refinar_hu` directamente.
-- Se busca refinar, validar, planificar o ejecutar una HU → usar `sac-refinar-hu`/`validar-hu`/`planificar-hu`/`ejecutar-plan`. Esta skill **nunca** los invoca.
+- Se busca refinar, validar, planificar o ejecutar una HU → usar `sac-refinar-hu`/`sac-validar-hu`/`planificar-hu`/`ejecutar-plan`. Esta skill **nunca** los invoca.
 
 ## Implementation
 
@@ -38,7 +38,7 @@ Leer `artifacts/backlog_roadmap.md`:
 
 Por cada `HU-XXX` → localizar su bloque en `artifacts/HU/epics/EPIC-BUS-XX.MD`; por cada `STORY-ENABLER-XXX` → localizar su bloque en `artifacts/HU/enablers/EPIC-ENABLER-XX.md`. Extraer: User Story (Como/Quiero/Para), Criterios de Aceptación BDD, Dependencia Técnica.
 
-Cruzar contra `artifacts/HU/dependencies_matrix.md`: si el ítem aparece como 🔴 Bloqueado, **se crea igual** pero se marca advertencia en el reporte final (no se omite — bloquear la ejecución es responsabilidad de `validar-hu`, no de esta skill).
+Cruzar contra `artifacts/HU/dependencies_matrix.md`: si el ítem aparece como 🔴 Bloqueado, **se crea igual** pero se marca advertencia en el reporte final (no se omite — bloquear la ejecución es responsabilidad de `sac-validar-hu`, no de esta skill).
 
 ### 3. Crear carpeta y `HU.md` base
 

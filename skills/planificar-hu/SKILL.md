@@ -18,7 +18,7 @@ Genera un plan técnico de implementación a partir de una HU aprobada, alineado
 - El usuario solicita generar plan de implementación
 - Se necesita secuenciar tareas con dependencias
 
-**Cuándo NO usar:** HU en `[R]` → `>validar_hu`; HU en `[N]` o `[~]` → `>sac_refinar_hu`.
+**Cuándo NO usar:** HU en `[R]` → `>sac_validar_hu`; HU en `[N]` o `[~]` → `>sac_refinar_hu`.
 
 ## Implementation
 
@@ -94,5 +94,5 @@ Siguiente: >ejecutar_plan [ID-HU]
 
 | Error | Causa | Solución |
 |-------|-------|----------|
-| HU no aprobada | Sin `[A]` | Ejecutar `>validar_hu` primero |
+| HU no aprobada | Sin `[A]` | Ejecutar `>sac_validar_hu` primero |
 | Sin contexto proyecto | No configurado | Ejecutar `>sac_tomar_contexto` |

@@ -262,7 +262,7 @@ def show_install_menu():
     # Categorías de componentes
     categories = {
         "👤 AGENTES": ["PO", "ARQUITECTO-SOFTWARE", "ARQUITECTO-DEVOPS", "DESARROLLADOR"],
-        "🔧 SKILLS SAC": ["sac-tomar-contexto", "sac-refinar-hu", "validar-hu", ...],
+        "🔧 SKILLS SAC": ["sac-tomar-contexto", "sac-refinar-hu", "sac-validar-hu", ...],
         "📋 WORKFLOWS": ["definir-vision-producto", "definir-arquitectura-solucion", ...],
         "🛠️ TOOLS": ["workflow-discover"]
     }

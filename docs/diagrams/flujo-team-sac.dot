@@ -15,7 +15,7 @@ digraph flujo_team_sac {
   registrar_hallazgo [label="registrar-hallazgo\n(bug)", fillcolor="#F5A623"];
   sac_refinar_hu [label="sac-refinar-hu\n(feature)", fillcolor="#7BC67E"];
   refinada [label="[R] Refinada", shape=ellipse, fillcolor="#F8E71C"];
-  validar_hu [label="validar-hu", fillcolor="#7BC67E"];
+  sac_validar_hu [label="sac-validar-hu", fillcolor="#7BC67E"];
   bloqueada [label="BLOQUEADA", fillcolor="#D0021B", fontcolor=white];
   aprobada [label="[A] Aprobada", shape=ellipse, fillcolor="#F8E71C"];
   priorizar_backlog [label="priorizar-backlog\n(orden real por\ndependencias + prioridad)", fillcolor="#9B59B6", fontcolor=white];
@@ -39,9 +39,9 @@ digraph flujo_team_sac {
   sac_tomar_contexto -> registrar_hallazgo [label="si es bug"];
   sac_refinar_hu -> refinada;
   registrar_hallazgo -> refinada [label="crea Refinamiento.md"];
-  refinada -> validar_hu;
-  validar_hu -> bloqueada [label="dependencia\nbloqueante"];
-  validar_hu -> aprobada [label="CA claros"];
+  refinada -> sac_validar_hu;
+  sac_validar_hu -> bloqueada [label="dependencia\nbloqueante"];
+  sac_validar_hu -> aprobada [label="CA claros"];
   aprobada -> priorizar_backlog [label="todas las HU\ndel sprint en [A]/[P]"];
   priorizar_backlog -> planificar_hu [label="en el orden\nsugerido"];
   planificar_hu -> planificada -> ejecutar_plan;
@@ -187,7 +187,7 @@ digraph skill_registrar_hallazgo {
   clasificacion -> crear_pendiente [label="PENDIENTE"];
 }
 
-// validar-hu — Fuente: skills/validar-hu/SKILL.md (flowchart oficial de la skill).
+// sac-validar-hu — Fuente: skills/sac-validar-hu/SKILL.md (flowchart oficial de la skill).
 digraph skill_validar_hu {
   rankdir=LR;
   node [fontname="Helvetica", fontsize=10];
@@ -238,7 +238,7 @@ digraph skill_planificar_hu {
   start [label="Iniciar", shape=oval, fillcolor="#4A90D9", fontcolor=white];
   cargar [label="Cargar HU.md +\nRefinamiento/\nRefinamientoBug"];
   aprobada [label="¿✅ Aprobada?", shape=diamond, fillcolor="#F5A623"];
-  error [label="Error: ejecutar\n>validar_hu primero", fillcolor="#D0021B", fontcolor=white];
+  error [label="Error: ejecutar\n>sac_validar_hu primero", fillcolor="#D0021B", fontcolor=white];
 
   ambiguedades [label="¿Ambigüedades\n(tech/rutas/decisiones)?", shape=diamond, fillcolor="#F5A623"];
   pausar [label="PAUSAR", fillcolor="#D0021B", fontcolor=white];

@@ -14,7 +14,7 @@ Diagrama técnico detallado (con el flujo interno de cada skill): [`flujo-team-s
 4. **`sac-iniciar-sprint`** *(skill)* — Materializa las HU/Stories del Sprint activo: crea `artifacts/HU/[ID]/HU.md` (estado `[ ]` Pendiente) y actualiza `backlog_desarrollo.md`. No refina nada, solo arma el andamiaje.
 5. **`sac-tomar-contexto`** *(skill)* — Genera o refresca `workspace.md` (stack, arquitectura, scorecard) leyendo el código real. Útil sobre todo una vez que ya existe código (tras el scaffold), no reemplaza a los ADRs.
 6. **`sac-refinar-hu`** / **`registrar-hallazgo`** *(skill)* — Por cada HU en `[ ]`: define criterios de aceptación SMART, estimación y desglose técnico vertical → pasa a `[R]` Refinada. `registrar-hallazgo` es el equivalente para bugs encontrados en desarrollo.
-7. **`validar-hu`** *(skill)* — Valida la HU refinada contra SMART, arquitectura (ADRs) y dependencias reales. Resultado: `[A]` Aprobada, `AJUSTES` (vuelve a refinar) o `BLOQUEADA`.
+7. **`sac-validar-hu`** *(skill)* — Valida la HU refinada contra SMART, arquitectura (ADRs) y dependencias reales. Resultado: `[A]` Aprobada, `AJUSTES` (vuelve a refinar) o `BLOQUEADA`.
 8. **`priorizar-backlog`** *(skill)* — Una vez que **todas** las HU candidatas del Sprint están `[A]`/`[P]`, calcula el orden real de ejecución por dependencias técnicas + prioridad P0-P3 — nunca por el ID/título.
 9. **`planificar-hu`** *(skill)* — Genera el plan técnico de implementación de cada HU, en el orden que dio `priorizar-backlog` → pasa a `[P]` Planificada.
 10. **`ejecutar-plan`** + **`validar-ca`** *(skill)* — Implementa el plan con commits granulares (rama Git, reglas arquitectónicas); cada criterio de aceptación se valida contra el código real, no contra el plan.
@@ -36,7 +36,7 @@ digraph flujo_ideal_team_sac {
   v3 [label="3. gestionar-backlog-roadmap", fillcolor="#8E44AD", fontcolor=white];
   v4 [label="4. sac-iniciar-sprint", fillcolor="#50E3C2"];
   v5 [label="5. sac-refinar-hu / registrar-hallazgo", fillcolor="#7BC67E"];
-  v6 [label="6. validar-hu", fillcolor="#7BC67E"];
+  v6 [label="6. sac-validar-hu", fillcolor="#7BC67E"];
   v7 [label="7. priorizar-backlog", fillcolor="#9B59B6", fontcolor=white];
   v8 [label="8. planificar-hu", fillcolor="#7BC67E"];
   v9 [label="9. ejecutar-plan + validar-ca", fillcolor="#7BC67E"];

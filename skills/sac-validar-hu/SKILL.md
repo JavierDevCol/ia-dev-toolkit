@@ -1,5 +1,5 @@
 ---
-name: validar-hu
+name: sac-validar-hu
 description: >
   Use when a HU is in [R] Refinada state and needs architectural validation
   before planning.
@@ -22,7 +22,7 @@ Valida una HU refinada contra criterios SMART, arquitectura del proyecto y depen
 ## Flowchart
 
 ```dot
-digraph validar_hu {
+digraph sac_validar_hu {
   rankdir=LR;
   node [fontname="Helvetica", fontsize=10];
   edge [fontname="Helvetica", fontsize=9];
@@ -142,7 +142,7 @@ Sin `{{usuario.nombre}}` configurado, la línea queda `> **Validador:** Arquitec
 ```
 ✅ HU APROBADA: [ID-HU] → >planificar_hu [ID-HU]
 ⚠️ HU REQUIERE AJUSTES: [ID-HU] → >sac_refinar_hu [ID-HU]
-🚫 HU BLOQUEADA: [ID-HU] → resolver → >validar_hu [ID-HU]
+🚫 HU BLOQUEADA: [ID-HU] → resolver → >sac_validar_hu [ID-HU]
 ```
 
 ## Quick Reference

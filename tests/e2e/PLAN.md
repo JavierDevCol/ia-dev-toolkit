@@ -10,7 +10,7 @@ Verificar que las skills del pipeline SAC funcionan correctamente de punta a pun
 ## Pipeline bajo prueba
 
 ```
-sac-tomar-contexto → sac-refinar-hu → validar-hu → planificar-hu → ejecutar-plan → sincronizar-backlog
+sac-tomar-contexto → sac-refinar-hu → sac-validar-hu → planificar-hu → ejecutar-plan → sincronizar-backlog
                                                        ↗
                               registrar-hallazgo (bugs)
 ```
@@ -21,7 +21,7 @@ sac-tomar-contexto → sac-refinar-hu → validar-hu → planificar-hu → ejecu
 ```
 1. sac-tomar-contexto    → crea workspace.md, contexto_proyecto.md, backlog
 2. sac-refinar-hu        → crea HU.md + Refinamiento.md (estado [R])
-3. validar-hu        → aprueba HU, agrega ✅ Aprobada (estado [A])
+3. sac-validar-hu        → aprueba HU, agrega ✅ Aprobada (estado [A])
 4. planificar-hu     → crea Plan.md (estado [P])
 5. ejecutar-plan     → ejecuta plan, crea Tracking.md (estado [E] → [X])
 6. sincronizar-backlog → actualiza backlog con estados correctos
@@ -39,7 +39,7 @@ sac-tomar-contexto → sac-refinar-hu → validar-hu → planificar-hu → ejecu
 ```
 1. planificar-hu sin Refinamiento.md → ERROR esperado
 2. ejecutar-plan sin Plan.md → ERROR esperado
-3. validar-hu sin HU refinada → ERROR esperado
+3. sac-validar-hu sin HU refinada → ERROR esperado
 4. sincronizar-backlog sin workspace → ERROR esperado
 ```
 
