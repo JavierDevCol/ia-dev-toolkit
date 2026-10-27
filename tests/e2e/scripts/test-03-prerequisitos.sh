@@ -67,9 +67,9 @@ echo "  ESC-03: Validación de prerequisitos"
 echo "=========================================="
 echo ""
 
-# ---- TEST 1: planificar-hu sin Refinamiento.md ----
-echo -e "${YELLOW}TEST 1: planificar-hu sin Refinamiento.md${NC}"
-echo "  Verificando que planificar-hu NO puede ejecutar sin Refinamiento.md..."
+# ---- TEST 1: sac-planificar-hu sin Refinamiento.md ----
+echo -e "${YELLOW}TEST 1: sac-planificar-hu sin Refinamiento.md${NC}"
+echo "  Verificando que sac-planificar-hu NO puede ejecutar sin Refinamiento.md..."
 
 TEST1_DIR="$WS/artifacts/HU/HU-TEST-01"
 mkdir -p "$TEST1_DIR"
@@ -86,8 +86,8 @@ assert_file_exists "$TEST1_DIR/HU.md" "HU.md existe"
 assert_file_not_exists "$TEST1_DIR/Refinamiento.md" "Refinamiento.md NO existe (prerequisito faltante)"
 
 # Verificar que la skill detectaría el error
-# (En ejecución real, planificar-hu leería HU.md y buscaría Refinamiento.md)
-echo "  → planificar-hu debería fallar con: 'Ejecutar >sac_refinar_hu primero'"
+# (En ejecución real, sac-planificar-hu leería HU.md y buscaría Refinamiento.md)
+echo "  → sac-planificar-hu debería fallar con: 'Ejecutar >sac_refinar_hu primero'"
 
 echo ""
 
@@ -120,7 +120,7 @@ assert_file_exists "$TEST2_DIR/HU.md" "HU.md existe"
 assert_file_exists "$TEST2_DIR/Refinamiento.md" "Refinamiento.md existe con aprobación"
 assert_file_not_exists "$TEST2_DIR/Plan.md" "Plan.md NO existe (prerequisito faltante)"
 
-echo "  → ejecutar-plan debería fallar con: 'Ejecutar >planificar_hu primero'"
+echo "  → ejecutar-plan debería fallar con: 'Ejecutar >sac_planificar_hu primero'"
 
 echo ""
 

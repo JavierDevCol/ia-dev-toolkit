@@ -133,8 +133,8 @@ assert_file_contains "$BUG_DIR/Refinamiento.md" "Causa Raíz" "Refinamiento.md c
 
 echo ""
 
-# ---- PASO 2: planificar-hu (planificar bug) ----
-echo -e "${YELLOW}PASO 2: planificar-hu (planificar bug)${NC}"
+# ---- PASO 2: sac-planificar-hu (planificar bug) ----
+echo -e "${YELLOW}PASO 2: sac-planificar-hu (planificar bug)${NC}"
 echo "  Creando Plan.md para BUG-001..."
 
 cat > "$BUG_DIR/Plan.md" << 'EOF'

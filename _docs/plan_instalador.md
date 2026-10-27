@@ -81,7 +81,7 @@
                 "plugins": []
             },
             "optional": {
-                "skills": ["sincronizar-backlog", "planificar-hu"]
+                "skills": ["sincronizar-backlog", "sac-planificar-hu"]
             }
         },
         "ARQUITECTO-SOFTWARE": {
@@ -123,7 +123,7 @@
     "skills": {
         "validar-ca": {
             "requires": {
-                "skills": ["planificar-hu"],
+                "skills": ["sac-planificar-hu"],
                 "workflows": [],
                 "tools": [],
                 "commands": [],
@@ -135,7 +135,7 @@
         },
         "ejecutar-plan": {
             "requires": {
-                "skills": ["planificar-hu"],
+                "skills": ["sac-planificar-hu"],
                 "workflows": [],
                 "tools": [],
                 "commands": [],
@@ -153,7 +153,7 @@
             },
             "optional": {}
         },
-        "planificar-hu": {
+        "sac-planificar-hu": {
             "requires": {
                 "skills": ["sac-tomar-contexto"],
                 "workflows": [],
@@ -383,7 +383,7 @@ print_banner() {
                 1. analizar-calidad-codigo             — Revisa código detectando code smells y violaciones | deps: .SAC/config/
                 2. ejecutar-plan                       — Implementa planes actualizando Plan.md | deps: .SAC/config/
                 3. init-reglas-arquitectonicas         — Genera reglas arquitectónicas del proyecto | deps: .SAC/config/
-                4. planificar-hu                       — Genera plan técnico desde HU aprobada | deps: .SAC/config/
+                4. sac-planificar-hu                       — Genera plan técnico desde HU aprobada | deps: .SAC/config/
                 5. sac-refinar-hu                          — Refina HUs con criterios SMART y estimación | deps: .SAC/config/
                 6. registrar-hallazgo                  — Captura incidencias mediante análisis paralelo | deps: .SAC/config/
 

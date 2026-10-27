@@ -127,5 +127,5 @@ memctl es solo lectura y su salida ES la respuesta; si memctl no existe (exit 12
 
 ## Después de ejecutar
 
-- `>planificar_hu [ID-HU]` sobre la primera HU del orden sugerido
+- `>sac_planificar_hu [ID-HU]` sobre la primera HU del orden sugerido
 - `>sincronizar_backlog` si el reporte muestra HUs con estado desactualizado antes de confiar en el orden

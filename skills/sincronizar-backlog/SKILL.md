@@ -121,4 +121,4 @@ memctl es solo lectura y su salida ES la respuesta; si memctl no existe (exit 12
 ## Después de ejecutar
 
 - `>sac_refinar_hu [ID-HU]` → refinar HUs Pendientes
-- `>planificar_hu [ID-HU]` → planificar HUs Aprobadas
+- `>sac_planificar_hu [ID-HU]` → planificar HUs Aprobadas

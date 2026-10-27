@@ -361,7 +361,7 @@ Al seleccionar esta opción se instala todo el paquete SAC:
 1. analizar-calidad-codigo   — Revisa código detectando code smells y violaciones | deps: config/
 2. ejecutar-plan             — Implementa planes actualizando Plan.md               | deps: config/
 3. init-reglas-arquitectonicas — Genera reglas arquitectónicas del proyecto         | deps: config/
-4. planificar-hu             — Genera plan técnico desde HU aprobada                | deps: config/
+4. sac-planificar-hu             — Genera plan técnico desde HU aprobada                | deps: config/
 5. sac-refinar-hu                — Refina HUs con criterios SMART y estimación          | deps: config/
 6. registrar-hallazgo        — Captura incidencias mediante análisis paralelo       | deps: config/
 ```
@@ -430,7 +430,7 @@ COMPONENT_DEPENDENCIES = {
         "PO": {
             "requires": {"skills": ["sac-refinar-hu", "sac-validar-hu"],
                          "tools": [], "commands": [], "plugins": []},
-            "optional": {"skills": ["sincronizar-backlog", "planificar-hu"]},
+            "optional": {"skills": ["sincronizar-backlog", "sac-planificar-hu"]},
         },
         "ARQUITECTO-SOFTWARE": {
             "requires": {"skills": ["crear-adr", "init-reglas-arquitectonicas"],
@@ -450,12 +450,12 @@ COMPONENT_DEPENDENCIES = {
     # Skills -> dependencies
     "skills": {
         "validar-ca": {
-            "requires": {"skills": ["planificar-hu"], "workflows": [],
+            "requires": {"skills": ["sac-planificar-hu"], "workflows": [],
                          "tools": [], "commands": [], "plugins": []},
             "optional": {"skills": ["registrar-hallazgo"]},
         },
         "ejecutar-plan": {
-            "requires": {"skills": ["planificar-hu"], "workflows": [],
+            "requires": {"skills": ["sac-planificar-hu"], "workflows": [],
                          "tools": [], "commands": [], "plugins": []},
             "optional": {},
         },
@@ -464,7 +464,7 @@ COMPONENT_DEPENDENCIES = {
                          "tools": [], "commands": [], "plugins": []},
             "optional": {},
         },
-        "planificar-hu": {
+        "sac-planificar-hu": {
             "requires": {"skills": ["sac-tomar-contexto"], "workflows": [],
                          "tools": [], "commands": [], "plugins": []},
             "optional": {},

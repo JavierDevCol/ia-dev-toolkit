@@ -84,7 +84,7 @@ El cache (`~/.local/share/ia-dev-toolkit/`) contiene **solo** las 6 carpetas de 
 
 ## #1 — Resolución transitiva de dependencias
 
-**Problema:** `resolve_dependencies()` del v1 mira un solo nivel y no recursa → dependencias transitivas (`validar-ca → planificar-hu → sac-tomar-contexto`) se pierden silenciosamente.
+**Problema:** `resolve_dependencies()` del v1 mira un solo nivel y no recursa → dependencias transitivas (`validar-ca → sac-planificar-hu → sac-tomar-contexto`) se pierden silenciosamente.
 
 **Solución:** cierre transitivo con DFS post-orden (topológico) + detección de ciclos + validación estricta contra catálogo.
 

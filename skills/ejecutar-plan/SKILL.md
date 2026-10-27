@@ -13,7 +13,7 @@ Implementa el plan de una HU actualizando Plan.md en tiempo real, aplicando regl
 - Una HU tiene Estado = `PENDIENTE` en Plan.md y el usuario pide implementarla.
 - Se requiere ejecución guiada (por fase, tarea o task) con commits granulares.
 
-**Cuándo NO usar:** si la HU no está planificada (ejecutar `>planificar_hu` primero); si solo se quiere revisar código sin implementar.
+**Cuándo NO usar:** si la HU no está planificada (ejecutar `>sac_planificar_hu` primero); si solo se quiere revisar código sin implementar.
 
 ## Decision Flow
 
@@ -24,7 +24,7 @@ digraph ejecutarplan {
 
   start [label="HU PENDIENTE" shape=ellipse style=filled fillcolor="#4A90D9" fontcolor=white]
   q1 [label="¿HU planificada\nen Plan.md?" shape=diamond style=filled fillcolor="#F5A623"]
-  stop [label="→ planificar_hu\nprimero" shape=box style=filled fillcolor="#D0021B" fontcolor=white]
+  stop [label="→ sac_planificar_hu\nprimero" shape=box style=filled fillcolor="#D0021B" fontcolor=white]
   q2 [label="¿Modo?" shape=diamond style=filled fillcolor="#F5A623"]
   completo [label="completo\nTodo sin pausas" shape=box style=filled fillcolor="#7ED321"]
   fase [label="fase_por_fase\nPausa entre fases" shape=box style=filled fillcolor="#7ED321"]
@@ -102,7 +102,7 @@ memctl es solo lectura y su salida ES la respuesta; si memctl no existe (exit 12
 ## Common Mistakes
 | Error | Causa | Solución |
 |-------|-------|----------|
-| Plan no encontrado | Falta Plan.md | Ejecutar `>planificar_hu` primero |
+| Plan no encontrado | Falta Plan.md | Ejecutar `>sac_planificar_hu` primero |
 | Plan no está PENDIENTE ni EN_PROGRESO | Ya completado o bloqueado | Verificar flujo de estados |
 | Plan.md en `BLOQUEADO` | Una tarea agotó 2 reintentos | Revisar error en Tracking.md, corregir manualmente y reanudar |
 | Error de compilación | Código con errores | Revisar código generado |

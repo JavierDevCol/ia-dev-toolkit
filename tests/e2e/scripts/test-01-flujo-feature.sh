@@ -197,18 +197,18 @@ cat >> "$HU_DIR/Refinamiento.md" << 'EOF'
 > **Validador:** Tester
 > **Fecha:** 2026-08-27
 > **Observaciones:** Ninguna
-> **Siguiente:** >planificar_hu HU-001
+> **Siguiente:** >sac_planificar_hu HU-001
 EOF
 
 assert_file_contains "$HU_DIR/Refinamiento.md" "✅ Aprobada" "Refinamiento.md tiene aprobación"
 
 echo ""
 
-# ---- PASO 4: planificar-hu (simular creación de Plan.md) ----
-echo -e "${YELLOW}PASO 4: planificar-hu (simular creación de Plan.md)${NC}"
+# ---- PASO 4: sac-planificar-hu (simular creación de Plan.md) ----
+echo -e "${YELLOW}PASO 4: sac-planificar-hu (simular creación de Plan.md)${NC}"
 echo "  Creando Plan.md desde plantilla..."
 
-# Simular lo que haría planificar-hu
+# Simular lo que haría sac-planificar-hu
 cat > "$HU_DIR/Plan.md" << 'EOF'
 # Plan de Implementación: HU-001
 

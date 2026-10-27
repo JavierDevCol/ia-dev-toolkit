@@ -1,5 +1,5 @@
 ---
-name: planificar-hu
+name: sac-planificar-hu
 description: >
   Use when a HU is in [A] Aprobada state and needs an implementation plan
   before execution.

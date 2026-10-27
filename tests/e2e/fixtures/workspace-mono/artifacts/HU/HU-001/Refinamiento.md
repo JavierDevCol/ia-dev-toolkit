@@ -56,4 +56,4 @@
 > **Validador:** Tester
 > **Fecha:** 2026-08-27
 > **Observaciones:** Ninguna
-> **Siguiente:** >planificar_hu HU-001
+> **Siguiente:** >sac_planificar_hu HU-001

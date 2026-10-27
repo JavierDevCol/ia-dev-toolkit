@@ -189,7 +189,7 @@ La validación **nunca se detiene** por un ❌: se evalúan todos los CAs del sc
 | Error | Causa | Solución |
 |-------|-------|----------|
 | Refinamiento no encontrado | HU no refinada | Verificar que la HU fue refinada |
-| Plan no encontrado | HU no planificada | Ejecutar >planificar_hu primero |
+| Plan no encontrado | HU no planificada | Ejecutar >sac_planificar_hu primero |
 | No hay código implementado | Tasks no ejecutadas | Ejecutar >ejecutar_plan primero |
 | Tasks pendientes para integración | Tasks incompletas | Completar todas las tasks primero |
 

@@ -98,5 +98,5 @@ Prioridad: Baja o Media (si es Alta → reclasificar como BUG).
 
 ## Después de ejecutar
 
-- `>planificar_hu BUG-NNN` → planificar resolución del bug
+- `>sac_planificar_hu BUG-NNN` → planificar resolución del bug
 - `>sincronizar_backlog` → verificar estado del backlog

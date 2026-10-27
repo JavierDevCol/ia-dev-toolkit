@@ -1,7 +1,7 @@
 ---
 tipo: plan_implementacion
 version: "5.0"
-generado_por: ">planificar_hu"
+generado_por: ">sac_planificar_hu"
 actualizado_por: ">ejecutar_plan"
 validado_por: ">validar_ca"
 ---
@@ -134,7 +134,7 @@ validado_por: ">validar_ca"
 ---
 
 > **Archivo:** `{hu_folder}/[ID-HU]/Plan.md`
-> **Creado por:** `>planificar_hu`
+> **Creado por:** `>sac_planificar_hu`
 > **Actualizado por:** `>ejecutar_plan`
 > **Planificador:** ArchDev Pro - {{usuario.nombre}}
 > **Fecha:** {{fecha}}

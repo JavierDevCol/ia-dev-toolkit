@@ -331,14 +331,14 @@ echo ""
 # ============================================
 # ESCENARIO 3: Intentar planificar HU en estado [R]
 # HU.md dice [R] Refinada, Refinamiento.md sin aprobación
-# planificar-hu debería rechazar
+# sac-planificar-hu debería rechazar
 # ============================================
 echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo -e "${YELLOW}ESCENARIO 3: Intentar planificar HU en estado [R]${NC}"
 echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
 echo "  HU.md dice [R] Refinada, Refinamiento.md sin aprobación"
-echo "  Skill: planificar-hu"
+echo "  Skill: sac-planificar-hu"
 echo "  Comportamiento esperado: rechazar con 'Ejecutar >sac_validar_hu primero'"
 echo ""
 
@@ -388,10 +388,10 @@ echo ""
 echo "  Verificando que NO se puede planificar..."
 # La skill debería leer Refinamiento.md y buscar "✅ Aprobada"
 # Como no existe, debería rechazar
-assert_file_not_contains "$ESC3_DIR/Refinamiento.md" "✅ Aprobada" "planificar-hu NO encontrará aprobación"
+assert_file_not_contains "$ESC3_DIR/Refinamiento.md" "✅ Aprobada" "sac-planificar-hu NO encontrará aprobación"
 
 echo ""
-echo "  → planificar-hu debería:"
+echo "  → sac-planificar-hu debería:"
 echo "    - Leer HU.md → detectar [R] Refinada"
 echo "    - Leer Refinamiento.md → buscar '✅ Aprobada'"
 echo "    - NO encontrar aprobación"
@@ -420,7 +420,7 @@ echo ""
 echo "  ESCENARIO 3: Planificar HU en [R]"
 echo "  - HU.md: [R] Refinada ✅"
 echo "  - Refinamiento.md: sin aprobación ✅"
-echo "  - planificar-hu debe rechazar ✅"
+echo "  - sac-planificar-hu debe rechazar ✅"
 echo ""
 echo -e "  Total: $TOTAL"
 echo -e "  ${GREEN}Pasados: $PASS${NC}"

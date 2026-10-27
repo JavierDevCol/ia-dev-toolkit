@@ -129,14 +129,14 @@ assert_file_contains "$TEST1_DIR/Refinamiento.md" "<!-- Pendiente" "Refinamiento
 assert_file_not_contains "$TEST1_DIR/Refinamiento.md" "✅ Aprobada" "Refinamiento.md NO tiene ✅ Aprobada"
 
 echo "  → sac-validar-hu debería detectar: [R] Refinada (lista para validar)"
-echo "  → planificar-hu debería rechazar: 'Ejecutar >sac_validar_hu primero'"
+echo "  → sac-planificar-hu debería rechazar: 'Ejecutar >sac_validar_hu primero'"
 
 echo ""
 
 # ============================================
 # TEST 2: Estado [A] Aprobada
 # Archivos: HU.md + Refinamiento.md con ## Aprobación + ✅ Aprobada
-# Skill que detecta: planificar-hu
+# Skill que detecta: sac-planificar-hu
 # ============================================
 echo -e "${YELLOW}TEST 2: Estado [A] Aprobada${NC}"
 echo "  Archivos requeridos: HU.md + Refinamiento.md (con aprobación)"
@@ -177,8 +177,8 @@ assert_file_exists "$TEST2_DIR/Refinamiento.md" "Refinamiento.md existe"
 assert_file_contains "$TEST2_DIR/HU.md" "\[A\] Aprobada" "HU.md tiene estado [A]"
 assert_file_contains "$TEST2_DIR/Refinamiento.md" "✅ Aprobada" "Refinamiento.md tiene ✅ Aprobada"
 
-echo "  → planificar-hu debería detectar: [A] Aprobada (lista para planificar)"
-echo "  → ejecutar-plan debería rechazar: 'Ejecutar >planificar_hu primero'"
+echo "  → sac-planificar-hu debería detectar: [A] Aprobada (lista para planificar)"
+echo "  → ejecutar-plan debería rechazar: 'Ejecutar >sac_planificar_hu primero'"
 
 echo ""
 

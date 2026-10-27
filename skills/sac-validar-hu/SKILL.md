@@ -17,7 +17,7 @@ Valida una HU refinada contra criterios SMART, arquitectura del proyecto y depen
 - HU en estado `[R] Refinada` tras refinamiento
 - El usuario solicita validación de una HU refinada
 
-**Cuándo NO usar:** HU en `[A]` → `>planificar_hu`; HU en `[N]` → `>sac_refinar_hu`; HU en `[B]` → resolver dependencia primero.
+**Cuándo NO usar:** HU en `[A]` → `>sac_planificar_hu`; HU en `[N]` → `>sac_refinar_hu`; HU en `[B]` → resolver dependencia primero.
 
 ## Flowchart
 
@@ -140,7 +140,7 @@ Toda sección lleva el mismo bloque de firma, con el rol del validador y el nomb
 Sin `{{usuario.nombre}}` configurado, la línea queda `> **Validador:** Arquitecto`.
 
 ```
-✅ HU APROBADA: [ID-HU] → >planificar_hu [ID-HU]
+✅ HU APROBADA: [ID-HU] → >sac_planificar_hu [ID-HU]
 ⚠️ HU REQUIERE AJUSTES: [ID-HU] → >sac_refinar_hu [ID-HU]
 🚫 HU BLOQUEADA: [ID-HU] → resolver → >sac_validar_hu [ID-HU]
 ```
@@ -155,7 +155,7 @@ Sin `{{usuario.nombre}}` configurado, la línea queda `> **Validador:** Arquitec
 
 | Veredicto | Estado | Siguiente |
 |-----------|--------|-----------|
-| APROBADA | `[A] Aprobada` | `>planificar_hu [ID-HU]` |
+| APROBADA | `[A] Aprobada` | `>sac_planificar_hu [ID-HU]` |
 | AJUSTES | `[R] + observaciones` | `>sac_refinar_hu [ID-HU]` |
 | BLOQUEADA | `[B] Bloqueada` | Resolver → revalidar |
 

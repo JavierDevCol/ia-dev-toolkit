@@ -19,7 +19,7 @@ digraph flujo_team_sac {
   bloqueada [label="BLOQUEADA", fillcolor="#D0021B", fontcolor=white];
   aprobada [label="[A] Aprobada", shape=ellipse, fillcolor="#F8E71C"];
   priorizar_backlog [label="priorizar-backlog\n(orden real por\ndependencias + prioridad)", fillcolor="#9B59B6", fontcolor=white];
-  planificar_hu [label="planificar-hu", fillcolor="#7BC67E"];
+  sac_planificar_hu [label="sac-planificar-hu", fillcolor="#7BC67E"];
   planificada [label="[P] Planificada", shape=ellipse, fillcolor="#F8E71C"];
   ejecutar_plan [label="ejecutar-plan", fillcolor="#7BC67E"];
   validar_ca [label="validar-ca\n(granular por task +\nfinal integración/todos)", fillcolor="#50E3C2"];
@@ -43,8 +43,8 @@ digraph flujo_team_sac {
   sac_validar_hu -> bloqueada [label="dependencia\nbloqueante"];
   sac_validar_hu -> aprobada [label="CA claros"];
   aprobada -> priorizar_backlog [label="todas las HU\ndel sprint en [A]/[P]"];
-  priorizar_backlog -> planificar_hu [label="en el orden\nsugerido"];
-  planificar_hu -> planificada -> ejecutar_plan;
+  priorizar_backlog -> sac_planificar_hu [label="en el orden\nsugerido"];
+  sac_planificar_hu -> planificada -> ejecutar_plan;
   ejecutar_plan -> validar_ca [label="por task\n(granular)"];
   validar_ca -> ejecutar_plan [label="CUMPLIDO"];
   ejecutar_plan -> validar_ca [label="al completar\ntodas las tasks"];
@@ -229,7 +229,7 @@ digraph skill_validar_hu {
   blocked -> persist;
 }
 
-// planificar-hu — Fuente: skills/planificar-hu/SKILL.md (Implementation 1-4).
+// sac-planificar-hu — Fuente: skills/sac-planificar-hu/SKILL.md (Implementation 1-4).
 digraph skill_planificar_hu {
   rankdir=LR;
   node [fontname="Helvetica", fontsize=10, shape=box, style=filled];
@@ -274,7 +274,7 @@ digraph skill_ejecutar_plan {
 
   start [label="HU PENDIENTE" shape=ellipse style=filled fillcolor="#4A90D9" fontcolor=white]
   q1 [label="¿HU planificada\nen Plan.md?" shape=diamond style=filled fillcolor="#F5A623"]
-  stop [label="→ planificar_hu\nprimero" shape=box style=filled fillcolor="#D0021B" fontcolor=white]
+  stop [label="→ sac_planificar_hu\nprimero" shape=box style=filled fillcolor="#D0021B" fontcolor=white]
   q2 [label="¿Modo?" shape=diamond style=filled fillcolor="#F5A623"]
   completo [label="completo\nTodo sin pausas" shape=box style=filled fillcolor="#7ED321"]
   fase [label="fase_por_fase\nPausa entre fases" shape=box style=filled fillcolor="#7ED321"]

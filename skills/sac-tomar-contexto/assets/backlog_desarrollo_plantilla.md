@@ -40,7 +40,7 @@
 [R] Refinada
   ↓ >sac_validar_hu (ONAD)
 [A] Aprobada
-  ↓ >planificar_hu (ARCHDEV)
+  ↓ >sac_planificar_hu (ARCHDEV)
 [P] Planificada
   ↓ >ejecutar_plan (ARCHDEV)
 [E] En Ejecución

@@ -78,8 +78,8 @@ echo "  → ejecutar-plan debería rechazar: 'Plan ya completado'"
 
 echo ""
 
-# ---- TEST 2: planificar-hu con HU en [R] (sin aprobación) ----
-echo -e "${YELLOW}TEST 2: planificar-hu con HU en [R] (sin aprobación)${NC}"
+# ---- TEST 2: sac-planificar-hu con HU en [R] (sin aprobación) ----
+echo -e "${YELLOW}TEST 2: sac-planificar-hu con HU en [R] (sin aprobación)${NC}"
 echo "  Verificando que NO se puede planificar una HU no aprobada..."
 
 TEST2_DIR="$WS/artifacts/HU/HU-TRANS-02"
@@ -108,7 +108,7 @@ EOF
 
 assert_file_contains "$TEST2_DIR/Refinamiento.md" "<!-- Pendiente" "Refinamiento.md NO tiene aprobación"
 assert_file_not_contains "$TEST2_DIR/Refinamiento.md" "✅ Aprobada" "Refinamiento.md NO contiene ✅ Aprobada"
-echo "  → planificar-hu debería rechazar: 'Ejecutar >sac_validar_hu primero'"
+echo "  → sac-planificar-hu debería rechazar: 'Ejecutar >sac_validar_hu primero'"
 
 echo ""
 
@@ -141,7 +141,7 @@ EOF
 
 assert_file_contains "$TEST3_DIR/HU.md" "\[A\] Aprobada" "HU.md tiene estado [A]"
 assert_file_contains "$TEST3_DIR/Refinamiento.md" "✅ Aprobada" "Refinamiento.md tiene aprobación"
-echo "  → sac-refinar-hu debería rechazar: 'HU ya aprobada, usar >planificar_hu'"
+echo "  → sac-refinar-hu debería rechazar: 'HU ya aprobada, usar >sac_planificar_hu'"
 
 echo ""
 
@@ -170,7 +170,7 @@ cat > "$TEST4_DIR/Refinamiento.md" << 'EOF'
 EOF
 
 assert_file_contains "$TEST4_DIR/HU.md" "\[A\] Aprobada" "HU.md tiene estado [A]"
-echo "  → sac-validar-hu debería rechazar: 'HU ya aprobada, usar >planificar_hu'"
+echo "  → sac-validar-hu debería rechazar: 'HU ya aprobada, usar >sac_planificar_hu'"
 
 echo ""
 
