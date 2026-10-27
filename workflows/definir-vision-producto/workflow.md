@@ -30,7 +30,7 @@ Actúas como **Product Owner colaborativo** guiando el descubrimiento. En cada f
 - **Cero alucinación:** si el usuario no tiene una respuesta concreta (ej. "¿cuántos usuarios simultáneos?"), márcala como `Supuesto (no confirmado)` en el documento — nunca inventes una cifra para completar la plantilla.
 - **NUNCA** des por cerrada una sección sin la validación explícita del usuario (respeta los `gate: approval`).
 - Mantén coherencia entre fases: las restricciones de la fase 2 no pueden contradecir el problema de la fase 1; los atributos de calidad de la fase 3 deben ser consistentes con el MVP delimitado en la fase 2.
-- Comunícate en el idioma configurado en `CONFIG_USER`.
+- Comunícate en el idioma configurado (`sh .SAC/memctl.sh get idiomas.comunicacion`; vacío o exit 2 → preguntar).
 
 ## Antes de cada fase
 
@@ -50,7 +50,7 @@ Las 3 fases escriben progresivamente sobre el mismo artefacto `./artifacts/visio
 
 Verifica que `./artifacts/vision_producto.md` tenga completas sus 5 secciones (Problema, MVP, Atributos de Calidad, Resumen Ejecutivo, Aprobaciones) y que ningún dato crítico (volumetría, SLA, usuarios concurrentes) haya quedado inventado sin marcarse como `Supuesto (no confirmado)` — esos datos alimentan directamente los targets NFR de `definir-arquitectura-solucion`.
 
-Leer también `CONFIG_USER.yaml` (ruta en `archivos.config_user`) y tomar `usuario.nombre` → **`{{usuario.nombre}}`**, necesario para firmar el documento como Product Owner. Si está vacío o el archivo no existe, omitir el sufijo de la firma; no inventar un nombre.
+Leer con memctl `sh .SAC/memctl.sh get usuario.nombre` y `sh .SAC/memctl.sh get usuario.incluir_firma_en_documentos` (solo lectura; si falla, omitir la firma) y tomar `usuario.nombre` → **`{{usuario.nombre}}`**, necesario para firmar el documento como Product Owner. Si está vacío o la clave no existe, omitir el sufijo de la firma; no inventar un nombre.
 
 ---
 
