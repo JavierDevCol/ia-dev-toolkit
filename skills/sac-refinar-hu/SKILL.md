@@ -64,7 +64,7 @@ HU-001/           ← padre: HU.md + Refinamiento.md
 HU-001-TASK-01/   ← hija: HU.md ("Padre: HU-001") + Refinamiento.md
 ```
 
-Trazabilidad: CAs TASK-N completadas → CA padre `[~]` → `>validar_ca --scope integracion` → HU completada.
+Trazabilidad: CAs TASK-N completadas → CA padre `[~]` → `>sac_validar_ca --scope integracion` → HU completada.
 
 ### 4. Estimación y persistencia
 

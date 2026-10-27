@@ -3,7 +3,7 @@ tipo: plan_implementacion
 version: "5.0"
 generado_por: ">sac_planificar_hu"
 actualizado_por: ">sac_ejecutar_plan"
-validado_por: ">validar_ca"
+validado_por: ">sac_validar_ca"
 ---
 
 # Plan de Implementación: [ID-HU] - [Título]

@@ -97,7 +97,7 @@ CA-02 (Dashboard) → ❌ SIN TASK ASOCIADA
 Un CA padre se considera SATISFECHO cuando:
 - Todas sus tasks asociadas están completadas
 - Todos los CAs granulares de esas tasks están validados
-- `>validar_ca --scope integracion` confirma PASS
+- `>sac_validar_ca --scope integracion` confirma PASS
 
 ## Restricciones de Seguridad
 

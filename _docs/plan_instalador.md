@@ -121,7 +121,7 @@
 
     # Skills → dependencies
     "skills": {
-        "validar-ca": {
+        "sac-validar-ca": {
             "requires": {
                 "skills": ["sac-planificar-hu"],
                 "workflows": [],

@@ -1,5 +1,5 @@
 ---
-name: validar-ca
+name: sac-validar-ca
 description: >
   Use when verifying that implemented code meets acceptance criteria
   after completing development tasks for a HU.
@@ -25,7 +25,7 @@ Verifica que el código cumple los criterios de aceptación del refinamiento. Fu
 ## Flowchart
 
 ```dot
-digraph validar_ca {
+digraph sac_validar_ca {
   rankdir=LR;
   node [fontname="Helvetica", fontsize=10];
   edge [fontname="Helvetica", fontsize=9];

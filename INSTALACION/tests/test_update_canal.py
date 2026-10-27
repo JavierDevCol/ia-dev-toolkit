@@ -66,7 +66,7 @@ class UpdateCanalR10Test(unittest.TestCase):
                    return_value={"skills": {"sac-ejecutar-plan"}}), \
              patch("diatlib.github.get_latest_release_tag", return_value="v2.1.1"):
             with redirect_stdout(out):
-                update.cmd_update([])       # valida -> falta validar-ca -> aborta
+                update.cmd_update([])       # valida -> falta sac-validar-ca -> aborta
         dl.assert_called_once_with(ref="v2.1.1")
         self.assertIn("Dependencias inválidas", out.getvalue())
         # lo staged queda etiquetado con el canal NUEVO pese al abort

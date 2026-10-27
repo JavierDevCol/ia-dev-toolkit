@@ -17,7 +17,7 @@ Diagrama técnico detallado (con el flujo interno de cada skill): [`flujo-team-s
 7. **`sac-validar-hu`** *(skill)* — Valida la HU refinada contra SMART, arquitectura (ADRs) y dependencias reales. Resultado: `[A]` Aprobada, `AJUSTES` (vuelve a refinar) o `BLOQUEADA`.
 8. **`priorizar-backlog`** *(skill)* — Una vez que **todas** las HU candidatas del Sprint están `[A]`/`[P]`, calcula el orden real de ejecución por dependencias técnicas + prioridad P0-P3 — nunca por el ID/título.
 9. **`sac-planificar-hu`** *(skill)* — Genera el plan técnico de implementación de cada HU, en el orden que dio `priorizar-backlog` → pasa a `[P]` Planificada.
-10. **`sac-ejecutar-plan`** + **`validar-ca`** *(skill)* — Implementa el plan con commits granulares (rama Git, reglas arquitectónicas); cada criterio de aceptación se valida contra el código real, no contra el plan.
+10. **`sac-ejecutar-plan`** + **`sac-validar-ca`** *(skill)* — Implementa el plan con commits granulares (rama Git, reglas arquitectónicas); cada criterio de aceptación se valida contra el código real, no contra el plan.
 11. **`sincronizar-backlog`** *(skill)* — Al cerrar el Sprint, reconcilia el estado de `backlog_desarrollo.md` con lo que realmente hay en disco (`Refinamiento.md`/`Plan.md` son la fuente de verdad) antes de arrancar el siguiente Sprint con `sac-iniciar-sprint`.
 
 ---
@@ -39,7 +39,7 @@ digraph flujo_ideal_team_sac {
   v6 [label="6. sac-validar-hu", fillcolor="#7BC67E"];
   v7 [label="7. priorizar-backlog", fillcolor="#9B59B6", fontcolor=white];
   v8 [label="8. sac-planificar-hu", fillcolor="#7BC67E"];
-  v9 [label="9. sac-ejecutar-plan + validar-ca", fillcolor="#7BC67E"];
+  v9 [label="9. sac-ejecutar-plan + sac-validar-ca", fillcolor="#7BC67E"];
   v10 [label="10. sincronizar-backlog", fillcolor="#7ED321"];
   fin [label="Sprint cerrado", shape=oval, fillcolor="#4A90D9", fontcolor=white];
 

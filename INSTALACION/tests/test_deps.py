@@ -20,7 +20,7 @@ class ValidateDependenciesC1Test(unittest.TestCase):
         self._tmp.cleanup()
 
     def catalog(self, **over):
-        cat = {"skills": {"sac-ejecutar-plan", "validar-ca"},
+        cat = {"skills": {"sac-ejecutar-plan", "sac-validar-ca"},
                "workflows": set(), "agents": set(), "plugins": set(),
                "commands": set(), "tools": set()}
         cat.update(over)
@@ -31,7 +31,7 @@ class ValidateDependenciesC1Test(unittest.TestCase):
             deps.validate_dependencies(self.catalog(skills={"sac-ejecutar-plan"}),
                                        seeds=[("skills", "sac-ejecutar-plan")])
         msg = str(cm.exception)
-        self.assertIn("skills:validar-ca", msg)
+        self.assertIn("skills:sac-validar-ca", msg)
         self.assertIn("ref activa: v2.1.1", msg)
         self.assertIn("re-ejecuta el bootstrap", msg)           # mensaje nuevo
 

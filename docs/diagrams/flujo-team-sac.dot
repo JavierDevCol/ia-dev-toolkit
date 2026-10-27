@@ -22,7 +22,7 @@ digraph flujo_team_sac {
   sac_planificar_hu [label="sac-planificar-hu", fillcolor="#7BC67E"];
   planificada [label="[P] Planificada", shape=ellipse, fillcolor="#F8E71C"];
   sac_ejecutar_plan [label="sac-ejecutar-plan", fillcolor="#7BC67E"];
-  validar_ca [label="validar-ca\n(granular por task +\nfinal integración/todos)", fillcolor="#50E3C2"];
+  sac_validar_ca [label="sac-validar-ca\n(granular por task +\nfinal integración/todos)", fillcolor="#50E3C2"];
   detenido [label="DETENIDO\n(CA PARCIAL /\nNO CUMPLIDO)", fillcolor="#D0021B", fontcolor=white];
   completada [label="[X] Completada", shape=ellipse, fillcolor="#7ED321"];
   sincronizar_backlog [label="sincronizar-backlog", fillcolor="#7BC67E"];
@@ -45,11 +45,11 @@ digraph flujo_team_sac {
   aprobada -> priorizar_backlog [label="todas las HU\ndel sprint en [A]/[P]"];
   priorizar_backlog -> sac_planificar_hu [label="en el orden\nsugerido"];
   sac_planificar_hu -> planificada -> sac_ejecutar_plan;
-  sac_ejecutar_plan -> validar_ca [label="por task\n(granular)"];
-  validar_ca -> sac_ejecutar_plan [label="CUMPLIDO"];
-  sac_ejecutar_plan -> validar_ca [label="al completar\ntodas las tasks"];
-  validar_ca -> detenido [label="PARCIAL /\nNO CUMPLIDO"];
-  validar_ca -> completada [label="todos\nCUMPLIDO"];
+  sac_ejecutar_plan -> sac_validar_ca [label="por task\n(granular)"];
+  sac_validar_ca -> sac_ejecutar_plan [label="CUMPLIDO"];
+  sac_ejecutar_plan -> sac_validar_ca [label="al completar\ntodas las tasks"];
+  sac_validar_ca -> detenido [label="PARCIAL /\nNO CUMPLIDO"];
+  sac_validar_ca -> completada [label="todos\nCUMPLIDO"];
   completada -> sincronizar_backlog -> fin;
   fin -> sac_iniciar_sprint [label="siguiente sprint", style=dashed];
 }
@@ -302,7 +302,7 @@ digraph skill_ejecutar_plan {
   q3 -> especifica [label="Sí\n(requiere --task_id)"]
 }
 
-// validar-ca — Fuente: skills/validar-ca/SKILL.md (flowchart oficial de la skill).
+// sac-validar-ca — Fuente: skills/sac-validar-ca/SKILL.md (flowchart oficial de la skill).
 digraph skill_validar_ca {
   rankdir=LR;
   node [fontname="Helvetica", fontsize=10];

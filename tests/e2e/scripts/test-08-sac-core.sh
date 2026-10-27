@@ -1,5 +1,5 @@
 #!/bin/bash
-# test-08-sac-core.sh — ESC-08: Pruebas SAC Core (init-reglas-arquitectonicas, validar-ca, analizar-calidad-codigo)
+# test-08-sac-core.sh — ESC-08: Pruebas SAC Core (init-reglas-arquitectonicas, sac-validar-ca, analizar-calidad-codigo)
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -120,9 +120,9 @@ echo "  → Si usuario responde 'cancelar' o 'salir', no guardar parcialmente"
 echo ""
 
 # ============================================
-# validar-ca
+# sac-validar-ca
 # ============================================
-echo -e "${YELLOW}━━━ validar-ca ━━━${NC}"
+echo -e "${YELLOW}━━━ sac-validar-ca ━━━${NC}"
 echo ""
 
 echo -e "${YELLOW}VCA-01: Happy path — validar CAs de HU plana${NC}"
@@ -176,7 +176,7 @@ assert_file_exists "$VCA01_DIR/Plan.md" "Plan.md existe"
 assert_file_contains "$VCA01_DIR/Refinamiento.md" "CA-01" "Refinamiento.md tiene CAs"
 assert_file_contains "$VCA01_DIR/Plan.md" "EN_PROGRESO" "Plan.md está EN_PROGRESO"
 
-echo "  → validar-ca debería validar cada CA contra código y tests"
+echo "  → sac-validar-ca debería validar cada CA contra código y tests"
 
 echo ""
 
@@ -193,7 +193,7 @@ EOF
 
 assert_file_exists "$VCA02_DIR/HU.md" "HU.md existe"
 assert_file_not_exists "$VCA02_DIR/Refinamiento.md" "Refinamiento.md NO existe"
-echo "  → validar-ca debería fallar: 'Refinamiento no encontrado'"
+echo "  → sac-validar-ca debería fallar: 'Refinamiento no encontrado'"
 
 echo ""
 
@@ -221,17 +221,17 @@ EOF
 assert_file_exists "$VCA03_DIR/HU.md" "HU.md existe"
 assert_file_exists "$VCA03_DIR/Refinamiento.md" "Refinamiento.md existe"
 assert_file_not_exists "$VCA03_DIR/Plan.md" "Plan.md NO existe"
-echo "  → validar-ca debería fallar: 'Plan no encontrado'"
+echo "  → sac-validar-ca debería fallar: 'Plan no encontrado'"
 
 echo ""
 
 echo -e "${YELLOW}VCA-04: HU particonada — scope granulares${NC}"
-echo "  → validar-ca --task_id TASK-01 --scope granulares debería validar solo CAs de TASK-01"
+echo "  → sac-validar-ca --task_id TASK-01 --scope granulares debería validar solo CAs de TASK-01"
 
 echo ""
 
 echo -e "${YELLOW}VCA-05: HU particonada — scope integración${NC}"
-echo "  → validar-ca --scope integracion debería validar CAs de integración (padre)"
+echo "  → sac-validar-ca --scope integracion debería validar CAs de integración (padre)"
 
 echo ""
 
@@ -319,7 +319,7 @@ Estado: $([ $FAIL -eq 0 ] && echo "PASS" || echo "FAIL")
 
 Skills testeadas:
 - init-reglas-arquitectonicas: IRA-01 a IRA-06
-- validar-ca: VCA-01 a VCA-08
+- sac-validar-ca: VCA-01 a VCA-08
 - analizar-calidad-codigo: AQC-01 a AQC-08
 EOF
 

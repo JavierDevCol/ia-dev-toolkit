@@ -449,7 +449,7 @@ COMPONENT_DEPENDENCIES = {
     },
     # Skills -> dependencies
     "skills": {
-        "validar-ca": {
+        "sac-validar-ca": {
             "requires": {"skills": ["sac-planificar-hu"], "workflows": [],
                          "tools": [], "commands": [], "plugins": []},
             "optional": {"skills": ["registrar-hallazgo"]},

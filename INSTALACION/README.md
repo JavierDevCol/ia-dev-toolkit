@@ -174,7 +174,7 @@ python3 diat --list
 Los módulos se prueban de forma aislada, p. ej.:
 ```bash
 python3 -c "from diatlib import deps, github; \
-  print(deps.resolve_closure([('skills','validar-ca')])[0])"
+  print(deps.resolve_closure([('skills','sac-validar-ca')])[0])"
 ```
 
 ### Requisitos
