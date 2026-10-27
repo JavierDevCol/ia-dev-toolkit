@@ -33,7 +33,7 @@ memctl es solo lectura y su salida ES la respuesta; si memctl no existe (exit 12
    - `archivo`: verificar existencia.
 3. **Ejecutar análisis (sub-agentes en paralelo):**
    - Modo `smells`: prompt `assets/prompt-analisis-smells.md` + catálogo `assets/catalogo-smells.md`.
-   - Modo `arquitectura`: prompt `assets/prompt-analisis-arquitectura.md` + `{archivos.reglas_arquitectonicas}`.
+   - Modo `arquitectura`: prompt `assets/prompt-analisis-arquitectura.md` + `{reglas_arquitectonicas}`.
    - `todos`: ambos en paralelo.
 4. **Consolidar:** unificar, eliminar duplicados, ordenar por severidad (Crítica→Alta→Media→Baja).
 5. **Presentar reporte:** ver plantilla unificada en Quick Reference.
