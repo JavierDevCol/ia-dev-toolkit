@@ -11,14 +11,21 @@ Reinstalar sobre un proyecto ya registrado FUSIONA selection/components con lo p
 """
 
 import json
+import os
+import shutil
 from datetime import datetime
 from pathlib import Path
 
 from . import paths
+from .atomico import write_text_atomic
 from . import __version__
 
 
 _PLATFORMS = (".opencode", ".claude")
+
+
+class RegistroError(Exception):
+    pass
 
 # Skills renombradas (nombre viejo → nuevo). Se migran al cargar el registro para que
 # --update instale el nombre nuevo; instalar.py borra la carpeta vieja.
@@ -42,8 +49,14 @@ def load_installations():
         return []
     try:
         items = json.loads(f.read_text(encoding="utf-8")).get("installations", [])
-    except Exception:
-        return []
+        if not isinstance(items, list):
+            raise ValueError("'installations' no es una lista")
+    except (ValueError, AttributeError, OSError) as e:      # JSONDecodeError es ValueError
+        bad = f.with_name(f.name + ".bad")
+        shutil.copyfile(f, bad)                              # no se pisa el registro: se aborta
+        raise RegistroError(
+            f"El registro de instalaciones {f} está dañado ({e}); copia en {bad.name}. "
+            "Repáralo o bórralo (se perderá el listado de proyectos) y reintenta.")
     # Entradas antiguas (sin platform válida) = .opencode, la única instalable entonces.
     for i in items:
         if i.get("platform") not in _PLATFORMS:
@@ -128,7 +141,7 @@ def _write(installations, sha):
         "last_update": datetime.now().isoformat(),
         "installations": installations,
     }
-    f.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
+    write_text_atomic(f, json.dumps(data, indent=2, ensure_ascii=False))
 
 
 # ============================================================

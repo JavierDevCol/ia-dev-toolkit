@@ -15,6 +15,14 @@ from .ui import print_warning, print_success
 MEMCTL_FILES = ("memctl.sh", "memctl.ps1")
 
 
+class InstallError(Exception):
+    """Fallo a mitad de la instalación. `installed` = lo que SÍ quedó copiado (para registrarlo)."""
+
+    def __init__(self, msg, installed):
+        super().__init__(msg)
+        self.installed = installed
+
+
 def install_component(ctype, name, cache, project, platform):
     """Copia un componente del cache al proyecto. Sobrescribe siempre.
     La forma (carpeta vs archivo) y la extensión salen de COMPONENT_LAYOUT."""
@@ -53,6 +61,15 @@ def install_memctl(cache, project):
 # ============================================================
 # ASSETS RAÍZ COMPARTIDOS DE SKILLS
 # ============================================================
+def shared_skill_asset_names(cache):
+    """Nombres de los assets RAÍZ compartidos de skills/ (lo que install_shared_skill_assets copia)."""
+    src = Path(cache) / "skills"
+    if not src.exists():
+        return []
+    return [i.name for i in src.iterdir()
+            if not (i.is_dir() and (i / "SKILL.md").exists()) and i.name != "memory_skill.json"]
+
+
 def install_shared_skill_assets(cache, project, platform):
     """Copia los assets RAÍZ compartidos de skills/ (references/…) a la raíz de skills del
     proyecto. memory_skill.json YA NO se copia: la config vive en .SAC/config/sac.json."""
@@ -109,7 +126,11 @@ def install_seeds(seeds, cache, project, platform, with_config=False,
         install_memctl(cache, project)                  # memctl lee sac.json -> viaja con él
     installed = {}
     for ctype, cname in order:
-        if install_component(ctype, cname, cache, project, platform):
+        try:
+            ok = install_component(ctype, cname, cache, project, platform)
+        except OSError as e:                            # permisos, disco, symlinks…
+            raise InstallError(f"{ctype}:{cname}: {e}", installed) from e
+        if ok:
             installed.setdefault(ctype, []).append(cname)
     _remove_legacy_files(project, platform, installed)
     if installed.get("skills"):

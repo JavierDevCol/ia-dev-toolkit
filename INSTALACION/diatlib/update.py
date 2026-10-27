@@ -13,7 +13,7 @@ import re
 from datetime import datetime
 from pathlib import Path
 
-from . import paths, github, deps, registro, instalar, sac_config
+from . import paths, github, deps, registro, instalar, sac_config, cli_args
 from . import ui
 
 
@@ -40,8 +40,8 @@ def cmd_update(argv=None):
     Con ruta: reinstala solo en esa instalación (debe estar registrada)."""
     ui.print_banner()
 
-    args = [a for a in (argv or []) if not a.startswith("-")]
-    target_path = Path(args[0]).resolve() if args else None
+    args = cli_args.parse_update(argv or [])
+    target_path = Path(args.path).resolve() if args.path else None
 
     ref = paths.get_ref()
     if paths.is_test_channel(ref):                       # R10: pin explícito
@@ -134,6 +134,10 @@ def cmd_update(argv=None):
             ui.print_error(f"{project}: {e}")
             failed += 1
             continue
+        except (OSError, instalar.InstallError) as e:      # un proyecto con problemas no aborta a los demás
+            ui.print_error(f"{project}: {e}")
+            failed += 1
+            continue
         inst["sha"] = remote_sha
         inst["ref"] = ref
         inst["installed_at"] = datetime.now().isoformat()
@@ -144,5 +148,5 @@ def cmd_update(argv=None):
     print(f"\n{'═' * 70}")
     ui.print_success("ACTUALIZACIÓN COMPLETADA")
     print(f"     {updated} actualizados · {skipped} al día · {missing} no encontrados"
-          + (f" · {failed} con sac.json inválido (corrígelos y reintenta)" if failed else ""))
+          + (f" · {failed} con error (revisa los mensajes y reintenta)" if failed else ""))
     print(f"{'═' * 70}\n")
