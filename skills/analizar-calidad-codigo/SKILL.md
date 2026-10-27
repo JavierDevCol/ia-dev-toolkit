@@ -17,7 +17,16 @@ Revisa código mediante sub-agentes en paralelo para detectar code smells y viol
 **Cuándo NO usar:** si el usuario solo quiere ejecutar tests; si no hay reglas y se prefiere configurarlas primero con `>init-reglas-arquitectonicas`.
 
 ## Implementation
-1. **Cargar configuración:** leer `.SAC/config/CONFIG_SYSTEM.yaml` (`archivos.reglas_arquitectonicas`) y `CONFIG_USER.yaml`. Mostrar scope/modo/archivos/reglas al usuario. Leer también `user_name` de `memory_skill.json` (`$SKILL_DIR/../memory_skill.json`) → `{{user_name}}`, necesario para firmar el reporte en el paso 5. Si `memory_skill.incluir_firma_en_documentos` es `false`, omitir el bloque de firma; si el nombre está vacío o el archivo no existe, omitir el sufijo de la firma; no inventar un nombre.
+1. **Cargar configuración con memctl:** leer `archivos.reglas_arquitectonicas` y el nombre del usuario. Mostrar scope/modo/archivos/reglas al usuario. `usuario.nombre` → `{{usuario.nombre}}`, necesario para firmar el reporte en el paso 5. Si `usuario.incluir_firma_en_documentos` es `false`, omitir el bloque de firma; si el nombre está vacío o la clave no existe, omitir el sufijo de la firma; no inventar un nombre.
+
+```sh
+sh .SAC/memctl.sh get usuario.nombre
+sh .SAC/memctl.sh get usuario.incluir_firma_en_documentos
+sh .SAC/memctl.sh get archivos.reglas_arquitectonicas
+sh .SAC/memctl.sh get output_folder
+```
+
+memctl es solo lectura y su salida ES la respuesta; si falla, leer `.SAC/config/sac.json` con `jq`; nunca inventar valores. `null`, vacío o exit 2 → no configurado.
 2. **Determinar archivos:**
    - `commits`: `git diff main..HEAD --name-only` (solo cambiados en rama).
    - `project`: escanear todo, excluyendo node_modules, .git, .SAC, build, dist, vendor.
@@ -29,7 +38,7 @@ Revisa código mediante sub-agentes en paralelo para detectar code smells y viol
 4. **Consolidar:** unificar, eliminar duplicados, ordenar por severidad (Crítica→Alta→Media→Baja).
 5. **Presentar reporte:** ver plantilla unificada en Quick Reference.
    a. Mostrar el reporte en el chat.
-   b. **Guardar archivo solo si el usuario lo pide:** `calidad-codigo_{scope}_{fecha}.md` en el `output_folder` global de `memory_skill.json` (`$SKILL_DIR/../memory_skill.json`). Si es `null` o el archivo no existe, preguntar la carpeta al usuario y persistirla en `output_folder`.
+   b. **Guardar archivo solo si el usuario lo pide:** `calidad-codigo_{scope}_{fecha}.md` en el `output_folder` global (comando del paso 1). Si es `null` o memctl sale con exit 2, preguntar la carpeta al usuario y persistirla en `output_folder` de `.SAC/config/sac.json`, editando solo esa clave.
 6. **Ofrecer corrección:** [S] todas, [P] seleccionar, [N] solo análisis. Si S/P → sub-agente con herramientas de edición.
 
 ## Quick Reference
@@ -53,10 +62,10 @@ Revisa código mediante sub-agentes en paralelo para detectar code smells y viol
 📐 Arquitectura: | # | Regla | Archivo | Línea | Violación |
 💡 Top 3 recomendaciones: 1… 2… 3…
 
-> **Auditor de Calidad:** {{user_name}}
+> **Auditor de Calidad:** {{usuario.nombre}}
 > **Fecha:** {{fecha}}
 ```
-Sin `user_name` configurado, la línea queda `> **Auditor de Calidad:**` (solo si `memory_skill.incluir_firma_en_documentos` es `true`).
+Sin `usuario.nombre` configurado, la línea queda `> **Auditor de Calidad:**` (solo si `usuario.incluir_firma_en_documentos` es `true`).
 
 Sin hallazgos: `✅ Sin hallazgos — código cumple estándares`.
 
