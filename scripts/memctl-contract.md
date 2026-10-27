@@ -9,7 +9,7 @@ comportamiento en OpenCode, Claude Code, Codex o cualquier harness.
 > 1. Si `.SAC/memctl.sh` (Unix) o `.SAC/memctl.ps1` (Windows) existe, úsalo
 >    (en el repo fuente: `scripts/`). La respuesta que devuelve ES la respuesta.
 > 2. Si no existe o falla (motor ausente, entorno restringido), resuelve con las
->    herramientas nativas del agente (`jq` / `yq` / lectura directa del archivo)
+>    herramientas nativas del agente (`jq` / lectura directa del archivo)
 >    respetando el mismo contrato de salida.
 > 3. Nunca inventes un valor. Si la clave no existe o el formato no se puede
 >    interpretar, dilo explícitamente.
@@ -17,19 +17,22 @@ comportamiento en OpenCode, Claude Code, Codex o cualquier harness.
 ## Interfaz
 
 ```
-memctl get <ruta> [fuente]    # valor o subárbol
-memctl list [fuente]          # claves de primer nivel, en orden de aparición
+memctl get <ruta>    # valor o subárbol
+memctl list          # claves de primer nivel, en orden de aparición
 ```
 
-| fuente | archivo | formato |
-|---|---|---|
-| `memory` (default) | `skills/memory_skill.json` | JSON |
-| `user` | `config/config/CONFIG_USER.yaml` | YAML |
-| `system` | `config/config/CONFIG_SYSTEM.yaml` | YAML |
+Fuente única: `sac.json` (JSON).
 
-- `<ruta>`: segmentos separados por `.` — `ado.config.perfiles`, `usuario.nombre`.
-- Variables: `MEMCTL_ROOT` (raíz del proyecto; por defecto la del script), `MEMCTL_MEMORY` (ruta a `memory_skill.json`; pisa la derivada de la raíz; layout instalado: el YAML se lee de `config/` junto al script),
-  `MEMCTL_ENGINE` (`auto|jq|python3|node|ruby|restricted` en `.sh`; `auto|restricted` en `.ps1`).
+| layout | archivo |
+|---|---|
+| instalado en un proyecto | `.SAC/config/sac.json` (con `.SAC/memctl.sh` al lado) |
+| repo fuente | `config/config/sac.json` |
+
+- `<ruta>`: segmentos separados por `.` — `ado.config.perfil_activo`, `usuario.nombre`.
+  Un nombre de clave con `.` no es direccionable (p. ej. un perfil ADO `javier.garcia`).
+- Variables: `MEMCTL_ROOT` (raíz del repo fuente; por defecto la del script),
+  `MEMCTL_FILE` (ruta explícita a `sac.json`; pisa todo lo demás),
+  `MEMCTL_ENGINE` (`auto|jq|python3|node|restricted` en `.sh`; `auto|restricted` en `.ps1`).
 
 ## Contrato de salida
 
@@ -43,44 +46,45 @@ memctl list [fuente]          # claves de primer nivel, en orden de aparición
 | código | significado | acción del agente |
 |---|---|---|
 | `0` | ok | usar la salida |
-| `1` | formato no soportado o motor insuficiente | no interpretar a mano: reportar |
-| `2` | clave o fuente inexistente | la clave NO existe: no inventar ni asumir `null` |
+| `1` | JSON inválido (p. ej. truncado) o motor insuficiente | no interpretar a mano: reportar |
+| `2` | clave o archivo inexistente | la clave NO existe: no inventar ni asumir `null` |
 
-## Perfil soportado por los parsers restringidos (fallback sin runtimes)
+## Parser restringido (fallback sin runtimes)
 
-- **JSON:** cualquier documento JSON válido (scaneo carácter a carácter).
-- **YAML:** mapas anidados por indentación, escalares (comillas simples/dobles,
-  planos, `true`/`false`/`null`, números), flow `["a","b"]` y `{}`/`[]` de
-  escalares, comentarios `#`.
-- **Fuera de perfil** (secuencias `- `, anclas `&`/`*`, escalares de bloque
-  `|`/`>`, tabulaciones, `\uXXXX`): **fallo ruidoso** (código 1), nunca se
-  adivina ni se degrada en silencio.
+Cualquier documento JSON válido (scaneo carácter a carácter). Valida el archivo
+completo antes de responder: un `sac.json` truncado falla con código 1, nunca
+devuelve datos parciales.
 
 ## Plantilla de bloque para SKILL.md
 
-Cada skill que necesita memoria incluye este bloque, con SOLO las claves que usa.
-`memory_skill.json` vive en la raíz de skills del proyecto (`$SKILL_DIR/../memory_skill.json`).
-memctl solo lee: la persistencia de datos sigue como la define cada skill.
+Cada skill que necesita config o memoria incluye este bloque, con SOLO las claves que usa.
+memctl solo lee: la persistencia de datos sigue como la define cada skill (edición
+directa de `.SAC/config/sac.json`, únicamente bajo su propia sección).
 
 ````markdown
 **Leer config con memctl** (solo lectura; su salida ES la respuesta):
 
 ```sh
-M='MEMCTL_MEMORY="$SKILL_DIR/../memory_skill.json" sh .SAC/memctl.sh'
-$M get <clave>                 # memoria de skill (memory_skill.json)
-$M get <clave> user            # CONFIG_USER.yaml
-$M get <clave> system          # CONFIG_SYSTEM.yaml
+sh .SAC/memctl.sh get <clave>        # ej: usuario.nombre, artifacts.hu_folder, ado.config.perfil_activo
 ```
 
 - Exit 0 + `null` → dato no configurado: aplicar el flujo "pregunta una vez y persiste" de esta skill.
 - Exit 2 → clave o archivo inexistente: tratarlo como no configurado.
-- Exit 1 u otro fallo → leer el archivo directo con `jq`/`yq`. Nunca inventar valores.
+- Exit 1 u otro fallo → leer `.SAC/config/sac.json` directo con `jq`. Nunca inventar valores.
 - Consultar solo las claves de esta skill; no volcar secciones completas con datos de terceros.
 ````
 
 Perfiles ADO: el perfil es un mapa por nombre, así que se resuelve en dos pasos
-(`P=$($M get ado.config.perfil_activo)` y luego `$M get ado.config.perfiles.$P.<campo>`).
-Un nombre de perfil con `.` rompe la ruta.
+(`P=$(sh .SAC/memctl.sh get ado.config.perfil_activo)` y luego
+`sh .SAC/memctl.sh get ado.config.perfiles.$P.<campo>`).
+
+## Nombres reservados de `sac.json`
+
+Ninguna sección de skill puede usar estos nombres:
+`schema_version, usuario, idiomas, proyecto, output_folder, rutas, rutas_override,
+archivos, artifacts, rutas_reglas, reglas, multi_proyecto`.
+Las secciones de skill viven al tope del archivo (`ado`, `handoff-release`,
+`env-config-audit`, `gh-pr-reviewer`).
 
 ## Mantenimiento
 

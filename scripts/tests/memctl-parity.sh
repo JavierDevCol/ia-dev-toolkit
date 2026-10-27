@@ -5,8 +5,8 @@
 #
 # Uso: sh scripts/tests/memctl-parity.sh
 #
-# Ejecuta la misma tabla contra cada implementación disponible
-# y contra cada motor de extracción. Si una implementación o un
+# Ejecuta la misma tabla (JSON-only, sac.json) contra cada implementación
+# disponible y contra cada motor de extracción. Si una implementación o un
 # motor no está disponible en la máquina, se marca SKIP (nunca
 # PASS). Si pwsh no existe, memctl.ps1 queda SIN VERIFICAR.
 # ============================================================
@@ -19,19 +19,24 @@ MEMCTL_PS1="$DIR/../memctl.ps1"
 PASS=0
 FAIL=0
 SKIP=0
+XFILE=""
 
 FIX=$(mktemp -d)
 trap 'rm -rf "$FIX"' EXIT
 
-mkdir -p "$FIX/skills" "$FIX/config/config"
+mkdir -p "$FIX/config/config"
 
-# ---- Fixtures: perfil de datos que memctl debe soportar ----
-cat > "$FIX/skills/memory_skill.json" <<'EOF'
+# ---- Fixture: perfil de datos que memctl debe soportar (layout del repo: $ROOT/config/config/sac.json) ----
+cat > "$FIX/config/config/sac.json" <<'EOF'
 {
+  "schema_version": 1,
+  "usuario": {
+    "nombre": "",
+    "incluir_firma_en_documentos": true
+  },
   "output_folder": null,
-  "user_name": "",
-  "incluir_firma_en_documentos": true,
   "intentos": 3,
+  "ruta": "{project-root}/artifacts",
   "ado": {
     "config": {
       "perfil_activo": null,
@@ -41,6 +46,7 @@ cat > "$FIX/skills/memory_skill.json" <<'EOF'
   },
   "handoff-release": {
     "config": {
+      "tag_format": "vX.Y.Z-{env}",
       "environments": {
         "dev": "DEV",
         "staging": "STAGING"
@@ -52,22 +58,10 @@ cat > "$FIX/skills/memory_skill.json" <<'EOF'
 }
 EOF
 
-cat > "$FIX/config/config/CONFIG_USER.yaml" <<'EOF'
-# comentario raiz
-usuario:
-  nombre: ""                          # comentario inline
-  incluir_firma_en_documentos: true
-
-idiomas:
-  documentacion: "es"
-  ruta: "{project-root}/artifacts"
-EOF
-
-cat > "$FIX/config/config/CONFIG_SYSTEM.yaml" <<'EOF'
-multi_proyecto:
-  marcadores_proyecto:
-    java: ["pom.xml", "build.gradle"]
-EOF
+# JSON truncado (simula una edicion interrumpida) y layout instalado (script junto a config/sac.json)
+printf '{"usuario": {"nombre": "Ana"' > "$FIX/truncado.json"
+mkdir -p "$FIX/instalado/config"
+cp "$FIX/config/config/sac.json" "$FIX/instalado/config/sac.json"
 
 # ---- Motor de pruebas ----
 check() {
@@ -77,7 +71,7 @@ check() {
   exp_out=$(cat)
 
   err_file="$FIX/.stderr"
-  out=$(MEMCTL_ROOT="$FIX" MEMCTL_ENGINE="$ENGINE" "$RUN" "$@" 2>"$err_file")
+  out=$(MEMCTL_ROOT="$FIX" MEMCTL_ENGINE="$ENGINE" MEMCTL_FILE="$XFILE" "$RUN" "$@" 2>"$err_file")
   code=$?
 
   if [ "$code" -ne "$exp_exit" ]; then
@@ -103,16 +97,25 @@ check() {
 }
 
 run_table_json() {
-  check "JSON booleano -> crudo" 0 get incluir_firma_en_documentos <<'EOF'
+  check "JSON booleano anidado -> crudo" 0 get usuario.incluir_firma_en_documentos <<'EOF'
 true
 EOF
-  check "JSON string vacio -> linea vacia (exit 0)" 0 get user_name <<'EOF'
+  check "JSON string vacio -> linea vacia (exit 0)" 0 get usuario.nombre <<'EOF'
 EOF
-  check "JSON null -> 'null'" 0 get output_folder <<'EOF'
+  check "JSON null -> 'null'" 0 get ado.config.perfil_activo <<'EOF'
+null
+EOF
+  check "JSON null raiz -> 'null'" 0 get output_folder <<'EOF'
 null
 EOF
   check "JSON numero -> crudo" 0 get intentos <<'EOF'
 3
+EOF
+  check "JSON schema_version -> 1" 0 get schema_version <<'EOF'
+1
+EOF
+  check "JSON string con llaves literales" 0 get ruta <<'EOF'
+{project-root}/artifacts
 EOF
   check "JSON subarbol anidado -> pretty indent 2" 0 get ado.config <<'EOF'
 {
@@ -123,6 +126,9 @@ EOF
   check "JSON objeto vacio -> '{}'" 0 get ado.config.perfiles <<'EOF'
 {}
 EOF
+  check "JSON seccion con guion + escalar" 0 get handoff-release.config.tag_format <<'EOF'
+vX.Y.Z-{env}
+EOF
   check "JSON ruta con guion + escalar anidado" 0 get handoff-release.config.environments.dev <<'EOF'
 DEV
 EOF
@@ -132,59 +138,57 @@ EOF
   "build.gradle"
 ]
 EOF
-  check "list JSON -> claves raiz en orden" 0 list <<'EOF'
+  check "list -> claves raiz en orden" 0 list <<'EOF'
+schema_version
+usuario
 output_folder
-user_name
-incluir_firma_en_documentos
 intentos
+ruta
 ado
 handoff-release
 EOF
-  check "clave inexistente en JSON -> exit 2" 2 get no_existe <<'EOF'
+  check "clave inexistente -> exit 2" 2 get no_existe <<'EOF'
 EOF
-  check "ruta que atraviesa un escalar -> exit 2" 2 get user_name.algo <<'EOF'
+  check "ruta que atraviesa un escalar -> exit 2" 2 get usuario.nombre.algo <<'EOF'
 EOF
-}
-
-run_table_yaml() {
-  check "YAML booleano -> crudo" 0 get usuario.incluir_firma_en_documentos user <<'EOF'
+  check "get sin ruta -> exit 2" 2 get <<'EOF'
+EOF
+  XFILE="$FIX/truncado.json"
+  check "JSON truncado -> exit 1 (fallo ruidoso)" 1 get usuario.nombre <<'EOF'
+EOF
+  XFILE="$FIX/config/config/sac.json"
+  check "MEMCTL_FILE sobrescribe la ruta" 0 get usuario.incluir_firma_en_documentos <<'EOF'
 true
 EOF
-  check "YAML string vacio -> linea vacia (exit 0)" 0 get usuario.nombre user <<'EOF'
-EOF
-  check "YAML string con llaves literales" 0 get idiomas.ruta user <<'EOF'
-{project-root}/artifacts
-EOF
-  check "YAML flow array -> pretty indent 2" 0 get multi_proyecto.marcadores_proyecto.java system <<'EOF'
-[
-  "pom.xml",
-  "build.gradle"
-]
-EOF
-  check "list YAML -> claves raiz en orden" 0 list user <<'EOF'
-usuario
-idiomas
-EOF
-  check "clave inexistente en YAML -> exit 2" 2 get usuario.nada user <<'EOF'
-EOF
-}
-
-run_table_common() {
-  check "fuente desconocida -> exit 2" 2 get x fuente_invalida <<'EOF'
-EOF
+  XFILE=""
 }
 
 run_source_missing() {
   err_file="$FIX/.stderr"
   out=$(MEMCTL_ROOT="$FIX/inexistente" MEMCTL_ENGINE="$ENGINE" "$RUN" get x 2>"$err_file")
   code=$?
-  desc="MEMCTL_ROOT sin fuentes -> exit 2"
+  desc="MEMCTL_ROOT sin sac.json -> exit 2"
   if [ "$code" -eq 2 ] && [ -s "$err_file" ]; then
     PASS=$((PASS + 1))
     printf 'ok   [%s/%s] %s\n' "$IMPL" "$ENGINE" "$desc"
   else
     FAIL=$((FAIL + 1))
     printf 'FAIL [%s/%s] %s\n     exit obtenido %s\n' "$IMPL" "$ENGINE" "$desc" "$code"
+  fi
+}
+
+# Layout instalado: sin MEMCTL_ROOT, sac.json se lee de config/ junto al script.
+run_installed_layout() {
+  src=$1
+  cp "$src" "$FIX/instalado/$(basename "$src")"
+  desc="layout instalado (config/sac.json junto al script)"
+  out=$(env -u MEMCTL_ROOT MEMCTL_ENGINE="$ENGINE" $INSTALLED_RUN "$FIX/instalado/$(basename "$src")" get handoff-release.config.environments.dev 2>"$FIX/.stderr")
+  if [ "$out" = "DEV" ]; then
+    PASS=$((PASS + 1))
+    printf 'ok   [%s/%s] %s\n' "$IMPL" "$ENGINE" "$desc"
+  else
+    FAIL=$((FAIL + 1))
+    printf 'FAIL [%s/%s] %s\n     salida obtenida: [%s]\n' "$IMPL" "$ENGINE" "$desc" "$out"
   fi
 }
 
@@ -226,18 +230,13 @@ run_impl() {
   esac
 
   for ENGINE in $engines; do
-    case $ENGINE in
-      jq|node) fmts="json" ;;
-      ruby) fmts="yaml" ;;
-      *) fmts="json yaml" ;;
-    esac
     printf '=== %s / motor %s ===\n' "$IMPL" "$ENGINE"
-    for fmt in $fmts; do
-      [ "$fmt" = json ] && run_table_json
-      [ "$fmt" = yaml ] && run_table_yaml
-    done
-    run_table_common
+    run_table_json
     run_source_missing
+    case $IMPL in
+      sh)  INSTALLED_RUN="sh";   run_installed_layout "$MEMCTL_SH" ;;
+      ps1) INSTALLED_RUN="pwsh -File"; run_installed_layout "$MEMCTL_PS1" ;;
+    esac
   done
 }
 
