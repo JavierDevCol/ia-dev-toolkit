@@ -1,5 +1,5 @@
 ---
-name: analizar-seguridad
+name: sac-analizar-seguridad
 description: Usa esta skill cuando necesites auditar código en busca de vulnerabilidades de seguridad explotables — antes de un release, tras implementar un endpoint o funcionalidad sensible, o al revisar un PR/rama en busca de fallos tipo OWASP (inyección, control de acceso, secretos, XSS, deserialización insegura, SSRF, etc.). Cubre backend, frontend (postMessage, storage de tokens, SRI) y DevOps (Dockerfile, pipelines CI/CD, IaC). Análisis estático de código únicamente, sin ejecutar nada ni realizar pruebas activas.
 ready: true
 ---

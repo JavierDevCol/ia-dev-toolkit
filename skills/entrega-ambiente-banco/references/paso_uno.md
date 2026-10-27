@@ -77,7 +77,7 @@
    ```
    @env-config-audit sobre el diff origin/des..release/vX.Y.Z
    @ado-pipeline-analyzer build latest del pipeline <nombre_pipeline> en rama release/vX.Y.Z
-   @analizar-seguridad scope=commits sobre release/vX.Y.Z
+   @sac-analizar-seguridad scope=commits sobre release/vX.Y.Z
    @sac-analizar-calidad-codigo scope=commits sobre release/vX.Y.Z
    ```
 
