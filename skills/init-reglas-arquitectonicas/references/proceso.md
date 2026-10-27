@@ -19,10 +19,10 @@ sh .SAC/memctl.sh get usuario.nombre
 sh .SAC/memctl.sh get usuario.incluir_firma_en_documentos
 ```
 
-  `idiomas.documentacion` (`es|en|pt`) es el idioma; vacío o exit 2 → preguntar. `{contextos_folder}` = `artifacts.contextos_folder`; `{artifacts.adr_folder}` (plantilla) = `artifacts.adr_folder`; `{artifacts_folder}` = `rutas.artifacts_folder`.
+  `idiomas.documentacion` (`es|en|pt`) es el idioma; vacío o exit 2 → preguntar. `{contextos_folder}` = `artifacts.contextos_folder`; `{adr_folder}` (plantilla) = `artifacts.adr_folder`; `{artifacts_folder}` = `rutas.artifacts_folder`.
 - **Plantilla propia:** leer `{file:./assets/reglas_arquitectonicas_plantilla.md}`
 - Verificar que existe contexto del proyecto:
-  - Buscar `{archivos.workspace}` o archivo de contexto en `{contextos_folder}/`
+  - Buscar `{workspace}` o archivo de contexto en `{contextos_folder}/`
   - Si NO existe → Informar: "Necesito conocer el proyecto primero. Ejecuta >tomar_contexto"
   - Extraer stack tecnológico y arquitectura del contexto
 
@@ -94,7 +94,7 @@ sh .SAC/memctl.sh get usuario.incluir_firma_en_documentos
 ## 7. Generar Archivo de Reglas
 
 - Crear `{artifacts_folder}/` si no existe
-- Generar `{archivos.reglas_arquitectonicas}` desde `{file:./assets/reglas_arquitectonicas_plantilla.md}`
+- Generar `{reglas_arquitectonicas}` desde `{file:./assets/reglas_arquitectonicas_plantilla.md}`
 - Incluir metadata: fecha, versión, aprobado_por
 
 ## 8. Actualizar Contexto del Proyecto
@@ -105,7 +105,7 @@ sh .SAC/memctl.sh get usuario.incluir_firma_en_documentos
 - Agregar referencia:
   ```
   ### Reglas Arquitectónicas
-  - **Archivo:** {archivos.reglas_arquitectonicas}
+  - **Archivo:** {reglas_arquitectonicas}
   - **Generado:** {fecha}
   - **Versión:** 1.0
   - **Estado:** ✅ Configurado
@@ -124,7 +124,7 @@ sh .SAC/memctl.sh get usuario.incluir_firma_en_documentos
 ```
 ✅ REGLAS ARQUITECTÓNICAS CONFIGURADAS
 
-📁 Archivo generado: {archivos.reglas_arquitectonicas}
+📁 Archivo generado: {reglas_arquitectonicas}
 📝 Contexto actualizado: (ver workspace)
 
 📊 Configuración aplicada:

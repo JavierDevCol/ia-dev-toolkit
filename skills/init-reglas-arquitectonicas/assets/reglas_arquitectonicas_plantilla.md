@@ -296,7 +296,7 @@
 
 **Formato:** {{documentacion.formato_adr}}
 
-**Ubicación:** {{artifacts.adr_folder}}
+**Ubicación:** {adr_folder}
 
 **Plantilla:**
 ```markdown
