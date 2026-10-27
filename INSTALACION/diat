@@ -28,7 +28,7 @@ from diatlib import ui
 # Nota: validar-ca entra por dependencia de ejecutar-plan.
 SAC_SKILLS = [
     "sac-tomar-contexto",                                              # contexto del proyecto
-    "iniciar-sprint",                                              # materializa HU del sprint activo
+    "sac-iniciar-sprint",                                              # materializa HU del sprint activo
     "refinar-hu", "validar-hu", "planificar-hu", "ejecutar-plan",  # ciclo de vida de HU
     "priorizar-backlog",                                           # orden real de ejecucion (dependencias + prioridad)
     "sincronizar-backlog", "registrar-hallazgo",                   # backlog y hallazgos

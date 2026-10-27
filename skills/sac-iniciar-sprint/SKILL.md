@@ -1,5 +1,5 @@
 ---
-name: iniciar-sprint
+name: sac-iniciar-sprint
 description: >
   Use when the epics produced by gestionar-backlog-roadmap
   (backlog_roadmap.md, EPIC-BUS-XX.MD, EPIC-ENABLER-XX.md) already exist

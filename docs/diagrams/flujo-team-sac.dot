@@ -10,7 +10,7 @@ digraph flujo_team_sac {
   consolidador [label="Sub-agente\nconsolidador\n(crea scaffold real)", fillcolor="#BD10E0", fontcolor=white];
   nota_sprint0 [label="consolidacion.md:\nscaffold pendiente,\nprimeras HU de Sprint 0", fillcolor="#F8E71C"];
   gestionar_backlog [label="gestionar-backlog-roadmap\n(workflow)", fillcolor="#8E44AD", fontcolor=white];
-  iniciar_sprint [label="iniciar-sprint\n(materializa HU.md +\nbacklog_desarrollo.md)", fillcolor="#50E3C2"];
+  sac_iniciar_sprint [label="sac-iniciar-sprint\n(materializa HU.md +\nbacklog_desarrollo.md)", fillcolor="#50E3C2"];
   sac_tomar_contexto [label="sac-tomar-contexto", shape=oval, fillcolor="#4A90D9", fontcolor=white];
   registrar_hallazgo [label="registrar-hallazgo\n(bug)", fillcolor="#F5A623"];
   refinar_hu [label="refinar-hu\n(feature)", fillcolor="#7BC67E"];
@@ -33,8 +33,8 @@ digraph flujo_team_sac {
   consolidar_q -> nota_sprint0 [label="NO"];
   consolidador -> gestionar_backlog;
   nota_sprint0 -> gestionar_backlog;
-  gestionar_backlog -> iniciar_sprint;
-  iniciar_sprint -> sac_tomar_contexto;
+  gestionar_backlog -> sac_iniciar_sprint;
+  sac_iniciar_sprint -> sac_tomar_contexto;
   sac_tomar_contexto -> refinar_hu;
   sac_tomar_contexto -> registrar_hallazgo [label="si es bug"];
   refinar_hu -> refinada;
@@ -51,7 +51,7 @@ digraph flujo_team_sac {
   validar_ca -> detenido [label="PARCIAL /\nNO CUMPLIDO"];
   validar_ca -> completada [label="todos\nCUMPLIDO"];
   completada -> sincronizar_backlog -> fin;
-  fin -> iniciar_sprint [label="siguiente sprint", style=dashed];
+  fin -> sac_iniciar_sprint [label="siguiente sprint", style=dashed];
 }
 
 
@@ -392,7 +392,7 @@ digraph skill_sincronizar_backlog {
   plan_status -> blocked [label="BLOQUEADO"];
 }
 
-// iniciar-sprint — Fuente: skills/iniciar-sprint/SKILL.md (Implementation 1-5).
+// sac-iniciar-sprint — Fuente: skills/sac-iniciar-sprint/SKILL.md (Implementation 1-5).
 digraph skill_iniciar_sprint {
   rankdir=LR;
   node [fontname="Helvetica", fontsize=10, shape=box, style=filled];
