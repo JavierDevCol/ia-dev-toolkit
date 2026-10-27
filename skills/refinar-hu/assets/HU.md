@@ -42,5 +42,5 @@
 
 ---
 
-> **Archivo:** `{{artifacts.hu_folder}}/[ID-HU]/HU.md`
+> **Archivo:** `{hu_folder}/[ID-HU]/HU.md`
 > **Creado por:** `>refinar_hu` o `>registrar_bug`
