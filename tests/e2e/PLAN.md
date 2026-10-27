@@ -10,7 +10,7 @@ Verificar que las skills del pipeline SAC funcionan correctamente de punta a pun
 ## Pipeline bajo prueba
 
 ```
-sac-tomar-contexto → sac-refinar-hu → sac-validar-hu → sac-planificar-hu → sac-ejecutar-plan → sincronizar-backlog
+sac-tomar-contexto → sac-refinar-hu → sac-validar-hu → sac-planificar-hu → sac-ejecutar-plan → sac-sincronizar-backlog
                                                        ↗
                               registrar-hallazgo (bugs)
 ```
@@ -24,7 +24,7 @@ sac-tomar-contexto → sac-refinar-hu → sac-validar-hu → sac-planificar-hu �
 3. sac-validar-hu        → aprueba HU, agrega ✅ Aprobada (estado [A])
 4. sac-planificar-hu     → crea Plan.md (estado [P])
 5. sac-ejecutar-plan     → ejecuta plan, crea Tracking.md (estado [E] → [X])
-6. sincronizar-backlog → actualiza backlog con estados correctos
+6. sac-sincronizar-backlog → actualiza backlog con estados correctos
 ```
 
 ### ESC-02: Flujo completo Bug
@@ -40,7 +40,7 @@ sac-tomar-contexto → sac-refinar-hu → sac-validar-hu → sac-planificar-hu �
 1. sac-planificar-hu sin Refinamiento.md → ERROR esperado
 2. sac-ejecutar-plan sin Plan.md → ERROR esperado
 3. sac-validar-hu sin HU refinada → ERROR esperado
-4. sincronizar-backlog sin workspace → ERROR esperado
+4. sac-sincronizar-backlog sin workspace → ERROR esperado
 ```
 
 ### ESC-04: Transiciones de estado inválidas

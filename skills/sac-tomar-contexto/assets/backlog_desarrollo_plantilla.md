@@ -68,7 +68,7 @@ Plan.md Estado: COMPLETADO         → [X] Completada
   Tabla compacta para carga inicial optimizada (bajo consumo de tokens).
   El agente carga SOLO esta tabla al iniciar sesión.
   Para detalle de una HU, leer SAC-XXX/HU.md directamente.
-  Esta tabla se regenera automáticamente con >sincronizar_backlog.
+  Esta tabla se regenera automáticamente con >sac_sincronizar_backlog.
 -->
 
 | ID | Título | Estado | Prioridad | Tipo | Proyecto | Tasks |
@@ -101,5 +101,5 @@ Plan.md Estado: COMPLETADO         → [X] Completada
 
 ---
 
-> **Archivo generado por `>sincronizar_backlog`**
+> **Archivo generado por `>sac_sincronizar_backlog`**
 > **Las HUs detalladas viven en `artifacts/HU/[ID-HU]/`**

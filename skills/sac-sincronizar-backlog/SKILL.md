@@ -1,5 +1,5 @@
 ---
-name: sincronizar-backlog
+name: sac-sincronizar-backlog
 description: >
   Use when the backlog status doesn't match the actual refinement, planning,
   or execution state of HUs on disk.
@@ -25,7 +25,7 @@ Detecta y corrige discrepancias entre el estado del backlog y los artefactos en 
 ## Flowchart
 
 ```dot
-digraph sincronizar_backlog {
+digraph sac_sincronizar_backlog {
   rankdir=LR;
   node [fontname="Helvetica", fontsize=10];
   edge [fontname="Helvetica", fontsize=9];

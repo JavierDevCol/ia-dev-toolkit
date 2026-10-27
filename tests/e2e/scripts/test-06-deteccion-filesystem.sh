@@ -232,7 +232,7 @@ assert_file_contains "$TEST3_DIR/Plan.md" "PENDIENTE" "Plan.md tiene Estado=PEND
 assert_file_not_exists "$TEST3_DIR/Tracking.md" "Tracking.md NO existe (no está en ejecución)"
 
 echo "  → sac-ejecutar-plan debería detectar: [P] Planificada (lista para ejecutar)"
-echo "  → sincronizar-backlog debería detectar: [P] en backlog"
+echo "  → sac-sincronizar-backlog debería detectar: [P] en backlog"
 
 echo ""
 
@@ -299,14 +299,14 @@ assert_file_contains "$TEST4_DIR/Plan.md" "EN_PROGRESO" "Plan.md tiene Estado=EN
 assert_file_contains "$TEST4_DIR/Tracking.md" "EN_PROGRESO" "Tracking.md tiene Estado=EN_PROGRESO"
 
 echo "  → sac-ejecutar-plan debería detectar: [E] En Ejecución (continuar ejecución)"
-echo "  → sincronizar-backlog debería detectar: [E] en backlog"
+echo "  → sac-sincronizar-backlog debería detectar: [E] en backlog"
 
 echo ""
 
 # ============================================
 # TEST 5: Estado [X] Completada
 # Archivos: Plan.md con Estado=COMPLETADO
-# Skill que detecta: sincronizar-backlog
+# Skill que detecta: sac-sincronizar-backlog
 # ============================================
 echo -e "${YELLOW}TEST 5: Estado [X] Completada${NC}"
 echo "  Archivos requeridos: Plan.md (COMPLETADO)"
@@ -360,7 +360,7 @@ assert_file_exists "$TEST5_DIR/Tracking.md" "Tracking.md existe"
 assert_file_contains "$TEST5_DIR/Plan.md" "COMPLETADO" "Plan.md tiene Estado=COMPLETADO"
 assert_file_contains "$TEST5_DIR/Tracking.md" "FINALIZADO" "Tracking.md tiene Estado=FINALIZADO"
 
-echo "  → sincronizar-backlog debería detectar: [X] Completada"
+echo "  → sac-sincronizar-backlog debería detectar: [X] Completada"
 echo "  → sac-ejecutar-plan debería rechazar: 'Plan ya completado'"
 
 echo ""

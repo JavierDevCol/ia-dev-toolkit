@@ -66,7 +66,7 @@
                 "plugins": []
             },
             "optional": {
-                "skills": ["sincronizar-backlog"]
+                "skills": ["sac-sincronizar-backlog"]
             }
         }
     },
@@ -81,7 +81,7 @@
                 "plugins": []
             },
             "optional": {
-                "skills": ["sincronizar-backlog", "sac-planificar-hu"]
+                "skills": ["sac-sincronizar-backlog", "sac-planificar-hu"]
             }
         },
         "ARQUITECTO-SOFTWARE": {
@@ -143,7 +143,7 @@
             },
             "optional": {}
         },
-        "sincronizar-backlog": {
+        "sac-sincronizar-backlog": {
             "requires": {
                 "skills": [],
                 "workflows": [],

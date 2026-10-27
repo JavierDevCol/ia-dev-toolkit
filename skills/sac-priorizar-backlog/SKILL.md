@@ -23,7 +23,7 @@ Calcula un orden de ejecución sugerido para las HUs del backlog combinando el g
 **Cuándo NO usar:**
 - Backlog no existe o no tiene `Índice Rápido` (ejecutar `>sac_refinar_hu` primero)
 - Solo hay una HU candidata (`[A]`/`[P]`) — no hay nada que ordenar
-- El backlog está desincronizado (ejecutar `>sincronizar_backlog` primero; esta skill confía en el `Estado` del Índice Rápido)
+- El backlog está desincronizado (ejecutar `>sac_sincronizar_backlog` primero; esta skill confía en el `Estado` del Índice Rápido)
 
 ## Flowchart
 
@@ -120,7 +120,7 @@ memctl es solo lectura y su salida ES la respuesta; si memctl no existe (exit 12
 - Tratar toda fila de `## Dependencias` como bloqueante → solo `Tipo = HU previa` genera arista
 - Ignorar un ciclo y forzar un orden arbitrario → un ciclo se reporta, no se resuelve adivinando
 - Asumir que "sin sección Dependencias" significa "backlog corrupto" → simplemente no hay dependencias declaradas
-- Confiar en el `Estado` del backlog sin verificar que esté sincronizado → correr `>sincronizar_backlog` antes si hay dudas
+- Confiar en el `Estado` del backlog sin verificar que esté sincronizado → correr `>sac_sincronizar_backlog` antes si hay dudas
 - Usar la columna `Estado` de la fila `HU previa` (ej. "Pendiente") para decidir si bloquea → esa columna es informativa; el bloqueo se decide con el `Estado` real de la HU referenciada en el Índice Rápido
 - Usar el ID como desempate silencioso cuando falta `Fecha Creación` en un empate de Prioridad → reportar el empate explícitamente, no ordenar por ID
 - Leer dependencias de `Plan.md` → nunca es fuente de dependencias
@@ -128,4 +128,4 @@ memctl es solo lectura y su salida ES la respuesta; si memctl no existe (exit 12
 ## Después de ejecutar
 
 - `>sac_planificar_hu [ID-HU]` sobre la primera HU del orden sugerido
-- `>sincronizar_backlog` si el reporte muestra HUs con estado desactualizado antes de confiar en el orden
+- `>sac_sincronizar_backlog` si el reporte muestra HUs con estado desactualizado antes de confiar en el orden

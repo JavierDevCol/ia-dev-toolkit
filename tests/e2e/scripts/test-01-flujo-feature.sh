@@ -302,8 +302,8 @@ assert_file_contains "$HU_DIR/Tracking.md" "FINALIZADO" "Tracking.md cambió a F
 
 echo ""
 
-# ---- PASO 6: sincronizar-backlog (verificar estados) ----
-echo -e "${YELLOW}PASO 6: sincronizar-backlog (verificar estados)${NC}"
+# ---- PASO 6: sac-sincronizar-backlog (verificar estados) ----
+echo -e "${YELLOW}PASO 6: sac-sincronizar-backlog (verificar estados)${NC}"
 echo "  Verificando que los archivos reflejan el estado correcto..."
 
 # Verificar que HU.md existe

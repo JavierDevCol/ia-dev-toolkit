@@ -422,7 +422,7 @@ COMPONENT_DEPENDENCIES = {
         "gestionar-backlog-roadmap": {
             "requires": {"tools": ["workflow-sac", "workflow-discover"],
                          "commands": ["workflow-sac"], "skills": [], "plugins": []},
-            "optional": {"skills": ["sincronizar-backlog"]},
+            "optional": {"skills": ["sac-sincronizar-backlog"]},
         },
     },
     # Agents -> dependencies
@@ -430,7 +430,7 @@ COMPONENT_DEPENDENCIES = {
         "PO": {
             "requires": {"skills": ["sac-refinar-hu", "sac-validar-hu"],
                          "tools": [], "commands": [], "plugins": []},
-            "optional": {"skills": ["sincronizar-backlog", "sac-planificar-hu"]},
+            "optional": {"skills": ["sac-sincronizar-backlog", "sac-planificar-hu"]},
         },
         "ARQUITECTO-SOFTWARE": {
             "requires": {"skills": ["crear-adr", "init-reglas-arquitectonicas"],
@@ -459,7 +459,7 @@ COMPONENT_DEPENDENCIES = {
                          "tools": [], "commands": [], "plugins": []},
             "optional": {},
         },
-        "sincronizar-backlog": {
+        "sac-sincronizar-backlog": {
             "requires": {"skills": [], "workflows": [],
                          "tools": [], "commands": [], "plugins": []},
             "optional": {},

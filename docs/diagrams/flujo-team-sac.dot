@@ -25,7 +25,7 @@ digraph flujo_team_sac {
   sac_validar_ca [label="sac-validar-ca\n(granular por task +\nfinal integración/todos)", fillcolor="#50E3C2"];
   detenido [label="DETENIDO\n(CA PARCIAL /\nNO CUMPLIDO)", fillcolor="#D0021B", fontcolor=white];
   completada [label="[X] Completada", shape=ellipse, fillcolor="#7ED321"];
-  sincronizar_backlog [label="sincronizar-backlog", fillcolor="#7BC67E"];
+  sac_sincronizar_backlog [label="sac-sincronizar-backlog", fillcolor="#7BC67E"];
   fin [label="Sprint cerrado", shape=oval, fillcolor="#4A90D9", fontcolor=white];
 
   idea -> definir_vision -> definir_arquitectura -> consolidar_q;
@@ -50,7 +50,7 @@ digraph flujo_team_sac {
   sac_ejecutar_plan -> sac_validar_ca [label="al completar\ntodas las tasks"];
   sac_validar_ca -> detenido [label="PARCIAL /\nNO CUMPLIDO"];
   sac_validar_ca -> completada [label="todos\nCUMPLIDO"];
-  completada -> sincronizar_backlog -> fin;
+  completada -> sac_sincronizar_backlog -> fin;
   fin -> sac_iniciar_sprint [label="siguiente sprint", style=dashed];
 }
 
@@ -360,7 +360,7 @@ digraph skill_validar_ca {
   hu_complete -> report;
 }
 
-// sincronizar-backlog — Fuente: skills/sincronizar-backlog/SKILL.md (flowchart oficial de la skill).
+// sac-sincronizar-backlog — Fuente: skills/sac-sincronizar-backlog/SKILL.md (flowchart oficial de la skill).
 digraph skill_sincronizar_backlog {
   rankdir=LR;
   node [fontname="Helvetica", fontsize=10];

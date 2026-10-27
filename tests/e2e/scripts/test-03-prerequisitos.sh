@@ -146,9 +146,9 @@ echo "  → sac-validar-hu debería fallar con: 'Ejecutar >sac_refinar_hu primer
 
 echo ""
 
-# ---- TEST 4: sincronizar-backlog sin workspace ----
-echo -e "${YELLOW}TEST 4: sincronizar-backlog sin workspace${NC}"
-echo "  Verificando que sincronizar-backlog NO puede ejecutar sin .SAC/workspace.md..."
+# ---- TEST 4: sac-sincronizar-backlog sin workspace ----
+echo -e "${YELLOW}TEST 4: sac-sincronizar-backlog sin workspace${NC}"
+echo "  Verificando que sac-sincronizar-backlog NO puede ejecutar sin .SAC/workspace.md..."
 
 TEST4_DIR="$FIXTURES_DIR/workspace-no-sac"
 rm -rf "$TEST4_DIR"
@@ -156,7 +156,7 @@ mkdir -p "$TEST4_DIR"
 
 assert_file_not_exists "$TEST4_DIR/.SAC/workspace.md" "workspace.md NO existe"
 
-echo "  → sincronizar-backlog debería fallar con: 'Ejecutar >sac_tomar_contexto primero'"
+echo "  → sac-sincronizar-backlog debería fallar con: 'Ejecutar >sac_tomar_contexto primero'"
 
 echo ""
 
