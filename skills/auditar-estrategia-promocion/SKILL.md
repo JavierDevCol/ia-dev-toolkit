@@ -68,15 +68,15 @@ por estrategia — no inventar señales nuevas fuera de esa tabla.
 **Fase D — Reporte:** generar `ESTRATEGIA-PROMOCION-{nombre_repo}.md` con la plantilla
 `assets/template-ESTRATEGIA-PROMOCION.md`: tabla ranking (desc por score), detalle por
 estrategia (qué sumó, qué restó, qué cambiar para subir el score) y una recomendación
-top-1 explícita. Usar el `output_folder` global como ruta de salida; si es `null`, preguntar al usuario la carpeta y
-persistirla en `output_folder` de `.SAC/config/sac.json` (editando solo esa clave).
+top-1 explícita. Guardarlo en `{documentacion_sac_path}/estrategia_promocion/` (crear la subcarpeta si no existe;
+nunca escribir fuera de `{documentacion_sac_path}`).
 
 Leer la config con memctl y, si `usuario.incluir_firma_en_documentos` es `true`, agregar al final del archivo:
 
 ```sh
 sh .SAC/memctl.sh get usuario.nombre
 sh .SAC/memctl.sh get usuario.incluir_firma_en_documentos
-sh .SAC/memctl.sh get output_folder
+sh .SAC/memctl.sh get documentacion_sac_path
 ```
 
 memctl es solo lectura y su salida ES la respuesta; si memctl no existe (exit 127), leer `.SAC/config/sac.json` con `jq` o usar `~/.SAC/memctl.sh` (instalación global); si sale con exit 1 (JSON inválido o vacío), detenerse y avisar: no leer ni editar el archivo a mano; nunca inventar valores. `null`, vacío o exit 2 → no configurado.
