@@ -48,7 +48,7 @@ memctl es solo lectura y su salida ES la respuesta; si memctl no existe (exit 12
 6. **Presentar sugerencia** → evidencia encontrada, clasificación, confianza, severidad; pedir confirmación
 7. **Crear artefacto** → si acepta:
    - BUG: crear `{hu_folder}/BUG-NNN/`, copiar `{file:./assets/RefinamientoBug.md}` como `Refinamiento.md`, agregar en backlog con estado [P]
-   - PENDIENTE: crear entrada en `{artifacts.pendientes}` con categoría y prioridad
+   - PENDIENTE: crear entrada en `{pendientes}` con categoría y prioridad
 
    Si `usuario.incluir_firma_en_documentos` es `true`, agregar al final del artefacto creado:
    ```

@@ -20,7 +20,7 @@ Recibes:
    - ¿Qué nombre de HU podría estar relacionado?
 
 2. **Buscar en backlog:**
-   - Escanear `{archivos.backlog}` buscando HUs del mismo módulo
+   - Escanear `{backlog}` buscando HUs del mismo módulo
    - Buscar por palabras clave en títulos de HUs
    - Filtrar por proyecto si se especifica
 
