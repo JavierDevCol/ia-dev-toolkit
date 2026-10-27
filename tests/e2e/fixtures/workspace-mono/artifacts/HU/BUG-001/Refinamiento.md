@@ -57,13 +57,13 @@
 
 ## 6. Corrección Sugerida
 
-**SUGERIDA** — Instrucciones de alto nivel para `planificar_hu`:
+**SUGERIDA** — Instrucciones de alto nivel para `sac_planificar_hu`:
 
 - **Qué cambiar:** [Descripción del cambio necesario]
 - **En qué archivo(s):** [Lista de archivos a modificar]
 - **Lógica esperada:** [Descripción de la lógica corregida]
 
-> ⚠️ NO incluir código — solo instrucciones de alto nivel para planificar_hu
+> ⚠️ NO incluir código — solo instrucciones de alto nivel para sac_planificar_hu
 
 ---
 
@@ -105,7 +105,7 @@
 
 ## 10. Estimación
 
-<!-- Se llena cuando planificar_hu calcula la estimación -->
+<!-- Se llena cuando sac_planificar_hu calcula la estimación -->
 
 | Factor | Valor | Justificación |
 |--------|-------|---------------|
@@ -135,7 +135,7 @@
 
 ## Aprobación
 
-<!-- Generado por >validar_hu al aprobar (bugs saltan validación directa) -->
+<!-- Generado por >sac_validar_hu al aprobar (bugs saltan validación directa) -->
 
 | Campo | Valor |
 |-------|-------|
@@ -157,4 +157,4 @@
 
 > **Archivo:** `{{artifacts.hu_folder}}/BUG-NNN/RefinamientoBug.md`
 > **Creado por:** `>registrar_bug`
-> **Actualizado por:** `>planificar_hu`, `>ejecutar_plan`
+> **Actualizado por:** `>sac_planificar_hu`, `>sac_ejecutar_plan`

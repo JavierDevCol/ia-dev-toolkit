@@ -358,12 +358,12 @@ Al seleccionar esta opción se instala todo el paquete SAC:
 ══════════════════════════════════════════════════════════════════════
 📋 SKILLS SAC DISPONIBLES
 ══════════════════════════════════════════════════════════════════════
-1. analizar-calidad-codigo   — Revisa código detectando code smells y violaciones | deps: config/
-2. ejecutar-plan             — Implementa planes actualizando Plan.md               | deps: config/
-3. init-reglas-arquitectonicas — Genera reglas arquitectónicas del proyecto         | deps: config/
-4. planificar-hu             — Genera plan técnico desde HU aprobada                | deps: config/
-5. refinar-hu                — Refina HUs con criterios SMART y estimación          | deps: config/
-6. registrar-hallazgo        — Captura incidencias mediante análisis paralelo       | deps: config/
+1. sac-analizar-calidad-codigo   — Revisa código detectando code smells y violaciones | deps: config/
+2. sac-ejecutar-plan             — Implementa planes actualizando Plan.md               | deps: config/
+3. sac-init-reglas-arquitectonicas — Genera reglas arquitectónicas del proyecto         | deps: config/
+4. sac-planificar-hu             — Genera plan técnico desde HU aprobada                | deps: config/
+5. sac-refinar-hu                — Refina HUs con criterios SMART y estimación          | deps: config/
+6. sac-registrar-hallazgo        — Captura incidencias mediante análisis paralelo       | deps: config/
 ```
 
 ### 4.4 Kit Completo — Agents + Skills + Workflows + Config
@@ -412,69 +412,69 @@ COMPONENT_DEPENDENCIES = {
     "workflows": {
         "definir-vision-producto": {
             "requires": {"tools": [], "commands": [], "skills": [], "plugins": []},
-            "optional": {"skills": ["tomar-contexto"]},
+            "optional": {"skills": ["sac-tomar-contexto"]},
         },
         "definir-arquitectura-solucion": {
             "requires": {"tools": ["workflow-sac", "workflow-discover"],
                          "commands": ["workflow-sac"], "skills": [], "plugins": []},
-            "optional": {"skills": ["crear-adr"]},
+            "optional": {"skills": ["sac-crear-adr"]},
         },
         "gestionar-backlog-roadmap": {
             "requires": {"tools": ["workflow-sac", "workflow-discover"],
                          "commands": ["workflow-sac"], "skills": [], "plugins": []},
-            "optional": {"skills": ["sincronizar-backlog"]},
+            "optional": {"skills": ["sac-sincronizar-backlog"]},
         },
     },
     # Agents -> dependencies
     "agents": {
         "PO": {
-            "requires": {"skills": ["refinar-hu", "validar-hu"],
+            "requires": {"skills": ["sac-refinar-hu", "sac-validar-hu"],
                          "tools": [], "commands": [], "plugins": []},
-            "optional": {"skills": ["sincronizar-backlog", "planificar-hu"]},
+            "optional": {"skills": ["sac-sincronizar-backlog", "sac-planificar-hu"]},
         },
         "ARQUITECTO-SOFTWARE": {
-            "requires": {"skills": ["crear-adr", "init-reglas-arquitectonicas"],
+            "requires": {"skills": ["sac-crear-adr", "sac-init-reglas-arquitectonicas"],
                          "tools": [], "commands": [], "plugins": []},
-            "optional": {"skills": ["analizar-calidad-codigo"]},
+            "optional": {"skills": ["sac-analizar-calidad-codigo"]},
         },
         "ARQUITECTO-DEVOPS": {
             "requires": {"skills": [], "tools": [], "commands": [], "plugins": []},
-            "optional": {"skills": ["tomar-contexto"]},
+            "optional": {"skills": ["sac-tomar-contexto"]},
         },
         "DESARROLLADOR": {
             "requires": {"skills": ["git-branch-commit"],
                          "tools": [], "commands": [], "plugins": []},
-            "optional": {"skills": ["analizar-calidad-codigo"]},
+            "optional": {"skills": ["sac-analizar-calidad-codigo"]},
         },
     },
     # Skills -> dependencies
     "skills": {
-        "validar-ca": {
-            "requires": {"skills": ["planificar-hu"], "workflows": [],
+        "sac-validar-ca": {
+            "requires": {"skills": ["sac-planificar-hu"], "workflows": [],
                          "tools": [], "commands": [], "plugins": []},
-            "optional": {"skills": ["registrar-hallazgo"]},
+            "optional": {"skills": ["sac-registrar-hallazgo"]},
         },
-        "ejecutar-plan": {
-            "requires": {"skills": ["planificar-hu"], "workflows": [],
+        "sac-ejecutar-plan": {
+            "requires": {"skills": ["sac-planificar-hu"], "workflows": [],
                          "tools": [], "commands": [], "plugins": []},
             "optional": {},
         },
-        "sincronizar-backlog": {
+        "sac-sincronizar-backlog": {
             "requires": {"skills": [], "workflows": [],
                          "tools": [], "commands": [], "plugins": []},
             "optional": {},
         },
-        "planificar-hu": {
-            "requires": {"skills": ["tomar-contexto"], "workflows": [],
+        "sac-planificar-hu": {
+            "requires": {"skills": ["sac-tomar-contexto"], "workflows": [],
                          "tools": [], "commands": [], "plugins": []},
             "optional": {},
         },
-        "refinar-hu": {
-            "requires": {"skills": ["tomar-contexto"], "workflows": [],
+        "sac-refinar-hu": {
+            "requires": {"skills": ["sac-tomar-contexto"], "workflows": [],
                          "tools": [], "commands": [], "plugins": []},
             "optional": {},
         },
-        "analizar-calidad-codigo": {
+        "sac-analizar-calidad-codigo": {
             "requires": {"skills": [], "workflows": [],
                          "tools": [], "commands": [], "plugins": []},
             "optional": {},
@@ -493,7 +493,7 @@ COMPONENT_DEPENDENCIES = {
 }
 ```
 
-> Los componentes hoja sin dependencias propias (p. ej. `tomar-contexto`) **no** necesitan
+> Los componentes hoja sin dependencias propias (p. ej. `sac-tomar-contexto`) **no** necesitan
 > entrada aquí: basta con que existan como componente descargable (aparezcan en el catálogo).
 
 ### 6.2 Tipos de nodo
@@ -953,7 +953,7 @@ de lo que **quedó instalado** (`components` = seeds + deps). Cada instalación 
       },
       "components": {
         "workflows": ["definir-arquitectura-solucion"],
-        "skills": ["crear-adr", "tomar-contexto"],
+        "skills": ["sac-crear-adr", "sac-tomar-contexto"],
         "tools": ["workflow-sac", "workflow-discover"],
         "commands": ["workflow-sac"],
         "agents": [], "config": true
@@ -1323,7 +1323,7 @@ Salida de ejemplo (`diat --status /home/user/proyecto-1`):
    Estado:      ⚠️ desactualizado (a1b2c3d → f9e8d7c)
 
    workflows (1): definir-arquitectura-solucion
-   skills (2): crear-adr, tomar-contexto
+   skills (2): sac-crear-adr, sac-tomar-contexto
    tools (2): workflow-sac, workflow-discover
    commands (1): workflow-sac
    config: ✅

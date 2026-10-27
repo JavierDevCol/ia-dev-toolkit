@@ -90,7 +90,7 @@ echo ""
 # ============================================
 # TEST 1: Estado [R] Refinada
 # Archivos: HU.md + Refinamiento.md con ## Aprobación vacía
-# Skill que detecta: validar-hu
+# Skill que detecta: sac-validar-hu
 # ============================================
 echo -e "${YELLOW}TEST 1: Estado [R] Refinada${NC}"
 echo "  Archivos requeridos: HU.md + Refinamiento.md (sin aprobación)"
@@ -128,15 +128,15 @@ assert_file_contains "$TEST1_DIR/HU.md" "\[R\] Refinada" "HU.md tiene estado [R]
 assert_file_contains "$TEST1_DIR/Refinamiento.md" "<!-- Pendiente" "Refinamiento.md tiene aprobación vacía"
 assert_file_not_contains "$TEST1_DIR/Refinamiento.md" "✅ Aprobada" "Refinamiento.md NO tiene ✅ Aprobada"
 
-echo "  → validar-hu debería detectar: [R] Refinada (lista para validar)"
-echo "  → planificar-hu debería rechazar: 'Ejecutar >validar_hu primero'"
+echo "  → sac-validar-hu debería detectar: [R] Refinada (lista para validar)"
+echo "  → sac-planificar-hu debería rechazar: 'Ejecutar >sac_validar_hu primero'"
 
 echo ""
 
 # ============================================
 # TEST 2: Estado [A] Aprobada
 # Archivos: HU.md + Refinamiento.md con ## Aprobación + ✅ Aprobada
-# Skill que detecta: planificar-hu
+# Skill que detecta: sac-planificar-hu
 # ============================================
 echo -e "${YELLOW}TEST 2: Estado [A] Aprobada${NC}"
 echo "  Archivos requeridos: HU.md + Refinamiento.md (con aprobación)"
@@ -177,15 +177,15 @@ assert_file_exists "$TEST2_DIR/Refinamiento.md" "Refinamiento.md existe"
 assert_file_contains "$TEST2_DIR/HU.md" "\[A\] Aprobada" "HU.md tiene estado [A]"
 assert_file_contains "$TEST2_DIR/Refinamiento.md" "✅ Aprobada" "Refinamiento.md tiene ✅ Aprobada"
 
-echo "  → planificar-hu debería detectar: [A] Aprobada (lista para planificar)"
-echo "  → ejecutar-plan debería rechazar: 'Ejecutar >planificar_hu primero'"
+echo "  → sac-planificar-hu debería detectar: [A] Aprobada (lista para planificar)"
+echo "  → sac-ejecutar-plan debería rechazar: 'Ejecutar >sac_planificar_hu primero'"
 
 echo ""
 
 # ============================================
 # TEST 3: Estado [P] Planificada
 # Archivos: HU.md + Refinamiento.md + Plan.md con Estado=PENDIENTE
-# Skill que detecta: ejecutar-plan
+# Skill que detecta: sac-ejecutar-plan
 # ============================================
 echo -e "${YELLOW}TEST 3: Estado [P] Planificada${NC}"
 echo "  Archivos requeridos: HU.md + Refinamiento.md + Plan.md (PENDIENTE)"
@@ -231,15 +231,15 @@ assert_file_exists "$TEST3_DIR/Plan.md" "Plan.md existe"
 assert_file_contains "$TEST3_DIR/Plan.md" "PENDIENTE" "Plan.md tiene Estado=PENDIENTE"
 assert_file_not_exists "$TEST3_DIR/Tracking.md" "Tracking.md NO existe (no está en ejecución)"
 
-echo "  → ejecutar-plan debería detectar: [P] Planificada (lista para ejecutar)"
-echo "  → sincronizar-backlog debería detectar: [P] en backlog"
+echo "  → sac-ejecutar-plan debería detectar: [P] Planificada (lista para ejecutar)"
+echo "  → sac-sincronizar-backlog debería detectar: [P] en backlog"
 
 echo ""
 
 # ============================================
 # TEST 4: Estado [E] En Ejecución
 # Archivos: Plan.md con Estado=EN_PROGRESO + Tracking.md
-# Skill que detecta: ejecutar-plan (continuar)
+# Skill que detecta: sac-ejecutar-plan (continuar)
 # ============================================
 echo -e "${YELLOW}TEST 4: Estado [E] En Ejecución${NC}"
 echo "  Archivos requeridos: Plan.md (EN_PROGRESO) + Tracking.md"
@@ -298,15 +298,15 @@ assert_file_exists "$TEST4_DIR/Tracking.md" "Tracking.md existe"
 assert_file_contains "$TEST4_DIR/Plan.md" "EN_PROGRESO" "Plan.md tiene Estado=EN_PROGRESO"
 assert_file_contains "$TEST4_DIR/Tracking.md" "EN_PROGRESO" "Tracking.md tiene Estado=EN_PROGRESO"
 
-echo "  → ejecutar-plan debería detectar: [E] En Ejecución (continuar ejecución)"
-echo "  → sincronizar-backlog debería detectar: [E] en backlog"
+echo "  → sac-ejecutar-plan debería detectar: [E] En Ejecución (continuar ejecución)"
+echo "  → sac-sincronizar-backlog debería detectar: [E] en backlog"
 
 echo ""
 
 # ============================================
 # TEST 5: Estado [X] Completada
 # Archivos: Plan.md con Estado=COMPLETADO
-# Skill que detecta: sincronizar-backlog
+# Skill que detecta: sac-sincronizar-backlog
 # ============================================
 echo -e "${YELLOW}TEST 5: Estado [X] Completada${NC}"
 echo "  Archivos requeridos: Plan.md (COMPLETADO)"
@@ -360,8 +360,8 @@ assert_file_exists "$TEST5_DIR/Tracking.md" "Tracking.md existe"
 assert_file_contains "$TEST5_DIR/Plan.md" "COMPLETADO" "Plan.md tiene Estado=COMPLETADO"
 assert_file_contains "$TEST5_DIR/Tracking.md" "FINALIZADO" "Tracking.md tiene Estado=FINALIZADO"
 
-echo "  → sincronizar-backlog debería detectar: [X] Completada"
-echo "  → ejecutar-plan debería rechazar: 'Plan ya completado'"
+echo "  → sac-sincronizar-backlog debería detectar: [X] Completada"
+echo "  → sac-ejecutar-plan debería rechazar: 'Plan ya completado'"
 
 echo ""
 
@@ -380,9 +380,9 @@ if [ -f "$BACKLOG_FILE" ]; then
     # El backlog podría decir [P] pero el filesystem dice [X]
     # La fuente de verdad es el filesystem
     echo "  → Si backlog dice [P] pero Plan.md dice COMPLETADO"
-    echo "  → ejecutar-plan debería rechazar (filesystem manda)"
+    echo "  → sac-ejecutar-plan debería rechazar (filesystem manda)"
 else
-    echo -e "  ${YELLOW}⚠️  Backlog no existe aún (se creará con tomar-contexto)${NC}"
+    echo -e "  ${YELLOW}⚠️  Backlog no existe aún (se creará con sac-tomar-contexto)${NC}"
 fi
 
 echo ""

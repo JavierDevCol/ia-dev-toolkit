@@ -56,17 +56,17 @@ class UpdateCanalR10Test(unittest.TestCase):
         registro.save_installed_sha("OLD")
         proyecto = Path(self._tmp.name) / "proj"
         registro.save_installation(proyecto, ".opencode",
-                                   {"skills": ["ejecutar-plan"]}, {}, "OLD",
+                                   {"skills": ["sac-ejecutar-plan"]}, {}, "OLD",
                                    ref="v2.0.0")
         out = io.StringIO()
         with patch("diatlib.github.get_remote_sha", return_value="NEW123"), \
              patch("diatlib.github.download_and_stage",
                    return_value=paths.get_cache_dir()) as dl, \
              patch("diatlib.github.scan_components",
-                   return_value={"skills": {"ejecutar-plan"}}), \
+                   return_value={"skills": {"sac-ejecutar-plan"}}), \
              patch("diatlib.github.get_latest_release_tag", return_value="v2.1.1"):
             with redirect_stdout(out):
-                update.cmd_update([])       # valida -> falta validar-ca -> aborta
+                update.cmd_update([])       # valida -> falta sac-validar-ca -> aborta
         dl.assert_called_once_with(ref="v2.1.1")
         self.assertIn("Dependencias inválidas", out.getvalue())
         # lo staged queda etiquetado con el canal NUEVO pese al abort

@@ -67,9 +67,9 @@ echo "  ESC-03: Validación de prerequisitos"
 echo "=========================================="
 echo ""
 
-# ---- TEST 1: planificar-hu sin Refinamiento.md ----
-echo -e "${YELLOW}TEST 1: planificar-hu sin Refinamiento.md${NC}"
-echo "  Verificando que planificar-hu NO puede ejecutar sin Refinamiento.md..."
+# ---- TEST 1: sac-planificar-hu sin Refinamiento.md ----
+echo -e "${YELLOW}TEST 1: sac-planificar-hu sin Refinamiento.md${NC}"
+echo "  Verificando que sac-planificar-hu NO puede ejecutar sin Refinamiento.md..."
 
 TEST1_DIR="$WS/artifacts/HU/HU-TEST-01"
 mkdir -p "$TEST1_DIR"
@@ -86,14 +86,14 @@ assert_file_exists "$TEST1_DIR/HU.md" "HU.md existe"
 assert_file_not_exists "$TEST1_DIR/Refinamiento.md" "Refinamiento.md NO existe (prerequisito faltante)"
 
 # Verificar que la skill detectaría el error
-# (En ejecución real, planificar-hu leería HU.md y buscaría Refinamiento.md)
-echo "  → planificar-hu debería fallar con: 'Ejecutar >refinar_hu primero'"
+# (En ejecución real, sac-planificar-hu leería HU.md y buscaría Refinamiento.md)
+echo "  → sac-planificar-hu debería fallar con: 'Ejecutar >sac_refinar_hu primero'"
 
 echo ""
 
-# ---- TEST 2: ejecutar-plan sin Plan.md ----
-echo -e "${YELLOW}TEST 2: ejecutar-plan sin Plan.md${NC}"
-echo "  Verificando que ejecutar-plan NO puede ejecutar sin Plan.md..."
+# ---- TEST 2: sac-ejecutar-plan sin Plan.md ----
+echo -e "${YELLOW}TEST 2: sac-ejecutar-plan sin Plan.md${NC}"
+echo "  Verificando que sac-ejecutar-plan NO puede ejecutar sin Plan.md..."
 
 TEST2_DIR="$WS/artifacts/HU/HU-TEST-02"
 mkdir -p "$TEST2_DIR"
@@ -120,13 +120,13 @@ assert_file_exists "$TEST2_DIR/HU.md" "HU.md existe"
 assert_file_exists "$TEST2_DIR/Refinamiento.md" "Refinamiento.md existe con aprobación"
 assert_file_not_exists "$TEST2_DIR/Plan.md" "Plan.md NO existe (prerequisito faltante)"
 
-echo "  → ejecutar-plan debería fallar con: 'Ejecutar >planificar_hu primero'"
+echo "  → sac-ejecutar-plan debería fallar con: 'Ejecutar >sac_planificar_hu primero'"
 
 echo ""
 
-# ---- TEST 3: validar-hu sin HU refinada ----
-echo -e "${YELLOW}TEST 3: validar-hu sin HU refinada${NC}"
-echo "  Verificando que validar-hu NO puede ejecutar sin Refinamiento.md..."
+# ---- TEST 3: sac-validar-hu sin HU refinada ----
+echo -e "${YELLOW}TEST 3: sac-validar-hu sin HU refinada${NC}"
+echo "  Verificando que sac-validar-hu NO puede ejecutar sin Refinamiento.md..."
 
 TEST3_DIR="$WS/artifacts/HU/HU-TEST-03"
 mkdir -p "$TEST3_DIR"
@@ -142,13 +142,13 @@ EOF
 assert_file_exists "$TEST3_DIR/HU.md" "HU.md existe"
 assert_file_not_exists "$TEST3_DIR/Refinamiento.md" "Refinamiento.md NO existe"
 
-echo "  → validar-hu debería fallar con: 'Ejecutar >refinar_hu primero'"
+echo "  → sac-validar-hu debería fallar con: 'Ejecutar >sac_refinar_hu primero'"
 
 echo ""
 
-# ---- TEST 4: sincronizar-backlog sin workspace ----
-echo -e "${YELLOW}TEST 4: sincronizar-backlog sin workspace${NC}"
-echo "  Verificando que sincronizar-backlog NO puede ejecutar sin .SAC/workspace.md..."
+# ---- TEST 4: sac-sincronizar-backlog sin workspace ----
+echo -e "${YELLOW}TEST 4: sac-sincronizar-backlog sin workspace${NC}"
+echo "  Verificando que sac-sincronizar-backlog NO puede ejecutar sin .SAC/workspace.md..."
 
 TEST4_DIR="$FIXTURES_DIR/workspace-no-sac"
 rm -rf "$TEST4_DIR"
@@ -156,13 +156,13 @@ mkdir -p "$TEST4_DIR"
 
 assert_file_not_exists "$TEST4_DIR/.SAC/workspace.md" "workspace.md NO existe"
 
-echo "  → sincronizar-backlog debería fallar con: 'Ejecutar >tomar_contexto primero'"
+echo "  → sac-sincronizar-backlog debería fallar con: 'Ejecutar >sac_tomar_contexto primero'"
 
 echo ""
 
-# ---- TEST 5: ejecutar-plan con Plan.md COMPLETADO ----
-echo -e "${YELLOW}TEST 5: ejecutar-plan con Plan.md COMPLETADO${NC}"
-echo "  Verificando que ejecutar-plan NO puede ejecutar un plan ya completado..."
+# ---- TEST 5: sac-ejecutar-plan con Plan.md COMPLETADO ----
+echo -e "${YELLOW}TEST 5: sac-ejecutar-plan con Plan.md COMPLETADO${NC}"
+echo "  Verificando que sac-ejecutar-plan NO puede ejecutar un plan ya completado..."
 
 TEST5_DIR="$WS/artifacts/HU/HU-TEST-05"
 mkdir -p "$TEST5_DIR"
@@ -175,7 +175,7 @@ EOF
 
 assert_file_exists "$TEST5_DIR/Plan.md" "Plan.md existe con estado COMPLETADO"
 
-echo "  → ejecutar-plan debería fallar con: 'Plan ya completado'"
+echo "  → sac-ejecutar-plan debería fallar con: 'Plan ya completado'"
 
 echo ""
 

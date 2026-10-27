@@ -69,8 +69,8 @@ Comportamiento:
 | `diat --update [/ruta]` | Actualiza el CLI, el cache y reinstala en los proyectos registrados |
 | `diat --status [/ruta]` | Estado del sistema (sin ruta) o de un proyecto (con ruta) |
 | `diat --list` | Proyectos donde se instalaron componentes |
-| `diat --uninstall /ruta` | Quita los componentes DIAT de ese proyecto (si hay OpenCode y Claude Code, pregunta cuál) |
-| `diat --uninstall` | Desinstala DIAT por completo (CLI + cache + PATH) |
+| `diat --uninstall /ruta` | Quita los componentes DIAT de ese proyecto (si hay OpenCode y Claude Code, pregunta cuál o usa `--platform`) |
+| `diat --uninstall` | Desinstala DIAT por completo (CLI + cache + PATH), con confirmación |
 
 ### Flujo de `--install`
 1. **Harness:** OpenCode (`.opencode/`) o Claude Code (`.claude/`).
@@ -136,6 +136,22 @@ usuario/idioma, rutas del sistema (`{project-root}` resuelto al instalar) y el e
 
 ---
 
+### Modo no interactivo (CI / scripts)
+
+`--install` salta los menús cuando recibe `--platform` y una selección. Un flag desconocido es un error (exit 2); la ruta debe existir y no puede ser el home.
+
+| Flag | Aplica a | Efecto |
+|---|---|---|
+| `--platform claude\|opencode` | install, uninstall | Harness destino (si se omite, se pregunta) |
+| `--skills a,b` · `--agents a,b` · `--workflows a,b` | install | Componentes concretos (error si no existen en el catálogo) |
+| `--team-sac` · `--kit` | install | Paquete Team Dev SAC / todo el repo (ambos con config) |
+| `--yes` / `-y` | install, uninstall | No preguntar (sin confirmaciones ni opcionales) |
+| `--dry-run` | install, uninstall | Muestra qué se instalaría o quitaría sin escribir ni borrar |
+
+Ejemplo: `diat --install ~/mi-proyecto --platform claude --team-sac --yes`.
+
+Códigos de salida: `0` ok · `1` error (ruta inválida, registro dañado, descarga) · `2` uso incorrecto · `130` cancelado (Ctrl-C).
+
 ## Estructura del proyecto
 
 ```
@@ -148,7 +164,10 @@ INSTALACION/
 │   ├── github.py        # descarga tarball, staging, sha, catálogo
 │   ├── deps.py          # grafo de dependencias + resolver transitivo
 │   ├── menu.py          # motor de menú stdlib (cross-platform)
-│   ├── registro.py      # instalacion.json (sha + selection)
+│   ├── registro.py      # instalacion.json (sha + selection); escritura atómica, aborta si está dañado
+│   ├── atomico.py       # escritura atómica (tmp + os.replace)
+│   ├── cli_args.py      # argparse por comando (flags desconocidos = error)
+│   ├── desinstalar.py   # --uninstall (solo borra lo que DIAT copió)
 │   ├── instalar.py      # instalación de componentes + memctl
 │   ├── sac_config.py    # .SAC/config/sac.json: crear/fusionar sin pisar valores
 │   ├── migrar.py        # CONFIG_USER.yaml + memory_skill.json -> sac.json
@@ -174,7 +193,7 @@ python3 diat --list
 Los módulos se prueban de forma aislada, p. ej.:
 ```bash
 python3 -c "from diatlib import deps, github; \
-  print(deps.resolve_closure([('skills','validar-ca')])[0])"
+  print(deps.resolve_closure([('skills','sac-validar-ca')])[0])"
 ```
 
 ### Requisitos

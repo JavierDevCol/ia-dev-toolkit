@@ -6,10 +6,13 @@ Uso:
     diat --help   / --h       Ayuda detallada
     diat --version / --v      Versión actual
     diat --install [/ruta]    Instalar componentes (en /ruta o en el directorio actual)
+        [--platform claude|opencode] [--skills a,b] [--agents a,b] [--workflows a,b]
+        [--team-sac] [--kit] [--yes] [--dry-run]   (sin selección: menú interactivo)
     diat --update  [/ruta]    Actualizar componentes
     diat --status  [/ruta]    Estado del sistema o de un proyecto
     diat --list               Proyectos con componentes instalados
-    diat --uninstall          Desinstalar
+    diat --uninstall [/ruta]  Quitar componentes de un proyecto; sin ruta, desinstala DIAT entero
+        [--platform claude|opencode] [--yes] [--dry-run]
 """
 
 import os
@@ -20,19 +23,19 @@ from pathlib import Path
 # Hacer importable el paquete diatlib (está junto a este script, en el bin)
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from diatlib import paths, github, deps, registro, instalar, update, entorno, sac_config
+from diatlib import paths, github, deps, registro, instalar, update, entorno, sac_config, cli_args
 from diatlib import menu
 from diatlib import ui
 
 # Skills de la metodología SAC (ciclo de vida de HU + arquitectura/calidad + soporte).
-# Nota: validar-ca entra por dependencia de ejecutar-plan.
+# Nota: sac-validar-ca entra por dependencia de sac-ejecutar-plan.
 SAC_SKILLS = [
-    "tomar-contexto",                                              # contexto del proyecto
-    "iniciar-sprint",                                              # materializa HU del sprint activo
-    "refinar-hu", "validar-hu", "planificar-hu", "ejecutar-plan",  # ciclo de vida de HU
-    "priorizar-backlog",                                           # orden real de ejecucion (dependencias + prioridad)
-    "sincronizar-backlog", "registrar-hallazgo",                   # backlog y hallazgos
-    "init-reglas-arquitectonicas", "crear-adr", "analizar-calidad-codigo", "analizar-seguridad",  # arquitectura/calidad
+    "sac-tomar-contexto",                                              # contexto del proyecto
+    "sac-iniciar-sprint",                                              # materializa HU del sprint activo
+    "sac-refinar-hu", "sac-validar-hu", "sac-planificar-hu", "sac-ejecutar-plan",  # ciclo de vida de HU
+    "sac-priorizar-backlog",                                           # orden real de ejecucion (dependencias + prioridad)
+    "sac-sincronizar-backlog", "sac-registrar-hallazgo",                   # backlog y hallazgos
+    "sac-init-reglas-arquitectonicas", "sac-crear-adr", "sac-analizar-calidad-codigo", "sac-analizar-seguridad",  # arquitectura/calidad
     "git-branch-commit", "bitacora-tecnica",                       # soporte dev
 ]
 
@@ -115,12 +118,7 @@ def _gather_seeds(catalog, platform):
             return seeds, False
 
         if choice == "team_sac":
-            # Stack SAC coherente: el equipo (agentes) + su flujo (workflows) +
-            # las skills de la metodología SAC + config.
-            seeds = ([("agents", a) for a in catalog.get("agents", set())] +
-                     [("workflows", w) for w in catalog.get("workflows", set())] +
-                     [("skills", s) for s in SAC_SKILLS if s in catalog.get("skills", set())])
-            return seeds, True
+            return _seeds_team_sac(catalog), True
 
         if choice == "kit":
             print(f"\n  Se instalará TODO: "
@@ -129,26 +127,74 @@ def _gather_seeds(catalog, platform):
                   f"{len(catalog.get('workflows',[]))} workflows + config")
             if input("  ¿Continuar? (s/N): ").strip().lower() != "s":
                 continue                            # volver al menú, no cancelar
-            seeds = ([("agents", n) for n in catalog.get("agents", [])] +
-                     [("skills", n) for n in catalog.get("skills", [])] +
-                     [("workflows", n) for n in catalog.get("workflows", [])])
-            return seeds, True
+            return _seeds_kit(catalog), True
 
 
-def cmd_install(argv):
-    ui.print_banner()
+def _seeds_team_sac(catalog):
+    """Stack SAC coherente: el equipo (agentes) + su flujo (workflows) +
+    las skills de la metodología SAC (config se instala siempre con él)."""
+    return ([("agents", a) for a in sorted(catalog.get("agents", set()))] +
+            [("workflows", w) for w in sorted(catalog.get("workflows", set()))] +
+            [("skills", s) for s in SAC_SKILLS if s in catalog.get("skills", set())])
 
-    # 1) Harness primero; 2) destino: ruta explícita o, sin ella, el directorio actual (nunca ~)
-    platform = ask_platform()
-    if platform is None:
-        ui.print_info("Cancelado.")
-        return
-    args = [a for a in argv if not a.startswith("-")]
-    if args:
-        project = Path(args[0]).resolve()
+
+def _seeds_kit(catalog):
+    return ([("agents", n) for n in sorted(catalog.get("agents", []))] +
+            [("skills", n) for n in sorted(catalog.get("skills", []))] +
+            [("workflows", n) for n in sorted(catalog.get("workflows", []))])
+
+
+def _seeds_from_flags(args, catalog):
+    """Seeds pedidas por flags. Devuelve (seeds, with_config, desconocidos 'tipo:nombre')."""
+    seeds, unknown = [], []
+    for ctype in ("skills", "agents", "workflows"):
+        for n in getattr(args, ctype):
+            if n in catalog.get(ctype, set()):
+                seeds.append((ctype, n))
+            else:
+                unknown.append(f"{ctype}:{n}")
+    if args.team_sac:
+        seeds += _seeds_team_sac(catalog)
+    if args.kit:
+        seeds += _seeds_kit(catalog)
+    return list(dict.fromkeys(seeds)), bool(args.team_sac or args.kit), unknown
+
+
+def _resolve_destino(path_arg):
+    """Proyecto destino validado, o None (con el error ya impreso). Nunca crea carpetas ni usa ~."""
+    if path_arg:
+        project = Path(path_arg).resolve()
     else:
         project = Path.cwd()
         ui.print_warning(f"Sin ruta: se instalará en el directorio actual: {project}")
+    if not project.exists():
+        ui.print_error(f"La ruta no existe: {project}")
+        return None
+    if not project.is_dir():
+        ui.print_error(f"La ruta no es un directorio: {project}")
+        return None
+    if project == Path.home().resolve():
+        ui.print_error(f"No se instala en el home ({project}): indica la carpeta de un proyecto.")
+        return None
+    return project
+
+
+def cmd_install(argv):
+    args = cli_args.parse_install(argv)
+    ui.print_banner()
+
+    # 1) Destino validado (ruta explícita o directorio actual; nunca ~); 2) harness
+    project = _resolve_destino(args.path)
+    if project is None:
+        return
+    flags_de_seleccion = bool(args.skills or args.agents or args.workflows or args.team_sac or args.kit)
+    if args.platform:
+        platform = cli_args.PLATFORMS[args.platform]
+    else:
+        platform = ask_platform()
+        if platform is None:
+            ui.print_info("Cancelado.")
+            return
 
     cache = ensure_cache()
     if not cache:
@@ -157,7 +203,16 @@ def cmd_install(argv):
     catalog = github.filter_catalog(github.scan_components(cache), platform)
     dependencies = deps.for_platform(platform)
 
-    seeds, with_config = _gather_seeds(catalog, platform)
+    if flags_de_seleccion:
+        seeds, with_config, unknown = _seeds_from_flags(args, catalog)
+        if unknown:
+            ui.print_error(f"No existen en el catálogo para {platform}: {', '.join(unknown)}")
+            return
+        if args.kit and not args.yes and input("  ¿Instalar TODO el kit? (s/N): ").strip().lower() != "s":
+            ui.print_info("Cancelado.")
+            return
+    else:
+        seeds, with_config = _gather_seeds(catalog, platform)
     if not seeds and not with_config:
         ui.print_info("Nada seleccionado. Cancelado.")
         return
@@ -173,9 +228,10 @@ def cmd_install(argv):
         return
 
     # Ofrecer solo opcionales que NO estén ya incluidas en lo que se instalará
-    # (p. ej. en "Kit Completo" todas las skills ya entran, así que no se ofrece nada)
-    _, already = deps.resolve_closure(seeds, dependencies)
-    offered = deps.collect_optional(seeds, dependencies)
+    # (p. ej. en "Kit Completo" todas las skills ya entran, así que no se ofrece nada).
+    # Con --yes no se pregunta (modo no interactivo): solo lo pedido y sus dependencias.
+    order, already = deps.resolve_closure(seeds, dependencies)
+    offered = {} if args.yes else deps.collect_optional(seeds, dependencies)
     opt_options = [(f"{t}:{n}", n, f"opcional ({t})")
                    for t, names in offered.items() for n in names
                    if n not in already.get(t, [])]
@@ -184,20 +240,39 @@ def cmd_install(argv):
         for key in (extra or []):
             t, n = key.split(":", 1)
             seeds.append((t, n))
+        order, _ = deps.resolve_closure(seeds, dependencies)
+
+    if args.dry_run:
+        ui.print_info(f"(dry-run) Se instalaría en {project / platform}; no se escribió nada:")
+        for ctype in ("agents", "workflows", "skills", "plugins", "tools", "commands"):
+            names = [n for t, n in order if t == ctype]
+            if names:
+                print(f"     {ctype} ({len(names)}): {', '.join(names)}")
+        if with_config:
+            print("     config: sac.json + memctl")
+        return
 
     selection = _seeds_to_dict(seeds, with_config)
+    remote_sha = registro.get_installed_sha()
     try:
         installed = instalar.install_seeds(seeds, cache, project, platform, with_config=with_config,
                                            dependencies=dependencies)
     except sac_config.SacConfigError as e:
         ui.print_error(str(e))
         return
+    except instalar.InstallError as e:                  # a medias: registrar lo copiado para poder quitarlo/actualizarlo
+        registro.save_installation(project, platform, selection, e.installed, remote_sha)
+        ui.print_error(f"Instalación incompleta: {e}")
+        print("     Lo ya copiado quedó registrado; corrige el problema y reintenta.")
+        return
 
-    remote_sha = registro.get_installed_sha()
     registro.save_installation(project, platform, selection, installed, remote_sha)
 
     ui.print_success(f"Instalado en {project / platform}")
-    print(f"     {sum(len(v) for v in installed.values() if isinstance(v, list))} componentes")
+    for ctype in ("agents", "workflows", "skills", "plugins", "tools", "commands"):
+        names = installed.get(ctype, [])
+        if names:
+            print(f"     {ctype} ({len(names)}): {', '.join(names)}")
 
 
 def _seeds_to_dict(seeds, with_config):
@@ -215,9 +290,9 @@ def _seeds_to_dict(seeds, with_config):
 # --status  (sistema o proyecto)
 # ============================================================
 def cmd_status(argv):
-    args = [a for a in argv if not a.startswith("-")]
-    if args:
-        _status_project(Path(args[0]).resolve())
+    args = cli_args.parse_status(argv)
+    if args.path:
+        _status_project(Path(args.path).resolve())
     else:
         _status_system()
 
@@ -304,7 +379,8 @@ def _status_project(project):
 # ============================================================
 # --list
 # ============================================================
-def cmd_list():
+def cmd_list(argv=()):
+    cli_args.parse_none("--list", list(argv))
     ui.print_banner()
     installs = registro.load_installations()
     if not installs:
@@ -339,12 +415,14 @@ def cmd_list():
 # ============================================================
 def cmd_uninstall(argv):
     from diatlib import desinstalar
+    args = cli_args.parse_uninstall(argv)
     ui.print_banner()
-    args = [a for a in argv if not a.startswith("-")]
-    if args:
-        desinstalar.uninstall_project(Path(args[0]).resolve())
+    if args.path:
+        desinstalar.uninstall_project(Path(args.path).resolve(),
+                                      platform=cli_args.PLATFORMS.get(args.platform),
+                                      dry_run=args.dry_run)
     else:
-        desinstalar.uninstall_global()
+        desinstalar.uninstall_global(yes=args.yes, dry_run=args.dry_run)
 
 
 # ============================================================
@@ -392,15 +470,22 @@ def main():
         elif cmd in ("--status", "-s"):
             cmd_status(rest)
         elif cmd in ("--list", "-l"):
-            cmd_list()
+            cmd_list(rest)
         elif cmd in ("--uninstall",):
             cmd_uninstall(rest)
         else:
             ui.print_error(f"Comando desconocido: {cmd}")
             cmd_help()
+            sys.exit(2)
     except paths.ChannelError as e:                           # B4/B12 -> educativo
         ui.print_error(str(e))
         sys.exit(1)
+    except (registro.RegistroError, github.DownloadError, github.RefNotFoundError) as e:
+        ui.print_error(str(e))
+        sys.exit(1)
+    except (KeyboardInterrupt, EOFError):                     # Ctrl-C / sin TTY: salida limpia
+        print("\n  Cancelado.")
+        sys.exit(130)
 
 
 if __name__ == "__main__":

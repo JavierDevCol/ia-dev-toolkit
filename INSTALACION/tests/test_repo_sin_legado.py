@@ -57,6 +57,10 @@ class ContratoMemctlTest(unittest.TestCase):
 
 
 SECCIONES_SKILL = {"schema_version", "ado", "handoff-release", "env-config-audit", "gh-pr-reviewer"}
+SAC_RENOMBRADAS = ("tomar-contexto", "iniciar-sprint", "refinar-hu", "validar-hu", "planificar-hu",
+                   "ejecutar-plan", "validar-ca", "priorizar-backlog", "sincronizar-backlog",
+                   "registrar-hallazgo", "init-reglas-arquitectonicas", "crear-adr",
+                   "analizar-calidad-codigo", "analizar-seguridad")
 PLACEHOLDERS = {                       # placeholder de ruta (forma corta única) -> clave memctl
     r"\{hu_folder\}": "artifacts.hu_folder",
     r"\{adr_folder\}": "artifacts.adr_folder",
@@ -129,6 +133,38 @@ class ConfigUsadaTest(unittest.TestCase):
     def test_sin_fallback_a_instalacion_global(self):
         usos = [str(f.relative_to(REPO)) for b in ("skills", "workflows", "scripts")
                 for f in _mds(b) if re.search(r"~/\.SAC|instalación global|global install", f.read_text(encoding="utf-8"))]
+        self.assertEqual(usos, [])
+
+    def test_skills_sac_llevan_prefijo_sac(self):
+        from diatlib import registro
+        antiguos = [n for n in registro.RENAMED_SKILLS if registro.RENAMED_SKILLS[n].startswith("sac-")]
+        self.assertEqual(len(antiguos), len(SAC_RENOMBRADAS))
+        for n in SAC_RENOMBRADAS:
+            self.assertFalse((REPO / "skills" / n).exists(), f"carpeta vieja skills/{n}")
+            nueva = REPO / "skills" / f"sac-{n}" / "SKILL.md"
+            self.assertTrue(nueva.exists(), f"falta skills/sac-{n}")
+            self.assertIn(f"name: sac-{n}\n", nueva.read_text(encoding="utf-8"))
+            self.assertEqual(registro.RENAMED_SKILLS[n], f"sac-{n}")
+
+    def test_sin_referencias_a_nombres_sac_sin_prefijo(self):
+        viejos = re.compile(r"(?<![\w-])(?:%s)(?![\w-])" % "|".join(
+            re.escape(n) + "|" + re.escape(n.replace("-", "_")) for n in SAC_RENOMBRADAS))
+        usos = []
+        for base in ("skills", "workflows", "agents", "commands", "INSTALACION", "tests", "README.md", "AGENTS.md", "_docs", "prompts-sub-agentes", ".claude"):
+            raiz = REPO / base
+            archivos = [raiz] if raiz.is_file() else (f for f in raiz.rglob("*") if f.is_file()) if raiz.exists() else []
+            for f in archivos:
+                rel = f.relative_to(REPO).parts
+                if "evals" in rel or "tmp" in rel or "__pycache__" in rel or rel[:2] == ("INSTALACION", "tests") and f.name == "test_repo_sin_legado.py":
+                    continue
+                try:
+                    t = f.read_text(encoding="utf-8")
+                except (UnicodeDecodeError, OSError):
+                    continue
+                if f.name == "registro.py":                  # tabla de renombres: contiene los nombres viejos a propósito
+                    continue
+                for m in viejos.finditer(t):
+                    usos.append(f"{'/'.join(rel)}: {m.group()}")
         self.assertEqual(usos, [])
 
 

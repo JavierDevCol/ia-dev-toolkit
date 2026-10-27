@@ -9,9 +9,11 @@ import json
 import os
 import shutil
 import sys
+import time
 from pathlib import Path
 
 from . import paths
+from .atomico import write_text_atomic
 
 CONFIG_NAME = "sac.json"
 
@@ -73,7 +75,7 @@ def _ask_project_config(project, interactive):
 
 
 def _write(path, tree):
-    path.write_text(json.dumps(tree, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    write_text_atomic(path, json.dumps(tree, indent=2, ensure_ascii=False) + "\n")
 
 
 def ensure_sac_config(cache, project, interview=False, interactive=True):
@@ -91,11 +93,13 @@ def ensure_sac_config(cache, project, interview=False, interactive=True):
 
     if dst.exists():
         try:
-            actual = json.loads(dst.read_bytes().decode("utf-8"))
+            actual = json.loads(dst.read_bytes().decode("utf-8-sig"))     # tolera BOM de editores Windows
             if not isinstance(actual, dict):
                 raise ValueError("la raíz no es un objeto")
         except ValueError as e:                        # JSONDecodeError es ValueError
             bad = dst.with_name(CONFIG_NAME + ".bad")
+            if bad.exists():                           # no pisar una copia anterior
+                bad = dst.with_name(f"{CONFIG_NAME}.bad.{int(time.time())}")
             shutil.copyfile(dst, bad)                  # byte a byte: también si está cortado a mitad de un carácter
             raise SacConfigError(
                 f"{dst} no es JSON válido ({e}); copia en {bad.name}. Corrígelo o bórralo y reinstala.")

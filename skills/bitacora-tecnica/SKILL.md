@@ -12,7 +12,7 @@ ready: true
 
 ## Overview
 
-Bitácora corta de **checkpoints cruciales** de una sesión de trabajo: lo que sirve para retomar la tarea otro día o para no repetir acciones ya ejecutadas. No es un paso a paso ni un registro de decisiones (eso es `crear-adr`).
+Bitácora corta de **checkpoints cruciales** de una sesión de trabajo: lo que sirve para retomar la tarea otro día o para no repetir acciones ya ejecutadas. No es un paso a paso ni un registro de decisiones (eso es `sac-crear-adr`).
 
 La escritura la hace un **subagente** para no cargar la sesión con el contenido de la bitácora.
 
@@ -23,7 +23,7 @@ La escritura la hace un **subagente** para no cargar la sesión con el contenido
 
 **Cuándo NO usar:**
 - Sesiones solo de consulta o sin objetivo claro
-- Decisiones de arquitectura → `crear-adr`; bugs/pendientes del backlog → `registrar-hallazgo`
+- Decisiones de arquitectura → `sac-crear-adr`; bugs/pendientes del backlog → `sac-registrar-hallazgo`
 
 ## Implementation
 

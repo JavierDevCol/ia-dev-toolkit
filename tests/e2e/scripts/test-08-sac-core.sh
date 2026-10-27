@@ -1,5 +1,5 @@
 #!/bin/bash
-# test-08-sac-core.sh — ESC-08: Pruebas SAC Core (init-reglas-arquitectonicas, validar-ca, analizar-calidad-codigo)
+# test-08-sac-core.sh — ESC-08: Pruebas SAC Core (sac-init-reglas-arquitectonicas, sac-validar-ca, sac-analizar-calidad-codigo)
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -37,16 +37,16 @@ echo "=========================================="
 echo ""
 
 # ============================================
-# init-reglas-arquitectonicas
+# sac-init-reglas-arquitectonicas
 # ============================================
-echo -e "${YELLOW}━━━ init-reglas-arquitectonicas ━━━${NC}"
+echo -e "${YELLOW}━━━ sac-init-reglas-arquitectonicas ━━━${NC}"
 echo ""
 
 echo -e "${YELLOW}IRA-01: Happy path — crear reglas desde cero${NC}"
 IRA01_DIR="$WS/artifacts"
 mkdir -p "$IRA01_DIR"
 
-assert_file_exists "$WS/.SAC/workspace.md" "workspace.md existe (prerequisito tomar-contexto)"
+assert_file_exists "$WS/.SAC/workspace.md" "workspace.md existe (prerequisito sac-tomar-contexto)"
 
 cat > "$IRA01_DIR/reglas_arquitectonicas.md" << 'EOF'
 # Reglas Arquitectónicas: mi-proyecto
@@ -94,18 +94,18 @@ IRA02_DIR="$FIXTURES_DIR/workspace-no-context"
 rm -rf "$IRA02_DIR"
 mkdir -p "$IRA02_DIR/.SAC/config"
 assert_file_not_exists "$IRA02_DIR/.SAC/workspace.md" "workspace.md NO existe"
-echo "  → init-reglas-arquitectonicas debería fallar: 'Ejecutar >tomar_contexto primero'"
+echo "  → sac-init-reglas-arquitectonicas debería fallar: 'Ejecutar >sac_tomar_contexto primero'"
 
 echo ""
 
 echo -e "${YELLOW}IRA-03: Reglas ya existen (modo editar)${NC}"
 assert_file_exists "$IRA01_DIR/reglas_arquitectonicas.md" "reglas_arquitectonicas.md existe"
-echo "  → init-reglas-arquitectonicas debería ofrecer: [V] Ver / [E] Editar / [R] Regenerar"
+echo "  → sac-init-reglas-arquitectonicas debería ofrecer: [V] Ver / [E] Editar / [R] Regenerar"
 
 echo ""
 
 echo -e "${YELLOW}IRA-04: Reglas ya existen con --force${NC}"
-echo "  → init-reglas-arquitectonicas --force debería regenerar sin preguntar"
+echo "  → sac-init-reglas-arquitectonicas --force debería regenerar sin preguntar"
 
 echo ""
 
@@ -120,9 +120,9 @@ echo "  → Si usuario responde 'cancelar' o 'salir', no guardar parcialmente"
 echo ""
 
 # ============================================
-# validar-ca
+# sac-validar-ca
 # ============================================
-echo -e "${YELLOW}━━━ validar-ca ━━━${NC}"
+echo -e "${YELLOW}━━━ sac-validar-ca ━━━${NC}"
 echo ""
 
 echo -e "${YELLOW}VCA-01: Happy path — validar CAs de HU plana${NC}"
@@ -176,7 +176,7 @@ assert_file_exists "$VCA01_DIR/Plan.md" "Plan.md existe"
 assert_file_contains "$VCA01_DIR/Refinamiento.md" "CA-01" "Refinamiento.md tiene CAs"
 assert_file_contains "$VCA01_DIR/Plan.md" "EN_PROGRESO" "Plan.md está EN_PROGRESO"
 
-echo "  → validar-ca debería validar cada CA contra código y tests"
+echo "  → sac-validar-ca debería validar cada CA contra código y tests"
 
 echo ""
 
@@ -193,7 +193,7 @@ EOF
 
 assert_file_exists "$VCA02_DIR/HU.md" "HU.md existe"
 assert_file_not_exists "$VCA02_DIR/Refinamiento.md" "Refinamiento.md NO existe"
-echo "  → validar-ca debería fallar: 'Refinamiento no encontrado'"
+echo "  → sac-validar-ca debería fallar: 'Refinamiento no encontrado'"
 
 echo ""
 
@@ -221,17 +221,17 @@ EOF
 assert_file_exists "$VCA03_DIR/HU.md" "HU.md existe"
 assert_file_exists "$VCA03_DIR/Refinamiento.md" "Refinamiento.md existe"
 assert_file_not_exists "$VCA03_DIR/Plan.md" "Plan.md NO existe"
-echo "  → validar-ca debería fallar: 'Plan no encontrado'"
+echo "  → sac-validar-ca debería fallar: 'Plan no encontrado'"
 
 echo ""
 
 echo -e "${YELLOW}VCA-04: HU particonada — scope granulares${NC}"
-echo "  → validar-ca --task_id TASK-01 --scope granulares debería validar solo CAs de TASK-01"
+echo "  → sac-validar-ca --task_id TASK-01 --scope granulares debería validar solo CAs de TASK-01"
 
 echo ""
 
 echo -e "${YELLOW}VCA-05: HU particonada — scope integración${NC}"
-echo "  → validar-ca --scope integracion debería validar CAs de integración (padre)"
+echo "  → sac-validar-ca --scope integracion debería validar CAs de integración (padre)"
 
 echo ""
 
@@ -251,23 +251,23 @@ echo "  → Si hay tasks pendientes, error: 'Completar todas las tasks primero'"
 echo ""
 
 # ============================================
-# analizar-calidad-codigo
+# sac-analizar-calidad-codigo
 # ============================================
-echo -e "${YELLOW}━━━ analizar-calidad-codigo ━━━${NC}"
+echo -e "${YELLOW}━━━ sac-analizar-calidad-codigo ━━━${NC}"
 echo ""
 
 echo -e "${YELLOW}AQC-01: Scope commits — archivos cambiados${NC}"
-echo "  → analizar-calidad-codigo --scope commits debería analizar solo archivos de git diff"
+echo "  → sac-analizar-calidad-codigo --scope commits debería analizar solo archivos de git diff"
 
 echo ""
 
 echo -e "${YELLOW}AQC-02: Scope project — todo el proyecto${NC}"
-echo "  → analizar-calidad-codigo --scope project debería escanear todo excluyendo node_modules, .git, etc."
+echo "  → sac-analizar-calidad-codigo --scope project debería escanear todo excluyendo node_modules, .git, etc."
 
 echo ""
 
 echo -e "${YELLOW}AQC-03: Scope archivo — archivo específico${NC}"
-echo "  → analizar-calidad-codigo --scope archivo --archivo src/main.java debería analizar solo ese archivo"
+echo "  → sac-analizar-calidad-codigo --scope archivo --archivo src/main.java debería analizar solo ese archivo"
 
 echo ""
 
@@ -282,7 +282,7 @@ echo "  → Debería usar reglas_arquitectonicas.md y reportar violaciones"
 echo ""
 
 echo -e "${YELLOW}AQC-06: Sin reglas arquitectónicas${NC}"
-echo "  → Si no existe reglas_arquitectonicas.md, error: 'Ejecutar >init-reglas-arquitectonicas'"
+echo "  → Si no existe reglas_arquitectonicas.md, error: 'Ejecutar >sac-init-reglas-arquitectonicas'"
 
 echo ""
 
@@ -318,9 +318,9 @@ Fallidos: $FAIL
 Estado: $([ $FAIL -eq 0 ] && echo "PASS" || echo "FAIL")
 
 Skills testeadas:
-- init-reglas-arquitectonicas: IRA-01 a IRA-06
-- validar-ca: VCA-01 a VCA-08
-- analizar-calidad-codigo: AQC-01 a AQC-08
+- sac-init-reglas-arquitectonicas: IRA-01 a IRA-06
+- sac-validar-ca: VCA-01 a VCA-08
+- sac-analizar-calidad-codigo: AQC-01 a AQC-08
 EOF
 
 if [ $FAIL -eq 0 ]; then echo -e "${GREEN}✅ ESC-08: PASS${NC}"; exit 0; else echo -e "${RED}❌ ESC-08: FAIL${NC}"; exit 1; fi

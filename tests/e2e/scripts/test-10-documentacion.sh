@@ -32,9 +32,9 @@ echo "=========================================="
 echo ""
 
 # ============================================
-# crear-adr
+# sac-crear-adr
 # ============================================
-echo -e "${YELLOW}━━━ crear-adr ━━━${NC}"
+echo -e "${YELLOW}━━━ sac-crear-adr ━━━${NC}"
 echo ""
 
 echo -e "${YELLOW}CADR-01: Happy path — crear ADR MADR${NC}"
@@ -329,7 +329,7 @@ Fallidos: $FAIL
 Estado: $([ $FAIL -eq 0 ] && echo "PASS" || echo "FAIL")
 
 Skills testeadas:
-- crear-adr: CADR-01 a CADR-08
+- sac-crear-adr: CADR-01 a CADR-08
 - bitacora-tecnica: BT-01 a BT-06
 - crear-workflow: CW-01 a CW-04
 - mermaid-diagram: MD-01 a MD-06

@@ -87,14 +87,14 @@ echo ""
 # ============================================
 # ESCENARIO 1: Plan en [E] En Ejecución
 # Plan.md con Estado=EN_PROGRESO + Tracking.md
-# ejecutar-plan debería continuar o rechazar
+# sac-ejecutar-plan debería continuar o rechazar
 # ============================================
 echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo -e "${YELLOW}ESCENARIO 1: Plan en [E] En Ejecución${NC}"
 echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
 echo "  Archivos: Plan.md (EN_PROGRESO) + Tracking.md"
-echo "  Skill: ejecutar-plan"
+echo "  Skill: sac-ejecutar-plan"
 echo "  Comportamiento esperado: continuar ejecución o rechazar según contexto"
 echo ""
 
@@ -200,7 +200,7 @@ assert_file_contains "$ESC1_DIR/Plan.md" "\[X\] EJEC-02" "EJEC-02 completada"
 assert_file_contains "$ESC1_DIR/Plan.md" "\[ \] EJEC-03" "EJEC-03 pendiente"
 
 echo ""
-echo "  → ejecutar-plan debería:"
+echo "  → sac-ejecutar-plan debería:"
 echo "    - Detectar EN_PROGRESO en Plan.md"
 echo "    - Continuar desde EJEC-03"
 echo "    - NO reiniciar desde EJEC-01"
@@ -217,7 +217,7 @@ echo -e "${YELLOW}ESCENARIO 2: Backlog desincronizado${NC}"
 echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
 echo "  Backlog dice [P] Planificada pero filesystem dice [X] Completada"
-echo "  Skill: sincronizar-backlog"
+echo "  Skill: sac-sincronizar-backlog"
 echo "  Comportamiento esperado: corregir backlog según filesystem"
 echo ""
 
@@ -320,7 +320,7 @@ echo "  Verificando que filesystem es fuente de verdad..."
 assert_file_contains "$ESC2_DIR/Plan.md" "COMPLETADO" "Filesystem dice COMPLETADO (CORRECTO)"
 
 echo ""
-echo "  → sincronizar-backlog debería:"
+echo "  → sac-sincronizar-backlog debería:"
 echo "    - Leer Plan.md del filesystem"
 echo "    - Detectar COMPLETADO"
 echo "    - Corregir backlog: [P] → [X]"
@@ -331,15 +331,15 @@ echo ""
 # ============================================
 # ESCENARIO 3: Intentar planificar HU en estado [R]
 # HU.md dice [R] Refinada, Refinamiento.md sin aprobación
-# planificar-hu debería rechazar
+# sac-planificar-hu debería rechazar
 # ============================================
 echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo -e "${YELLOW}ESCENARIO 3: Intentar planificar HU en estado [R]${NC}"
 echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
 echo "  HU.md dice [R] Refinada, Refinamiento.md sin aprobación"
-echo "  Skill: planificar-hu"
-echo "  Comportamiento esperado: rechazar con 'Ejecutar >validar_hu primero'"
+echo "  Skill: sac-planificar-hu"
+echo "  Comportamiento esperado: rechazar con 'Ejecutar >sac_validar_hu primero'"
 echo ""
 
 ESC3_DIR="$WS/artifacts/HU/HU-ESC7-03"
@@ -388,14 +388,14 @@ echo ""
 echo "  Verificando que NO se puede planificar..."
 # La skill debería leer Refinamiento.md y buscar "✅ Aprobada"
 # Como no existe, debería rechazar
-assert_file_not_contains "$ESC3_DIR/Refinamiento.md" "✅ Aprobada" "planificar-hu NO encontrará aprobación"
+assert_file_not_contains "$ESC3_DIR/Refinamiento.md" "✅ Aprobada" "sac-planificar-hu NO encontrará aprobación"
 
 echo ""
-echo "  → planificar-hu debería:"
+echo "  → sac-planificar-hu debería:"
 echo "    - Leer HU.md → detectar [R] Refinada"
 echo "    - Leer Refinamiento.md → buscar '✅ Aprobada'"
 echo "    - NO encontrar aprobación"
-echo "    - Rechazar con: 'Ejecutar >validar_hu HU-ESC7-03 primero'"
+echo "    - Rechazar con: 'Ejecutar >sac_validar_hu HU-ESC7-03 primero'"
 
 echo ""
 
@@ -410,17 +410,17 @@ echo "  ESCENARIO 1: Plan en [E] En Ejecución"
 echo "  - Plan.md: EN_PROGRESO ✅"
 echo "  - Tracking.md: EN_PROGRESO ✅"
 echo "  - Tareas parcialmente completadas ✅"
-echo "  - ejecutar-plan puede continuar ✅"
+echo "  - sac-ejecutar-plan puede continuar ✅"
 echo ""
 echo "  ESCENARIO 2: Backlog desincronizado"
 echo "  - Backlog dice: [P] Planificada ❌"
 echo "  - Filesystem dice: COMPLETADO ✅"
-echo "  - sincronizar-backlog debe corregir ✅"
+echo "  - sac-sincronizar-backlog debe corregir ✅"
 echo ""
 echo "  ESCENARIO 3: Planificar HU en [R]"
 echo "  - HU.md: [R] Refinada ✅"
 echo "  - Refinamiento.md: sin aprobación ✅"
-echo "  - planificar-hu debe rechazar ✅"
+echo "  - sac-planificar-hu debe rechazar ✅"
 echo ""
 echo -e "  Total: $TOTAL"
 echo -e "  ${GREEN}Pasados: $PASS${NC}"
