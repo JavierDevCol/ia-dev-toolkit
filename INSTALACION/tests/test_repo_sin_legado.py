@@ -65,8 +65,7 @@ PLACEHOLDERS = {                       # placeholder de ruta (forma corta única
     r"\{backlog\}": "archivos.backlog",
     r"\{workspace\}": "archivos.workspace",
     r"\{reglas_arquitectonicas\}": "archivos.reglas_arquitectonicas",
-    r"\{artifacts_folder\}": "rutas.artifacts_folder",
-    r"\{output_folder\}": "output_folder",
+    r"\{documentacion_sac_path\}": "documentacion_sac_path",
     r"\{\{usuario\.nombre\}\}": "usuario.nombre",
 }
 # Forma larga {artifacts.x} / {archivos.x} (simple o doble llave): prohibida, solo existe la corta
@@ -117,6 +116,12 @@ class ConfigUsadaTest(unittest.TestCase):
         largas = [f"{f.relative_to(REPO)}: {m.group()}" for b in ("skills", "workflows")
                   for f in _mds(b) for m in FORMA_LARGA.finditer(f.read_text(encoding="utf-8"))]
         self.assertEqual(largas, [])
+
+    def test_ninguna_skill_usa_claves_de_salida_legadas(self):
+        legado = re.compile(r"output_folder|rutas_override|artifacts_folder|rutas\.")
+        usos = [f"{f.relative_to(REPO)}: {m.group()}" for b in ("skills", "workflows")
+                for f in _mds(b) for m in legado.finditer(f.read_text(encoding="utf-8"))]
+        self.assertEqual(usos, [])
 
 
 if __name__ == "__main__":

@@ -105,8 +105,8 @@ echo "  → Instalación SAC incompleta: indicar ejecutar diat (no crear sac.jso
 
 echo ""
 
-echo -e "${YELLOW}CADR-06: output_folder es null${NC}"
-echo "  → Si sac.json existe pero output_folder es null, preguntar y persistir en output_folder"
+echo -e "${YELLOW}CADR-06: carpeta de ADR inexistente${NC}"
+echo "  → Si {adr_folder} no existe, crearla bajo documentacion_sac_path (no preguntar carpeta)"
 
 echo ""
 

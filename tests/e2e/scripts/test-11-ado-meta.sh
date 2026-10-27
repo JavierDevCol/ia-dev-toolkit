@@ -93,8 +93,8 @@ echo "  → pr-config-audit debería alertar siempre, nunca incluir valores real
 
 echo ""
 
-echo -e "${YELLOW}PCA-05: Sin output_folder en sac.json${NC}"
-echo "  → pr-config-audit debería preguntar carpeta de salida"
+echo -e "${YELLOW}PCA-05: Salida de documentos${NC}"
+echo "  → la salida debe quedar bajo documentacion_sac_path (sin preguntar carpeta)"
 
 echo ""
 
