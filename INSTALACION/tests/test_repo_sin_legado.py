@@ -1,4 +1,4 @@
-import re, unittest
+import json, os, re, unittest
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
@@ -54,6 +54,66 @@ class ContratoMemctlTest(unittest.TestCase):
                 if "exit 127" not in t or "exit 1 (" not in t:
                     sin.append(str(f.relative_to(REPO)))
         self.assertEqual(sin, [])
+
+
+SECCIONES_SKILL = {"schema_version", "ado", "handoff-release", "env-config-audit", "gh-pr-reviewer"}
+PLACEHOLDERS = {                       # placeholder de ruta -> clave memctl que la skill debe consultar
+    r"\{(?:artifacts\.)?hu_folder\}": "artifacts.hu_folder",
+    r"\{(?:artifacts\.)?adr_folder\}": "artifacts.adr_folder",
+    r"\{archivos\.backlog\}": "archivos.backlog",
+    r"\{archivos\.workspace\}": "archivos.workspace",
+    r"\{archivos\.reglas_arquitectonicas\}": "archivos.reglas_arquitectonicas",
+    r"\{(?:artifacts\.)?contextos_folder\}": "artifacts.contextos_folder",
+    r"\{artifacts\.pendientes\}": "artifacts.pendientes",
+    r"\{(?:rutas\.)?artifacts_folder\}": "rutas.artifacts_folder",
+    r"\{output_folder\}": "output_folder",
+    r"\{\{usuario\.nombre\}\}": "usuario.nombre",
+}
+# {{archivos.x}} / {{artifacts.x}} en plantillas también son placeholders de ruta
+PLACEHOLDERS_PLANTILLA = {r"\{\{(archivos\.[a-z_]+|artifacts\.[a-z_]+)\}\}": None}
+
+
+def _hojas(d, p=""):
+    for k, v in d.items():
+        q = f"{p}.{k}" if p else k
+        if not p and k in SECCIONES_SKILL:
+            continue
+        if isinstance(v, dict) and v:
+            yield from _hojas(v, q)
+        else:
+            yield q
+
+
+def _mds(base):
+    for r, dn, fs in os.walk(REPO / base):
+        dn[:] = [d for d in dn if d != "evals"]
+        for f in fs:
+            if f.endswith((".md", ".txt")):
+                yield Path(r) / f
+
+
+class ConfigUsadaTest(unittest.TestCase):
+    def test_toda_clave_de_la_plantilla_se_consulta_con_memctl(self):
+        tpl = json.loads((REPO / "config/config/sac.json").read_text(encoding="utf-8"))
+        corpus = "\n".join(f.read_text(encoding="utf-8") for b in ("skills", "workflows") for f in _mds(b))
+        sin_uso = [k for k in _hojas(tpl) if not re.search(r"memctl\.sh get " + re.escape(k) + r"(?![\w.])", corpus)]
+        self.assertEqual(sin_uso, [])
+
+    def test_skills_con_placeholder_de_ruta_consultan_esa_clave(self):
+        huecos = []
+        for base in ("skills", "workflows"):
+            for d in sorted((REPO / base).iterdir()):
+                if not d.is_dir():
+                    continue
+                textos = [f.read_text(encoding="utf-8") for f in _mds(f"{base}/{d.name}")]
+                todo = "\n".join(textos)
+                reglas = dict(PLACEHOLDERS)
+                for m in re.finditer(PLACEHOLDERS_PLANTILLA and r"\{\{((?:archivos|artifacts)\.[a-z_]+)\}\}", todo):
+                    reglas[re.escape("{{" + m.group(1) + "}}")] = m.group(1)
+                for rx, clave in reglas.items():
+                    if re.search(rx, todo) and f"memctl.sh get {clave}" not in todo:
+                        huecos.append(f"{d.name}: {clave}")
+        self.assertEqual(huecos, [])
 
 
 if __name__ == "__main__":
