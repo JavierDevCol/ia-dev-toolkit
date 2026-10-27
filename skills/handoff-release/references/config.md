@@ -4,13 +4,15 @@
 
 Leer la sección `handoff-release` de `.SAC/config/sac.json` con memctl (solo lectura; su salida ES la respuesta; si memctl no existe (exit 127), leer `.SAC/config/sac.json` con `jq` o usar `~/.SAC/memctl.sh` (instalación global); si sale con exit 1 (JSON inválido o vacío), detenerse y avisar: no leer ni editar el archivo a mano; nunca inventar valores):
 
-```sh
-sh .SAC/memctl.sh get handoff-release.config.environments.dev      # .staging / .prod
-sh .SAC/memctl.sh get handoff-release.config.roles.preparer        # .deployer
-sh .SAC/memctl.sh get handoff-release.config.branch_format
-sh .SAC/memctl.sh get handoff-release.config.tag_format
-sh .SAC/memctl.sh get documentacion_sac_path
-```
+Ejecutar cada comando: **su salida ES el valor del placeholder** de su fila y se usa tal cual en el resto de esta skill (no recalcular ni inventar rutas):
+
+| Placeholder / dato | Valor = salida de |
+|---|---|
+| `handoff-release.config.environments.dev` (.staging / .prod) | `sh .SAC/memctl.sh get handoff-release.config.environments.dev` |
+| `handoff-release.config.roles.preparer` (.deployer) | `sh .SAC/memctl.sh get handoff-release.config.roles.preparer` |
+| `handoff-release.config.branch_format` | `sh .SAC/memctl.sh get handoff-release.config.branch_format` |
+| `handoff-release.config.tag_format` | `sh .SAC/memctl.sh get handoff-release.config.tag_format` |
+| `{documentacion_sac_path}` | `sh .SAC/memctl.sh get documentacion_sac_path` |
 
 Si un campo es `null` o memctl sale con exit 2, usar los defaults indicados. Si `.SAC/config/sac.json` no existe, la instalación SAC está incompleta: indicar al usuario que ejecute `diat`; no crear el archivo a mano.
 
