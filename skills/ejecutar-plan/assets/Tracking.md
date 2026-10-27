@@ -57,6 +57,6 @@
 
 ---
 
-> **Archivo:** `{{artifacts.hu_folder}}/[ID-HU]/Tracking.md`
+> **Archivo:** `{hu_folder}/[ID-HU]/Tracking.md`
 > **Creado por:** `>ejecutar_plan`
 > **Actualizado por:** `>ejecutar_plan` (en tiempo real)
