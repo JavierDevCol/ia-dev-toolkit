@@ -39,7 +39,7 @@ Analiza un PR/diff y clasifica variables, colas y secretos por ámbito (pipeline
 sh .SAC/memctl.sh get env-config-audit.config.ambientes
 sh .SAC/memctl.sh get usuario.nombre
 sh .SAC/memctl.sh get usuario.incluir_firma_en_documentos
-sh .SAC/memctl.sh get output_folder
+sh .SAC/memctl.sh get documentacion_sac_path
 ```
 
 
@@ -48,7 +48,7 @@ sh .SAC/memctl.sh get output_folder
 | `ambientes` | `env-config-audit.config.ambientes` — lista **ordenada** = orden de promoción, ej. `["develop","des","pru","prepro","pro"]` | Preguntar una vez y persistir |
 | `usuario.nombre` | global | Preguntar una vez y persistir en `usuario.nombre` |
 | `usuario.incluir_firma_en_documentos` | global | `true` |
-| `output_folder` | global | Preguntar una vez y persistir |
+| `documentacion_sac_path` | global | No preguntar: es la raíz de salida; si falta, avisar "No hay instalación SAC" |
 
 **Inicio (cada ejecución):** preguntar:
 1. **Repo:** sugerir el nombre del remoto git (`git remote get-url origin`); `{nombre_ms}` = nombre del repo.
@@ -79,7 +79,7 @@ sh .SAC/memctl.sh get output_folder
 2. Nunca asumir origen de variables — preguntar con archivo+línea
 3. Nunca incluir secretos reales; alertar si hay secretos commiteados
 4. Si el usuario no sabe el origen → `⚠️ Pendiente de definir`
-5. Usar `output_folder` como ruta de salida (ver Configuración).
+5. Guardar solo en `{documentacion_sac_path}/config_entorno/` (crear la subcarpeta si no existe).
 
 ## Quick Reference
 
