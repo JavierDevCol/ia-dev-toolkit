@@ -70,22 +70,31 @@ START: User requests release handoff
 
 ## Implementation
 
-### Configuración global (`memory_skill.json`)
+### Configuración global (`.SAC/config/sac.json`)
 
-Antes de generar artefactos, leer `$SKILL_DIR/../memory_skill.json` y tomar los tres campos globales (raíz del JSON):
+Antes de generar artefactos, leer con memctl estos tres campos globales:
+
+```sh
+sh .SAC/memctl.sh get usuario.nombre
+sh .SAC/memctl.sh get usuario.incluir_firma_en_documentos
+sh .SAC/memctl.sh get output_folder
+```
+
+memctl es solo lectura y su salida ES la respuesta; si falla, leer `.SAC/config/sac.json` con `jq`; nunca inventar valores. `null`, vacío o exit 2 → no configurado.
+
 
 | Campo | Para qué se usa | Comportamiento si falta |
 |-------|-----------------|-------------------------|
-| `output_folder` | Base de **todas** las rutas de entrega: `{output_folder}/entrega_release/...` | `null` o archivo inexistente → preguntar la carpeta al usuario y **persistirla** en `output_folder` |
-| `user_name` | Firma de los resúmenes de entrega → placeholder **`{{user_name}}`** | Vacío o archivo inexistente → la línea queda `> **Release Manager:**` sin sufijo. **No inventar un nombre** |
-| `incluir_firma_en_documentos` | Activa o desactiva el bloque de firma | `false` → omitir el bloque completo. Cualquier otro valor (o ausente) → incluirlo |
+| `output_folder` | Base de **todas** las rutas de entrega: `{output_folder}/entrega_release/...` | `null` o exit 2 → preguntar la carpeta al usuario y **persistirla** en `output_folder` de `.SAC/config/sac.json` (editando solo esa clave) |
+| `usuario.nombre` | Firma de los resúmenes de entrega → placeholder **`{{usuario.nombre}}`** | Vacío o clave inexistente → la línea queda `> **Release Manager:**` sin sufijo. **No inventar un nombre** |
+| `usuario.incluir_firma_en_documentos` | Activa o desactiva el bloque de firma | `false` → omitir el bloque completo. Cualquier otro valor (o ausente) → incluirlo |
 
 **Bloque de firma.** Todo `resumen-entrega_*.txt` (Opción 1 paso 8, Opción 2b paso 10, Opción 2c paso 7) cierra con:
 ```
-> **Release Manager:** {{user_name}}
+> **Release Manager:** {{usuario.nombre}}
 > **Fecha:** {{fecha}}
 ```
-Sustituir `{{user_name}}` por el valor leído. Con `user_name` sin configurar, la línea queda `> **Release Manager:**`.
+Sustituir `{{usuario.nombre}}` por el valor leído. Con `usuario.nombre` sin configurar, la línea queda `> **Release Manager:**`.
 
 ### Skills sugeridas: comandos exactos
 

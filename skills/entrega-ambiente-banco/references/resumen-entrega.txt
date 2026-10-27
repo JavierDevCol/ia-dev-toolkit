@@ -32,7 +32,7 @@ ARTÉFACTOS (nombres reales según la skill que los genera)
 NOTIFICACIÓN AL BANCO
 - Entrega lista. El banco crea PR release/vX.Y.Z → des y taggea vX.Y.Z en DES.
 
-> **Release Manager:** {{user_name}}
+> **Release Manager:** {{usuario.nombre}}
 > **Fecha:** {{fecha}}
 
 
@@ -59,7 +59,7 @@ ARTÉFACTOS (nombres reales según la skill que los genera)
 NOTIFICACIÓN AL BANCO
 - La versión sigue el flujo completo: develop → des → pru → prepro → pro (sin saltar ambientes).
 
-> **Release Manager:** {{user_name}}
+> **Release Manager:** {{usuario.nombre}}
 > **Fecha:** {{fecha}}
 
 
@@ -87,5 +87,5 @@ POST-ENTREGA
 - Eliminar release/vX.Y.Z-rc.N (local y remoto) tras el merge del banco.
 - release/vX.Y.Z sigue viva hasta la aprobación final del banco.
 
-> **Release Manager:** {{user_name}}
+> **Release Manager:** {{usuario.nombre}}
 > **Fecha:** {{fecha}}
