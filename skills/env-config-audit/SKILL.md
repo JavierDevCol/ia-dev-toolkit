@@ -35,12 +35,14 @@ Analiza un PR/diff y clasifica variables, colas y secretos por ámbito (pipeline
 
 **Configuración:** leer con memctl (`.SAC/config/sac.json`; solo lectura, su salida ES la respuesta; `null`/exit 2 → falta; si memctl no existe (exit 127), leer con `jq` o usar `~/.SAC/memctl.sh`; exit 1 (JSON inválido o vacío) → detenerse y avisar, sin leer ni editar el archivo a mano; la persistencia edita solo la clave o sección indicada):
 
-```sh
-sh .SAC/memctl.sh get env-config-audit.config.ambientes
-sh .SAC/memctl.sh get usuario.nombre
-sh .SAC/memctl.sh get usuario.incluir_firma_en_documentos
-sh .SAC/memctl.sh get documentacion_sac_path
-```
+Ejecutar cada comando: **su salida ES el valor del placeholder** de su fila y se usa tal cual en el resto de esta skill (no recalcular ni inventar rutas):
+
+| Placeholder / dato | Valor = salida de |
+|---|---|
+| `env-config-audit.config.ambientes` | `sh .SAC/memctl.sh get env-config-audit.config.ambientes` |
+| `{{usuario.nombre}}` | `sh .SAC/memctl.sh get usuario.nombre` |
+| `usuario.incluir_firma_en_documentos` | `sh .SAC/memctl.sh get usuario.incluir_firma_en_documentos` |
+| `{documentacion_sac_path}` | `sh .SAC/memctl.sh get documentacion_sac_path` |
 
 
 | Campo | Ubicación | Si falta |
