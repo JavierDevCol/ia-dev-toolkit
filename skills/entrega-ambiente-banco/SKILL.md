@@ -77,7 +77,7 @@ Antes de generar artefactos, leer con memctl estos tres campos globales:
 ```sh
 sh .SAC/memctl.sh get usuario.nombre
 sh .SAC/memctl.sh get usuario.incluir_firma_en_documentos
-sh .SAC/memctl.sh get output_folder
+sh .SAC/memctl.sh get documentacion_sac_path
 ```
 
 memctl es solo lectura y su salida ES la respuesta; si memctl no existe (exit 127), leer `.SAC/config/sac.json` con `jq` o usar `~/.SAC/memctl.sh` (instalación global); si sale con exit 1 (JSON inválido o vacío), detenerse y avisar: no leer ni editar el archivo a mano; nunca inventar valores. `null`, vacío o exit 2 → no configurado.
@@ -85,7 +85,7 @@ memctl es solo lectura y su salida ES la respuesta; si memctl no existe (exit 12
 
 | Campo | Para qué se usa | Comportamiento si falta |
 |-------|-----------------|-------------------------|
-| `output_folder` | Base de **todas** las rutas de entrega: `{output_folder}/entrega_release/...` | `null` o exit 2 → preguntar la carpeta al usuario y **persistirla** en `output_folder` de `.SAC/config/sac.json` (editando solo esa clave) |
+| `documentacion_sac_path` | Base de **todas** las rutas de entrega: `{documentacion_sac_path}/entrega_release/...` | `null` o exit 2 → no preguntar ni escribir fuera: avisar "No hay instalación SAC" (ejecutar `diat`) |
 | `usuario.nombre` | Firma de los resúmenes de entrega → placeholder **`{{usuario.nombre}}`** | Vacío o clave inexistente → la línea queda `> **Release Manager:**` sin sufijo. **No inventar un nombre** |
 | `usuario.incluir_firma_en_documentos` | Activa o desactiva el bloque de firma | `false` → omitir el bloque completo. Cualquier otro valor (o ausente) → incluirlo |
 

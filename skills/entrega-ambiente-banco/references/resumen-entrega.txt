@@ -2,7 +2,7 @@ RESUMEN DE ENTREGA — Handoff CEIBA → banco
 
 Plantilla de relleno. Variantes: RELEASE (Opción 1) · HOTFIX (Opción 2b) · RC (Opción 2c).
 Copiar la variante que corresponda y sustituir TODOS los placeholders — nunca dejar `{...}` literal.
-Guardar como: {output_folder}/entrega_release/{nombre_repo}/{version}/resumen-entrega_<variante>_<version>.txt
+Guardar como: {documentacion_sac_path}/entrega_release/{nombre_repo}/{version}/resumen-entrega_<variante>_<version>.txt
 Ejemplos: resumen-entrega_release_vX.Y.Z.txt · resumen-entrega_hotfix_vX.Y.Z+1.txt · resumen-entrega_rc_vX.Y.Z-rc.N.txt
 
 

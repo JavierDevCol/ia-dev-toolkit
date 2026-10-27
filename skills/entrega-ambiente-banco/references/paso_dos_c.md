@@ -8,7 +8,7 @@
 - Versión activa `vX.Y.Z`, descripción del ajuste.
 - Número de RCs existentes → `git ls-remote --tags origin 'refs/tags/vX.Y.Z-rc.*'` → `N = máximo(rc) + 1`.
 
-**Outputs** (en `{output_folder}/entrega_release/{nombre_repo}/vX.Y.Z/`): `resumen-entrega_rc_vX.Y.Z-rc.N.txt` + rama `release/vX.Y.Z-rc.N` publicada para el PR del banco. **No** se regeneran release notes (Regla 5).
+**Outputs** (en `{documentacion_sac_path}/entrega_release/{nombre_repo}/vX.Y.Z/`): `resumen-entrega_rc_vX.Y.Z-rc.N.txt` + rama `release/vX.Y.Z-rc.N` publicada para el PR del banco. **No** se regeneran release notes (Regla 5).
 
 **Confirmaciones del usuario:** ✋ versión y descripción antes del paso 2 · ✋ OK para publicar la rama RC · ✋ validación del fix en DEVELOP antes del back-merge.
 
@@ -38,7 +38,7 @@
 
 6. **Back-merge mediante PR** `release/vX.Y.Z → develop` (develop está protegida: PR con ≥1 approval, sin push directo), con descripción del fix y link al WI/bug original. **Conflictos → detener y reportar**, nunca forzar.
 
-7. **Resumen:** rellenar la **variante RC** de `references/resumen-entrega.txt` (sustituir todos los placeholders), mostrarla y guardarla como `resumen-entrega_rc_vX.Y.Z-rc.N.txt` en `{output_folder}/entrega_release/{nombre_repo}/vX.Y.Z/`.
+7. **Resumen:** rellenar la **variante RC** de `references/resumen-entrega.txt` (sustituir todos los placeholders), mostrarla y guardarla como `resumen-entrega_rc_vX.Y.Z-rc.N.txt` en `{documentacion_sac_path}/entrega_release/{nombre_repo}/vX.Y.Z/`.
 
 8. **Post-entrega (tras el merge del banco):** cuando el banco confirme que mergeó el PR de la RC a `des`, eliminar la rama efímera — `git push origin --delete release/vX.Y.Z-rc.N` y `git branch -d release/vX.Y.Z-rc.N`. La rama base `release/vX.Y.Z` **sigue viva** hasta la aprobación final del banco (tag `vX.Y.Z` y back-merge final a develop).
 
