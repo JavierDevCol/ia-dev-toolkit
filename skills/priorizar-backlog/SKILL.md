@@ -79,7 +79,7 @@ sh .SAC/memctl.sh get archivos.backlog
 sh .SAC/memctl.sh get artifacts.hu_folder
 ```
 
-memctl es solo lectura y su salida ES la respuesta; si falla, leer `.SAC/config/sac.json` con `jq`; nunca inventar valores. `null`, vacío o exit 2 → no configurado.
+memctl es solo lectura y su salida ES la respuesta; si memctl no existe (exit 127), leer `.SAC/config/sac.json` con `jq` o usar `~/.SAC/memctl.sh` (instalación global); si sale con exit 1 (JSON inválido o vacío), detenerse y avisar: no leer ni editar el archivo a mano; nunca inventar valores. `null`, vacío o exit 2 → no configurado.
 
    `usuario.nombre` → **`{{usuario.nombre}}`**, necesario para firmar el reporte en el paso 10. Si está vacío, la clave no existe, o `usuario.incluir_firma_en_documentos` es `false`, omitir la firma; no inventar un nombre.
 2. **Cargar backlog** → extraer HUs de la tabla `## 📇 Índice Rápido`; filtrar por `--proyecto` / `--id_hu`

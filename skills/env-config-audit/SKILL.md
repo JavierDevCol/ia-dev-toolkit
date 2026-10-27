@@ -33,7 +33,7 @@ Analiza un PR/diff y clasifica variables, colas y secretos por ámbito (pipeline
 
 ## Implementation
 
-**Configuración:** leer con memctl (`.SAC/config/sac.json`; solo lectura, su salida ES la respuesta; `null`/exit 2 → falta; la persistencia edita solo la clave o sección indicada):
+**Configuración:** leer con memctl (`.SAC/config/sac.json`; solo lectura, su salida ES la respuesta; `null`/exit 2 → falta; si memctl no existe (exit 127), leer con `jq` o usar `~/.SAC/memctl.sh`; exit 1 (JSON inválido o vacío) → detenerse y avisar, sin leer ni editar el archivo a mano; la persistencia edita solo la clave o sección indicada):
 
 ```sh
 sh .SAC/memctl.sh get env-config-audit.config.ambientes

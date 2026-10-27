@@ -42,7 +42,7 @@ Same as `gh-pr-creator`: `curl -H "Authorization: Bearer $GITHUB_TOKEN" -H "Acce
 
 ### Standards Configuration
 
-Read `coding_standards_path` and `architecture_guide_path` with memctl (read-only; its output IS the answer; on failure read `.SAC/config/sac.json` with `jq`; never invent values):
+Read `coding_standards_path` and `architecture_guide_path` with memctl (read-only; its output IS the answer; if memctl is missing (exit 127) read `.SAC/config/sac.json` with `jq` or use `~/.SAC/memctl.sh` (global install); on exit 1 (invalid or empty JSON) stop and tell the user: do not read or edit the file by hand; never invent values):
 
 ```sh
 sh .SAC/memctl.sh get gh-pr-reviewer.config.coding_standards_path

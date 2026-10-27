@@ -44,7 +44,7 @@ P=$(sh .SAC/memctl.sh get ado.config.perfil_activo)   # nombre del perfil activo
 sh .SAC/memctl.sh get ado.config.perfiles.$P.colaboradores
 ```
 
-memctl es solo lectura y su salida ES la respuesta; si falla, leer `.SAC/config/sac.json` con `jq`; nunca inventar valores. `null` o exit 2 → no configurado. El nombre de perfil no puede contener `.` (memctl lo usa como separador de ruta).
+memctl es solo lectura y su salida ES la respuesta; si memctl no existe (exit 127), leer `.SAC/config/sac.json` con `jq` o usar `~/.SAC/memctl.sh` (instalación global); si sale con exit 1 (JSON inválido o vacío), detenerse y avisar: no leer ni editar el archivo a mano; nunca inventar valores. `null` o exit 2 → no configurado. El nombre de perfil no puede contener `.` (memctl lo usa como separador de ruta).
 
 Estructura:
 

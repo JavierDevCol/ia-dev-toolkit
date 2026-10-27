@@ -2,7 +2,7 @@
 
 ## Carga de configuración
 
-Leer la sección `handoff-release` de `.SAC/config/sac.json` con memctl (solo lectura; su salida ES la respuesta; si falla, leer el archivo con `jq`; nunca inventar valores):
+Leer la sección `handoff-release` de `.SAC/config/sac.json` con memctl (solo lectura; su salida ES la respuesta; si memctl no existe (exit 127), leer `.SAC/config/sac.json` con `jq` o usar `~/.SAC/memctl.sh` (instalación global); si sale con exit 1 (JSON inválido o vacío), detenerse y avisar: no leer ni editar el archivo a mano; nunca inventar valores):
 
 ```sh
 sh .SAC/memctl.sh get handoff-release.config.environments.dev      # .staging / .prod

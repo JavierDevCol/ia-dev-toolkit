@@ -8,9 +8,10 @@ comportamiento en OpenCode, Claude Code, Codex o cualquier harness.
 > **Antes de consultar configuración, intenta `memctl`.**
 > 1. Si `.SAC/memctl.sh` (Unix) o `.SAC/memctl.ps1` (Windows) existe, úsalo
 >    (en el repo fuente: `scripts/`). La respuesta que devuelve ES la respuesta.
-> 2. Si no existe o falla (motor ausente, entorno restringido), resuelve con las
->    herramientas nativas del agente (`jq` / lectura directa del archivo)
->    respetando el mismo contrato de salida.
+> 2. Si no existe (exit 127), resuelve con `jq` / lectura directa del archivo respetando el
+>    mismo contrato de salida (en instalación global, prueba `~/.SAC/memctl.sh`). Si memctl
+>    existe y sale con **exit 1** (JSON inválido, truncado o vacío): detente y avisa; **no leas
+>    ni edites el archivo a mano**.
 > 3. Nunca inventes un valor. Si la clave no existe o el formato no se puede
 >    interpretar, dilo explícitamente.
 
@@ -46,7 +47,7 @@ Fuente única: `sac.json` (JSON).
 | código | significado | acción del agente |
 |---|---|---|
 | `0` | ok | usar la salida |
-| `1` | JSON inválido (p. ej. truncado) o motor insuficiente | no interpretar a mano: reportar |
+| `1` | JSON inválido (truncado, vacío, más de un documento) o motor insuficiente | detenerse y reportar: no leer ni editar el archivo a mano |
 | `2` | clave o archivo inexistente | la clave NO existe: no inventar ni asumir `null` |
 
 ## Parser restringido (fallback sin runtimes)
@@ -70,7 +71,8 @@ sh .SAC/memctl.sh get <clave>        # ej: usuario.nombre, artifacts.hu_folder, 
 
 - Exit 0 + `null` → dato no configurado: aplicar el flujo "pregunta una vez y persiste" de esta skill.
 - Exit 2 → clave o archivo inexistente: tratarlo como no configurado.
-- Exit 1 u otro fallo → leer `.SAC/config/sac.json` directo con `jq`. Nunca inventar valores.
+- Exit 127 (memctl no existe) → leer `.SAC/config/sac.json` con `jq`, o usar `~/.SAC/memctl.sh` en instalación global.
+- Exit 1 (JSON inválido, truncado o vacío) → detenerse y avisar al usuario: no leer ni editar el archivo a mano. Nunca inventar valores.
 - Consultar solo las claves de esta skill; no volcar secciones completas con datos de terceros.
 ````
 

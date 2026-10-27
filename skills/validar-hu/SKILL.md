@@ -79,7 +79,7 @@ sh .SAC/memctl.sh get artifacts.hu_folder
 sh .SAC/memctl.sh get artifacts.adr_folder
 ```
 
-memctl es solo lectura y su salida ES la respuesta; si falla, leer `.SAC/config/sac.json` con `jq`; nunca inventar valores. `null`, vacío o exit 2 → no configurado.
+memctl es solo lectura y su salida ES la respuesta; si memctl no existe (exit 127), leer `.SAC/config/sac.json` con `jq` o usar `~/.SAC/memctl.sh` (instalación global); si sale con exit 1 (JSON inválido o vacío), detenerse y avisar: no leer ni editar el archivo a mano; nunca inventar valores. `null`, vacío o exit 2 → no configurado.
 
 `usuario.nombre` → **`{{usuario.nombre}}`**, necesario para firmar el veredicto en el paso 5. Si está vacío o la clave no existe, omitir el sufijo de la firma; no inventar un nombre.
 

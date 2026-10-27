@@ -27,7 +27,7 @@ Guided creation of Pull Requests in Azure DevOps with duplicate detection, branc
 
 Reads `user_email` and the projects from the active profile: repos project = `project_map.repos`, work items project = `project_map.workitems` (each falls back to `project_map.default`).
 
-Read the config with memctl (read-only; its output IS the answer; on failure read `.SAC/config/sac.json` with `jq`; never invent values):
+Read the config with memctl (read-only; its output IS the answer; if memctl is missing (exit 127) read `.SAC/config/sac.json` with `jq` or use `~/.SAC/memctl.sh` (global install); on exit 1 (invalid or empty JSON) stop and tell the user: do not read or edit the file by hand; never invent values):
 
 ```sh
 P=$(sh .SAC/memctl.sh get ado.config.perfil_activo)   # active profile name

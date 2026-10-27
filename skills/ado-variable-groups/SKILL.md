@@ -39,7 +39,7 @@ sh .SAC/memctl.sh get ado.config.perfiles.$P.project_map.pipelines   # fallback:
 sh .SAC/memctl.sh get ado.config.perfiles.$P.config_extras.ado_org
 ```
 
-memctl es solo lectura y su salida ES la respuesta; si falla, leer `.SAC/config/sac.json` con `jq`; nunca inventar valores. `null` o exit 2 → no configurado. El nombre de perfil no puede contener `.` (memctl lo usa como separador de ruta).
+memctl es solo lectura y su salida ES la respuesta; si memctl no existe (exit 127), leer `.SAC/config/sac.json` con `jq` o usar `~/.SAC/memctl.sh` (instalación global); si sale con exit 1 (JSON inválido o vacío), detenerse y avisar: no leer ni editar el archivo a mano; nunca inventar valores. `null` o exit 2 → no configurado. El nombre de perfil no puede contener `.` (memctl lo usa como separador de ruta).
 
 **Profile guard:** si `perfil_activo` es null, su perfil no existe o no resuelve proyecto, detenerse y pedir al usuario que ejecute `ado-profile-setup`.
 

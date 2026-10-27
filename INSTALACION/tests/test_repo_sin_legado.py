@@ -31,5 +31,30 @@ class SinLegadoTest(unittest.TestCase):
         self.assertEqual(hallazgos, [])
 
 
+class ContratoMemctlTest(unittest.TestCase):
+    """memctl exit 1 = JSON inválido: nunca leer ni editar el archivo a mano; jq solo si memctl no existe."""
+
+    def _md(self):
+        for rel in ("skills", "workflows", "scripts/memctl-contract.md"):
+            base = REPO / rel
+            for f in ([base] if base.is_file() else base.rglob("*.md")):
+                if "evals" not in f.parts:
+                    yield f
+
+    def test_ninguna_skill_manda_leer_a_mano_si_falla(self):
+        malos = [str(f.relative_to(REPO)) for f in self._md()
+                 if re.search(r"(si falla|on failure|Exit 1 u otro fallo)[^\n]{0,80}jq", f.read_text(encoding="utf-8"))]
+        self.assertEqual(malos, [])
+
+    def test_bloques_distinguen_memctl_ausente_de_json_invalido(self):
+        sin = []
+        for f in self._md():
+            t = f.read_text(encoding="utf-8")
+            if ("su salida ES la respuesta" in t or "its output IS the answer" in t) and f.name != "memctl-contract.md":
+                if "exit 127" not in t or "exit 1 (" not in t:
+                    sin.append(str(f.relative_to(REPO)))
+        self.assertEqual(sin, [])
+
+
 if __name__ == "__main__":
     unittest.main()

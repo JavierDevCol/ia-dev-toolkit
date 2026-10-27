@@ -26,7 +26,7 @@ sh .SAC/memctl.sh get archivos.reglas_arquitectonicas
 sh .SAC/memctl.sh get output_folder
 ```
 
-memctl es solo lectura y su salida ES la respuesta; si falla, leer `.SAC/config/sac.json` con `jq`; nunca inventar valores. `null`, vacío o exit 2 → no configurado.
+memctl es solo lectura y su salida ES la respuesta; si memctl no existe (exit 127), leer `.SAC/config/sac.json` con `jq` o usar `~/.SAC/memctl.sh` (instalación global); si sale con exit 1 (JSON inválido o vacío), detenerse y avisar: no leer ni editar el archivo a mano; nunca inventar valores. `null`, vacío o exit 2 → no configurado.
 2. **Determinar archivos:**
    - `commits`: `git diff main..HEAD --name-only` (solo cambiados en rama).
    - `project`: escanear todo, excluyendo node_modules, .git, .SAC, build, dist, vendor.
