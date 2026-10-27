@@ -12,12 +12,14 @@
 sh .SAC/memctl.sh get archivos.reglas_arquitectonicas
 sh .SAC/memctl.sh get archivos.workspace
 sh .SAC/memctl.sh get artifacts.contextos_folder
+sh .SAC/memctl.sh get artifacts.adr_folder
+sh .SAC/memctl.sh get rutas.artifacts_folder
 sh .SAC/memctl.sh get idiomas.documentacion
 sh .SAC/memctl.sh get usuario.nombre
 sh .SAC/memctl.sh get usuario.incluir_firma_en_documentos
 ```
 
-  `idiomas.documentacion` (`es|en|pt`) es el idioma; vacío o exit 2 → preguntar. `{contextos_folder}` = `artifacts.contextos_folder`.
+  `idiomas.documentacion` (`es|en|pt`) es el idioma; vacío o exit 2 → preguntar. `{contextos_folder}` = `artifacts.contextos_folder`; `{artifacts.adr_folder}` (plantilla) = `artifacts.adr_folder`; `{artifacts_folder}` = `rutas.artifacts_folder`.
 - **Plantilla propia:** leer `{file:./assets/reglas_arquitectonicas_plantilla.md}`
 - Verificar que existe contexto del proyecto:
   - Buscar `{archivos.workspace}` o archivo de contexto en `{contextos_folder}/`
