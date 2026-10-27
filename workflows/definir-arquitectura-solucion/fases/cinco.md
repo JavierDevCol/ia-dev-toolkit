@@ -18,7 +18,7 @@
 
 > La validación cruzada de trazabilidad entre este artefacto y los ADRs se realiza en la **FASE 6** (`./fases/seis.md`).
 
-Leer también `CONFIG_USER.yaml` (ruta en `archivos.config_user`) y tomar `usuario.nombre` → **`{{usuario.nombre}}`**, necesario para firmar el documento. Si está vacío o el archivo no existe, omitir el sufijo de la firma; no inventar un nombre.
+Leer con memctl `sh .SAC/memctl.sh get usuario.nombre` y `sh .SAC/memctl.sh get usuario.incluir_firma_en_documentos` (solo lectura; si falla, omitir la firma) y tomar `usuario.nombre` → **`{{usuario.nombre}}`**, necesario para firmar el documento. Si está vacío o la clave no existe, omitir el sufijo de la firma; no inventar un nombre.
 
 Al final del documento generado, agregar:
 
