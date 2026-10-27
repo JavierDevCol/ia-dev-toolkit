@@ -55,11 +55,13 @@ digraph crearadr {
 
 Leer la config con memctl y tomar `usuario.nombre` → **`{{usuario.nombre}}`**, necesario para firmar el ADR en el paso 6. Si está vacío o la clave no existe, omitir el sufijo de la firma; no inventar un nombre.
 
-```sh
-sh .SAC/memctl.sh get usuario.nombre
-sh .SAC/memctl.sh get usuario.incluir_firma_en_documentos
-sh .SAC/memctl.sh get artifacts.adr_folder
-```
+Ejecutar cada comando: **su salida ES el valor del placeholder** de su fila y se usa tal cual en el resto de esta skill (no recalcular ni inventar rutas):
+
+| Placeholder / dato | Valor = salida de |
+|---|---|
+| `{{usuario.nombre}}` | `sh .SAC/memctl.sh get usuario.nombre` |
+| `usuario.incluir_firma_en_documentos` | `sh .SAC/memctl.sh get usuario.incluir_firma_en_documentos` |
+| `{adr_folder}` | `sh .SAC/memctl.sh get artifacts.adr_folder` |
 
 memctl es solo lectura y su salida ES la respuesta; si memctl no existe (exit 127), leer `.SAC/config/sac.json` con `jq` o usar `~/.SAC/memctl.sh` (instalación global); si sale con exit 1 (JSON inválido o vacío), detenerse y avisar: no leer ni editar el archivo a mano; nunca inventar valores. `null`, vacío o exit 2 → no configurado.
 
