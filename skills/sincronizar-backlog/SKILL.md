@@ -59,7 +59,18 @@ digraph sincronizar_backlog {
 
 ## Implementation
 
-1. **Cargar config** → leer `.SAC/config/CONFIG_SYSTEM.yaml` para rutas. Leer también `CONFIG_USER.yaml` (ruta en `archivos.config_user`) y tomar `usuario.nombre` → `{{usuario.nombre}}`, usado en el paso 10 si `usuario.incluir_firma_en_documentos` es `true`. Si está vacío o el archivo no existe, omitir la línea de firma; no inventar un nombre.
+1. **Cargar config** con memctl (rutas y firma):
+
+```sh
+sh .SAC/memctl.sh get usuario.nombre
+sh .SAC/memctl.sh get usuario.incluir_firma_en_documentos
+sh .SAC/memctl.sh get archivos.backlog
+sh .SAC/memctl.sh get artifacts.hu_folder
+```
+
+memctl es solo lectura y su salida ES la respuesta; si falla, leer `.SAC/config/sac.json` con `jq`; nunca inventar valores. `null`, vacío o exit 2 → no configurado.
+
+   `usuario.nombre` → `{{usuario.nombre}}`, usado en el paso 10 si `usuario.incluir_firma_en_documentos` es `true`. Si está vacío o la clave no existe, omitir la línea de firma; no inventar un nombre.
 2. **Atajo resumen** → si `--resumen`: extraer Resumen/Índice y mostrar (sin escanear)
 3. **Cargar backlog** → extraer HUs de la tabla `## 📇 Índice Rápido` (`| ID | Título | Estado | Prioridad | Tipo | Proyecto | Tasks |`); filtrar por `--id_hu` / `--proyecto`
 4. **Escanear artefactos** → por cada HU: Refinamiento.md, Aprobación, Plan.md, carpetas TASK
