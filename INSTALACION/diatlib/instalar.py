@@ -15,6 +15,14 @@ from .ui import print_warning, print_success
 MEMCTL_FILES = ("memctl.sh", "memctl.ps1")
 
 
+class InstallError(Exception):
+    """Fallo a mitad de la instalación. `installed` = lo que SÍ quedó copiado (para registrarlo)."""
+
+    def __init__(self, msg, installed):
+        super().__init__(msg)
+        self.installed = installed
+
+
 def install_component(ctype, name, cache, project, platform):
     """Copia un componente del cache al proyecto. Sobrescribe siempre.
     La forma (carpeta vs archivo) y la extensión salen de COMPONENT_LAYOUT."""
@@ -118,7 +126,11 @@ def install_seeds(seeds, cache, project, platform, with_config=False,
         install_memctl(cache, project)                  # memctl lee sac.json -> viaja con él
     installed = {}
     for ctype, cname in order:
-        if install_component(ctype, cname, cache, project, platform):
+        try:
+            ok = install_component(ctype, cname, cache, project, platform)
+        except OSError as e:                            # permisos, disco, symlinks…
+            raise InstallError(f"{ctype}:{cname}: {e}", installed) from e
+        if ok:
             installed.setdefault(ctype, []).append(cname)
     _remove_legacy_files(project, platform, installed)
     if installed.get("skills"):

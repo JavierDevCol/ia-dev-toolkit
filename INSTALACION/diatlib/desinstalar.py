@@ -43,16 +43,21 @@ def _cleanup_empty(project, platform):
             base.rmdir()
 
 
-def uninstall_project(project_path):
+def uninstall_project(project_path, platform=None, dry_run=False):
     """Quita los componentes DIAT de una instalación del proyecto (si hay varias
-    plataformas, pregunta cuál) y solo su entrada del registro."""
+    plataformas, usa `platform` o pregunta cuál) y solo su entrada del registro.
+    dry_run: muestra qué se quitaría sin borrar nada."""
     project = Path(project_path).resolve()
     installs = registro.find_installations(project)
     if not installs:
         print_info(f"{project} no tiene componentes DIAT registrados.")
         return
 
-    if len(installs) > 1:
+    if platform is not None:
+        if not any(i["platform"] == platform for i in installs):
+            print_info(f"{project} no tiene una instalación {platform} registrada.")
+            return
+    elif len(installs) > 1:
         platform = menu.menu_select("¿QUÉ HARNESS DESINSTALAR?",
                                     [(i["platform"], i["platform"], "") for i in installs])
         if platform is None:
@@ -62,6 +67,12 @@ def uninstall_project(project_path):
         platform = installs[0]["platform"]
     inst = registro.find_installation(project, platform, installs)
     comps = inst.get("components", {})
+    if dry_run:
+        print_info(f"(dry-run) Se desinstalaría de {project / platform}; no se borró nada:")
+        for ctype, names in comps.items():
+            if ctype != "config" and isinstance(names, list) and names:
+                print(f"     {ctype} ({len(names)}): {', '.join(names)}")
+        return
     others = [i.get("components", {}) for i in installs if i["platform"] != platform]
     # .SAC es compartido entre plataformas: conservar lo que otra instalación usa
     shared_wf = {w for c in others for w in c.get("workflows", [])}
@@ -119,15 +130,23 @@ def uninstall_project(project_path):
     print_success(f"Desinstalado de {project / platform} ({removed} elementos)")
 
 
-def uninstall_global():
-    """Elimina DIAT por completo: CLI del bin + cache + PATH. Con confirmación."""
+def uninstall_global(yes=False, dry_run=False):
+    """Elimina DIAT por completo: CLI del bin + cache + PATH. Con confirmación (salvo yes)."""
     bin_dir = paths.get_bin_path()
     cache = paths.get_cache_dir()
 
-    print_warning("Esto eliminará DIAT por completo (CLI + cache + PATH).")
-    if input("  ¿Continuar? (s/N): ").strip().lower() != "s":
-        print_info("Cancelado.")
+    if dry_run:
+        print_info(f"(dry-run) Se eliminaría el CLI ({bin_dir}), el cache ({cache}) y la entrada de PATH; no se borró nada.")
         return
+    print_warning("Esto eliminará DIAT por completo (CLI + cache + PATH).")
+    if not yes:
+        try:
+            respuesta = input("  ¿Continuar? (s/N): ").strip().lower()
+        except EOFError:                                  # sin TTY: no se confirma nada
+            respuesta = ""
+        if respuesta != "s":
+            print_info("Cancelado.")
+            return
 
     # 1. CLI del bin
     for name in ("diat", "diat.bat"):
