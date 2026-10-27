@@ -33,13 +33,21 @@ Analiza un PR/diff y clasifica variables, colas y secretos por ámbito (pipeline
 
 ## Implementation
 
-**Configuración:** leer `memory_skill.json` (`$SKILL_DIR/../memory_skill.json`):
+**Configuración:** leer con memctl (`.SAC/config/sac.json`; solo lectura, su salida ES la respuesta; `null`/exit 2 → falta; la persistencia edita solo la clave o sección indicada):
+
+```sh
+sh .SAC/memctl.sh get env-config-audit.config.ambientes
+sh .SAC/memctl.sh get usuario.nombre
+sh .SAC/memctl.sh get usuario.incluir_firma_en_documentos
+sh .SAC/memctl.sh get output_folder
+```
+
 
 | Campo | Ubicación | Si falta |
 |-------|-----------|----------|
 | `ambientes` | `env-config-audit.config.ambientes` — lista **ordenada** = orden de promoción, ej. `["develop","des","pru","prepro","pro"]` | Preguntar una vez y persistir |
-| `user_name` | global | Preguntar una vez y persistir |
-| `incluir_firma_en_documentos` | global | `true` |
+| `usuario.nombre` | global | Preguntar una vez y persistir en `usuario.nombre` |
+| `usuario.incluir_firma_en_documentos` | global | `true` |
 | `output_folder` | global | Preguntar una vez y persistir |
 
 **Inicio (cada ejecución):** preguntar:
@@ -58,9 +66,9 @@ Analiza un PR/diff y clasifica variables, colas y secretos por ámbito (pipeline
 
 **Fase D — Preview:** Mostrar resumen consolidado (ver `references/preview-example.md`). Solo incluir secciones con cambios.
 
-**Fase E — Generación:** Crear `config-entorno_{nombre_ms}_vX.Y.Z.md` según template `assets/template-config-entorno.md` — la versión es la del release o RC entregado (misma `vX.Y.Z`/`vX.Y.Z-rc.N` del flujo) y el ID del PR va en la cabecera del documento, no en el nombre. Firma con `user_name` → **`{{user_name}}`**; si `incluir_firma_en_documentos` es `false`, omitir el bloque de firma. No inventar un nombre. Antes del pie `*Documento generado con env-config-audit skill*`, agregar:
+**Fase E — Generación:** Crear `config-entorno_{nombre_ms}_vX.Y.Z.md` según template `assets/template-config-entorno.md` — la versión es la del release o RC entregado (misma `vX.Y.Z`/`vX.Y.Z-rc.N` del flujo) y el ID del PR va en la cabecera del documento, no en el nombre. Firma con `usuario.nombre` → **`{{usuario.nombre}}`**; si `usuario.incluir_firma_en_documentos` es `false`, omitir el bloque de firma. No inventar un nombre. Antes del pie `*Documento generado con env-config-audit skill*`, agregar:
 ```
-> **Auditor:** {{user_name}}
+> **Auditor:** {{usuario.nombre}}
 > **Fecha:** {{fecha}}
 ```
 
