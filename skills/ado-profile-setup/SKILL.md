@@ -1,16 +1,16 @@
 ---
 name: ado-profile-setup
-description: Use when the active `[ado]` profile in memory_skill.json is incomplete or invalid, or the user wants to add a new Azure DevOps profile.
+description: Use when the active `ado` profile in sac.json is incomplete or invalid, or the user wants to add a new Azure DevOps profile.
 ready: true
 ---
 
 # ADO Profile Setup
 
-Creates and manages user profiles in `memory_skill.json` → section `[ado].config`, the central config that maps Azure DevOps email, projects, and default queries to an active profile.
+Creates and manages user profiles in `.SAC/config/sac.json` → section `ado.config`, the central config that maps Azure DevOps email, projects, and default queries to an active profile.
 
 ## When to Use
 
-- `memory_skill.json` lacks the `[ado]` section or has no `perfiles`
+- `sac.json` lacks the `ado` section or has no `perfiles` (check with `sh .SAC/memctl.sh get ado.config.perfiles`; `null`/exit 2 → missing)
 - Active profile has missing or invalid fields
 - User requests a new profile (command: `>nuevo-perfil`)
 - Agent needs project/email context before other ADO skills run
@@ -25,7 +25,7 @@ Collect via interactive prompts:
 
 | Field | Key | Notes |
 |-------|-----|-------|
-| Profile name | NOMBRE | — |
+| Profile name | NOMBRE | Must NOT contain `.` — memctl uses it as path separator and every ADO skill would fail to read the profile. Reject and ask again |
 | ADO email | EMAIL | — |
 | WI project | PROJ_WI | For work item queries |
 | Repos/PR project | PROJ_REPOS | Default: copy PROJ_WI |
@@ -45,8 +45,8 @@ For **[B]**, call `ado/wit_get_work_item(id)` to extract type, area, tags, paren
 
 ### Phase 3 — Write JSON
 
-- File: `memory_skill.json` at skills root, under `[ado].config`, 2-space indent
-- Does not exist → create, insert new profile, set as active
+- File: `.SAC/config/sac.json`, under `ado.config`, 2-space indent. Edit only the `ado` section
+- Does not exist → the DIAT installer creates it: tell the user to run `diat` (do not create it by hand)
 - Exists valid → insert new profile, activate it, leave others untouched
 - Exists invalid → ask to overwrite; if no → cancel
 
@@ -65,5 +65,6 @@ Full JSON schema: [references/config-schema.md](references/config-schema.md)
 | Mistake | Fix |
 |---------|-----|
 | Overwriting existing profiles | Always insert new profile key, never replace entire `perfiles` object |
+| Profile name with `.` | Reject it: memctl cannot address the profile (`ado.config.perfiles.<name>.*`) |
 | Skipping query confirmation | Always show readable summary before saving — never save unreviewed WIQL |
 | Using wrong project for repos | `repos`/`pipelines` may differ from `workitems` — ask explicitly |

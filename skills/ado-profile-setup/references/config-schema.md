@@ -1,8 +1,8 @@
-# Profile Config Schema & Templates (sección `[ado]` en `memory_skill.json`)
+# Profile Config Schema & Templates (sección `ado` en `.SAC/config/sac.json`)
 
 ## JSON Structure
 
-Esta sección vive en `skills/memory_skill.json` bajo la clave `"ado"`:
+Esta sección vive en `.SAC/config/sac.json` bajo la clave `"ado"` (el nombre de perfil NO puede contener `.`):
 
 ```json
 {
@@ -132,8 +132,8 @@ When building from a WI example, extract:
 
 ## Write Rules
 
-- File: `skills/memory_skill.json` → `[ado].config`
+- File: `.SAC/config/sac.json` → `ado.config`
 - Indentation: 2 spaces
-- Does not exist → create template, insert new profile, set as active
+- Does not exist → the DIAT installer creates it (tell the user to run `diat`); never create it by hand
 - Exists valid → insert new profile name, activate it, do not modify others
 - Exists invalid → ask user whether to overwrite; if no → cancel
