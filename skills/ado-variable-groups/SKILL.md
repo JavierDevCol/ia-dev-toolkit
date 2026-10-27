@@ -31,7 +31,15 @@ Consulta la Library de Azure DevOps por REST API usando el PAT de `.env`. El MCP
 | Scope del PAT | Lectura sobre **Library** (`vso.variablegroups_read`) |
 | Organización / Proyecto | `--org` / `--project` (o `ADO_ORG` / `ADO_PROJECT`); ver abajo |
 
-**Resolución de org y proyecto:** leer `memory_skill.json` → `[ado].config.perfiles[perfil_activo]`. Proyecto = `project_map.pipelines` → `project_map.default`. Organización = `config_extras.ado_org`; si falta, preguntarla una vez y persistirla en ese perfil.
+**Resolución de org y proyecto:** leer el perfil activo con memctl. Proyecto = `project_map.pipelines` → `project_map.default`. Organización = `config_extras.ado_org`; si falta, preguntarla una vez y persistirla en ese perfil de `.SAC/config/sac.json` (`ado.config.perfiles.<perfil>.config_extras.ado_org`, editando solo esa sección).
+
+```sh
+P=$(sh .SAC/memctl.sh get ado.config.perfil_activo)   # nombre del perfil activo
+sh .SAC/memctl.sh get ado.config.perfiles.$P.project_map.pipelines   # fallback: project_map.default
+sh .SAC/memctl.sh get ado.config.perfiles.$P.config_extras.ado_org
+```
+
+memctl es solo lectura y su salida ES la respuesta; si falla, leer `.SAC/config/sac.json` con `jq`; nunca inventar valores. `null` o exit 2 → no configurado. El nombre de perfil no puede contener `.` (memctl lo usa como separador de ruta).
 
 **Profile guard:** si `perfil_activo` es null, su perfil no existe o no resuelve proyecto, detenerse y pedir al usuario que ejecute `ado-profile-setup`.
 
