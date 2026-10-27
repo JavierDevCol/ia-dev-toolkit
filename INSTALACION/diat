@@ -32,7 +32,7 @@ SAC_SKILLS = [
     "sac-refinar-hu", "sac-validar-hu", "sac-planificar-hu", "sac-ejecutar-plan",  # ciclo de vida de HU
     "sac-priorizar-backlog",                                           # orden real de ejecucion (dependencias + prioridad)
     "sac-sincronizar-backlog", "sac-registrar-hallazgo",                   # backlog y hallazgos
-    "sac-init-reglas-arquitectonicas", "crear-adr", "analizar-calidad-codigo", "analizar-seguridad",  # arquitectura/calidad
+    "sac-init-reglas-arquitectonicas", "sac-crear-adr", "analizar-calidad-codigo", "analizar-seguridad",  # arquitectura/calidad
     "git-branch-commit", "bitacora-tecnica",                       # soporte dev
 ]
 

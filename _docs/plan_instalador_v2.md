@@ -55,7 +55,7 @@ Se separa lo que el usuario **eligió** (`selection` = *seeds*) de lo que **qued
       },
       "components": {
         "workflows": ["definir-arquitectura-solucion"],
-        "skills": ["crear-adr", "sac-tomar-contexto"],
+        "skills": ["sac-crear-adr", "sac-tomar-contexto"],
         "tools": ["workflow-sac", "workflow-discover"],
         "commands": ["workflow-sac"],
         "agents": [], "config": true

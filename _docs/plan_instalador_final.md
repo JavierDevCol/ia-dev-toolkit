@@ -417,7 +417,7 @@ COMPONENT_DEPENDENCIES = {
         "definir-arquitectura-solucion": {
             "requires": {"tools": ["workflow-sac", "workflow-discover"],
                          "commands": ["workflow-sac"], "skills": [], "plugins": []},
-            "optional": {"skills": ["crear-adr"]},
+            "optional": {"skills": ["sac-crear-adr"]},
         },
         "gestionar-backlog-roadmap": {
             "requires": {"tools": ["workflow-sac", "workflow-discover"],
@@ -433,7 +433,7 @@ COMPONENT_DEPENDENCIES = {
             "optional": {"skills": ["sac-sincronizar-backlog", "sac-planificar-hu"]},
         },
         "ARQUITECTO-SOFTWARE": {
-            "requires": {"skills": ["crear-adr", "sac-init-reglas-arquitectonicas"],
+            "requires": {"skills": ["sac-crear-adr", "sac-init-reglas-arquitectonicas"],
                          "tools": [], "commands": [], "plugins": []},
             "optional": {"skills": ["analizar-calidad-codigo"]},
         },
@@ -953,7 +953,7 @@ de lo que **quedó instalado** (`components` = seeds + deps). Cada instalación 
       },
       "components": {
         "workflows": ["definir-arquitectura-solucion"],
-        "skills": ["crear-adr", "sac-tomar-contexto"],
+        "skills": ["sac-crear-adr", "sac-tomar-contexto"],
         "tools": ["workflow-sac", "workflow-discover"],
         "commands": ["workflow-sac"],
         "agents": [], "config": true
@@ -1323,7 +1323,7 @@ Salida de ejemplo (`diat --status /home/user/proyecto-1`):
    Estado:      ⚠️ desactualizado (a1b2c3d → f9e8d7c)
 
    workflows (1): definir-arquitectura-solucion
-   skills (2): crear-adr, sac-tomar-contexto
+   skills (2): sac-crear-adr, sac-tomar-contexto
    tools (2): workflow-sac, workflow-discover
    commands (1): workflow-sac
    config: ✅

@@ -1,5 +1,5 @@
 ---
-name: crear-adr
+name: sac-crear-adr
 description: Use when the user asks to create, generate, or register an ADR (Architecture Decision Record), or says "documenta/registra esta decisión de arquitectura", "decisión técnica", "architecture decision record", or needs a decision written down as a record.
 ready: true
 ---

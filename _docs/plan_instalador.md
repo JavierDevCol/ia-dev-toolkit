@@ -55,7 +55,7 @@
                 "plugins": []
             },
             "optional": {
-                "skills": ["crear-adr"]
+                "skills": ["sac-crear-adr"]
             }
         },
         "gestionar-backlog-roadmap": {
@@ -86,7 +86,7 @@
         },
         "ARQUITECTO-SOFTWARE": {
             "requires": {
-                "skills": ["crear-adr", "sac-init-reglas-arquitectonicas"],
+                "skills": ["sac-crear-adr", "sac-init-reglas-arquitectonicas"],
                 "tools": [],
                 "commands": [],
                 "plugins": []
