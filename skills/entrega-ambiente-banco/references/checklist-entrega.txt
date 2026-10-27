@@ -17,11 +17,11 @@ CHECKLIST DE ENTREGA — Handoff vX.Y.Z
 [⚠] Auditoría de seguridad estática (SAST) ejecutada
      → Ejecuta @analizar-seguridad scope=commits sobre release/vX.Y.Z
 [⚠] Calidad de código verificada
-     → Ejecuta @analizar-calidad-codigo scope=commits sobre release/vX.Y.Z
+     → Ejecuta @sac-analizar-calidad-codigo scope=commits sobre release/vX.Y.Z
 [ ] Artefactos listos para entregar al banco
 
 NOTA: Las skills @env-config-audit, @ado-pipeline-analyzer, @analizar-seguridad y
-@analizar-calidad-codigo se recomienda ejecutar en el mismo chat.
+@sac-analizar-calidad-codigo se recomienda ejecutar en el mismo chat.
 
 INSTRUCCIÓN DE USO (actualización del checklist):
 - Esta plantilla NO se modifica. La copia marcada es la que se entrega.

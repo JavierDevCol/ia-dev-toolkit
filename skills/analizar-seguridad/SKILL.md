@@ -22,7 +22,7 @@ Revisa código mediante sub-agentes en paralelo para detectar vulnerabilidades d
 **Cuándo NO usar:**
 - Pruebas activas contra una app corriendo (escaneo de puertos, fuzzing, exploits reales) — aclarar el límite y sugerir herramientas (ZAP, Burp, nmap) para que el usuario las ejecute
 - Solo se necesita inventariar variables de entorno/secretos por ámbito → usar `env-config-audit`
-- Solo se necesita revisar mantenibilidad/code smells → usar `analizar-calidad-codigo`
+- Solo se necesita revisar mantenibilidad/code smells → usar `sac-analizar-calidad-codigo`
 - El usuario quiere registrar un hallazgo ya conocido → usar `sac-registrar-hallazgo`
 
 ## Implementation
@@ -80,7 +80,7 @@ Si `usuario.nombre` está vacío o la clave no existe, omitir el sufijo (`> **Au
 ## Common Mistakes
 
 - **Confundir con `env-config-audit`:** esa skill inventaría variables/secretos por ámbito ADO/Vault; esta skill busca vulnerabilidad explotable. Si aparecen secretos, reportar el hallazgo y remitir, no duplicar el flujo completo.
-- **Confundir con `analizar-calidad-codigo`:** esa skill mide mantenibilidad (code smells), no explotabilidad. Un `God Object` no es un hallazgo de esta skill salvo que además sea, por ejemplo, un endpoint sin control de acceso.
+- **Confundir con `sac-analizar-calidad-codigo`:** esa skill mide mantenibilidad (code smells), no explotabilidad. Un `God Object` no es un hallazgo de esta skill salvo que además sea, por ejemplo, un endpoint sin control de acceso.
 - **Inventar CVEs:** sin consulta en línea no se puede confirmar con certeza que una versión sea vulnerable — marcar como advertencia a verificar, no como hallazgo confirmado.
 - **Tratar como pentest real:** esta skill no ejecuta nada. Si el usuario pide escaneo activo, aclarar el límite explícitamente en vez de simularlo.
 - **Omitir la confianza:** severidad y confianza son ejes distintos — un hallazgo puede ser Crítico pero de confianza Baja (patrón sospechoso sin sink confirmado). Nunca colapsar ambos en un solo número.

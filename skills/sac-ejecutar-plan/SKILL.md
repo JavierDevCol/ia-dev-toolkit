@@ -80,7 +80,7 @@ memctl es solo lectura y su salida ES la respuesta; si memctl no existe (exit 12
    > **Desarrollador:** {{usuario.nombre}}
    > **Fecha:** {{fecha}}
    ```
-   Sin `usuario.nombre` configurado, la línea queda `> **Desarrollador:**`. En `task_especifica` con tasks pendientes, NO completar la HU. Si lo implementado tocó superficie sensible (endpoints nuevos, autenticación, control de acceso, entrada de usuario, criptografía o configuración), recomendar al usuario correr `@analizar-seguridad` y/o `@analizar-calidad-codigo` con `scope=commits` antes de mergear — juicio del agente según lo que se acaba de implementar, no una regla que bloquee el cierre.
+   Sin `usuario.nombre` configurado, la línea queda `> **Desarrollador:**`. En `task_especifica` con tasks pendientes, NO completar la HU. Si lo implementado tocó superficie sensible (endpoints nuevos, autenticación, control de acceso, entrada de usuario, criptografía o configuración), recomendar al usuario correr `@analizar-seguridad` y/o `@sac-analizar-calidad-codigo` con `scope=commits` antes de mergear — juicio del agente según lo que se acaba de implementar, no una regla que bloquee el cierre.
 
 ## Quick Reference
 | Modo | HU Plana | HU Particionada |

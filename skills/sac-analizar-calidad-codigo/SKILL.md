@@ -1,5 +1,5 @@
 ---
-name: analizar-calidad-codigo
+name: sac-analizar-calidad-codigo
 description: Use when reviewing code after implementing a task/user story (scope commits), before a release (scope project), or for a specific file (scope archivo) to detect code smells and architectural rule violations.
 ready: true
 ---

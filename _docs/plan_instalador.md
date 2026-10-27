@@ -92,7 +92,7 @@
                 "plugins": []
             },
             "optional": {
-                "skills": ["analizar-calidad-codigo"]
+                "skills": ["sac-analizar-calidad-codigo"]
             }
         },
         "ARQUITECTO-DEVOPS": {
@@ -114,7 +114,7 @@
                 "plugins": []
             },
             "optional": {
-                "skills": ["analizar-calidad-codigo"]
+                "skills": ["sac-analizar-calidad-codigo"]
             }
         }
     },
@@ -173,7 +173,7 @@
             },
             "optional": {}
         },
-        "analizar-calidad-codigo": {
+        "sac-analizar-calidad-codigo": {
             "requires": {
                 "skills": [],
                 "workflows": [],
@@ -380,7 +380,7 @@ print_banner() {
                 ══════════════════════════════════════════════════════════════════════
                 📋 SKILLS SAC DISPONIBLES
                 ══════════════════════════════════════════════════════════════════════
-                1. analizar-calidad-codigo             — Revisa código detectando code smells y violaciones | deps: .SAC/config/
+                1. sac-analizar-calidad-codigo             — Revisa código detectando code smells y violaciones | deps: .SAC/config/
                 2. sac-ejecutar-plan                       — Implementa planes actualizando Plan.md | deps: .SAC/config/
                 3. sac-init-reglas-arquitectonicas         — Genera reglas arquitectónicas del proyecto | deps: .SAC/config/
                 4. sac-planificar-hu                       — Genera plan técnico desde HU aprobada | deps: .SAC/config/

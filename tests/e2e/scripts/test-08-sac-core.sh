@@ -1,5 +1,5 @@
 #!/bin/bash
-# test-08-sac-core.sh — ESC-08: Pruebas SAC Core (sac-init-reglas-arquitectonicas, sac-validar-ca, analizar-calidad-codigo)
+# test-08-sac-core.sh — ESC-08: Pruebas SAC Core (sac-init-reglas-arquitectonicas, sac-validar-ca, sac-analizar-calidad-codigo)
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -251,23 +251,23 @@ echo "  → Si hay tasks pendientes, error: 'Completar todas las tasks primero'"
 echo ""
 
 # ============================================
-# analizar-calidad-codigo
+# sac-analizar-calidad-codigo
 # ============================================
-echo -e "${YELLOW}━━━ analizar-calidad-codigo ━━━${NC}"
+echo -e "${YELLOW}━━━ sac-analizar-calidad-codigo ━━━${NC}"
 echo ""
 
 echo -e "${YELLOW}AQC-01: Scope commits — archivos cambiados${NC}"
-echo "  → analizar-calidad-codigo --scope commits debería analizar solo archivos de git diff"
+echo "  → sac-analizar-calidad-codigo --scope commits debería analizar solo archivos de git diff"
 
 echo ""
 
 echo -e "${YELLOW}AQC-02: Scope project — todo el proyecto${NC}"
-echo "  → analizar-calidad-codigo --scope project debería escanear todo excluyendo node_modules, .git, etc."
+echo "  → sac-analizar-calidad-codigo --scope project debería escanear todo excluyendo node_modules, .git, etc."
 
 echo ""
 
 echo -e "${YELLOW}AQC-03: Scope archivo — archivo específico${NC}"
-echo "  → analizar-calidad-codigo --scope archivo --archivo src/main.java debería analizar solo ese archivo"
+echo "  → sac-analizar-calidad-codigo --scope archivo --archivo src/main.java debería analizar solo ese archivo"
 
 echo ""
 
@@ -320,7 +320,7 @@ Estado: $([ $FAIL -eq 0 ] && echo "PASS" || echo "FAIL")
 Skills testeadas:
 - sac-init-reglas-arquitectonicas: IRA-01 a IRA-06
 - sac-validar-ca: VCA-01 a VCA-08
-- analizar-calidad-codigo: AQC-01 a AQC-08
+- sac-analizar-calidad-codigo: AQC-01 a AQC-08
 EOF
 
 if [ $FAIL -eq 0 ]; then echo -e "${GREEN}✅ ESC-08: PASS${NC}"; exit 0; else echo -e "${RED}❌ ESC-08: FAIL${NC}"; exit 1; fi

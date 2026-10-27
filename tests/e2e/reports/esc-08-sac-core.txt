@@ -8,4 +8,4 @@ Estado: PASS
 Skills testeadas:
 - sac-init-reglas-arquitectonicas: IRA-01 a IRA-06
 - sac-validar-ca: VCA-01 a VCA-08
-- analizar-calidad-codigo: AQC-01 a AQC-08
+- sac-analizar-calidad-codigo: AQC-01 a AQC-08

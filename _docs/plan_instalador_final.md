@@ -358,7 +358,7 @@ Al seleccionar esta opción se instala todo el paquete SAC:
 ══════════════════════════════════════════════════════════════════════
 📋 SKILLS SAC DISPONIBLES
 ══════════════════════════════════════════════════════════════════════
-1. analizar-calidad-codigo   — Revisa código detectando code smells y violaciones | deps: config/
+1. sac-analizar-calidad-codigo   — Revisa código detectando code smells y violaciones | deps: config/
 2. sac-ejecutar-plan             — Implementa planes actualizando Plan.md               | deps: config/
 3. sac-init-reglas-arquitectonicas — Genera reglas arquitectónicas del proyecto         | deps: config/
 4. sac-planificar-hu             — Genera plan técnico desde HU aprobada                | deps: config/
@@ -435,7 +435,7 @@ COMPONENT_DEPENDENCIES = {
         "ARQUITECTO-SOFTWARE": {
             "requires": {"skills": ["sac-crear-adr", "sac-init-reglas-arquitectonicas"],
                          "tools": [], "commands": [], "plugins": []},
-            "optional": {"skills": ["analizar-calidad-codigo"]},
+            "optional": {"skills": ["sac-analizar-calidad-codigo"]},
         },
         "ARQUITECTO-DEVOPS": {
             "requires": {"skills": [], "tools": [], "commands": [], "plugins": []},
@@ -444,7 +444,7 @@ COMPONENT_DEPENDENCIES = {
         "DESARROLLADOR": {
             "requires": {"skills": ["git-branch-commit"],
                          "tools": [], "commands": [], "plugins": []},
-            "optional": {"skills": ["analizar-calidad-codigo"]},
+            "optional": {"skills": ["sac-analizar-calidad-codigo"]},
         },
     },
     # Skills -> dependencies
@@ -474,7 +474,7 @@ COMPONENT_DEPENDENCIES = {
                          "tools": [], "commands": [], "plugins": []},
             "optional": {},
         },
-        "analizar-calidad-codigo": {
+        "sac-analizar-calidad-codigo": {
             "requires": {"skills": [], "workflows": [],
                          "tools": [], "commands": [], "plugins": []},
             "optional": {},

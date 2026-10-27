@@ -27,7 +27,7 @@ ARTÉFACTOS (nombres reales según la skill que los genera)
 - config-entorno_{nombre_ms}_vX.Y.Z.md — lo genera env-config-audit
 - PIPELINE-REPORT_{runId}.md — lo genera ado-pipeline-analyzer (en `base_reports_path` del perfil ADO, no en esta carpeta)
 - AUDITORIA-SEGURIDAD-{fecha}.md — lo genera analizar-seguridad (opcional: solo existe si se pidió guardarlo)
-- calidad-codigo_{scope}_{fecha}.md — lo genera analizar-calidad-codigo (opcional: solo si se pidió guardarlo)
+- calidad-codigo_{scope}_{fecha}.md — lo genera sac-analizar-calidad-codigo (opcional: solo si se pidió guardarlo)
 
 NOTIFICACIÓN AL BANCO
 - Entrega lista. El banco crea PR release/vX.Y.Z → des y taggea vX.Y.Z en DES.

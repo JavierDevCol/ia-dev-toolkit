@@ -163,7 +163,7 @@ Cada fase referencia sus archivos de apoyo (`references/flujo-hotfix.sh`, `refer
 | `env-config-audit` |  analiza el diff | Checklist opción 1, 2a, 2b, 2c | Opción 1: `@env-config-audit sobre el diff origin/des..release/vX.Y.Z` · 2a: `@env-config-audit sobre el diff develop..<rama>` · 2b: `@env-config-audit sobre el diff develop..hotfix/<hotfix>` · 2c: `@env-config-audit sobre el diff origin/des..release/vX.Y.Z` |
 | `ado-pipeline-analyzer` | Valida build, tests, cobertura, DAST, SonarQube.| Checklist opción 1 | `@ado-pipeline-analyzer build latest del pipeline <nombre_pipeline> en rama develop` |
 | `analizar-seguridad` | Auditoría estática (SAST) de todo lo que se va a promover.  | Checklist opción 1, `scope=commits` | `@analizar-seguridad scope=commits sobre release/vX.Y.Z` |
-| `analizar-calidad-codigo` | Code smells y violaciones arquitectónicas de los cambios del release  | Checklist opción 1, `scope=commits` | `@analizar-calidad-codigo scope=commits sobre release/vX.Y.Z` |
+| `sac-analizar-calidad-codigo` | Code smells y violaciones arquitectónicas de los cambios del release  | Checklist opción 1, `scope=commits` | `@sac-analizar-calidad-codigo scope=commits sobre release/vX.Y.Z` |
 | `auto-versioning` | Calcula la versión siguiente según SemVer (breaking→MAJOR, feature→MINOR, fix→PATCH) | Regla 2 (inputs de Opción 1 y 2b) | `@auto-versioning calcular próxima versión desde el último tag (sin crear tag)` |
 
 Al ejecutar estas skills, **reflejar su resultado en el checklist de entrega** (marcar `[✓]`/`[✗]` sobre la copia de la entrega, nunca sobre la plantilla) — ver instrucción de uso al final de `references/checklist-entrega.txt`.
