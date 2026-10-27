@@ -172,7 +172,7 @@
 
 | Fecha | Acción | Detalle |
 |-------|--------|---------|
-| [timestamp] | Análisis inicial | Generado por >tomar_contexto |
+| [timestamp] | Análisis inicial | Generado por >sac_tomar_contexto |
 
 ---
 

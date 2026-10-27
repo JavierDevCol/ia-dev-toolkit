@@ -95,4 +95,4 @@ Siguiente: >ejecutar_plan [ID-HU]
 | Error | Causa | Solución |
 |-------|-------|----------|
 | HU no aprobada | Sin `[A]` | Ejecutar `>validar_hu` primero |
-| Sin contexto proyecto | No configurado | Ejecutar `>tomar_contexto` |
+| Sin contexto proyecto | No configurado | Ejecutar `>sac_tomar_contexto` |

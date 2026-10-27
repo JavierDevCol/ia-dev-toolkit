@@ -412,7 +412,7 @@ COMPONENT_DEPENDENCIES = {
     "workflows": {
         "definir-vision-producto": {
             "requires": {"tools": [], "commands": [], "skills": [], "plugins": []},
-            "optional": {"skills": ["tomar-contexto"]},
+            "optional": {"skills": ["sac-tomar-contexto"]},
         },
         "definir-arquitectura-solucion": {
             "requires": {"tools": ["workflow-sac", "workflow-discover"],
@@ -439,7 +439,7 @@ COMPONENT_DEPENDENCIES = {
         },
         "ARQUITECTO-DEVOPS": {
             "requires": {"skills": [], "tools": [], "commands": [], "plugins": []},
-            "optional": {"skills": ["tomar-contexto"]},
+            "optional": {"skills": ["sac-tomar-contexto"]},
         },
         "DESARROLLADOR": {
             "requires": {"skills": ["git-branch-commit"],
@@ -465,12 +465,12 @@ COMPONENT_DEPENDENCIES = {
             "optional": {},
         },
         "planificar-hu": {
-            "requires": {"skills": ["tomar-contexto"], "workflows": [],
+            "requires": {"skills": ["sac-tomar-contexto"], "workflows": [],
                          "tools": [], "commands": [], "plugins": []},
             "optional": {},
         },
         "refinar-hu": {
-            "requires": {"skills": ["tomar-contexto"], "workflows": [],
+            "requires": {"skills": ["sac-tomar-contexto"], "workflows": [],
                          "tools": [], "commands": [], "plugins": []},
             "optional": {},
         },
@@ -493,7 +493,7 @@ COMPONENT_DEPENDENCIES = {
 }
 ```
 
-> Los componentes hoja sin dependencias propias (p. ej. `tomar-contexto`) **no** necesitan
+> Los componentes hoja sin dependencias propias (p. ej. `sac-tomar-contexto`) **no** necesitan
 > entrada aquí: basta con que existan como componente descargable (aparezcan en el catálogo).
 
 ### 6.2 Tipos de nodo
@@ -953,7 +953,7 @@ de lo que **quedó instalado** (`components` = seeds + deps). Cada instalación 
       },
       "components": {
         "workflows": ["definir-arquitectura-solucion"],
-        "skills": ["crear-adr", "tomar-contexto"],
+        "skills": ["crear-adr", "sac-tomar-contexto"],
         "tools": ["workflow-sac", "workflow-discover"],
         "commands": ["workflow-sac"],
         "agents": [], "config": true
@@ -1323,7 +1323,7 @@ Salida de ejemplo (`diat --status /home/user/proyecto-1`):
    Estado:      ⚠️ desactualizado (a1b2c3d → f9e8d7c)
 
    workflows (1): definir-arquitectura-solucion
-   skills (2): crear-adr, tomar-contexto
+   skills (2): crear-adr, sac-tomar-contexto
    tools (2): workflow-sac, workflow-discover
    commands (1): workflow-sac
    config: ✅

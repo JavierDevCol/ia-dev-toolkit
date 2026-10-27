@@ -1,5 +1,5 @@
 ---
-name: tomar-contexto
+name: sac-tomar-contexto
 description: Use when {workspace} (workspace.md) is missing, outdated, or context is needed before refining HUs, planning, or DevOps diagnostics.
 ready: true
 ---
@@ -17,7 +17,7 @@ Genera el contexto del proyecto (workspace, scorecard, diagramas y archivos de a
 **Cuándo NO usar:**
 - `{workspace}` existe Y tiene < 7 días Y usuario no pidió regenerar.
 - Usuario solo quiere editar un archivo existente (usar skill específica).
-- Ya se ejecutó `tomar_contexto` en esta sesión (evitar duplicar).
+- Ya se ejecutó `sac_tomar_contexto` en esta sesión (evitar duplicar).
 
 ## Detección de Workspace
 

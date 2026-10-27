@@ -1,4 +1,4 @@
-# Estructura de Artifacts (tomar-contexto)
+# Estructura de Artifacts (sac-tomar-contexto)
 
 Usar las rutas cargadas con memctl desde `.SAC/config/sac.json` (`documentacion_sac_path`, `artifacts.*`, `archivos.*`):
 

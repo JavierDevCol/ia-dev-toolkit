@@ -156,7 +156,7 @@ mkdir -p "$TEST4_DIR"
 
 assert_file_not_exists "$TEST4_DIR/.SAC/workspace.md" "workspace.md NO existe"
 
-echo "  → sincronizar-backlog debería fallar con: 'Ejecutar >tomar_contexto primero'"
+echo "  → sincronizar-backlog debería fallar con: 'Ejecutar >sac_tomar_contexto primero'"
 
 echo ""
 

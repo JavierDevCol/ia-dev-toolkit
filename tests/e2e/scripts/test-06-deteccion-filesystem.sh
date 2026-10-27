@@ -382,7 +382,7 @@ if [ -f "$BACKLOG_FILE" ]; then
     echo "  → Si backlog dice [P] pero Plan.md dice COMPLETADO"
     echo "  → ejecutar-plan debería rechazar (filesystem manda)"
 else
-    echo -e "  ${YELLOW}⚠️  Backlog no existe aún (se creará con tomar-contexto)${NC}"
+    echo -e "  ${YELLOW}⚠️  Backlog no existe aún (se creará con sac-tomar-contexto)${NC}"
 fi
 
 echo ""

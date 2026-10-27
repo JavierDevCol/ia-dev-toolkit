@@ -48,7 +48,7 @@ Cruzar contra `artifacts/HU/dependencies_matrix.md`: si el ítem aparece como �
 
 ### 4. Generar o actualizar `backlog_desarrollo.md`
 
-- Si no existe → crearlo desde `{file:../tomar-contexto/assets/backlog_desarrollo_plantilla.md}`.
+- Si no existe → crearlo desde `{file:../sac-tomar-contexto/assets/backlog_desarrollo_plantilla.md}`.
 - Si ya existe → **edición quirúrgica**: agregar solo las filas nuevas al "Índice Rápido" (Estado `[ ]`, Prioridad y Tipo tomados del paso 3). No tocar ni regenerar filas de HUs de sprints anteriores.
 
 ### 5. Reporte final

@@ -63,6 +63,6 @@ Genera un set de reglas arquitectónicas para el proyecto mediante un cuestionar
 
 | Error | Causa | Solución |
 |-------|-------|----------|
-| No existe contexto del proyecto | No se ejecutó tomar_contexto | Ejecutar >tomar_contexto primero |
+| No existe contexto del proyecto | No se ejecutó sac_tomar_contexto | Ejecutar >sac_tomar_contexto primero |
 | Stack tecnológico no identificado | Contexto incompleto | Usar configuración genérica con preguntas ampliadas |
 | Respuesta no reconocida | Input inválido | Mostrar opciones válidas nuevamente |

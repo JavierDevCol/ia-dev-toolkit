@@ -11,7 +11,7 @@ digraph flujo_team_sac {
   nota_sprint0 [label="consolidacion.md:\nscaffold pendiente,\nprimeras HU de Sprint 0", fillcolor="#F8E71C"];
   gestionar_backlog [label="gestionar-backlog-roadmap\n(workflow)", fillcolor="#8E44AD", fontcolor=white];
   iniciar_sprint [label="iniciar-sprint\n(materializa HU.md +\nbacklog_desarrollo.md)", fillcolor="#50E3C2"];
-  tomar_contexto [label="tomar-contexto", shape=oval, fillcolor="#4A90D9", fontcolor=white];
+  sac_tomar_contexto [label="sac-tomar-contexto", shape=oval, fillcolor="#4A90D9", fontcolor=white];
   registrar_hallazgo [label="registrar-hallazgo\n(bug)", fillcolor="#F5A623"];
   refinar_hu [label="refinar-hu\n(feature)", fillcolor="#7BC67E"];
   refinada [label="[R] Refinada", shape=ellipse, fillcolor="#F8E71C"];
@@ -34,9 +34,9 @@ digraph flujo_team_sac {
   consolidador -> gestionar_backlog;
   nota_sprint0 -> gestionar_backlog;
   gestionar_backlog -> iniciar_sprint;
-  iniciar_sprint -> tomar_contexto;
-  tomar_contexto -> refinar_hu;
-  tomar_contexto -> registrar_hallazgo [label="si es bug"];
+  iniciar_sprint -> sac_tomar_contexto;
+  sac_tomar_contexto -> refinar_hu;
+  sac_tomar_contexto -> registrar_hallazgo [label="si es bug"];
   refinar_hu -> refinada;
   registrar_hallazgo -> refinada [label="crea Refinamiento.md"];
   refinada -> validar_hu;
@@ -60,7 +60,7 @@ digraph flujo_team_sac {
 // No modifican flujo_skills_sac de arriba, solo lo detallan.
 // ============================================================
 
-// tomar-contexto — Fuente: skills/tomar-contexto/SKILL.md (Fases A/B/C
+// sac-tomar-contexto — Fuente: skills/sac-tomar-contexto/SKILL.md (Fases A/B/C
 // + flowchart "Detección de Workspace" ya existente, integrado aquí).
 digraph skill_tomar_contexto {
   rankdir=LR;

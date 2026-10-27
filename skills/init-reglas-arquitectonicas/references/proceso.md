@@ -25,7 +25,7 @@ Ejecutar cada comando: **su salida ES el valor del placeholder** de su fila y se
 - **Plantilla propia:** leer `{file:./assets/reglas_arquitectonicas_plantilla.md}`
 - Verificar que existe contexto del proyecto:
   - Buscar `{workspace}` o archivo de contexto en `{contextos_folder}/`
-  - Si NO existe → Informar: "Necesito conocer el proyecto primero. Ejecuta >tomar_contexto"
+  - Si NO existe → Informar: "Necesito conocer el proyecto primero. Ejecuta >sac_tomar_contexto"
   - Extraer stack tecnológico y arquitectura del contexto
 
 ## 2. Detectar Modo de Operación

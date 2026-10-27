@@ -27,7 +27,7 @@ from diatlib import ui
 # Skills de la metodología SAC (ciclo de vida de HU + arquitectura/calidad + soporte).
 # Nota: validar-ca entra por dependencia de ejecutar-plan.
 SAC_SKILLS = [
-    "tomar-contexto",                                              # contexto del proyecto
+    "sac-tomar-contexto",                                              # contexto del proyecto
     "iniciar-sprint",                                              # materializa HU del sprint activo
     "refinar-hu", "validar-hu", "planificar-hu", "ejecutar-plan",  # ciclo de vida de HU
     "priorizar-backlog",                                           # orden real de ejecucion (dependencias + prioridad)

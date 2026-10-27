@@ -18,7 +18,7 @@ Refina una HU definiendo criterios de aceptación SMART, estimación y desglose 
 - Solicitud de re-refinamiento (modo ajuste)
 - HU sin `Refinamiento.md` o con estado `[N]`
 
-**Cuándo NO usar:** HU en `[R]` sin cambios → `>validar_hu`; HU en `[A]` o `[P]` → ya pasó este flujo; sin contexto → `>tomar_contexto`.
+**Cuándo NO usar:** HU en `[R]` sin cambios → `>validar_hu`; HU en `[A]` o `[P]` → ya pasó este flujo; sin contexto → `>sac_tomar_contexto`.
 
 ## Implementation
 

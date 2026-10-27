@@ -10,7 +10,7 @@ Verificar que las skills del pipeline SAC funcionan correctamente de punta a pun
 ## Pipeline bajo prueba
 
 ```
-tomar-contexto → refinar-hu → validar-hu → planificar-hu → ejecutar-plan → sincronizar-backlog
+sac-tomar-contexto → refinar-hu → validar-hu → planificar-hu → ejecutar-plan → sincronizar-backlog
                                                        ↗
                               registrar-hallazgo (bugs)
 ```
@@ -19,7 +19,7 @@ tomar-contexto → refinar-hu → validar-hu → planificar-hu → ejecutar-plan
 
 ### ESC-01: Flujo completo Feature (happy path)
 ```
-1. tomar-contexto    → crea workspace.md, contexto_proyecto.md, backlog
+1. sac-tomar-contexto    → crea workspace.md, contexto_proyecto.md, backlog
 2. refinar-hu        → crea HU.md + Refinamiento.md (estado [R])
 3. validar-hu        → aprueba HU, agrega ✅ Aprobada (estado [A])
 4. planificar-hu     → crea Plan.md (estado [P])
@@ -29,7 +29,7 @@ tomar-contexto → refinar-hu → validar-hu → planificar-hu → ejecutar-plan
 
 ### ESC-02: Flujo completo Bug
 ```
-1. tomar-contexto    → crea workspace
+1. sac-tomar-contexto    → crea workspace
 2. registrar-hallazgo → crea BUG-001/ con Refinamiento.md desde assets
 3. planificar-hu     → planifica bug (estado [P])
 4. ejecutar-plan     → ejecuta fix (estado [E] → [X])
@@ -52,9 +52,9 @@ tomar-contexto → refinar-hu → validar-hu → planificar-hu → ejecutar-plan
 
 ### ESC-05: Detección mono vs multi-proyecto
 ```
-1. tomar-contexto con 1 marcador en raíz → MODO_UNICO
-2. tomar-contexto con 0 marcadores + 2+ subcarpetas → MODO_MULTI
-3. tomar-contexto con 0 marcadores + 1 subcarpeta → Preguntar
+1. sac-tomar-contexto con 1 marcador en raíz → MODO_UNICO
+2. sac-tomar-contexto con 0 marcadores + 2+ subcarpetas → MODO_MULTI
+3. sac-tomar-contexto con 0 marcadores + 1 subcarpeta → Preguntar
 ```
 
 ## Métricas de éxito

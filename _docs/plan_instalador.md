@@ -44,7 +44,7 @@
                 "plugins": []
             },
             "optional": {
-                "skills": ["tomar-contexto"]
+                "skills": ["sac-tomar-contexto"]
             }
         },
         "definir-arquitectura-solucion": {
@@ -103,7 +103,7 @@
                 "plugins": []
             },
             "optional": {
-                "skills": ["tomar-contexto"]
+                "skills": ["sac-tomar-contexto"]
             }
         },
         "DESARROLLADOR": {
@@ -155,7 +155,7 @@
         },
         "planificar-hu": {
             "requires": {
-                "skills": ["tomar-contexto"],
+                "skills": ["sac-tomar-contexto"],
                 "workflows": [],
                 "tools": [],
                 "commands": [],
@@ -165,7 +165,7 @@
         },
         "refinar-hu": {
             "requires": {
-                "skills": ["tomar-contexto"],
+                "skills": ["sac-tomar-contexto"],
                 "workflows": [],
                 "tools": [],
                 "commands": [],

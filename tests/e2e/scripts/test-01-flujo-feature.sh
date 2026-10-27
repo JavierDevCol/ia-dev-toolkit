@@ -68,8 +68,8 @@ echo "  ESC-01: Flujo completo Feature"
 echo "=========================================="
 echo ""
 
-# ---- PASO 1: tomar-contexto ----
-echo -e "${YELLOW}PASO 1: tomar-contexto${NC}"
+# ---- PASO 1: sac-tomar-contexto ----
+echo -e "${YELLOW}PASO 1: sac-tomar-contexto${NC}"
 echo "  Verificando que el workspace mock tiene la estructura esperada..."
 
 # Verificar que el workspace tiene marcadores

@@ -117,7 +117,7 @@ assert_file_exists "$MONO/pom.xml" "pom.xml existe en raíz"
 assert_marker_count "$MONO" 1 "1 marcador de proyecto en raíz"
 assert_dir_exists "$MONO/.SAC/config" "Directorio .SAC/config existe"
 
-echo "  → tomar-contexto debería detectar: MODO_UNICO"
+echo "  → sac-tomar-contexto debería detectar: MODO_UNICO"
 
 echo ""
 
@@ -131,7 +131,7 @@ assert_marker_count "$MULTI" 0 "0 marcadores de proyecto en raíz"
 assert_subdirs_with_markers "$MULTI" 2 "2+ subcarpetas con marcadores"
 assert_dir_exists "$MULTI/.SAC/config" "Directorio .SAC/config existe"
 
-echo "  → tomar-contexto debería detectar: MODO_MULTI"
+echo "  → sac-tomar-contexto debería detectar: MODO_MULTI"
 
 echo ""
 
@@ -160,7 +160,7 @@ else
     echo -e "  ${RED}❌ Se esperaban 0 subcarpetas con marcadores, encontradas: $subdirs_with_markers${NC}"
 fi
 
-echo "  → tomar-contexto debería fallar: 'Sin proyecto detectable'"
+echo "  → sac-tomar-contexto debería fallar: 'Sin proyecto detectable'"
 
 echo ""
 

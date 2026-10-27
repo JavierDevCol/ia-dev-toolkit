@@ -46,7 +46,7 @@ echo -e "${YELLOW}IRA-01: Happy path — crear reglas desde cero${NC}"
 IRA01_DIR="$WS/artifacts"
 mkdir -p "$IRA01_DIR"
 
-assert_file_exists "$WS/.SAC/workspace.md" "workspace.md existe (prerequisito tomar-contexto)"
+assert_file_exists "$WS/.SAC/workspace.md" "workspace.md existe (prerequisito sac-tomar-contexto)"
 
 cat > "$IRA01_DIR/reglas_arquitectonicas.md" << 'EOF'
 # Reglas Arquitectónicas: mi-proyecto
@@ -94,7 +94,7 @@ IRA02_DIR="$FIXTURES_DIR/workspace-no-context"
 rm -rf "$IRA02_DIR"
 mkdir -p "$IRA02_DIR/.SAC/config"
 assert_file_not_exists "$IRA02_DIR/.SAC/workspace.md" "workspace.md NO existe"
-echo "  → init-reglas-arquitectonicas debería fallar: 'Ejecutar >tomar_contexto primero'"
+echo "  → init-reglas-arquitectonicas debería fallar: 'Ejecutar >sac_tomar_contexto primero'"
 
 echo ""
 
