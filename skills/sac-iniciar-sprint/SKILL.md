@@ -24,7 +24,7 @@ Materializa las HUs/Stories asignadas a un Sprint (definidas en `backlog_roadmap
 **Cuándo NO usar:**
 - No existe `artifacts/backlog_roadmap.md` → ejecutar el workflow `gestionar-backlog-roadmap` primero.
 - La HU ya tiene carpeta en `artifacts/HU/[ID-HU]/` → ya fue inicializada; usar `>sac_refinar_hu` directamente.
-- Se busca refinar, validar, planificar o ejecutar una HU → usar `sac-refinar-hu`/`sac-validar-hu`/`sac-planificar-hu`/`ejecutar-plan`. Esta skill **nunca** los invoca.
+- Se busca refinar, validar, planificar o ejecutar una HU → usar `sac-refinar-hu`/`sac-validar-hu`/`sac-planificar-hu`/`sac-ejecutar-plan`. Esta skill **nunca** los invoca.
 
 ## Implementation
 

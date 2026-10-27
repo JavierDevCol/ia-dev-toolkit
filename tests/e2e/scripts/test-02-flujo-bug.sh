@@ -175,8 +175,8 @@ assert_file_contains "$BUG_DIR/Plan.md" "Bugfix" "Plan.md identifica tipo Bugfix
 
 echo ""
 
-# ---- PASO 3: ejecutar-plan (simular ejecución del fix) ----
-echo -e "${YELLOW}PASO 3: ejecutar-plan (simular ejecución del fix)${NC}"
+# ---- PASO 3: sac-ejecutar-plan (simular ejecución del fix) ----
+echo -e "${YELLOW}PASO 3: sac-ejecutar-plan (simular ejecución del fix)${NC}"
 echo "  Simulando ejecución del plan de bug..."
 
 # Simular cambio de estado

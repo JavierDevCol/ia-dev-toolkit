@@ -133,7 +133,7 @@
                 "skills": ["registrar-hallazgo"]
             }
         },
-        "ejecutar-plan": {
+        "sac-ejecutar-plan": {
             "requires": {
                 "skills": ["sac-planificar-hu"],
                 "workflows": [],
@@ -381,7 +381,7 @@ print_banner() {
                 📋 SKILLS SAC DISPONIBLES
                 ══════════════════════════════════════════════════════════════════════
                 1. analizar-calidad-codigo             — Revisa código detectando code smells y violaciones | deps: .SAC/config/
-                2. ejecutar-plan                       — Implementa planes actualizando Plan.md | deps: .SAC/config/
+                2. sac-ejecutar-plan                       — Implementa planes actualizando Plan.md | deps: .SAC/config/
                 3. init-reglas-arquitectonicas         — Genera reglas arquitectónicas del proyecto | deps: .SAC/config/
                 4. sac-planificar-hu                       — Genera plan técnico desde HU aprobada | deps: .SAC/config/
                 5. sac-refinar-hu                          — Refina HUs con criterios SMART y estimación | deps: .SAC/config/

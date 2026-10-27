@@ -87,14 +87,14 @@ echo ""
 # ============================================
 # ESCENARIO 1: Plan en [E] En Ejecución
 # Plan.md con Estado=EN_PROGRESO + Tracking.md
-# ejecutar-plan debería continuar o rechazar
+# sac-ejecutar-plan debería continuar o rechazar
 # ============================================
 echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo -e "${YELLOW}ESCENARIO 1: Plan en [E] En Ejecución${NC}"
 echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
 echo "  Archivos: Plan.md (EN_PROGRESO) + Tracking.md"
-echo "  Skill: ejecutar-plan"
+echo "  Skill: sac-ejecutar-plan"
 echo "  Comportamiento esperado: continuar ejecución o rechazar según contexto"
 echo ""
 
@@ -200,7 +200,7 @@ assert_file_contains "$ESC1_DIR/Plan.md" "\[X\] EJEC-02" "EJEC-02 completada"
 assert_file_contains "$ESC1_DIR/Plan.md" "\[ \] EJEC-03" "EJEC-03 pendiente"
 
 echo ""
-echo "  → ejecutar-plan debería:"
+echo "  → sac-ejecutar-plan debería:"
 echo "    - Detectar EN_PROGRESO en Plan.md"
 echo "    - Continuar desde EJEC-03"
 echo "    - NO reiniciar desde EJEC-01"
@@ -410,7 +410,7 @@ echo "  ESCENARIO 1: Plan en [E] En Ejecución"
 echo "  - Plan.md: EN_PROGRESO ✅"
 echo "  - Tracking.md: EN_PROGRESO ✅"
 echo "  - Tareas parcialmente completadas ✅"
-echo "  - ejecutar-plan puede continuar ✅"
+echo "  - sac-ejecutar-plan puede continuar ✅"
 echo ""
 echo "  ESCENARIO 2: Backlog desincronizado"
 echo "  - Backlog dice: [P] Planificada ❌"

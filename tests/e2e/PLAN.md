@@ -10,7 +10,7 @@ Verificar que las skills del pipeline SAC funcionan correctamente de punta a pun
 ## Pipeline bajo prueba
 
 ```
-sac-tomar-contexto → sac-refinar-hu → sac-validar-hu → sac-planificar-hu → ejecutar-plan → sincronizar-backlog
+sac-tomar-contexto → sac-refinar-hu → sac-validar-hu → sac-planificar-hu → sac-ejecutar-plan → sincronizar-backlog
                                                        ↗
                               registrar-hallazgo (bugs)
 ```
@@ -23,7 +23,7 @@ sac-tomar-contexto → sac-refinar-hu → sac-validar-hu → sac-planificar-hu �
 2. sac-refinar-hu        → crea HU.md + Refinamiento.md (estado [R])
 3. sac-validar-hu        → aprueba HU, agrega ✅ Aprobada (estado [A])
 4. sac-planificar-hu     → crea Plan.md (estado [P])
-5. ejecutar-plan     → ejecuta plan, crea Tracking.md (estado [E] → [X])
+5. sac-ejecutar-plan     → ejecuta plan, crea Tracking.md (estado [E] → [X])
 6. sincronizar-backlog → actualiza backlog con estados correctos
 ```
 
@@ -32,20 +32,20 @@ sac-tomar-contexto → sac-refinar-hu → sac-validar-hu → sac-planificar-hu �
 1. sac-tomar-contexto    → crea workspace
 2. registrar-hallazgo → crea BUG-001/ con Refinamiento.md desde assets
 3. sac-planificar-hu     → planifica bug (estado [P])
-4. ejecutar-plan     → ejecuta fix (estado [E] → [X])
+4. sac-ejecutar-plan     → ejecuta fix (estado [E] → [X])
 ```
 
 ### ESC-03: Validación de prerequisitos (fallos esperados)
 ```
 1. sac-planificar-hu sin Refinamiento.md → ERROR esperado
-2. ejecutar-plan sin Plan.md → ERROR esperado
+2. sac-ejecutar-plan sin Plan.md → ERROR esperado
 3. sac-validar-hu sin HU refinada → ERROR esperado
 4. sincronizar-backlog sin workspace → ERROR esperado
 ```
 
 ### ESC-04: Transiciones de estado inválidas
 ```
-1. ejecutar-plan con Plan.md COMPLETADO → ERROR esperado
+1. sac-ejecutar-plan con Plan.md COMPLETADO → ERROR esperado
 2. sac-planificar-hu con HU en [R] (sin aprobación) → ERROR esperado
 3. sac-refinar-hu con HU en [A] (ya aprobada) → SKIP esperado
 ```

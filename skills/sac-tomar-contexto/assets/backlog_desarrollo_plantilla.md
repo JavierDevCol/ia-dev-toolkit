@@ -42,7 +42,7 @@
 [A] Aprobada
   ↓ >sac_planificar_hu (ARCHDEV)
 [P] Planificada
-  ↓ >ejecutar_plan (ARCHDEV)
+  ↓ >sac_ejecutar_plan (ARCHDEV)
 [E] En Ejecución
   ↓ (finaliza)
 [X] Completada

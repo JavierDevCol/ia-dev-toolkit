@@ -20,7 +20,7 @@ class ValidateDependenciesC1Test(unittest.TestCase):
         self._tmp.cleanup()
 
     def catalog(self, **over):
-        cat = {"skills": {"ejecutar-plan", "validar-ca"},
+        cat = {"skills": {"sac-ejecutar-plan", "validar-ca"},
                "workflows": set(), "agents": set(), "plugins": set(),
                "commands": set(), "tools": set()}
         cat.update(over)
@@ -28,8 +28,8 @@ class ValidateDependenciesC1Test(unittest.TestCase):
 
     def test_requires_ausente_aborta_con_ref_activa_y_bootstrap(self):     # B-07
         with self.assertRaises(deps.DependencyError) as cm:
-            deps.validate_dependencies(self.catalog(skills={"ejecutar-plan"}),
-                                       seeds=[("skills", "ejecutar-plan")])
+            deps.validate_dependencies(self.catalog(skills={"sac-ejecutar-plan"}),
+                                       seeds=[("skills", "sac-ejecutar-plan")])
         msg = str(cm.exception)
         self.assertIn("skills:validar-ca", msg)
         self.assertIn("ref activa: v2.1.1", msg)
@@ -37,7 +37,7 @@ class ValidateDependenciesC1Test(unittest.TestCase):
 
     def test_requires_presente_sin_errores(self):
         warnings = deps.validate_dependencies(self.catalog(),
-                                              seeds=[("skills", "ejecutar-plan")])
+                                              seeds=[("skills", "sac-ejecutar-plan")])
         self.assertEqual(warnings, [])
 
     def test_seed_ausente_es_warning_no_error(self):
@@ -57,13 +57,13 @@ class ValidateDependenciesC1Test(unittest.TestCase):
         # workflows:definir-vision-producto exige workflow-sac ausente del catálogo,
         # pero NO es alcanzable desde las seeds -> no bloquea.
         warnings = deps.validate_dependencies(self.catalog(),
-                                              seeds=[("skills", "ejecutar-plan")],
+                                              seeds=[("skills", "sac-ejecutar-plan")],
                                               dependencies=deps.for_platform(".opencode"))
         self.assertEqual(warnings, [])
 
     def test_sin_seeds_valida_grafo_completo(self):
         with self.assertRaises(deps.DependencyError):
-            deps.validate_dependencies(self.catalog(skills={"ejecutar-plan"}), seeds=None,
+            deps.validate_dependencies(self.catalog(skills={"sac-ejecutar-plan"}), seeds=None,
                                        dependencies=deps.for_platform(".opencode"))
 
     def test_for_platform_opencode_requiere_plugin_y_command(self):

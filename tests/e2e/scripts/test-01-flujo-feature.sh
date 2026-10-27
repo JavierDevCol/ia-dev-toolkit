@@ -250,8 +250,8 @@ assert_file_contains "$HU_DIR/Plan.md" "EJEC-01" "Plan.md tiene tareas definidas
 
 echo ""
 
-# ---- PASO 5: ejecutar-plan (simular ejecución) ----
-echo -e "${YELLOW}PASO 5: ejecutar-plan (simular ejecución)${NC}"
+# ---- PASO 5: sac-ejecutar-plan (simular ejecución) ----
+echo -e "${YELLOW}PASO 5: sac-ejecutar-plan (simular ejecución)${NC}"
 echo "  Simulando ejecución del plan..."
 
 # Simular cambio de estado a EN_PROGRESO

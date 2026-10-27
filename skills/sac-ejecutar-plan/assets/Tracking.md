@@ -58,5 +58,5 @@
 ---
 
 > **Archivo:** `{hu_folder}/[ID-HU]/Tracking.md`
-> **Creado por:** `>ejecutar_plan`
-> **Actualizado por:** `>ejecutar_plan` (en tiempo real)
+> **Creado por:** `>sac_ejecutar_plan`
+> **Actualizado por:** `>sac_ejecutar_plan` (en tiempo real)

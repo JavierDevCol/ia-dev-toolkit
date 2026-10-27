@@ -54,8 +54,8 @@ echo "  ESC-04: Transiciones de estado inválidas"
 echo "=========================================="
 echo ""
 
-# ---- TEST 1: ejecutar-plan con Plan.md COMPLETADO ----
-echo -e "${YELLOW}TEST 1: ejecutar-plan con Plan.md COMPLETADO${NC}"
+# ---- TEST 1: sac-ejecutar-plan con Plan.md COMPLETADO ----
+echo -e "${YELLOW}TEST 1: sac-ejecutar-plan con Plan.md COMPLETADO${NC}"
 echo "  Verificando que NO se puede ejecutar un plan completado..."
 
 TEST1_DIR="$WS/artifacts/HU/HU-TRANS-01"
@@ -74,7 +74,7 @@ cat > "$TEST1_DIR/Plan.md" << 'EOF'
 EOF
 
 assert_file_contains "$TEST1_DIR/Plan.md" "COMPLETADO" "Plan.md tiene estado COMPLETADO"
-echo "  → ejecutar-plan debería rechazar: 'Plan ya completado'"
+echo "  → sac-ejecutar-plan debería rechazar: 'Plan ya completado'"
 
 echo ""
 
@@ -174,8 +174,8 @@ echo "  → sac-validar-hu debería rechazar: 'HU ya aprobada, usar >sac_planifi
 
 echo ""
 
-# ---- TEST 5: ejecutar-plan con Plan.md EN_PROGRESO ----
-echo -e "${YELLOW}TEST 5: ejecutar-plan con Plan.md EN_PROGRESO${NC}"
+# ---- TEST 5: sac-ejecutar-plan con Plan.md EN_PROGRESO ----
+echo -e "${YELLOW}TEST 5: sac-ejecutar-plan con Plan.md EN_PROGRESO${NC}"
 echo "  Verificando el comportamiento con plan ya en ejecución..."
 
 TEST5_DIR="$WS/artifacts/HU/HU-TRANS-05"
@@ -194,7 +194,7 @@ cat > "$TEST5_DIR/Plan.md" << 'EOF'
 EOF
 
 assert_file_contains "$TEST5_DIR/Plan.md" "EN_PROGRESO" "Plan.md tiene estado EN_PROGRESO"
-echo "  → ejecutar-plan debería continuar o rechazar según contexto"
+echo "  → sac-ejecutar-plan debería continuar o rechazar según contexto"
 
 echo ""
 

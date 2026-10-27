@@ -21,7 +21,7 @@ digraph flujo_team_sac {
   priorizar_backlog [label="priorizar-backlog\n(orden real por\ndependencias + prioridad)", fillcolor="#9B59B6", fontcolor=white];
   sac_planificar_hu [label="sac-planificar-hu", fillcolor="#7BC67E"];
   planificada [label="[P] Planificada", shape=ellipse, fillcolor="#F8E71C"];
-  ejecutar_plan [label="ejecutar-plan", fillcolor="#7BC67E"];
+  sac_ejecutar_plan [label="sac-ejecutar-plan", fillcolor="#7BC67E"];
   validar_ca [label="validar-ca\n(granular por task +\nfinal integración/todos)", fillcolor="#50E3C2"];
   detenido [label="DETENIDO\n(CA PARCIAL /\nNO CUMPLIDO)", fillcolor="#D0021B", fontcolor=white];
   completada [label="[X] Completada", shape=ellipse, fillcolor="#7ED321"];
@@ -44,10 +44,10 @@ digraph flujo_team_sac {
   sac_validar_hu -> aprobada [label="CA claros"];
   aprobada -> priorizar_backlog [label="todas las HU\ndel sprint en [A]/[P]"];
   priorizar_backlog -> sac_planificar_hu [label="en el orden\nsugerido"];
-  sac_planificar_hu -> planificada -> ejecutar_plan;
-  ejecutar_plan -> validar_ca [label="por task\n(granular)"];
-  validar_ca -> ejecutar_plan [label="CUMPLIDO"];
-  ejecutar_plan -> validar_ca [label="al completar\ntodas las tasks"];
+  sac_planificar_hu -> planificada -> sac_ejecutar_plan;
+  sac_ejecutar_plan -> validar_ca [label="por task\n(granular)"];
+  validar_ca -> sac_ejecutar_plan [label="CUMPLIDO"];
+  sac_ejecutar_plan -> validar_ca [label="al completar\ntodas las tasks"];
   validar_ca -> detenido [label="PARCIAL /\nNO CUMPLIDO"];
   validar_ca -> completada [label="todos\nCUMPLIDO"];
   completada -> sincronizar_backlog -> fin;
@@ -267,7 +267,7 @@ digraph skill_planificar_hu {
   generar -> backbone -> fin;
 }
 
-// ejecutar-plan — Fuente: skills/ejecutar-plan/SKILL.md (Decision Flow oficial).
+// sac-ejecutar-plan — Fuente: skills/sac-ejecutar-plan/SKILL.md (Decision Flow oficial).
 digraph skill_ejecutar_plan {
   rankdir=LR
   node [fontname="Helvetica" fontsize=10]

@@ -157,4 +157,4 @@
 
 > **Archivo:** `{hu_folder}/BUG-NNN/RefinamientoBug.md`
 > **Creado por:** `>registrar_bug`
-> **Actualizado por:** `>sac_planificar_hu`, `>ejecutar_plan`
+> **Actualizado por:** `>sac_planificar_hu`, `>sac_ejecutar_plan`

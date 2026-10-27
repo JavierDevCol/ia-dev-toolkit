@@ -190,9 +190,9 @@ La validación **nunca se detiene** por un ❌: se evalúan todos los CAs del sc
 |-------|-------|----------|
 | Refinamiento no encontrado | HU no refinada | Verificar que la HU fue refinada |
 | Plan no encontrado | HU no planificada | Ejecutar >sac_planificar_hu primero |
-| No hay código implementado | Tasks no ejecutadas | Ejecutar >ejecutar_plan primero |
+| No hay código implementado | Tasks no ejecutadas | Ejecutar >sac_ejecutar_plan primero |
 | Tasks pendientes para integración | Tasks incompletas | Completar todas las tasks primero |
 
 ## Después de ejecutar
 
-- `>ejecutar_plan [ID-HU] --task_id [siguiente]` → continuar con siguiente task
+- `>sac_ejecutar_plan [ID-HU] --task_id [siguiente]` → continuar con siguiente task

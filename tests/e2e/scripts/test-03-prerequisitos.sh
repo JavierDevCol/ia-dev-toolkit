@@ -91,9 +91,9 @@ echo "  → sac-planificar-hu debería fallar con: 'Ejecutar >sac_refinar_hu pri
 
 echo ""
 
-# ---- TEST 2: ejecutar-plan sin Plan.md ----
-echo -e "${YELLOW}TEST 2: ejecutar-plan sin Plan.md${NC}"
-echo "  Verificando que ejecutar-plan NO puede ejecutar sin Plan.md..."
+# ---- TEST 2: sac-ejecutar-plan sin Plan.md ----
+echo -e "${YELLOW}TEST 2: sac-ejecutar-plan sin Plan.md${NC}"
+echo "  Verificando que sac-ejecutar-plan NO puede ejecutar sin Plan.md..."
 
 TEST2_DIR="$WS/artifacts/HU/HU-TEST-02"
 mkdir -p "$TEST2_DIR"
@@ -120,7 +120,7 @@ assert_file_exists "$TEST2_DIR/HU.md" "HU.md existe"
 assert_file_exists "$TEST2_DIR/Refinamiento.md" "Refinamiento.md existe con aprobación"
 assert_file_not_exists "$TEST2_DIR/Plan.md" "Plan.md NO existe (prerequisito faltante)"
 
-echo "  → ejecutar-plan debería fallar con: 'Ejecutar >sac_planificar_hu primero'"
+echo "  → sac-ejecutar-plan debería fallar con: 'Ejecutar >sac_planificar_hu primero'"
 
 echo ""
 
@@ -160,9 +160,9 @@ echo "  → sincronizar-backlog debería fallar con: 'Ejecutar >sac_tomar_contex
 
 echo ""
 
-# ---- TEST 5: ejecutar-plan con Plan.md COMPLETADO ----
-echo -e "${YELLOW}TEST 5: ejecutar-plan con Plan.md COMPLETADO${NC}"
-echo "  Verificando que ejecutar-plan NO puede ejecutar un plan ya completado..."
+# ---- TEST 5: sac-ejecutar-plan con Plan.md COMPLETADO ----
+echo -e "${YELLOW}TEST 5: sac-ejecutar-plan con Plan.md COMPLETADO${NC}"
+echo "  Verificando que sac-ejecutar-plan NO puede ejecutar un plan ya completado..."
 
 TEST5_DIR="$WS/artifacts/HU/HU-TEST-05"
 mkdir -p "$TEST5_DIR"
@@ -175,7 +175,7 @@ EOF
 
 assert_file_exists "$TEST5_DIR/Plan.md" "Plan.md existe con estado COMPLETADO"
 
-echo "  → ejecutar-plan debería fallar con: 'Plan ya completado'"
+echo "  → sac-ejecutar-plan debería fallar con: 'Plan ya completado'"
 
 echo ""
 

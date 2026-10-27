@@ -10,7 +10,7 @@ Usar las rutas cargadas con memctl desde `.SAC/config/sac.json` (`documentacion_
 │       ├── Refinamiento.md    (desde skills/sac-refinar-hu/assets/Refinamiento.md)
 │       ├── RefinamientoBug.md (solo bugs, desde skills/registrar-hallazgo/assets/RefinamientoBug.md)
 │       ├── Plan.md            (desde skills/sac-planificar-hu/assets/Plan.md)
-│       └── Tracking.md        (desde skills/ejecutar-plan/assets/Tracking.md)
+│       └── Tracking.md        (desde skills/sac-ejecutar-plan/assets/Tracking.md)
 ├── {adr_folder relative}/
 ├── {code_smells_folder relative}/
 ├── {contextos_folder relative}/

@@ -78,7 +78,7 @@ Sin `{{usuario.nombre}}` configurado, la línea queda `> **Planificador:** ArchD
 
 ```
 ✅ PLAN GENERADO: [ID-HU] | Modo: [Plano/Particionada] | Fases: [N] | Tareas: [M] | Est: [X]h
-Siguiente: >ejecutar_plan [ID-HU]
+Siguiente: >sac_ejecutar_plan [ID-HU]
 ```
 
 ## Quick Reference

@@ -1,5 +1,5 @@
 ---
-name: ejecutar-plan
+name: sac-ejecutar-plan
 description: Use when a HU is in [P] Planned state and the user requests implementation. Triggers on "execute plan", "implement HU", "start implementation", PENDIENTE status.
 ready: true
 ---

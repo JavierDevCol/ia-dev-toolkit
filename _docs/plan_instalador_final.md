@@ -359,7 +359,7 @@ Al seleccionar esta opción se instala todo el paquete SAC:
 📋 SKILLS SAC DISPONIBLES
 ══════════════════════════════════════════════════════════════════════
 1. analizar-calidad-codigo   — Revisa código detectando code smells y violaciones | deps: config/
-2. ejecutar-plan             — Implementa planes actualizando Plan.md               | deps: config/
+2. sac-ejecutar-plan             — Implementa planes actualizando Plan.md               | deps: config/
 3. init-reglas-arquitectonicas — Genera reglas arquitectónicas del proyecto         | deps: config/
 4. sac-planificar-hu             — Genera plan técnico desde HU aprobada                | deps: config/
 5. sac-refinar-hu                — Refina HUs con criterios SMART y estimación          | deps: config/
@@ -454,7 +454,7 @@ COMPONENT_DEPENDENCIES = {
                          "tools": [], "commands": [], "plugins": []},
             "optional": {"skills": ["registrar-hallazgo"]},
         },
-        "ejecutar-plan": {
+        "sac-ejecutar-plan": {
             "requires": {"skills": ["sac-planificar-hu"], "workflows": [],
                          "tools": [], "commands": [], "plugins": []},
             "optional": {},

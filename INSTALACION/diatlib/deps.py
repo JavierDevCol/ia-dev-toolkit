@@ -41,8 +41,8 @@ COMPONENT_DEPENDENCIES = {
 
     # Skills -> única invocación real skill→skill encontrada en el contenido.
     "skills": {
-        # ejecutar-plan (paso 6) delega en la skill validar-ca (>validar_ca).
-        "ejecutar-plan": {
+        # sac-ejecutar-plan (paso 6) delega en la skill validar-ca (>validar_ca).
+        "sac-ejecutar-plan": {
             "requires": {"skills": ["validar-ca"]},
             "optional": {},
         },
