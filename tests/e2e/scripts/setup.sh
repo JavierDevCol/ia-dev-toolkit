@@ -17,6 +17,20 @@ log_info() { echo -e "${YELLOW}ℹ️  $1${NC}"; }
 # ============================================
 # WORKSPACE MONO-PROYECTO
 # ============================================
+# Genera .SAC/config/sac.json desde la plantilla del repo ({project-root} -> $1).
+write_sac_json() {
+    sed "s|{project-root}|$1|g" "$REPO_ROOT/config/config/sac.json" > "$1/.SAC/config/sac.json"
+    python3 - "$1/.SAC/config/sac.json" "$2" "$3" <<'PY'
+import json, sys
+p, nombre, proyecto = sys.argv[1:]
+d = json.load(open(p, encoding="utf-8"))
+d["usuario"]["nombre"] = nombre
+d["proyecto"]["nombre"] = proyecto
+d["idiomas"]["documentacion"] = d["idiomas"]["comunicacion"] = "es"
+open(p, "w", encoding="utf-8").write(json.dumps(d, indent=2, ensure_ascii=False) + "\n")
+PY
+}
+
 setup_mono() {
     local WS="$FIXTURES_DIR/workspace-mono"
     log_info "Creando workspace mono-proyecto en $WS"
@@ -50,19 +64,7 @@ EOF
     mkdir -p "$WS/.SAC/config"
     mkdir -p "$WS/.SAC/session"
     
-    sed "s|{project-root}|$WS|g" "$REPO_ROOT/config/config/CONFIG_SYSTEM.yaml" > "$WS/.SAC/config/CONFIG_SYSTEM.yaml"
-    
-    cat > "$WS/.SAC/config/CONFIG_USER.yaml" << EOF
-usuario:
-  nombre: "Tester"
-  rol: "developer"
-
-idioma: "es"
-
-proyecto:
-  nombre: "mi-proyecto"
-  tipo: "mono"
-EOF
+    write_sac_json "$WS" "Tester" "mi-proyecto"
 
     cat > "$WS/.SAC/workspace.md" << 'EOF'
 # Workspace: mi-proyecto
@@ -137,19 +139,7 @@ EOF
     mkdir -p "$WS/.SAC/config"
     mkdir -p "$WS/.SAC/session"
     
-    sed "s|{project-root}|$WS|g" "$REPO_ROOT/config/config/CONFIG_SYSTEM.yaml" > "$WS/.SAC/config/CONFIG_SYSTEM.yaml"
-    
-    cat > "$WS/.SAC/config/CONFIG_USER.yaml" << EOF
-usuario:
-  nombre: "Tester"
-  rol: "developer"
-
-idioma: "es"
-
-proyecto:
-  nombre: "multi-test"
-  tipo: "multi"
-EOF
+    write_sac_json "$WS" "Tester" "multi-test"
     
     log_ok "Workspace multi-proyecto creado"
 }

@@ -93,7 +93,7 @@ echo "  → pr-config-audit debería alertar siempre, nunca incluir valores real
 
 echo ""
 
-echo -e "${YELLOW}PCA-05: Sin memory_skill.json${NC}"
+echo -e "${YELLOW}PCA-05: Sin output_folder en sac.json${NC}"
 echo "  → pr-config-audit debería preguntar carpeta de salida"
 
 echo ""

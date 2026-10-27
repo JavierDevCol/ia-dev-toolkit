@@ -100,13 +100,13 @@ echo "  → Si usuario pide y-statement, usar assets/adr_y_statement.md"
 
 echo ""
 
-echo -e "${YELLOW}CADR-05: Sin memory_skill.json${NC}"
-echo "  → Si no existe, preguntar carpeta y crear memory_skill.json"
+echo -e "${YELLOW}CADR-05: Sin .SAC/config/sac.json${NC}"
+echo "  → Instalación SAC incompleta: indicar ejecutar diat (no crear sac.json a mano)"
 
 echo ""
 
 echo -e "${YELLOW}CADR-06: output_folder es null${NC}"
-echo "  → Si memory_skill.json existe pero sin output_folder, preguntar y persistir"
+echo "  → Si sac.json existe pero output_folder es null, preguntar y persistir en output_folder"
 
 echo ""
 
@@ -287,7 +287,7 @@ echo "  → git-doc-sync debería hacer push selectivo de archivos elegidos"
 
 echo ""
 
-echo -e "${YELLOW}GDS-02: Sin memory_skill.json${NC}"
+echo -e "${YELLOW}GDS-02: Sin sac.json${NC}"
 echo "  → git-doc-sync debería preguntar nombre, ruta, ramas"
 
 echo ""

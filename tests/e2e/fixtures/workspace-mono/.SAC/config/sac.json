@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "usuario": {
+    "nombre": "Tester",
+    "rol": "developer"
+  },
+  "proyecto": {
+    "nombre": "mi-proyecto",
+    "tipo": "mono"
+  },
+  "rutas": {
+    "artifacts_folder": "/home/javier-garcia/Documentos/squad-skills/tests/e2e/scripts/../fixtures/workspace-mono/artifacts",
+    "config_folder": "/home/javier-garcia/Documentos/squad-skills/tests/e2e/scripts/../fixtures/workspace-mono/.SAC/config",
+    "herramientas_folder": "/home/javier-garcia/Documentos/squad-skills/tests/e2e/scripts/../fixtures/workspace-mono/.SAC/herramientas",
+    "agentes_folder": "/home/javier-garcia/Documentos/squad-skills/tests/e2e/scripts/../fixtures/workspace-mono/.SAC/agentes"
+  },
+  "archivos": {
+    "backlog": "/home/javier-garcia/Documentos/squad-skills/tests/e2e/scripts/../fixtures/workspace-mono/artifacts/backlog_desarrollo.md",
+    "reglas_arquitectonicas": "/home/javier-garcia/Documentos/squad-skills/tests/e2e/scripts/../fixtures/workspace-mono/artifacts/reglas_arquitectonicas.md",
+    "workspace": "/home/javier-garcia/Documentos/squad-skills/tests/e2e/scripts/../fixtures/workspace-mono/artifacts/workspace.md"
+  },
+  "artifacts": {
+    "hu_folder": "/home/javier-garcia/Documentos/squad-skills/tests/e2e/scripts/../fixtures/workspace-mono/artifacts/HU",
+    "adr_folder": "/home/javier-garcia/Documentos/squad-skills/tests/e2e/scripts/../fixtures/workspace-mono/artifacts/ADR",
+    "code_smells_folder": "/home/javier-garcia/Documentos/squad-skills/tests/e2e/scripts/../fixtures/workspace-mono/artifacts/code_smells",
+    "bugs_folder": "/home/javier-garcia/Documentos/squad-skills/tests/e2e/scripts/../fixtures/workspace-mono/artifacts/bugs",
+    "lecciones_aprendidas": "/home/javier-garcia/Documentos/squad-skills/tests/e2e/scripts/../fixtures/workspace-mono/artifacts/lecciones_aprendidas.md",
+    "pendientes": "/home/javier-garcia/Documentos/squad-skills/tests/e2e/scripts/../fixtures/workspace-mono/artifacts/pendientes.md",
+    "pendientes_folder": "/home/javier-garcia/Documentos/squad-skills/tests/e2e/scripts/../fixtures/workspace-mono/artifacts/pendientes",
+    "deuda_tecnica_folder": "/home/javier-garcia/Documentos/squad-skills/tests/e2e/scripts/../fixtures/workspace-mono/artifacts/deuda_tecnica",
+    "contextos_folder": "/home/javier-garcia/Documentos/squad-skills/tests/e2e/scripts/../fixtures/workspace-mono/artifacts/contextos"
+  },
+  "multi_proyecto": {
+    "marcadores_proyecto": null,
+    "java": "[\"pom.xml\", \"build.gradle\", \"build.gradle.kts\"]",
+    "javascript": "[\"package.json\"]",
+    "python": "[\"pyproject.toml\", \"setup.py\", \"requirements.txt\"]",
+    "dotnet": "[\"*.csproj\", \"*.sln\"]",
+    "rust": "[\"Cargo.toml\"]",
+    "go": "[\"go.mod\"]",
+    "patron_contexto": "contexto_proyecto_{nombre}.md",
+    "patron_stack": "stack_proyecto_{nombre}.md",
+    "patron_hu_proyecto": "HU/{nombre_proyecto}/"
+  },
+  "rutas_reglas": {
+    "reglas_folder": "/home/javier-garcia/Documentos/squad-skills/tests/e2e/scripts/../fixtures/workspace-mono/.SAC/reglas"
+  },
+  "reglas": {
+    "mermaid": "/home/javier-garcia/Documentos/squad-skills/tests/e2e/scripts/../fixtures/workspace-mono/.SAC/reglas/mermaid.rules.md"
+  }
+}
