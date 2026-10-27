@@ -21,13 +21,23 @@ class PlantillaTest(unittest.TestCase):
         self.assertEqual(t["usuario"]["nombre"], "")
         self.assertIs(t["usuario"]["incluir_firma_en_documentos"], True)
         self.assertIn("documentacion", t["idiomas"])
-        self.assertIn("nombre", t["proyecto"])
         self.assertTrue(t["artifacts"]["hu_folder"].startswith("{project-root}"))
         self.assertIsNone(t["ado"]["config"]["perfil_activo"])
         self.assertIsNone(t["gh-pr-reviewer"]["config"]["coding_standards_path"])
         self.assertNotIn("config_user", t["archivos"])
         self.assertNotIn("output_folder", t["rutas"])
         self.assertIsNone(t["output_folder"])
+
+    def test_plantilla_sin_campos_muertos(self):
+        t = self.t
+        for sec in ("proyecto", "rutas_reglas", "reglas"):
+            self.assertNotIn(sec, t)
+        for k in ("config_folder", "herramientas_folder", "agentes_folder"):
+            self.assertNotIn(k, t["rutas"])
+        self.assertNotIn("bugs_folder", t["artifacts"])
+        self.assertEqual(set(t["multi_proyecto"]), {"patron_contexto"})
+        for k in ("code_smells_folder", "pendientes_folder", "deuda_tecnica_folder", "lecciones_aprendidas"):
+            self.assertIn(k, t["artifacts"])
 
     def test_secciones_de_skill_no_usan_nombres_reservados(self):
         for s in SKILL_SECTIONS:
@@ -75,7 +85,7 @@ class EnsureSacConfigTest(unittest.TestCase):
         raro.mkdir(parents=True)
         sac_config.ensure_sac_config(self.cache, raro)
         t = json.loads((raro / ".SAC/config/sac.json").read_text(encoding="utf-8"))
-        self.assertEqual(t["rutas"]["config_folder"], f"{raro}/.SAC/config")
+        self.assertEqual(t["artifacts"]["hu_folder"], f"{raro}/artifacts/HU")
         t = sac_config.resolve_project_root({"a": ["{project-root}/x"]}, "C:\\mi proyecto")
         self.assertEqual(t["a"][0], "C:\\mi proyecto/x")
 
@@ -101,7 +111,7 @@ class EnsureSacConfigTest(unittest.TestCase):
         t = json.loads(self.dst.read_text(encoding="utf-8"))
         self.assertTrue(t["usuario"]["nombre"])
         self.assertEqual(t["idiomas"]["documentacion"], "es")
-        self.assertEqual(t["proyecto"]["nombre"], "proj")
+        self.assertNotIn("proyecto", t)
         t["usuario"]["nombre"] = "Ana"
         self.dst.write_text(json.dumps(t), encoding="utf-8")
         sac_config.ensure_sac_config(self.cache, self.proj, interview=True, interactive=False)

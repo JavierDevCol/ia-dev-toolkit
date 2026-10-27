@@ -46,7 +46,7 @@ class MigrarTest(unittest.TestCase):
         t = self.sac()
         self.assertEqual(t["usuario"], {"nombre": "Ana", "incluir_firma_en_documentos": False})
         self.assertEqual(t["idiomas"], {"documentacion": "en", "comunicacion": ""})
-        self.assertEqual(t["proyecto"]["nombre"], "Mi Proyecto")
+        self.assertNotIn("proyecto", t)                       # campo sin uso: no se migra
         self.assertTrue((self.p / ".SAC/config/CONFIG_USER.yaml.legacy").exists())
         self.assertFalse((self.p / ".SAC/config/CONFIG_USER.yaml").exists())
 

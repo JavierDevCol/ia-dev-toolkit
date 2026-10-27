@@ -8,18 +8,12 @@
     "documentacion": "",
     "comunicacion": ""
   },
-  "proyecto": {
-    "nombre": ""
-  },
   "output_folder": null,
   "rutas_override": {
     "artifacts_folder": ""
   },
   "rutas": {
-    "artifacts_folder": "{project-root}/artifacts",
-    "config_folder": "{project-root}/.SAC/config",
-    "herramientas_folder": "{project-root}/.SAC/herramientas",
-    "agentes_folder": "{project-root}/.SAC/agentes"
+    "artifacts_folder": "{project-root}/artifacts"
   },
   "archivos": {
     "backlog": "{project-root}/artifacts/backlog_desarrollo.md",
@@ -30,7 +24,6 @@
     "hu_folder": "{project-root}/artifacts/HU",
     "adr_folder": "{project-root}/artifacts/ADR",
     "code_smells_folder": "{project-root}/artifacts/code_smells",
-    "bugs_folder": "{project-root}/artifacts/bugs",
     "lecciones_aprendidas": "{project-root}/artifacts/lecciones_aprendidas.md",
     "pendientes": "{project-root}/artifacts/pendientes.md",
     "pendientes_folder": "{project-root}/artifacts/pendientes",
@@ -38,40 +31,7 @@
     "contextos_folder": "{project-root}/artifacts/contextos"
   },
   "multi_proyecto": {
-    "marcadores_proyecto": {
-      "java": [
-        "pom.xml",
-        "build.gradle",
-        "build.gradle.kts"
-      ],
-      "javascript": [
-        "package.json"
-      ],
-      "python": [
-        "pyproject.toml",
-        "setup.py",
-        "requirements.txt"
-      ],
-      "dotnet": [
-        "*.csproj",
-        "*.sln"
-      ],
-      "rust": [
-        "Cargo.toml"
-      ],
-      "go": [
-        "go.mod"
-      ]
-    },
-    "patron_contexto": "contexto_proyecto_{nombre}.md",
-    "patron_stack": "stack_proyecto_{nombre}.md",
-    "patron_hu_proyecto": "HU/{nombre_proyecto}/"
-  },
-  "rutas_reglas": {
-    "reglas_folder": "{project-root}/.SAC/reglas"
-  },
-  "reglas": {
-    "mermaid": "{project-root}/.SAC/reglas/mermaid.rules.md"
+    "patron_contexto": "contexto_proyecto_{nombre}.md"
   },
   "ado": {
     "config": {

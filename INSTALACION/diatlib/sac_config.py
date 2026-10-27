@@ -48,21 +48,19 @@ def resolve_project_root(tree, project):
 
 
 def _ask_project_config(project, interactive):
-    """Entrevista para usuario/proyecto/idioma. Sin TTY -> valores por defecto."""
+    """Entrevista para usuario/idioma. Sin TTY -> valores por defecto."""
     default_user = os.environ.get("USER") or os.environ.get("USERNAME") or "Usuario"
-    default_proj = Path(project).name
     if not (interactive and sys.stdin.isatty()):
-        return {"nombre": default_user, "proyecto": default_proj, "idioma": "es"}
+        return {"nombre": default_user, "idioma": "es"}
 
     print(f"\n{'═' * 60}")
     print("  📝 CONFIGURACIÓN DEL PROYECTO")
     print(f"{'═' * 60}")
     print("  (Enter = valor por defecto)\n")
     nombre = input(f"  Tu nombre [{default_user}]: ").strip() or default_user
-    proyecto = input(f"  Nombre del proyecto [{default_proj}]: ").strip() or default_proj
     print("\n  Idioma:  [1] Español (es)  [2] English (en)  [3] Português (pt)")
     idioma = {"1": "es", "2": "en", "3": "pt"}.get(input("  Selección [1]: ").strip(), "es")
-    return {"nombre": nombre, "proyecto": proyecto, "idioma": idioma}
+    return {"nombre": nombre, "idioma": idioma}
 
 
 def _write(path, tree):
@@ -72,7 +70,7 @@ def _write(path, tree):
 def ensure_sac_config(cache, project, interview=False, interactive=True):
     """Crea .SAC/config/sac.json desde la plantilla del cache, o lo fusiona si ya existe.
     - Existe: agrega solo claves nuevas de la plantilla; no entrevista.
-    - Nuevo: resuelve {project-root}; con interview=True rellena usuario/idiomas/proyecto.
+    - Nuevo: resuelve {project-root}; con interview=True rellena usuario/idiomas.
     - Existente inválido: lo respalda como sac.json.bad, NO lo pisa y lanza SacConfigError.
     Devuelve la ruta de sac.json."""
     src = Path(cache) / "config" / "config" / CONFIG_NAME
@@ -102,6 +100,5 @@ def ensure_sac_config(cache, project, interview=False, interactive=True):
         tpl["usuario"]["nombre"] = a["nombre"]
         tpl["idiomas"]["documentacion"] = a["idioma"]
         tpl["idiomas"]["comunicacion"] = a["idioma"]
-        tpl["proyecto"]["nombre"] = a["proyecto"]
     _write(dst, tpl)
     return dst

@@ -20,12 +20,11 @@ log_info() { echo -e "${YELLOW}ℹ️  $1${NC}"; }
 # Genera .SAC/config/sac.json desde la plantilla del repo ({project-root} -> $1).
 write_sac_json() {
     sed "s|{project-root}|$1|g" "$REPO_ROOT/config/config/sac.json" > "$1/.SAC/config/sac.json"
-    python3 - "$1/.SAC/config/sac.json" "$2" "$3" <<'PY'
+    python3 - "$1/.SAC/config/sac.json" "$2" <<'PY'
 import json, sys
-p, nombre, proyecto = sys.argv[1:]
+p, nombre = sys.argv[1:]
 d = json.load(open(p, encoding="utf-8"))
 d["usuario"]["nombre"] = nombre
-d["proyecto"]["nombre"] = proyecto
 d["idiomas"]["documentacion"] = d["idiomas"]["comunicacion"] = "es"
 open(p, "w", encoding="utf-8").write(json.dumps(d, indent=2, ensure_ascii=False) + "\n")
 PY
@@ -64,7 +63,7 @@ EOF
     mkdir -p "$WS/.SAC/config"
     mkdir -p "$WS/.SAC/session"
     
-    write_sac_json "$WS" "Tester" "mi-proyecto"
+    write_sac_json "$WS" "Tester"
 
     cat > "$WS/.SAC/workspace.md" << 'EOF'
 # Workspace: mi-proyecto
@@ -139,7 +138,7 @@ EOF
     mkdir -p "$WS/.SAC/config"
     mkdir -p "$WS/.SAC/session"
     
-    write_sac_json "$WS" "Tester" "multi-test"
+    write_sac_json "$WS" "Tester"
     
     log_ok "Workspace multi-proyecto creado"
 }

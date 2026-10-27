@@ -127,7 +127,7 @@ instala sola. La configuración SAC ya respondida **no se sobrescribe**.
 ### Configuración SAC: `.SAC/config/sac.json`
 
 Un único archivo JSON por proyecto reemplaza a `CONFIG_USER.yaml`, `CONFIG_SYSTEM.yaml` y `memory_skill.json`:
-usuario/idioma/proyecto, rutas del sistema (`{project-root}` resuelto al instalar) y el estado de cada skill
+usuario/idioma, rutas del sistema (`{project-root}` resuelto al instalar) y el estado de cada skill
 (`ado`, `handoff-release`, `env-config-audit`, `gh-pr-reviewer`). Las skills lo leen con `.SAC/memctl.sh`.
 
 - Se crea (o se fusiona) cada vez que se instalan skills o config: solo agrega claves nuevas de la plantilla, **nunca pisa valores del usuario**.
