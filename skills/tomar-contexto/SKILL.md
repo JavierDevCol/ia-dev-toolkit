@@ -63,7 +63,24 @@ digraph workspace_detection {
 ## Implementation
 
 ### Fase A: Cargar y Confirmar
-1. Leer `.SAC/config/CONFIG_SYSTEM.yaml` (`artifacts_folder`, `hu_folder`, `contextos_folder`, `adr_folder`) y `CONFIG_USER.yaml` (idioma, overrides, `usuario.nombre` → `{{usuario.nombre}}`, usado en la Fase C si `usuario.incluir_firma_en_documentos` es `true`). Sin `.SAC/config/` → avisar "No hay instalación SAC".
+1. Leer la config con memctl (`artifacts_folder` = `rutas.artifacts_folder`; `hu_folder`, `contextos_folder`, `adr_folder` = `artifacts.*`; idioma, override y `usuario.nombre` → `{{usuario.nombre}}`, usado en la Fase C si `usuario.incluir_firma_en_documentos` es `true`):
+
+```sh
+sh .SAC/memctl.sh get usuario.nombre
+sh .SAC/memctl.sh get usuario.incluir_firma_en_documentos
+sh .SAC/memctl.sh get rutas.artifacts_folder
+sh .SAC/memctl.sh get rutas_override.artifacts_folder
+sh .SAC/memctl.sh get artifacts.hu_folder
+sh .SAC/memctl.sh get artifacts.contextos_folder
+sh .SAC/memctl.sh get artifacts.adr_folder
+sh .SAC/memctl.sh get archivos.workspace
+sh .SAC/memctl.sh get idiomas.documentacion
+sh .SAC/memctl.sh get idiomas.comunicacion
+```
+
+memctl es solo lectura y su salida ES la respuesta; si falla, leer `.SAC/config/sac.json` con `jq`; nunca inventar valores. `null`, vacío o exit 2 → no configurado.
+
+   `rutas_override.artifacts_folder` vacío o exit 2 → sin override (no es un fallo). Sin `.SAC/config/sac.json` (memctl sale con exit 2) → avisar "No hay instalación SAC".
 2. Plantillas propias desde `{file:./assets/}` (backlog, contexto, workspace, lecciones_aprendidas, pendientes).
 3. Si existe contexto y no hay `--force` → preguntar [U] usar / [R] regenerar.
 4. Mostrar profundidad (`--profundidad_analisis`: basico/completo/exhaustivo) y proyectos detectados; esperar confirmación.

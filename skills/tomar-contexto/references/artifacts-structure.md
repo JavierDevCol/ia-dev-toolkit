@@ -1,6 +1,6 @@
 # Estructura de Artifacts (tomar-contexto)
 
-Usar las rutas cargadas de `CONFIG_SYSTEM` / `CONFIG_USER`:
+Usar las rutas cargadas con memctl desde `.SAC/config/sac.json` (`rutas.*`, `artifacts.*`, `archivos.*`, `rutas_override.*`):
 
 ```
 {artifacts_folder}/
@@ -24,7 +24,7 @@ Usar las rutas cargadas de `CONFIG_SYSTEM` / `CONFIG_USER`:
 
 ## Crear carpetas del sistema
 - Crear `{artifacts_folder}/` y subcarpetas: `HU/`, `ADR/`, `code_smells/`, `{contextos_folder}/`, `deuda_tecnica/`, `pendientes/`.
-- Crear `.SAC/config/` si no existe.
+- No crear `.SAC/config/` ni `sac.json`: los instala `diat`. Si falta → avisar "No hay instalación SAC".
 
 ## Generar archivos de contexto
 - **Mono-Proyecto:** `{contextos_folder}/contexto_proyecto.md` (desde `{file:./assets/contexto_proyecto_plantilla.md}`) + `{archivos.workspace}` (Tipo: Mono-Proyecto).
