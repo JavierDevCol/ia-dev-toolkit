@@ -42,12 +42,21 @@ Revisa código mediante sub-agentes en paralelo para detectar vulnerabilidades d
 
 **Fase B — Consolidar:** unificar hallazgos de los sub-agentes que corrieron, eliminar duplicados, ordenar por severidad (Crítica→Alta→Media→Baja) y mostrar la confianza (alta/media/baja) de cada uno.
 
-**Fase C — Reporte:** presentar tabla consolidada en el chat. Si el usuario pide guardarlo, generar `AUDITORIA-SEGURIDAD-{fecha}.md` en el `output_folder` de `memory_skill.json` (si es `null`, preguntar la carpeta). Al guardar, leer también `usuario.nombre` de `CONFIG_USER.yaml` (ruta en `archivos.config_user`) y, si `usuario.incluir_firma_en_documentos` es `true`, agregar al final del archivo:
+**Fase C — Reporte:** presentar tabla consolidada en el chat. Si el usuario pide guardarlo, generar `AUDITORIA-SEGURIDAD-{fecha}.md` en el `output_folder` global (si es `null`, preguntar la carpeta y persistirla en `output_folder` de `.SAC/config/sac.json`, editando solo esa clave). Al guardar, leer la config con memctl y, si `usuario.incluir_firma_en_documentos` es `true`, agregar al final del archivo:
+
+```sh
+sh .SAC/memctl.sh get usuario.nombre
+sh .SAC/memctl.sh get usuario.incluir_firma_en_documentos
+sh .SAC/memctl.sh get output_folder
+```
+
+memctl es solo lectura y su salida ES la respuesta; si falla, leer `.SAC/config/sac.json` con `jq`; nunca inventar valores. `null`, vacío o exit 2 → no configurado.
+
 
 > **Auditor de Seguridad:** {{usuario.nombre}}
 > **Fecha:** {{fecha}}
 
-Si `usuario.nombre` está vacío o el archivo no existe, omitir el sufijo (`> **Auditor de Seguridad:**`); no inventar un nombre.
+Si `usuario.nombre` está vacío o la clave no existe, omitir el sufijo (`> **Auditor de Seguridad:**`); no inventar un nombre.
 
 **Reglas obligatorias:**
 1. Solo análisis estático — nunca ejecutar código, escanear red ni invocar herramientas externas.
