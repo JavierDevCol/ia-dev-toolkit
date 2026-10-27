@@ -1,9 +1,9 @@
 # Estructura de Artifacts (tomar-contexto)
 
-Usar las rutas cargadas con memctl desde `.SAC/config/sac.json` (`rutas.*`, `artifacts.*`, `archivos.*`, `rutas_override.*`):
+Usar las rutas cargadas con memctl desde `.SAC/config/sac.json` (`documentacion_sac_path`, `artifacts.*`, `archivos.*`):
 
 ```
-{artifacts_folder}/
+{documentacion_sac_path}/
 ├── HU/
 │   └── [ID-HU]/
 │       ├── HU.md              (desde skills/refinar-hu/assets/HU.md)
@@ -23,7 +23,7 @@ Usar las rutas cargadas con memctl desde `.SAC/config/sac.json` (`rutas.*`, `art
 ```
 
 ## Crear carpetas del sistema
-- Crear `{artifacts_folder}/` y subcarpetas desde las rutas de memctl: `{hu_folder}`, `{adr_folder}`, `{code_smells_folder}`, `{contextos_folder}`, `{deuda_tecnica_folder}`, `{pendientes_folder}`.
+- Crear `{documentacion_sac_path}/` y subcarpetas desde las rutas de memctl: `{hu_folder}`, `{adr_folder}`, `{code_smells_folder}`, `{contextos_folder}`, `{deuda_tecnica_folder}`, `{pendientes_folder}`.
 - No crear `.SAC/config/` ni `sac.json`: los instala `diat`. Si falta → avisar "No hay instalación SAC".
 
 ## Generar archivos de contexto

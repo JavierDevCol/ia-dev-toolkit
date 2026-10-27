@@ -63,13 +63,12 @@ digraph workspace_detection {
 ## Implementation
 
 ### Fase A: Cargar y Confirmar
-1. Leer la config con memctl (`artifacts_folder` = `rutas.artifacts_folder`; `hu_folder`, `contextos_folder`, `adr_folder`, `code_smells_folder`, `deuda_tecnica_folder`, `pendientes_folder`, `lecciones_aprendidas` = `artifacts.*`; `backlog`, `reglas_arquitectonicas`, `workspace` = `archivos.*`; `patron_contexto` = `multi_proyecto.patron_contexto`; idioma, override y `usuario.nombre` → `{{usuario.nombre}}`, usado en la Fase C si `usuario.incluir_firma_en_documentos` es `true`):
+1. Leer la config con memctl (`documentacion_sac_path` = raíz única donde se crean todas las carpetas y archivos; `hu_folder`, `contextos_folder`, `adr_folder`, `code_smells_folder`, `deuda_tecnica_folder`, `pendientes_folder`, `lecciones_aprendidas` = `artifacts.*`; `backlog`, `reglas_arquitectonicas`, `workspace` = `archivos.*`; `patron_contexto` = `multi_proyecto.patron_contexto`; idioma y `usuario.nombre` → `{{usuario.nombre}}`, usado en la Fase C si `usuario.incluir_firma_en_documentos` es `true`):
 
 ```sh
 sh .SAC/memctl.sh get usuario.nombre
 sh .SAC/memctl.sh get usuario.incluir_firma_en_documentos
-sh .SAC/memctl.sh get rutas.artifacts_folder
-sh .SAC/memctl.sh get rutas_override.artifacts_folder
+sh .SAC/memctl.sh get documentacion_sac_path
 sh .SAC/memctl.sh get artifacts.hu_folder
 sh .SAC/memctl.sh get artifacts.contextos_folder
 sh .SAC/memctl.sh get artifacts.adr_folder
@@ -87,7 +86,7 @@ sh .SAC/memctl.sh get idiomas.comunicacion
 
 memctl es solo lectura y su salida ES la respuesta; si memctl no existe (exit 127), leer `.SAC/config/sac.json` con `jq` o usar `~/.SAC/memctl.sh` (instalación global); si sale con exit 1 (JSON inválido o vacío), detenerse y avisar: no leer ni editar el archivo a mano; nunca inventar valores. `null`, vacío o exit 2 → no configurado.
 
-   `rutas_override.artifacts_folder` vacío o exit 2 → sin override (no es un fallo). Sin `.SAC/config/sac.json` (memctl sale con exit 2) → avisar "No hay instalación SAC".
+   Todo lo que esta skill cree debe quedar dentro de `{documentacion_sac_path}`. Sin `.SAC/config/sac.json` (memctl sale con exit 2) → avisar "No hay instalación SAC".
 2. Plantillas propias desde `{file:./assets/}` (backlog, contexto, workspace, lecciones_aprendidas, pendientes).
 3. Si existe contexto y no hay `--force` → preguntar [U] usar / [R] regenerar.
 4. Mostrar profundidad (`--profundidad_analisis`: basico/completo/exhaustivo) y proyectos detectados; esperar confirmación.
