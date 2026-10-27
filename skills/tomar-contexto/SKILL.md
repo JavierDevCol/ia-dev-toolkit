@@ -86,7 +86,7 @@ Ejecutar cada comando: **su salida ES el valor del placeholder** de su fila y se
 | `idiomas.documentacion` | `sh .SAC/memctl.sh get idiomas.documentacion` |
 | `idiomas.comunicacion` | `sh .SAC/memctl.sh get idiomas.comunicacion` |
 
-memctl es solo lectura y su salida ES la respuesta; si memctl no existe (exit 127), leer `.SAC/config/sac.json` con `jq` o usar `~/.SAC/memctl.sh` (instalación global); si sale con exit 1 (JSON inválido o vacío), detenerse y avisar: no leer ni editar el archivo a mano; nunca inventar valores. `null`, vacío o exit 2 → no configurado.
+memctl es solo lectura y su salida ES la respuesta; si memctl no existe (exit 127), leer `.SAC/config/sac.json` con `jq`; si sale con exit 1 (JSON inválido o vacío), detenerse y avisar: no leer ni editar el archivo a mano; nunca inventar valores. `null`, vacío o exit 2 → no configurado.
 
    Todo lo que esta skill cree debe quedar dentro de `{documentacion_sac_path}`. Sin `.SAC/config/sac.json` (memctl sale con exit 2) → avisar "No hay instalación SAC".
 2. Plantillas propias desde `{file:./assets/}` (backlog, contexto, workspace, lecciones_aprendidas, pendientes).
