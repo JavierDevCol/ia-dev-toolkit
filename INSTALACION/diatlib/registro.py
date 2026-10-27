@@ -25,6 +25,11 @@ _PLATFORMS = (".opencode", ".claude")
 RENAMED_SKILLS = {n: f"ado-{n}" for n in (
     "hu-publisher", "pipeline-analyzer", "pr-creator",
     "pr-reviewer", "profile-setup", "task-creator")}
+RENAMED_SKILLS.update({n: f"sac-{n}" for n in (
+    "tomar-contexto", "iniciar-sprint", "refinar-hu", "validar-hu", "planificar-hu",
+    "ejecutar-plan", "validar-ca", "priorizar-backlog", "sincronizar-backlog",
+    "registrar-hallazgo", "init-reglas-arquitectonicas", "crear-adr",
+    "analizar-calidad-codigo", "analizar-seguridad")})
 
 
 # ============================================================
