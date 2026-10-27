@@ -259,6 +259,12 @@ def _status_system():
     else:
         print(f"  Repo:    ⚠️  hay actualización ({(local_sha or '?')[:7]} → {remote_sha[:7]})")
     print(f"\n  Proyectos registrados: {len(registro.load_installations())}")
+    home = Path.home().resolve()
+    antiguas = registro.find_installations(home)
+    if antiguas:                                    # la instalación global ya no se admite
+        plats = ", ".join(i["platform"] for i in antiguas)
+        ui.print_warning(f"Instalación global antigua en {home} ({plats}): ya no se admite. "
+                         "Quítala con 'diat --uninstall ~' e instala por proyecto.")
 
 
 def _status_project(project):

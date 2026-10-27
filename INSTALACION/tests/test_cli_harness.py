@@ -117,6 +117,27 @@ class UpdatePorPlataformaTest(_Base):
         self.assertTrue(all(i["sha"] == "NEW" for i in registro.find_installations(self.P)))
 
 
+class StatusInstalacionGlobalAntiguaTest(_Base):
+    def _status(self):
+        out = io.StringIO()
+        with patch("diatlib.github.get_remote_sha", return_value="S"), \
+             patch("diatlib.github.get_latest_release_tag", return_value="v2.1.1"), \
+             redirect_stdout(out):
+            self.cli._status_system()
+        return out.getvalue()
+
+    def test_status_avisa_de_instalacion_global_antigua(self):
+        registro.save_installation(Path.home(), ".claude", {}, {}, "S")
+        txt = self._status()
+        self.assertIn("global", txt)
+        self.assertIn("diat --uninstall", txt)
+        self.assertIn(str(Path.home().resolve()), txt)
+
+    def test_status_sin_global_no_avisa(self):
+        registro.save_installation(self.P, ".claude", {}, {}, "S")
+        self.assertNotIn("global", self._status())
+
+
 class StatusProyectoTest(_Base):
     def test_status_muestra_cada_instalacion(self):
         for plat in (".opencode", ".claude"):
