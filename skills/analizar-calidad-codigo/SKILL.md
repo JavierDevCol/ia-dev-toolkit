@@ -19,12 +19,14 @@ Revisa código mediante sub-agentes en paralelo para detectar code smells y viol
 ## Implementation
 1. **Cargar configuración con memctl:** leer `archivos.reglas_arquitectonicas`, `documentacion_sac_path` y el nombre del usuario. Mostrar scope/modo/archivos/reglas al usuario. `usuario.nombre` → `{{usuario.nombre}}`, necesario para firmar el reporte en el paso 5. Si `usuario.incluir_firma_en_documentos` es `false`, omitir el bloque de firma; si el nombre está vacío o la clave no existe, omitir el sufijo de la firma; no inventar un nombre.
 
-```sh
-sh .SAC/memctl.sh get usuario.nombre
-sh .SAC/memctl.sh get usuario.incluir_firma_en_documentos
-sh .SAC/memctl.sh get archivos.reglas_arquitectonicas
-sh .SAC/memctl.sh get documentacion_sac_path
-```
+Ejecutar cada comando: **su salida ES el valor del placeholder** de su fila y se usa tal cual en el resto de esta skill (no recalcular ni inventar rutas):
+
+| Placeholder / dato | Valor = salida de |
+|---|---|
+| `{{usuario.nombre}}` | `sh .SAC/memctl.sh get usuario.nombre` |
+| `usuario.incluir_firma_en_documentos` | `sh .SAC/memctl.sh get usuario.incluir_firma_en_documentos` |
+| `{reglas_arquitectonicas}` | `sh .SAC/memctl.sh get archivos.reglas_arquitectonicas` |
+| `{documentacion_sac_path}` | `sh .SAC/memctl.sh get documentacion_sac_path` |
 
 memctl es solo lectura y su salida ES la respuesta; si memctl no existe (exit 127), leer `.SAC/config/sac.json` con `jq` o usar `~/.SAC/memctl.sh` (instalación global); si sale con exit 1 (JSON inválido o vacío), detenerse y avisar: no leer ni editar el archivo a mano; nunca inventar valores. `null`, vacío o exit 2 → no configurado.
 2. **Determinar archivos:**
