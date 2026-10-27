@@ -1,6 +1,6 @@
 ---
 name: tomar-contexto
-description: Use when {archivos.workspace} (workspace.md) is missing, outdated, or context is needed before refining HUs, planning, or DevOps diagnostics.
+description: Use when {workspace} (workspace.md) is missing, outdated, or context is needed before refining HUs, planning, or DevOps diagnostics.
 ready: true
 ---
 
@@ -10,12 +10,12 @@ ready: true
 Genera el contexto del proyecto (workspace, scorecard, diagramas y archivos de artifacts) detectando tecnología, arquitectura y DevOps a partir de la configuración del sistema.
 
 ## When to Use
-- No existe `{archivos.workspace}` (workspace.md) o el contexto tiene más de 7 días.
+- No existe `{workspace}` (workspace.md) o el contexto tiene más de 7 días.
 - El usuario solicita analizar o inicializar un proyecto (mono o multi-proyecto).
 - Se requiere contexto previo para refinar HUs, planificar o diagnosticar DevOps.
 
 **Cuándo NO usar:**
-- `{archivos.workspace}` existe Y tiene < 7 días Y usuario no pidió regenerar.
+- `{workspace}` existe Y tiene < 7 días Y usuario no pidió regenerar.
 - Usuario solo quiere editar un archivo existente (usar skill específica).
 - Ya se ejecutó `tomar_contexto` en esta sesión (evitar duplicar).
 

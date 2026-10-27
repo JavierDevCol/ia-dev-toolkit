@@ -12,7 +12,7 @@
 |----|-----------|-------------|-----------|----------------|--------------|-------|--------|
 | PND-001 | [🔧 Deuda Técnica / 🎨 Mejora UX / ⚡ Optimización / 🔍 Verificación / 🧪 Investigación / 📎 Con Evidencia] | [Descripción breve] | [🟡 Baja / 🟠 Media] | [HU-XXX / —] | [Contexto] | [YYYY-MM-DD] | [📝 Registrado / 🚀 Promovido a HU-XXX / 🐛 Reclasificado a BUG-XXX / ❌ Descartado] |
 
-> **Detalle:** Pendientes con categoría 📎 **Con Evidencia** o que requieran contexto extenso tienen archivo individual en `{{artifacts.pendientes_folder}}/PND-NNN_descripcion.md`
+> **Detalle:** Pendientes con categoría 📎 **Con Evidencia** o que requieran contexto extenso tienen archivo individual en `{pendientes_folder}/PND-NNN_descripcion.md`
 
 ---
 

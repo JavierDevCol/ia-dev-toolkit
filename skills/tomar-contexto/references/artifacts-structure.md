@@ -27,14 +27,14 @@ Usar las rutas cargadas con memctl desde `.SAC/config/sac.json` (`rutas.*`, `art
 - No crear `.SAC/config/` ni `sac.json`: los instala `diat`. Si falta → avisar "No hay instalación SAC".
 
 ## Generar archivos de contexto
-- **Mono-Proyecto:** `{contextos_folder}/contexto_proyecto.md` (desde `{file:./assets/contexto_proyecto_plantilla.md}`) + `{archivos.workspace}` (Tipo: Mono-Proyecto).
-- **Multi-Proyecto:** por cada proyecto `{contextos_folder}/` + `{patron_contexto}` (`multi_proyecto.patron_contexto`, p. ej. `contexto_proyecto_{nombre}.md`), documentando relaciones en "Dependencias de Proyecto"; `{archivos.workspace}` con Tipo: Multi-Proyecto.
+- **Mono-Proyecto:** `{contextos_folder}/contexto_proyecto.md` (desde `{file:./assets/contexto_proyecto_plantilla.md}`) + `{workspace}` (Tipo: Mono-Proyecto).
+- **Multi-Proyecto:** por cada proyecto `{contextos_folder}/` + `{patron_contexto}` (`multi_proyecto.patron_contexto`, p. ej. `contexto_proyecto_{nombre}.md`), documentando relaciones en "Dependencias de Proyecto"; `{workspace}` con Tipo: Multi-Proyecto.
 
 ## Formato de salida
 **Mono-Proyecto:**
 ```
 ✅ WORKSPACE CONFIGURADO (Mono-Proyecto)
-📁 {archivos.workspace}
+📁 {workspace}
 📁 {contextos_folder}/contexto_proyecto.md
 📊 Scorecard: Arq X/10 | Stack X/10 | Test X/10 | DevOps X/10 | Docs X/10
 ```
@@ -42,7 +42,7 @@ Usar las rutas cargadas con memctl desde `.SAC/config/sac.json` (`rutas.*`, `art
 **Multi-Proyecto:**
 ```
 ✅ WORKSPACE CONFIGURADO (Multi-Proyecto)
-📁 {archivos.workspace}
+📁 {workspace}
 📁 {contextos_folder}/ (N contextos generados)
 📊 Scorecard Global: X/10
 ```
