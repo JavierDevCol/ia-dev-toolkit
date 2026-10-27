@@ -120,6 +120,8 @@ def migrate_legacy(project):
         tree["idiomas"] = {k: v or "" for k, v in yu["idiomas"].items()}
     if "proyecto" in yu:
         tree["proyecto"] = {k: v or "" for k, v in yu["proyecto"].items()}
+    if "rutas_override" in yu:                            # override de carpeta de artifacts (lo lee tomar-contexto)
+        tree["rutas_override"] = {k: v or "" for k, v in yu["rutas_override"].items()}
     if "output_folder" in mem:
         tree["output_folder"] = mem["output_folder"]
     for k, v in mem.items():

@@ -50,6 +50,11 @@ class MigrarTest(unittest.TestCase):
         self.assertTrue((self.p / ".SAC/config/CONFIG_USER.yaml.legacy").exists())
         self.assertFalse((self.p / ".SAC/config/CONFIG_USER.yaml").exists())
 
+    def test_rutas_override_se_migra(self):
+        self.yaml_user(USER_YAML + 'rutas_override:\n  artifacts_folder: "docs/artifacts"\n')
+        migrar.migrate_legacy(self.p)
+        self.assertEqual(self.sac()["rutas_override"], {"artifacts_folder": "docs/artifacts"})
+
     def test_yaml_con_comentarios_y_comillas(self):
         self.yaml_user('usuario:\n  nombre: "A # B"   # c\n  incluir_firma_en_documentos: true\n')
         migrar.migrate_legacy(self.p)
