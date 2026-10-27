@@ -42,12 +42,12 @@ Revisa código mediante sub-agentes en paralelo para detectar vulnerabilidades d
 
 **Fase B — Consolidar:** unificar hallazgos de los sub-agentes que corrieron, eliminar duplicados, ordenar por severidad (Crítica→Alta→Media→Baja) y mostrar la confianza (alta/media/baja) de cada uno.
 
-**Fase C — Reporte:** presentar tabla consolidada en el chat. Si el usuario pide guardarlo, generar `AUDITORIA-SEGURIDAD-{fecha}.md` en el `output_folder` global (si es `null`, preguntar la carpeta y persistirla en `output_folder` de `.SAC/config/sac.json`, editando solo esa clave). Al guardar, leer la config con memctl y, si `usuario.incluir_firma_en_documentos` es `true`, agregar al final del archivo:
+**Fase C — Reporte:** presentar tabla consolidada en el chat. Si el usuario pide guardarlo, generar `AUDITORIA-SEGURIDAD-{fecha}.md` en `{documentacion_sac_path}/auditoria_seguridad/` (crear la subcarpeta si no existe; nunca escribir fuera de `{documentacion_sac_path}`). Al guardar, leer la config con memctl y, si `usuario.incluir_firma_en_documentos` es `true`, agregar al final del archivo:
 
 ```sh
 sh .SAC/memctl.sh get usuario.nombre
 sh .SAC/memctl.sh get usuario.incluir_firma_en_documentos
-sh .SAC/memctl.sh get output_folder
+sh .SAC/memctl.sh get documentacion_sac_path
 ```
 
 memctl es solo lectura y su salida ES la respuesta; si memctl no existe (exit 127), leer `.SAC/config/sac.json` con `jq` o usar `~/.SAC/memctl.sh` (instalación global); si sale con exit 1 (JSON inválido o vacío), detenerse y avisar: no leer ni editar el archivo a mano; nunca inventar valores. `null`, vacío o exit 2 → no configurado.
