@@ -53,7 +53,16 @@ Cruzar contra `artifacts/HU/dependencies_matrix.md`: si el ítem aparece como �
 
 ### 5. Reporte final
 
-Leer también `CONFIG_USER.yaml` (ruta en `archivos.config_user`) y tomar `usuario.nombre`. Si `usuario.incluir_firma_en_documentos` es `true` y `usuario.nombre` no está vacío, agregar la línea de firma al final del reporte. Si está vacío, el archivo no existe, o la opción es `false`, omitir esa línea; no inventar un nombre.
+Leer con memctl `usuario.nombre` y `usuario.incluir_firma_en_documentos`:
+
+```sh
+sh .SAC/memctl.sh get usuario.nombre
+sh .SAC/memctl.sh get usuario.incluir_firma_en_documentos
+```
+
+memctl es solo lectura y su salida ES la respuesta; si falla, leer `.SAC/config/sac.json` con `jq`; nunca inventar valores. `null`, vacío o exit 2 → no configurado.
+
+Si `usuario.incluir_firma_en_documentos` es `true` y `usuario.nombre` no está vacío, agregar la línea de firma al final del reporte. Si está vacío, la clave no existe, o la opción es `false`, omitir esa línea; no inventar un nombre.
 
 ```
 ✅ SPRINT [N] INICIALIZADO
