@@ -53,8 +53,7 @@ class PlantillaTest(unittest.TestCase):
     def test_chat_dm_trae_la_forma_de_un_destinatario_vacio(self):
         self.assertEqual(self.t["chat-dm"], {
             "config": {"destinatarios": [{"alias": "", "tipo": "space", "valor": ""}],
-                       "zona_horaria": None, "alias_en_chat": []},
-            "memory": {}})
+                       "zona_horaria": None, "alias_en_chat": []}})
 
     def test_agenda_laboral_viene_sin_valores_por_defecto(self):
         self.assertEqual(self.t["agenda-laboral"], {
@@ -64,8 +63,7 @@ class PlantillaTest(unittest.TestCase):
                 "jornada": {"lunes_jueves": {"inicio": None, "fin": None},
                             "viernes": {"inicio": None, "fin": None}},
                 "almuerzo": {"inicio": None, "duracion_min": None},
-                "alias_en_notas": []},
-            "memory": {}})
+                "alias_en_notas": []}})
 
     def test_plantilla_sin_datos_personales_ni_ids_privados(self):
         import re

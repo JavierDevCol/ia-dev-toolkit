@@ -74,8 +74,7 @@
       ],
       "zona_horaria": null,
       "alias_en_chat": []
-    },
-    "memory": {}
+    }
   },
   "agenda-laboral": {
     "config": {
@@ -99,7 +98,6 @@
         "duracion_min": null
       },
       "alias_en_notas": []
-    },
-    "memory": {}
+    }
   }
 }
