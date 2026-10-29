@@ -92,9 +92,10 @@ ORDER BY [System.ChangedDate] DESC
 
 ### 3. Ejecutar (MCP primero)
 
-1. Usar las tools del servidor MCP `ado` (cargar con ToolSearch si no están). Los
-   nombres canónicos están en `_docs/tools-mcp-ado.md`: usa solo esos. Si una tool
-   que necesitas no está en el catálogo, dilo — **nunca inventes nombres de tools**.
+1. Usar las tools del servidor MCP `ado` (cargar con ToolSearch si no están). Usa
+   **solo** los nombres de tools listados en la tabla *Quick Reference* de esta
+   skill. Si una operación no está cubierta por esos nombres, dilo — **nunca
+   inventes nombres de tools ni busques catálogos externos en runtime**.
 2. **`project` = `{project_wi}` en TODA llamada** (sin él: `Project selection cancelled.`).
 3. Las queries devuelven IDs; el detalle va en un segundo paso:
    `wit_get_work_items_batch_by_ids` con `fields` explícitos:
@@ -137,7 +138,7 @@ Tabla compacta en español, una fila por WI (máx. 20 por defecto):
 
 | Error | Regla |
 |-------|-------|
-| Inventar nombres de tools MCP | Solo nombres de `_docs/tools-mcp-ado.md`; si no existe, decirlo |
+| Inventar nombres de tools o leer catálogos externos en runtime | Usar solo los nombres de la tabla *Quick Reference* de esta skill; si falta una operación, decirlo |
 | REST + PAT o `az` CLI como primera opción | MCP `ado` primero (maneja su propia auth) |
 | Olvidar `project` en las llamadas | `project` = `{project_wi}` en TODA llamada |
 | Esquema de config inventado (`organizacion`, `proyecto`) | Campos reales: `user_email`, `project_map.workitems`, `default_query`, `config_extras` |
