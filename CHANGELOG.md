@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-10-27
+
+### Breaking
+- release: sac.json unificado, prefijo sac- en skills y mejoras del instalador (#16)
+
+**Full Changelog**: https://github.com/JavierDevCol/ia-dev-toolkit/compare/v1.1.1...v2.0.0
+
 ### Changed
 - **BREAKING** refactor(skills): the 14 SAC skills now carry the `sac-` prefix, like `ado-*`: `sac-tomar-contexto`, `sac-iniciar-sprint`, `sac-refinar-hu`, `sac-validar-hu`, `sac-planificar-hu`, `sac-ejecutar-plan`, `sac-validar-ca`, `sac-priorizar-backlog`, `sac-sincronizar-backlog`, `sac-registrar-hallazgo`, `sac-init-reglas-arquitectonicas`, `sac-crear-adr`, `sac-analizar-calidad-codigo`, `sac-analizar-seguridad`. `git-branch-commit`, `bitacora-tecnica` and `exc-workflow-sac` keep their names.
 - **BREAKING** triggers follow the new names: `>validar_ca` is now `>sac_validar_ca`, `>tomar_contexto` is `>sac_tomar_contexto`, and so on.
