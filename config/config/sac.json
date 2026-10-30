@@ -62,5 +62,42 @@
       "architecture_guide_path": null
     },
     "memory": {}
+  },
+  "chat-dm": {
+    "config": {
+      "destinatarios": [
+        {
+          "alias": "",
+          "tipo": "space",
+          "valor": ""
+        }
+      ],
+      "zona_horaria": null,
+      "alias_en_chat": []
+    }
+  },
+  "agenda-laboral": {
+    "config": {
+      "zona_horaria": null,
+      "calendario_bloques": {
+        "nombre": null,
+        "id": null
+      },
+      "jornada": {
+        "lunes_jueves": {
+          "inicio": null,
+          "fin": null
+        },
+        "viernes": {
+          "inicio": null,
+          "fin": null
+        }
+      },
+      "almuerzo": {
+        "inicio": null,
+        "duracion_min": null
+      },
+      "alias_en_notas": []
+    }
   }
 }

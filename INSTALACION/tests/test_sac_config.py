@@ -6,7 +6,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 REPO = Path(__file__).resolve().parents[2]
 from diatlib import sac_config, instalar  # noqa: E402
 from _helpers import _cache_con_plantilla  # noqa: E402
-SKILL_SECTIONS = ("ado", "handoff-release", "env-config-audit", "gh-pr-reviewer")
+SKILL_SECTIONS = ("ado", "handoff-release", "env-config-audit", "gh-pr-reviewer", "chat-dm", "agenda-laboral")
 RESERVED = {"schema_version", "usuario", "idiomas", "documentacion_sac_path",
             "archivos", "artifacts", "multi_proyecto"}
 
@@ -49,6 +49,26 @@ class PlantillaTest(unittest.TestCase):
         for s in SKILL_SECTIONS:
             self.assertIn(s, self.t)
             self.assertNotIn(s, RESERVED)
+
+    def test_chat_dm_trae_la_forma_de_un_destinatario_vacio(self):
+        self.assertEqual(self.t["chat-dm"], {
+            "config": {"destinatarios": [{"alias": "", "tipo": "space", "valor": ""}],
+                       "zona_horaria": None, "alias_en_chat": []}})
+
+    def test_agenda_laboral_viene_sin_valores_por_defecto(self):
+        self.assertEqual(self.t["agenda-laboral"], {
+            "config": {
+                "zona_horaria": None,
+                "calendario_bloques": {"nombre": None, "id": None},
+                "jornada": {"lunes_jueves": {"inicio": None, "fin": None},
+                            "viernes": {"inicio": None, "fin": None}},
+                "almuerzo": {"inicio": None, "duracion_min": None},
+                "alias_en_notas": []}})
+
+    def test_plantilla_sin_datos_personales_ni_ids_privados(self):
+        import re
+        texto = (REPO / "config/config/sac.json").read_text(encoding="utf-8")
+        self.assertIsNone(re.search(r"[\w.+-]+@[\w-]+\.[a-z]{2,}|spaces/|group\.calendar", texto))
 
     def test_no_quedan_claves_de_firma_legadas_en_raiz(self):
         self.assertNotIn("user_name", self.t)
