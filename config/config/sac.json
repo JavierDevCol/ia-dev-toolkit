@@ -99,5 +99,10 @@
       },
       "alias_en_notas": []
     }
+  },
+  "entrega-ambiente-banco": {
+    "config": {
+      "output_documentacion": null
+    }
   }
 }
