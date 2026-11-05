@@ -4,7 +4,8 @@ description: >
   Use when a work session has a clear goal and something crucial happens that
   helps resume later or avoid repeating work (checks with results on DB/pods/logs,
   files or classes touched, branch and commits, root causes, dead ends, pending
-  items), or when the user wants to resume a task ("retomar", "bitácora").
+  items), when the user wants to resume a task ("retomar", "bitácora"), or when
+  closing a work log ("cerrar bitácora").
 ready: true
 ---
 
@@ -64,7 +65,11 @@ checkpoints: <1–2 líneas cada uno; solo en crear/checkpoint/cerrar>
 
 ### Retomar
 
-Usuario dice "retomar [tarea]" → subagente en modo `retomar` (si no hay slug, lista las bitácoras y se pregunta cuál). Presentar el resumen y continuar.
+Usuario dice "retomar [tarea]" → subagente en modo `retomar` (si no hay slug, lista las bitácoras y se pregunta cuál; si hay hueco >2h u otra fecha, abre sesión nueva con `· inicio HH:MM`). Presentar el resumen y continuar.
+
+### Cierre
+
+Usuario dice "cerrar bitácora" → subagente en modo `cerrar`: agrega los checkpoints pendientes, escribe la **duración estimada** (siempre, aunque haya un solo checkpoint: suma de los tramos de cada `## Sesión`, contados desde su `· inicio HH:MM`), marca `**Estado:** Cerrada` y firma. Detalle de cálculo: `references/escritor.md`.
 
 ## Common Mistakes
 
@@ -72,3 +77,5 @@ Usuario dice "retomar [tarea]" → subagente en modo `retomar` (si no hay slug, 
 - **Acumular para el final:** registrar cada checkpoint cuando ocurre
 - **Crear bitácora en sesiones de consulta:** esperar objetivo claro o preguntar
 - **Leer la bitácora en la sesión principal:** delegar siempre al subagente
+- **Estimar duración como creación → último checkpoint:** son los tramos de cada sesión sumados; los días entre sesiones no cuentan
+- **Fusionar jornadas del mismo día en un solo bloque:** un hueco de más de 2h abre sesión nueva; si no, la pausa se cuenta como tiempo trabajado
