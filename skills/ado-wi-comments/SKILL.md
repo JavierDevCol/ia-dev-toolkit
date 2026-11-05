@@ -23,7 +23,7 @@ Gestiona comentarios y menciones en Work Items de Azure DevOps con formato Markd
 ### Cuándo NO usar
 
 - Para crear o modificar campos del WI (usar `ado-hu-publisher` / `ado-task-creator`)
-- Para queries WIQL o búsqueda de WIs
+- Para queries WIQL, búsqueda o listado de WIs (usar `ado-wi-query`)
 - Para gestionar PRs o builds
 
 ## Implementation

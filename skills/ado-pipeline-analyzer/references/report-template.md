@@ -22,13 +22,22 @@ Report file: `{base_reports_path}/PIPELINE-REPORT_{runId}.md`
 |--------|--------|---------|
 | {hash} | {author} | {message} |
 
-## 3. Stages / Jobs
+## 3. Stages / Jobs (executed)
 
 | Stage | Status | Result | Duration | Errors |
 |-------|--------|--------|----------|--------|
 | {stageName} | {status} | {result} | {duration} | {errorCount} |
 
-## 4. Findings
+## 4. Run Integrity
+
+> **Cancelation check:** {natural end — `finishedDate` + `Set build status` / canceled — evidence}
+> **Stage coverage:** {N de M stages ejecutados; cuáles se omitieron y por qué condición}
+
+| Stage declared | Executed | Condition | Evidence |
+|----------------|----------|-----------|----------|
+| {stageName} | yes/no | {condition or —} | {log `##[section]Starting: ...` or "no logs"} |
+
+## 5. Findings
 
 ### Errors
 {detected errors}
@@ -39,7 +48,7 @@ Report file: `{base_reports_path}/PIPELINE-REPORT_{runId}.md`
 ### Information
 {relevant details}
 
-## 5. Recommendations
+## 6. Recommendations
 
 {suggested actions based on findings}
 

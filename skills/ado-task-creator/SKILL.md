@@ -14,7 +14,7 @@ Two-phase workflow for creating child tasks in Azure DevOps: design from a conte
 - A technical document needs to be broken into discrete ADO tasks
 - User says: agregar tareas, crear subtareas, desglosar HU, plan de trabajo
 
-**NOT for:** Creating bugs, updating existing tasks, or querying work items — use `ado_wit_work_item_write` or `ado_wit_query` directly.
+**NOT for:** Creating bugs, updating existing tasks, or querying work items — use `ado-wi-query` for queries/consultations, or `wit_update_work_item` directly for field updates.
 
 ## Implementation
 
