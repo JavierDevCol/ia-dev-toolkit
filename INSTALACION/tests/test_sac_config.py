@@ -6,7 +6,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 REPO = Path(__file__).resolve().parents[2]
 from diatlib import sac_config, instalar  # noqa: E402
 from _helpers import _cache_con_plantilla  # noqa: E402
-SKILL_SECTIONS = ("ado", "handoff-release", "env-config-audit", "gh-pr-reviewer", "chat-dm", "agenda-laboral")
+SKILL_SECTIONS = ("ado", "handoff-release", "env-config-audit", "gh-pr-reviewer", "chat-dm", "agenda-laboral",
+                  "entrega-ambiente-banco")
 RESERVED = {"schema_version", "usuario", "idiomas", "documentacion_sac_path",
             "archivos", "artifacts", "multi_proyecto"}
 
@@ -64,6 +65,9 @@ class PlantillaTest(unittest.TestCase):
                             "viernes": {"inicio": None, "fin": None}},
                 "almuerzo": {"inicio": None, "duracion_min": None},
                 "alias_en_notas": []}})
+
+    def test_entrega_ambiente_banco_tiene_salida_propia(self):
+        self.assertEqual(self.t["entrega-ambiente-banco"], {"config": {"output_documentacion": None}})
 
     def test_plantilla_sin_datos_personales_ni_ids_privados(self):
         import re

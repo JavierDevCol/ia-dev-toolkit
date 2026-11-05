@@ -72,22 +72,31 @@ START: User requests release handoff
 
 ### Configuración global (`.SAC/config/sac.json`)
 
-Antes de generar artefactos, leer con memctl estos tres campos globales:
+Antes de generar artefactos, leer con memctl estos cuatro campos:
 
 Ejecutar cada comando: **su salida ES el valor del placeholder** de su fila y se usa tal cual en el resto de esta skill (no recalcular ni inventar rutas):
 
 | Placeholder / dato | Valor = salida de |
 |---|---|
+| `{output_documentacion}` | `sh .SAC/memctl.sh get entrega-ambiente-banco.config.output_documentacion` |
+| `{documentacion_sac_path}` | `sh .SAC/memctl.sh get documentacion_sac_path` |
 | `{{usuario.nombre}}` | `sh .SAC/memctl.sh get usuario.nombre` |
 | `usuario.incluir_firma_en_documentos` | `sh .SAC/memctl.sh get usuario.incluir_firma_en_documentos` |
-| `{documentacion_sac_path}` | `sh .SAC/memctl.sh get documentacion_sac_path` |
 
 memctl es solo lectura y su salida ES la respuesta; si memctl no existe (exit 127), leer `.SAC/config/sac.json` con `jq`; si sale con exit 1 (JSON inválido o vacío), detenerse y avisar: no leer ni editar el archivo a mano; nunca inventar valores. `null`, vacío o exit 2 → no configurado.
 
+**Resolución de `{output_documentacion}`** — base de **todas** las rutas de entrega: `{output_documentacion}/entrega_release/...`:
+
+1. `entrega-ambiente-banco.config.output_documentacion` **con valor** → usarlo tal cual. Manda sobre la global.
+2. `null`, vacío o exit 2 → **preguntar al usuario** la ruta en la que quiere crear la documentación de entrega, **con `documentacion_sac_path` como valor por defecto**:
+   - Entrega una ruta distinta → **persistirla** en `.SAC/config/sac.json`, únicamente en la sección `entrega-ambiente-banco.config.output_documentacion` (no tocar ninguna otra sección), y usarla de ahí en adelante.
+   - Acepta el valor por defecto → usar `documentacion_sac_path` sin persistir nada.
+3. `documentacion_sac_path` también sin configurar y sin ruta persistida → no preguntar ni escribir fuera: avisar "No hay instalación SAC" (ejecutar `diat`).
 
 | Campo | Para qué se usa | Comportamiento si falta |
 |-------|-----------------|-------------------------|
-| `documentacion_sac_path` | Base de **todas** las rutas de entrega: `{documentacion_sac_path}/entrega_release/...` | `null` o exit 2 → no preguntar ni escribir fuera: avisar "No hay instalación SAC" (ejecutar `diat`) |
+| `entrega-ambiente-banco.config.output_documentacion` | Base de **todas** las rutas de entrega: `{output_documentacion}/entrega_release/...` | Preguntar una vez con default = `documentacion_sac_path` (resolución 2) |
+| `documentacion_sac_path` | Valor por defecto de `{output_documentacion}` | `null` o exit 2 sin ruta persistida → no preguntar ni escribir fuera: avisar "No hay instalación SAC" (ejecutar `diat`) |
 | `usuario.nombre` | Firma de los resúmenes de entrega → placeholder **`{{usuario.nombre}}`** | Vacío o clave inexistente → la línea queda `> **Release Manager:**` sin sufijo. **No inventar un nombre** |
 | `usuario.incluir_firma_en_documentos` | Activa o desactiva el bloque de firma | `false` → omitir el bloque completo. Cualquier otro valor (o ausente) → incluirlo |
 

@@ -70,6 +70,7 @@ PLACEHOLDERS = {                       # placeholder de ruta (forma corta única
     r"\{workspace\}": "archivos.workspace",
     r"\{reglas_arquitectonicas\}": "archivos.reglas_arquitectonicas",
     r"\{documentacion_sac_path\}": "documentacion_sac_path",
+    r"\{output_documentacion\}": "entrega-ambiente-banco.config.output_documentacion",
     r"\{\{usuario\.nombre\}\}": "usuario.nombre",
 }
 # Forma larga {artifacts.x} / {archivos.x} (simple o doble llave): prohibida, solo existe la corta
