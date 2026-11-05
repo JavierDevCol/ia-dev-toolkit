@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [3.0.0] - 2026-10-30
+
+### Breaking
+- feat(skills): sac.json alignment, ado-wi-query and diagnostic hardening (#17)
+
+**Full Changelog**: https://github.com/JavierDevCol/ia-dev-toolkit/compare/v2.0.0...v3.0.0
+
 ## [2.0.0] - 2026-10-27
 
 ### Breaking
