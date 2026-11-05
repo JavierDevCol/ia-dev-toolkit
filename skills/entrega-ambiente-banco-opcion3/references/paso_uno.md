@@ -65,9 +65,9 @@
      git merge --ff-only develop
      git push origin release/vX.Y.Z
      ```
-   - **`--ff-only` falla → detener**, no forzar el merge, remitir a la Opción 2c (ajuste RC) — Regla 8.
+   - **`--ff-only` falla → detener**, no forzar el merge, ver Regla 8.
 
-6. **Validar mismo commit (Regla de oro):** `git fetch origin` y luego `git rev-parse origin/develop` vs `git rev-parse origin/release/vX.Y.Z` — deben coincidir. Si difieren: **detener**, no forzar nada, abrir un ajuste RC (Opción 2c) y reportar al usuario.
+6. **Validar mismo commit (Regla de oro):** `git fetch origin` y luego `git rev-parse origin/develop` vs `git rev-parse origin/release/vX.Y.Z` — deben coincidir. Si difieren: detener, no forzar nada y reportar: una corrección sobre una versión entregada es una **nueva versión PATCH** (Opción 2b) o viaja por develop (Opción 2a → Opción 1).
 
 7. **Checklist de entrega** (`references/checklist-entrega.txt`):
    a. Mostrarlo **sustituyendo `vX.Y.Z` por la versión real** en todas las líneas (incluida la de `env-config-audit`) antes de mostrarlo — nunca dejar el placeholder literal. Los items ⚠️ requieren skills externas (ver tabla "Skills complementarias" en `SKILL.md`).

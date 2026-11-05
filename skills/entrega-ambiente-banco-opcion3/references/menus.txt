@@ -10,7 +10,7 @@
 ║  [2] Entregar release desde feature/fix/hotfix          ║
 ║      → El código NO está en develop o ya hay release    ║
 ║      → El agente determina el flujo según el caso       ║
-║      → Incluye hotfix y ajustes RC en DES              ║
+║      → Incluye hotfix y correcciones en certificación  ║
 ║                                                        ║
 ╚══════════════════════════════════════════════════════════╝
 
@@ -27,7 +27,8 @@
 ║      Merge a develop primero → nuevo release            ║
 ║      Flujo completo por todos los ambientes             ║
 ║                                                        ║
-║  [c] ajuste RC → Banco pidió cambios en DES             ║
-║      Fix sobre release vivo → RC efímera → PR a des     ║
+║  [c] corrección en certificación → Banco pidió cambios  ║
+║      Puede esperar → [a] y luego Opción 1 (nueva MINOR) ║
+║      Urgente → [b] hotfix (nueva PATCH)                 ║
 ║                                                        ║
 ╚══════════════════════════════════════════════════════════╝

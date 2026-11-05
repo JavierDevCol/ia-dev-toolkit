@@ -43,7 +43,7 @@
    git checkout -b release/vX.Y.Z+1
    git push origin release/vX.Y.Z+1
    ```
-   **Regla de oro:** `git fetch origin` y luego `git rev-parse origin/develop` vs `git rev-parse origin/release/vX.Y.Z+1` deben coincidir. Si difieren → **detener**, abrir un ajuste RC (Opción 2c).
+   **Regla de oro:** `git fetch origin` y luego `git rev-parse origin/develop` vs `git rev-parse origin/release/vX.Y.Z+1` deben coincidir. Si difieren → detener, no forzar nada y reportar: una corrección sobre una versión entregada es una **nueva versión PATCH** (Opción 2b) o viaja por develop (Opción 2a → Opción 1).
 
 8. **Release notes desde cero** para `vX.Y.Z+1` (Regla 5):
    ```bash

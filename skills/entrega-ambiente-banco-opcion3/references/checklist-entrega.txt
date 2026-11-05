@@ -13,7 +13,7 @@ CHECKLIST DE ENTREGA — Handoff vX.Y.Z
 [⚠] SonarQube Quality Gate passed
      → Ejecuta @ado-pipeline-analyzer build latest del pipeline <nombre_pipeline> en rama release/vX.Y.Z
 [⚠] config-entorno generado (archivo config-entorno_{nombre_ms}_vX.Y.Z.md)
-     → Ejecuta @env-config-audit sobre el diff origin/des..release/vX.Y.Z (Opción 1; en 2a/2b/2c usar el diff de su fase)
+     → Ejecuta @env-config-audit sobre el diff origin/des..release/vX.Y.Z (Opción 1; en 2a/2b usar el diff de su fase)
 [⚠] Auditoría de seguridad estática (SAST) ejecutada
      → Ejecuta @sac-analizar-seguridad scope=commits sobre release/vX.Y.Z
 [⚠] Calidad de código verificada
