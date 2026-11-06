@@ -283,6 +283,7 @@ def cmd_install(argv):
         names = installed.get(ctype, [])
         if names:
             print(f"     {ctype} ({len(names)}): {', '.join(names)}")
+    entorno.ensure_pat(installed.get("skills", []), interactive=not args.yes)
 
 
 def _team_members(platform):
@@ -395,6 +396,7 @@ def _status_system():
         print(f"  PATH:    ⚠️  {bin_dir} no está en PATH — reparando...")
         entorno.ensure_bin_on_path()
         print(f"  PATH:    ✅ reparado")
+    print(f"  PAT:     {'✅' if entorno.has_pat() else '⚠️  ' + entorno.PAT_VAR + ' no configurada'}")
 
     local_sha = registro.get_installed_sha()
     ref = paths.get_ref()
