@@ -119,12 +119,12 @@ Determinar la opción con el flowchart y el menú (Opción 2 → sub-menú `refe
 
 | Opción | Fase | Archivo |
 |--------|------|---------|
-| **1** | Entregar release desde DEVELOP | `{file:./references/paso_uno.md}` |
+| **1** | Entregar release desde DEVELOP | `{file:./references/opcion_uno/opcion.md}` (un archivo por paso) |
 | **2a** | feature/fix → develop | `{file:./references/paso_dos_a.md}` |
 | **2b** | hotfix post-entrega | `{file:./references/paso_dos_b.md}` |
 | **2c** | corrección en certificación (enrutador, sin archivo propio) | Puede esperar → **2a** y luego **1** · Urgente → **2b** |
 
-Cada fase referencia sus archivos de apoyo (`references/flujo-hotfix.sh`, `references/checklist-entrega.txt` en Opción 1) y su ruta de `resumen-entrega_*.txt`. El ciclo completo 2a → 1 se encadena: al aprobarse el PR, volver al menú y ejecutar la Opción 1.
+Cada fase referencia sus archivos de apoyo (`references/flujo-hotfix.sh`, `references/checklist-entrega.txt` en Opción 1) y su ruta de `resumen-entrega_*.txt`. **Opciones divididas por pasos** (`references/opcion_uno/`): cargar un solo archivo de paso a la vez y pasar al siguiente solo cuando se cumpla su condición **Siguiente**; nunca leer ni adelantar un paso posterior mientras el actual espera un resultado. El ciclo completo 2a → 1 se encadena: al aprobarse el PR, volver al menú y ejecutar la Opción 1.
 
 ## Quick Reference
 
