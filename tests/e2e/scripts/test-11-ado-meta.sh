@@ -176,8 +176,8 @@ echo "  → vault-manager debería re-autenticar antes de reintentar"
 
 echo ""
 
-echo -e "${YELLOW}VM-04: .env mal formateado${NC}"
-echo "  → vault-manager debería fallar: 'Formato incorrecto'"
+echo -e "${YELLOW}VM-04: Sin credenciales en el entorno (ni VAULT_TOKEN ni VAULT_USER+VAULT_PASS)${NC}"
+echo "  → vault-manager debería dar la plantilla 'export VAULT_TOKEN=...' sin pedir el valor por chat"
 
 echo ""
 
