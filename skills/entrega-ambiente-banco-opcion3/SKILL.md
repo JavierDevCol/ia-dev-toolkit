@@ -170,7 +170,7 @@ Cada fase referencia sus archivos de apoyo (`references/checklist-entrega.txt` e
 
 | Skill | Qué hace | Cuándo ejecutarla | Comando sugerido |
 |-------|----------|-------------------|------------------|
-| `env-config-audit` |  analiza el diff | Checklist opción 1, 2a, 2b | Opción 1 (uno por ambiente): `@env-config-audit sobre el diff origin/<des\|pru\|prepro\|main>..vX.Y.Z` · 2a: `@env-config-audit sobre el diff develop..<rama>` · 2b (uno por ambiente): `@env-config-audit sobre el diff origin/<des\|pru\|prepro\|main>..vX.Y.Z` |
+| `env-config-audit` |  analiza el diff | Checklist opción 1, 2a, 2b | Opción 1 (uno por ambiente): `@env-config-audit sobre el diff origin/<des\|pru\|prepro\|main>..vX.Y.Z` · 2a: `@env-config-audit sobre el diff origin/develop...origin/<rama>` · 2b (uno por ambiente): `@env-config-audit sobre el diff origin/<des\|pru\|prepro\|main>..vX.Y.Z` |
 | `ado-pipeline-analyzer` | Valida build, tests, cobertura, DAST, SonarQube.| Opción 1 pasos 1 y 6 · 2b paso 6 | `@ado-pipeline-analyzer build latest del pipeline <nombre_pipeline> en rama develop` · `... en rama release/vX.Y.Z` |
 | `ado-pr-creator` | Crea los PR en ADO (a ambientes en borrador) | Opción 1 paso 7 · 2b pasos 7 y 8 | `@ado-pr-creator crear PR en borrador (isDraft=true) de release/vX.Y.Z hacia <des\|pru\|prepro\|main> con título exacto "Release vX.Y.Z → <AMB>"` |
 | `email-composer` | Redacta el correo de entrega | Opción 1 paso 10 · 2b paso 11 | `@email-composer correo laboral de entrega vX.Y.Z de {nombre_repo} al banco con el contenido de resumen-entrega_release_vX.Y.Z.txt` |
