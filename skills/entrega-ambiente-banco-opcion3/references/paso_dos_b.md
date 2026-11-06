@@ -37,7 +37,7 @@
    - **Conflictos en el PR → detener y reportar**; nunca forzar el merge hacia develop.
    - Tras el merge, verificar que develop contiene el fix.
 
-7. **Nuevo release `vX.Y.Z+1`** (incremento de PATCH — fix→PATCH, coherente con `@auto-versioning`):
+7. **Nuevo release `vX.Y.Z+1`** (incremento de PATCH — Regla 2):
    ```bash
    git checkout develop && git pull
    git checkout -b release/vX.Y.Z+1

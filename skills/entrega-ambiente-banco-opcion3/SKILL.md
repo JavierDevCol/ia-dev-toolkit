@@ -39,8 +39,10 @@ START: User requests release handoff
 │  │
 │  ├─ YES ──────────────────────────────────────── Option 1
 │  │       Release from DEVELOP
-│  │       → Verify develop, generate release notes
-│  │       → Create/update release/vX.Y.Z (--ff-only)
+│  │       → Verify develop, fix <sha>, generate release notes
+│  │       → Create release/vX.Y.Z once on <sha> + lock (isLocked)
+│  │       → Wait release pipeline (tag vX.Y.Z + image)
+│  │       → 4 DRAFT PR release → des/pru/prepro/main (bank publishes)
 │  │       → Checklist + Resumen
 │  │
 │  └─ NO
@@ -97,7 +99,7 @@ memctl es solo lectura y su salida ES la respuesta; si memctl no existe (exit 12
 | `usuario.nombre` | Firma de los resúmenes de entrega → placeholder **`{{usuario.nombre}}`** | Vacío o clave inexistente → la línea queda `> **Release Manager:**` sin sufijo. **No inventar un nombre** |
 | `usuario.incluir_firma_en_documentos` | Activa o desactiva el bloque de firma | `false` → omitir el bloque completo. Cualquier otro valor (o ausente) → incluirlo |
 
-**Bloque de firma.** Todo `resumen-entrega_*.txt` (Opción 1 paso 8, Opción 2b paso 10) cierra con:
+**Bloque de firma.** Todo `resumen-entrega_*.txt` (Opción 1 paso 10, Opción 2b paso 10) cierra con:
 ```
 > **Release Manager:** {{usuario.nombre}}
 > **Fecha:** {{fecha}}
@@ -107,7 +109,7 @@ Sustituir `{{usuario.nombre}}` por el valor leído. Con `usuario.nombre` sin con
 ### Skills sugeridas: comandos exactos
 
 1. Toda skill sugerida al usuario se muestra con el **comando exacto, listo para copiar**, con los placeholders ya sustituidos por los valores reales de la entrega (versión, ramas, pipeline). Nunca sugerirla solo por nombre.
-2. El diff de `@env-config-audit` es siempre **`<destino>..<origen>` del PR que entregará el cambio** (lo que entra al ambiente). En la Opción 1: `origin/des..release/vX.Y.Z`. **Nunca** `develop..release/vX.Y.Z` — la Regla de oro iguala ambas ramas y el diff saldría siempre vacío.
+2. El diff de `@env-config-audit` es siempre **`<destino>..<origen>` del PR que entregará el cambio** (lo que entra al ambiente). En la Opción 1 hay un PR por ambiente, así que va un diff por cada uno: `origin/<des|pru|prepro|main>..vX.Y.Z`. **Nunca** `develop..release/vX.Y.Z` — la release nace de develop y el diff saldría vacío.
 
 Mostrar menú principal (`references/menus.txt`) y esperar selección.
 
@@ -138,7 +140,7 @@ Cada fase referencia sus archivos de apoyo (`references/flujo-hotfix.sh`, `refer
 ### Reglas obligatorias
 
 1. **Regla de oro:** develop y release/vX.Y.Z = mismo commit antes del handoff. Usar `--ff-only`.
-2. **Semver:** `vMAJOR.MINOR.PATCH`. Calcular la versión siguiente con `@auto-versioning` (analiza el diff desde el último tag: breaking→MAJOR, feature→MINOR, fix/docs→PATCH) y validar el formato. **Usar solo el cálculo** (sus pasos de análisis): los tags no los crea CEIBA (Regla 6) — nunca ejecutar el tagging de esa skill. Si el usuario ya trae la versión, solo validar el formato.
+2. **Semver:** `vMAJOR.MINOR.PATCH`, calculada por la skill (no usar `@auto-versioning`: crea tags y no distingue los tags de despliegue). Último tag de versión: `git ls-remote --tags origin | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1`. Entrega (Opción 1) → siguiente MINOR (`vA.B.C` → `vA.(B+1).0`); hotfix (Opción 2b) → siguiente PATCH del tag base; MAJOR solo si el usuario indica ruptura de compatibilidad (✋). Si el usuario ya trae la versión, solo validar el formato. Una versión publicada no se reutiliza.
 3. **Correcciones en certificación:** nunca sobre la release entregada ni con ramas RC. Puede esperar → develop (2a → 1, nueva MINOR); urgente → hotfix (2b, nueva PATCH).
 4. **Hotfixes:** incremento PATCH. Merge a develop primero, nuevo release, flujo completo.
 5. **release-notes.md** se genera desde cero en cada release nuevo (Opción 1 y Opción 2b, con `git log <TAG>..HEAD --oneline --no-merges`).
@@ -158,7 +160,7 @@ Cada fase referencia sus archivos de apoyo (`references/flujo-hotfix.sh`, `refer
 | Corregir sobre la release entregada o crear `release/vX.Y.Z-rc.N` | Ya no hay RC: puede esperar → 2a → 1; urgente → 2b (Regla 3) |
 | Merge directo a main/des en hotfix | Primero develop, luego crear release |
 | Generar release-notes incremental | Siempre desde cero con `git log <TAG>..HEAD` |
-| No generar `config-entorno_{nombre_ms}_vX.Y.Z.md` | Ejecutar `@env-config-audit sobre el diff origin/des..release/vX.Y.Z` (Opción 1; en 2a/2b el diff de su fase) manualmente por separado |
+| No generar `config-entorno_{nombre_ms}_vX.Y.Z.md` | Ejecutar `@env-config-audit sobre el diff origin/<amb>..vX.Y.Z` por ambiente (Opción 1; en 2a/2b el diff de su fase) manualmente por separado |
 | `--ff-only` forzado | Si falla, hay commits propios en release — detener |
 | Bloquear la entrega por tags de promoción faltantes | El chequeo de Opción 1 paso 2 / 2b paso 2 es informativo, nunca un gate — bloquearlo frenaría un hotfix urgente por el ritmo del banco, que es independiente de CEIBA |
 
@@ -166,10 +168,11 @@ Cada fase referencia sus archivos de apoyo (`references/flujo-hotfix.sh`, `refer
 
 | Skill | Qué hace | Cuándo ejecutarla | Comando sugerido |
 |-------|----------|-------------------|------------------|
-| `env-config-audit` |  analiza el diff | Checklist opción 1, 2a, 2b | Opción 1: `@env-config-audit sobre el diff origin/des..release/vX.Y.Z` · 2a: `@env-config-audit sobre el diff develop..<rama>` · 2b: `@env-config-audit sobre el diff develop..hotfix/<hotfix>` |
-| `ado-pipeline-analyzer` | Valida build, tests, cobertura, DAST, SonarQube.| Checklist opción 1 | `@ado-pipeline-analyzer build latest del pipeline <nombre_pipeline> en rama develop` |
+| `env-config-audit` |  analiza el diff | Checklist opción 1, 2a, 2b | Opción 1 (uno por ambiente): `@env-config-audit sobre el diff origin/<des\|pru\|prepro\|main>..vX.Y.Z` · 2a: `@env-config-audit sobre el diff develop..<rama>` · 2b: `@env-config-audit sobre el diff develop..hotfix/<hotfix>` |
+| `ado-pipeline-analyzer` | Valida build, tests, cobertura, DAST, SonarQube.| Opción 1 pasos 1 y 6 | `@ado-pipeline-analyzer build latest del pipeline <nombre_pipeline> en rama develop` · `... en rama release/vX.Y.Z` |
+| `ado-pr-creator` | Crea los PR en ADO (en borrador) | Opción 1 paso 7 | `@ado-pr-creator crear PR en borrador (isDraft=true) de release/vX.Y.Z hacia <des\|pru\|prepro\|main> con título exacto "Release vX.Y.Z → <AMB>"` |
+| `email-composer` | Redacta el correo de entrega | Opción 1 paso 10 | `@email-composer correo laboral de entrega vX.Y.Z de {nombre_repo} al banco con el contenido de resumen-entrega_release_vX.Y.Z.txt` |
 | `sac-analizar-seguridad` | Auditoría estática (SAST) de todo lo que se va a promover.  | Checklist opción 1, `scope=commits` | `@sac-analizar-seguridad scope=commits sobre release/vX.Y.Z` |
 | `sac-analizar-calidad-codigo` | Code smells y violaciones arquitectónicas de los cambios del release  | Checklist opción 1, `scope=commits` | `@sac-analizar-calidad-codigo scope=commits sobre release/vX.Y.Z` |
-| `auto-versioning` | Calcula la versión siguiente según SemVer (breaking→MAJOR, feature→MINOR, fix→PATCH) | Regla 2 (inputs de Opción 1 y 2b) | `@auto-versioning calcular próxima versión desde el último tag (sin crear tag)` |
 
 Al ejecutar estas skills, **reflejar su resultado en el checklist de entrega** (marcar `[✓]`/`[✗]` sobre la copia de la entrega, nunca sobre la plantilla) — ver instrucción de uso al final de `references/checklist-entrega.txt`.
