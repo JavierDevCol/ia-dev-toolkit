@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Consulta Variable Groups de Azure DevOps vía REST API.
 
-Auth: PAT leído de .env (clave `pat_ado`). Nunca imprime valores de variables
+Auth: PAT leído de la variable de entorno PAT_AZURE. Nunca imprime valores de variables
 marcadas como secret, ni el PAT.
 
 Uso (--org/--project van antes del subcomando):
@@ -26,19 +26,10 @@ TOKEN_RE = re.compile(r"#\{([A-Za-z_0-9]+)\}#")
 
 
 def load_pat():
-    """Sube directorios hasta encontrar un .env con la clave pat_ado."""
-    cur = os.path.abspath(".")
-    while True:
-        path = os.path.join(cur, ".env")
-        if os.path.exists(path):
-            for line in open(path, encoding="utf-8"):
-                k, _, v = line.strip().partition("=")
-                if k.strip() == "pat_ado":
-                    return v.strip().strip("'\"")
-        parent = os.path.dirname(cur)
-        if parent == cur:
-            sys.exit(f"ERROR: ningún .env con 'pat_ado' (buscado desde {os.getcwd()} hacia arriba)")
-        cur = parent
+    pat = os.environ.get("PAT_AZURE")
+    if not pat:
+        sys.exit("ERROR: falta la variable de entorno PAT_AZURE")
+    return pat
 
 
 def fetch_groups():

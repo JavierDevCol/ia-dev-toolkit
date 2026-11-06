@@ -144,7 +144,7 @@ Cada fase referencia sus archivos de apoyo (`references/checklist-entrega.txt` e
 4. **Hotfix:** PATCH+1 desde el tag de la versión con la falla (`vBASE`). El fix llega ya revisado (`fix/*` desde `vBASE` o commits de develop): la skill no lo implementa. El PR `hotfix/vX.Y.Z → develop` va **después** de los PR a ambientes y es obligatorio.
 5. **release-notes.md** se genera desde cero en cada versión: `git log <base>..<sha> --oneline --no-merges` (base = `vPREV` en Opción 1, `vBASE` en Opción 2b).
 6. **Responsabilidades:** CEIBA crea la rama de entrega y los 4 PR **en borrador**. El pipeline crea **todos** los tags (`vX.Y.Z` y `vX.Y.Z-{AMB}`); CEIBA nunca crea ni mueve tags. El banco publica y completa los PR con merge commit (sin squash), en orden DES → PRU → PRE → PRO.
-7. **No exponer tokens ni contraseñas:** el PAT de `.env` (`pat_ado`) nunca se imprime.
+7. **No exponer tokens ni contraseñas:** el PAT (`PAT_AZURE`, variable de entorno) nunca se imprime.
 8. **Sin PR antes del pipeline:** los PR a ambientes se crean solo con el pipeline de la rama de entrega en verde y el tag `vX.Y.Z` sobre `<sha>`. Si falla, la versión queda quemada: el siguiente intento es una versión nueva.
 9. **Un paso a la vez:** en las Opciones 1 y 2b se carga un solo archivo de paso y el siguiente solo con su condición **Siguiente** cumplida; nunca adelantar trabajo mientras se espera un resultado.
 10. **Versión reemplazada:** los PR abiertos de otra versión hacia los ambientes se listan para abandonarlos a mano; la skill no los abandona.

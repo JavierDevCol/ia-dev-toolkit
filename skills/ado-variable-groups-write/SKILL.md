@@ -7,7 +7,7 @@ description: Usa esta skill cuando necesites CREAR o MODIFICAR variables en Vari
 
 ## Overview
 
-Crea o modifica variables en la Library de Azure DevOps vía REST API con el PAT de `.env`.
+Crea o modifica variables en la Library de Azure DevOps vía REST API con el PAT de la variable de entorno `PAT_AZURE`.
 
 Complementa a `ado-variable-groups`, que es de solo lectura. **Consulta primero con esa skill**: saber
 dónde falta una variable es lo que define el alcance de la escritura.
@@ -41,7 +41,7 @@ Cada escritura es un reemplazo total. Un campo que se omita se pierde. Por eso e
 
 | Requisito | Detalle |
 |---|---|
-| PAT | En `.env`, clave `pat_ado`. Se busca subiendo desde el directorio actual |
+| PAT | Variable de entorno `PAT_AZURE` |
 | Scope | **`vso.variablegroups_write`** (*Variable Groups → Read, create & manage*) |
 | Organización / Proyecto | `--org` / `--project` (o `ADO_ORG` / `ADO_PROJECT`); ver abajo |
 

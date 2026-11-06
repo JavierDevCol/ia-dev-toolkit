@@ -6,10 +6,10 @@
 
    a. **Consultar el estado cada 30 s hasta que finalice.** Si el agente ejecuta el bucle en segundo plano (p. ej. por límite de tiempo de la herramienta), es solo para no cortar la consulta: **queda esperando su resultado** y no hace nada más mientras tanto.
       ```bash
-      PAT=$(grep -m1 '^pat_ado=' .env | cut -d= -f2-)
+      [ -n "$PAT_AZURE" ] || { echo "Falta PAT_AZURE: export PAT_AZURE=... en ~/.zshrc y reiniciar la terminal"; exit 1; }
       URL="{ado_base}/_apis/build/builds?branchName=refs/heads/hotfix/vX.Y.Z&queryOrder=queueTimeDescending&\$top=1&api-version=7.1"
       for i in $(seq 1 120); do                      # 120 × 30 s = 60 min máximo
-        B=$(curl -s -u ":$PAT" "$URL" | jq -r '.value[0] | "\(.id) \(.status) \(.result) \(.sourceVersion)"')
+        B=$(curl -s -u ":$PAT_AZURE" "$URL" | jq -r '.value[0] | "\(.id) \(.status) \(.result) \(.sourceVersion)"')
         echo "$(date +%T) $B"
         case "$B" in *" completed "*) break ;; esac
         sleep 30
