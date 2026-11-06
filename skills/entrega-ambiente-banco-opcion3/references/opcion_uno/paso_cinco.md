@@ -12,7 +12,7 @@
    curl -s -u ":$PAT" "$URL" | grep -o '"isLocked":[a-z]*'   # debe ser "isLocked":true
    ```
    El bloqueo impide cualquier commit posterior: lo que se compila es exactamente `<sha>`. **Sin PAT, HTTP distinto de 200 o `isLocked` distinto de `true` → detener y reportar**; no continuar con una rama abierta.
-   El push dispara el pipeline de release. La rama no se actualiza ni se desbloquea nunca: si después hace falta un cambio, es una versión nueva (Regla 3).
+   El push dispara el pipeline de release. La rama no se actualiza ni se desbloquea nunca: si después hace falta un cambio, es una versión nueva (Regla 1).
 
 ---
 

@@ -14,7 +14,7 @@ Orquesta la entrega de releases de CEIBA al banco siguiendo el flujo de paso ent
 
 ## Overview
 
-Prepara el handoff de releases creando ramas, generando release notes y artefactos de entrega. El banco ejecuta el PR a des; CEIBA solo prepara.
+CEIBA crea la rama de entrega bloqueada y los 4 PR en borrador hacia des/pru/prepro/main; el pipeline compila una sola vez y crea los tags; el banco publica y completa los PR. La skill además genera release notes, checklist y resumen de entrega.
 
 ## When to Use
 
@@ -26,7 +26,6 @@ Prepara el handoff de releases creando ramas, generando release notes y artefact
 ## When NOT to Use
 
 - Normal feature development (not a handoff scenario)
-- Creating a PR from feature → develop (standard git flow)
 - CI/CD pipeline configuration
 - Any task that is not a formal release handoff to the bank
 
@@ -132,36 +131,39 @@ Cada fase referencia sus archivos de apoyo (`references/checklist-entrega.txt` e
 
 | Flujo | Origen | Desarrollo previo | Ramas creadas | Commits a develop | Tags |
 |-------|--------|-------------------|---------------|-------------------|------|
-| **1: desde DEVELOP** | develop | Feature mergeada via PR | release/vX.Y.Z | Ya tiene el fix | Banco crea en DES |
-| **2a: feature/fix** | feature branch | NO está en develop | PR feature → develop | Después de PR | Banco crea en DES |
+| **1: desde DEVELOP** | develop | Feature mergeada via PR | release/vX.Y.Z (bloqueada) + 4 PR borrador | Ya tiene el cambio | Pipeline: vX.Y.Z y vX.Y.Z-{AMB} |
+| **2a: feature/fix** | feature branch | NO está en develop | PR feature → develop | Después de PR | Ninguno (luego Opción 1) |
 | **2b: hotfix** | tag de la versión con la falla | Fix revisado en `fix/*` o commits de develop | hotfix/vX.Y.Z (bloqueada) + 4 PR borrador | PR activo después | Pipeline: vX.Y.Z y vX.Y.Z-{AMB} |
 | **2c: corrección en certificación** | Enrutador | Banco pide fix sobre versión entregada | Las de 2a o 2b | Las de 2a o 2b | Las de 2a o 2b |
 
 ### Reglas obligatorias
 
-1. **Regla de oro:** develop y release/vX.Y.Z = mismo commit antes del handoff. Usar `--ff-only`.
+1. **Rama de entrega inmutable:** `release/vX.Y.Z` o `hotfix/vX.Y.Z` se crea una sola vez sobre un commit validado (`<sha>`) y se bloquea (`isLocked = true`). Nunca se actualiza, desbloquea, borra ni reutiliza.
 2. **Semver:** `vMAJOR.MINOR.PATCH`, calculada por la skill (no usar `@auto-versioning`: crea tags y no distingue los tags de despliegue). Último tag de versión: `git ls-remote --tags origin | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1`. Entrega (Opción 1) → siguiente MINOR (`vA.B.C` → `vA.(B+1).0`); hotfix (Opción 2b) → siguiente PATCH del tag base; MAJOR solo si el usuario indica ruptura de compatibilidad (✋). Si el usuario ya trae la versión, solo validar el formato. Una versión publicada no se reutiliza.
 3. **Correcciones en certificación:** nunca sobre la release entregada ni con ramas RC. Puede esperar → develop (2a → 1, nueva MINOR); urgente → hotfix (2b, nueva PATCH).
-4. **Hotfixes:** incremento PATCH. Merge a develop primero, nuevo release, flujo completo.
-5. **release-notes.md** se genera desde cero en cada release nuevo (Opción 1 y Opción 2b, con `git log <TAG>..HEAD --oneline --no-merges`).
-6. **PR a des lo crea el banco**, no CEIBA.
-7. **No exponer tokens ni contraseñas.**
-8. **Si `--ff-only` falla:** detener, no forzar nada y reportar: una corrección sobre una versión entregada es una **nueva versión PATCH** (Opción 2b) o viaja por develop (Opción 2a → Opción 1).
-9. **Release branch viva** durante la validación del banco.
-10. **Hotfix merge a develop primero** — merge limpio antes de nuevo release.
+4. **Hotfix:** PATCH+1 desde el tag de la versión con la falla (`vBASE`). El fix llega ya revisado (`fix/*` desde `vBASE` o commits de develop): la skill no lo implementa. El PR `hotfix/vX.Y.Z → develop` va **después** de los PR a ambientes y es obligatorio.
+5. **release-notes.md** se genera desde cero en cada versión: `git log <base>..<sha> --oneline --no-merges` (base = `vPREV` en Opción 1, `vBASE` en Opción 2b).
+6. **Responsabilidades:** CEIBA crea la rama de entrega y los 4 PR **en borrador**. El pipeline crea **todos** los tags (`vX.Y.Z` y `vX.Y.Z-{AMB}`); CEIBA nunca crea ni mueve tags. El banco publica y completa los PR con merge commit (sin squash), en orden DES → PRU → PRE → PRO.
+7. **No exponer tokens ni contraseñas:** el PAT de `.env` (`pat_ado`) nunca se imprime.
+8. **Sin PR antes del pipeline:** los PR a ambientes se crean solo con el pipeline de la rama de entrega en verde y el tag `vX.Y.Z` sobre `<sha>`. Si falla, la versión queda quemada: el siguiente intento es una versión nueva.
+9. **Un paso a la vez:** en las Opciones 1 y 2b se carga un solo archivo de paso y el siguiente solo con su condición **Siguiente** cumplida; nunca adelantar trabajo mientras se espera un resultado.
+10. **Versión reemplazada:** los PR abiertos de otra versión hacia los ambientes se listan para abandonarlos a mano; la skill no los abandona.
 
 ## Common Mistakes
 
 | Error | Solución |
 |-------|----------|
-| develop y release no coinciden (`--ff-only` falla) | No forzar merge. Detener y ver Regla 8 |
-| Crear tag vX.Y.Z desde CEIBA | El tag lo crea el banco en DES |
-| Hotfix sin merge a develop primero | El flujo es develop → des → pru → prepro → pro |
+| Agregar commits a una rama de entrega ya publicada | No: el HEAD pierde el tag `vX.Y.Z` y la validación de origen rechaza los PR. Es una versión nueva (Regla 1) |
+| Crear o mover tags a mano | Los crea solo el pipeline: `vX.Y.Z` al compilar y `vX.Y.Z-{AMB}` al verificar el pod (Regla 6) |
+| Olvidar el PR `hotfix/vX.Y.Z → develop` | La validación de correcciones contenidas en develop bloquea la siguiente versión (Regla 4) |
 | Corregir sobre la release entregada o crear `release/vX.Y.Z-rc.N` | Ya no hay RC: puede esperar → 2a → 1; urgente → 2b (Regla 3) |
 | Implementar el fix dentro de la skill o en `hotfix/*` | El fix se desarrolla y revisa en `fix/*` desde el tag base; cada push a `hotfix/*` dispara el pipeline |
-| Generar release-notes incremental | Siempre desde cero con `git log <TAG>..HEAD` |
+| Generar release-notes incremental | Siempre desde cero con `git log <base>..<sha>` (Regla 5) |
 | No generar `config-entorno_{nombre_ms}_vX.Y.Z.md` | Ejecutar `@env-config-audit sobre el diff origin/<amb>..vX.Y.Z` por ambiente (Opción 1; en 2a/2b el diff de su fase) manualmente por separado |
-| `--ff-only` forzado | Si falla, hay commits propios en release — detener |
+| Crear los PR antes de que el pipeline termine en verde | Esperar el pipeline y el tag sobre `<sha>` (Regla 8) |
+| Publicar o activar los PR a ambientes | Quedan en borrador: los publica el banco (Regla 6) |
+| Completar un PR con squash | Merge commit obligatorio: el squash rompe el vínculo con el tag (Regla 6) |
+| Adelantar pasos mientras se espera un resultado | Un paso a la vez (Regla 9) |
 | Bloquear la entrega por tags de promoción faltantes | El chequeo de Opción 1 paso 2 / 2b paso 1 es informativo, nunca un gate — bloquearlo frenaría un hotfix urgente por el ritmo del banco, que es independiente de CEIBA |
 
 ## Skills complementarias (se invocan aparte; esta skill solo las referencia)

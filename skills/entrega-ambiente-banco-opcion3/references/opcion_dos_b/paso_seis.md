@@ -30,7 +30,7 @@
       | Resultado | Acción |
       |---|---|
       | `succeeded`, `sourceVersion` = `<sha>`, sin stages omitidos y tag `vX.Y.Z` = `<sha>` | Continuar al paso 7. |
-      | `failed`, `canceled` o `partiallySucceeded` | **Detener y reportar**; no crear PR. `vX.Y.Z` queda quemada: el siguiente intento es `vA.B.(C+2)` (Regla 3). |
+      | `failed`, `canceled` o `partiallySucceeded` | **Detener y reportar**; no crear PR. `vX.Y.Z` queda quemada: el siguiente intento es `vA.B.(C+2)` (Regla 8). |
       | Stages omitidos, `sourceVersion` ≠ `<sha>`, tag inexistente o tag ≠ `<sha>` | **Detener y reportar**; no crear PR. |
 
    Guardar `runId` y los resultados de pruebas, cobertura y SonarQube para el checklist.
