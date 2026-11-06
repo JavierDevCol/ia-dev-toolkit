@@ -10,7 +10,7 @@
 ║  [2] Entregar release desde feature/fix/hotfix          ║
 ║      → El código NO está en develop o ya hay release    ║
 ║      → El agente determina el flujo según el caso       ║
-║      → Incluye hotfix y correcciones en certificación  ║
+║      → Incluye hotfix y ajustes RC en DES              ║
 ║                                                        ║
 ╚══════════════════════════════════════════════════════════╝
 
@@ -23,12 +23,11 @@
 ║      Crea PR feature → develop                          ║
 ║      Al aprobarse, usar Opción 1                        ║
 ║                                                        ║
-║  [b] hotfix → Falla en una versión ya entregada         ║
-║      Fix revisado desde el tag → hotfix/vX.Y.Z          ║
-║      4 PR a ambientes → PR a develop al final           ║
+║  [b] hotfix → Bug en PRU/PREPRO/PRO                     ║
+║      Merge a develop primero → nuevo release            ║
+║      Flujo completo por todos los ambientes             ║
 ║                                                        ║
-║  [c] corrección en certificación → Banco pidió cambios  ║
-║      Puede esperar → [a] y luego Opción 1 (nueva MINOR) ║
-║      Urgente → [b] hotfix (nueva PATCH)                 ║
+║  [c] ajuste RC → Banco pidió cambios en DES             ║
+║      Fix sobre release vivo → RC efímera → PR a des     ║
 ║                                                        ║
 ╚══════════════════════════════════════════════════════════╝

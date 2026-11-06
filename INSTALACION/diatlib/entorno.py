@@ -159,7 +159,7 @@ def _remove_path_windows(bin_dir):
 # ============================================================
 PAT_VAR = "PAT_AZURE"
 PAT_SKILLS = {"ado-variable-groups", "ado-variable-groups-write", "ado-wi-query",
-              "entrega-ambiente-banco-opcion3"}
+              "entrega-ambiente-banco"}
 PAT_BEGIN, PAT_END = "# >>> diat PAT_AZURE >>>", "# <<< diat PAT_AZURE <<<"
 
 

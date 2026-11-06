@@ -1,19 +1,21 @@
 CHECKLIST DE ENTREGA — Handoff vX.Y.Z
 
-[ ] Release branch creado o actualizado desde develop
-[ ] develop y release/vX.Y.Z apuntan al mismo commit
-[ ] Versión actualizada en artefactos
+[ ] release/vX.Y.Z creada sobre el commit validado de develop (<sha>) y bloqueada (isLocked = true)
 [ ] Release notes generados
+[ ] Pipeline de release OK: imagen {nombre_ms}:X.Y.Z publicada
+[ ] Tag vX.Y.Z creado por el pipeline y apuntando a <sha>
+[ ] 4 PR en borrador creados tras el pipeline OK: release/vX.Y.Z → des, pru, prepro, main
+[ ] PR abiertos de versiones anteriores listados para abandonar (o ninguno)
 [⚠] Pruebas unitarias ejecutadas (100% OK)
-     → Ejecuta @ado-pipeline-analyzer build latest del pipeline <nombre_pipeline> en rama release/vX.Y.Z
+     → Opción 1: resultado guardado en el paso 6 (corrida del pipeline de release/vX.Y.Z)
 [⚠] Cobertura ≥ 80% verificada
-     → Ejecuta @ado-pipeline-analyzer build latest del pipeline <nombre_pipeline> en rama release/vX.Y.Z
-[⚠] DAST ejecutado (0 High/Critical)
-     → Ejecuta @ado-pipeline-analyzer build latest del pipeline <nombre_pipeline> en rama release/vX.Y.Z
+     → Opción 1: resultado guardado en el paso 6 (corrida del pipeline de release/vX.Y.Z)
 [⚠] SonarQube Quality Gate passed
-     → Ejecuta @ado-pipeline-analyzer build latest del pipeline <nombre_pipeline> en rama release/vX.Y.Z
-[⚠] config-entorno generado (archivo config-entorno_{nombre_ms}_vX.Y.Z.md)
-     → Ejecuta @env-config-audit sobre el diff origin/des..release/vX.Y.Z (Opción 1; en 2a/2b/2c usar el diff de su fase)
+     → Opción 1: resultado guardado en el paso 6 (corrida del pipeline de release/vX.Y.Z)
+[⚠] DAST ejecutado (0 High/Critical) — solo corre en develop (el pipeline de release no despliega)
+     → Opción 1: resultado guardado en el paso 1 (corrida del pipeline de develop del commit <sha>)
+[⚠] config-entorno generado por ambiente (archivo config-entorno_{nombre_ms}_vX.Y.Z.md)
+     → Ejecuta @env-config-audit sobre el diff origin/<amb>..vX.Y.Z para des, pru, prepro y main (Opción 1; en 2a/2b usar el diff de su fase)
 [⚠] Auditoría de seguridad estática (SAST) ejecutada
      → Ejecuta @sac-analizar-seguridad scope=commits sobre release/vX.Y.Z
 [⚠] Calidad de código verificada

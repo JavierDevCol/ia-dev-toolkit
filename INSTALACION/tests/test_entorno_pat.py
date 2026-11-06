@@ -37,7 +37,7 @@ class EnsurePatTest(unittest.TestCase):
         self.assertEqual(self.zshrc.stat().st_mode & 0o777, 0o600)
 
     def test_omitido_avisa_y_no_escribe(self):
-        out = self._run(["entrega-ambiente-banco-opcion3"], "")
+        out = self._run(["entrega-ambiente-banco"], "")
         self.assertIn("Falta PAT_AZURE", out)
         self.assertFalse(self.zshrc.exists())
 
