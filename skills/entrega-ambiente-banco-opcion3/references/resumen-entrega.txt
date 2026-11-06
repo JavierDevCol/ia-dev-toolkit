@@ -52,25 +52,48 @@ INSTRUCCIONES AL BANCO
 ═══════════════════ VARIANTE HOTFIX (Opción 2b) ═══════════════════
 
 RESUMEN ENTREGA — hotfix ({nombre_repo})
-Versión entregada: vX.Y.Z+1  (incremento de PATCH desde vX.Y.Z)
-Ambiente donde se detectó el bug: PRU/PREPRO/PRO  (tag de origen: vX.Y.Z-<sufijo>)
-Descripción del bug y del fix: <texto>
-Commit del fix: <sha>
-Rama entregada: release/vX.Y.Z+1  (develop == release/vX.Y.Z+1 ✓)
-Back-merge: PR hotfix/<nombre> → develop (aprobado y mergeado)
+Versión entregada: vX.Y.Z  (PATCH+1 sobre vBASE)
+Ambiente donde se detectó la falla: <DES/PRU/PRE/PRO>  (tag: vBASE-<AMB>)
+Bug / WI: <descripción> · <WI>
+Origen del fix: <rama fix/<desc> | cherry-pick de <shas> desde develop>
+Commit del hotfix: <sha>
+Rama: hotfix/vX.Y.Z (bloqueada, isLocked = true)
+Tag de versión: vX.Y.Z  ·  Imagen: {nombre_ms}:X.Y.Z (creados por el pipeline)
 
-CAMBIOS DEL FIX
-- <cambio 1>
+VERSIÓN ACTUAL POR AMBIENTE (al preparar la entrega)
+- DES <vA.B.C> · PRU <vA.B.C> · PRE <vA.B.C> · PRO <vA.B.C>
+
+PULL REQUESTS DE LA ENTREGA (en borrador — los publica el banco)
+- DES → <url PR hotfix/vX.Y.Z → des>
+- PRU → <url PR hotfix/vX.Y.Z → pru>
+- PRE → <url PR hotfix/vX.Y.Z → prepro>
+- PRO → <url PR hotfix/vX.Y.Z → main>
+
+⚠ AMBIENTES QUE BAJAN DE VERSIÓN
+- <AMB>: pasa de <vA.B.C> a vX.Y.Z; el PR revierte <versiones>  (o "ninguno")
+
+PR A DEVELOP (CEIBA)
+- <url PR hotfix/vX.Y.Z → develop> — <activo / mergeado / conflicto reportado>
+
+PR DE VERSIONES ANTERIORES PARA ABANDONAR
+- <origen → destino · url>  (o "ninguno")
+
+CAMBIOS DEL FIX (desde release-notes.md)
+- <commit 1>
 
 CHECKLIST DE ENTREGA
-- <N> ítems [✓] · <M> pendientes ([⚠]/[✗]): <cuáles y por qué>
+- <N> ítems [✓] · <M> pendientes ([⚠]/[✗]) · DAST [N/A]: <cuáles y por qué>
 
 ARTÉFACTOS (nombres reales según la skill que los genera)
-- release-notes.md (desde cero, rango v<X.Y.Z>..HEAD)
+- release-notes.md (desde cero, rango vBASE..<sha>)
+- checklist-entrega_vX.Y.Z.txt
 - config-entorno_{nombre_ms}_vX.Y.Z.md — lo genera env-config-audit
 
-NOTIFICACIÓN AL BANCO
-- La versión sigue el flujo completo: develop → des → pru → prepro → pro (sin saltar ambientes).
+INSTRUCCIONES AL BANCO
+- Publicar los PR en borrador y darles el manejo que se requiera.
+- Completar los PR en orden DES → PRU → PRE → PRO, con merge commit (sin squash). Si es urgente, de forma consecutiva.
+- Completar el PR = aprobar el despliegue de {nombre_ms}:X.Y.Z en ese ambiente.
+- El pipeline crea vX.Y.Z-{AMB} tras verificar el pod; sin ese tag, el PR del siguiente ambiente queda bloqueado.
 
 > **Release Manager:** {{usuario.nombre}}
 > **Fecha:** {{fecha}}

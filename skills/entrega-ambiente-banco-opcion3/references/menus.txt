@@ -23,9 +23,9 @@
 ║      Crea PR feature → develop                          ║
 ║      Al aprobarse, usar Opción 1                        ║
 ║                                                        ║
-║  [b] hotfix → Bug en PRU/PREPRO/PRO                     ║
-║      Merge a develop primero → nuevo release            ║
-║      Flujo completo por todos los ambientes             ║
+║  [b] hotfix → Falla en una versión ya entregada         ║
+║      Fix revisado desde el tag → hotfix/vX.Y.Z          ║
+║      4 PR a ambientes → PR a develop al final           ║
 ║                                                        ║
 ║  [c] corrección en certificación → Banco pidió cambios  ║
 ║      Puede esperar → [a] y luego Opción 1 (nueva MINOR) ║

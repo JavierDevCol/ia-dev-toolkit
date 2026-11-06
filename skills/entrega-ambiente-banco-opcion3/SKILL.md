@@ -19,7 +19,7 @@ Prepara el handoff de releases creando ramas, generando release notes y artefact
 ## When to Use
 
 - La feature está integrada en develop y se necesita crear release/vX.Y.Z
-- Hay un hotfix que integrar desde un ambiente (PRU/PREPRO/PRO)
+- Hay una falla urgente en una versión ya entregada (DES/PRU/PRE/PRO) y el fix ya está revisado
 - El banco pidió una corrección durante la certificación (se enruta a 2a o 2b)
 - Se necesita generar release notes y resumen de entrega
 
@@ -46,10 +46,11 @@ START: User requests release handoff
 │  │       → Checklist + Resumen
 │  │
 │  └─ NO
-│     ├─ Is this a HOTFIX from PRU/PREPRO/PRO? ── Option 2b
+│     ├─ Is this a HOTFIX on a delivered version? ── Option 2b
 │     │  → Identify environment + affected version
-│     │  → hotfix branch → fix → merge develop
-│     │  → New release/vX.Y.Z+1 → Resumen
+│     │  → reviewed fix from base tag → hotfix/vX.Y.Z + lock
+│     │  → wait pipeline → 4 DRAFT PR to envs → PR to develop
+│     │  → Checklist + Resumen
 │     │
 │     ├─ Is this a CORRECTION during certification? ── Option 2c (router)
 │     │  → Can wait → Option 2a → Option 1 (new MINOR)
@@ -63,7 +64,6 @@ START: User requests release handoff
 ## Referencias
 
 - Menús ASCII: `references/menus.txt`
-- Flujo hotfix: `references/flujo-hotfix.sh`
 - Checklist: `references/checklist-entrega.txt`
 - Plantilla de resumen de entrega: `references/resumen-entrega.txt` (variantes RELEASE / HOTFIX)
 
@@ -99,7 +99,7 @@ memctl es solo lectura y su salida ES la respuesta; si memctl no existe (exit 12
 | `usuario.nombre` | Firma de los resúmenes de entrega → placeholder **`{{usuario.nombre}}`** | Vacío o clave inexistente → la línea queda `> **Release Manager:**` sin sufijo. **No inventar un nombre** |
 | `usuario.incluir_firma_en_documentos` | Activa o desactiva el bloque de firma | `false` → omitir el bloque completo. Cualquier otro valor (o ausente) → incluirlo |
 
-**Bloque de firma.** Todo `resumen-entrega_*.txt` (Opción 1 paso 10, Opción 2b paso 10) cierra con:
+**Bloque de firma.** Todo `resumen-entrega_*.txt` (Opción 1 paso 10, Opción 2b paso 11) cierra con:
 ```
 > **Release Manager:** {{usuario.nombre}}
 > **Fecha:** {{fecha}}
@@ -121,10 +121,10 @@ Determinar la opción con el flowchart y el menú (Opción 2 → sub-menú `refe
 |--------|------|---------|
 | **1** | Entregar release desde DEVELOP | `{file:./references/opcion_uno/opcion.md}` (un archivo por paso) |
 | **2a** | feature/fix → develop | `{file:./references/paso_dos_a.md}` |
-| **2b** | hotfix post-entrega | `{file:./references/paso_dos_b.md}` |
+| **2b** | hotfix sobre versión entregada | `{file:./references/opcion_dos_b/opcion.md}` (un archivo por paso) |
 | **2c** | corrección en certificación (enrutador, sin archivo propio) | Puede esperar → **2a** y luego **1** · Urgente → **2b** |
 
-Cada fase referencia sus archivos de apoyo (`references/flujo-hotfix.sh`, `references/checklist-entrega.txt` en Opción 1) y su ruta de `resumen-entrega_*.txt`. **Opciones divididas por pasos** (`references/opcion_uno/`): cargar un solo archivo de paso a la vez y pasar al siguiente solo cuando se cumpla su condición **Siguiente**; nunca leer ni adelantar un paso posterior mientras el actual espera un resultado. El ciclo completo 2a → 1 se encadena: al aprobarse el PR, volver al menú y ejecutar la Opción 1.
+Cada fase referencia sus archivos de apoyo (`references/checklist-entrega.txt` en Opciones 1 y 2b) y su ruta de `resumen-entrega_*.txt`. **Opciones divididas por pasos** (`references/opcion_uno/`, `references/opcion_dos_b/`): cargar un solo archivo de paso a la vez y pasar al siguiente solo cuando se cumpla su condición **Siguiente**; nunca leer ni adelantar un paso posterior mientras el actual espera un resultado. El ciclo completo 2a → 1 se encadena: al aprobarse el PR, volver al menú y ejecutar la Opción 1.
 
 ## Quick Reference
 
@@ -134,7 +134,7 @@ Cada fase referencia sus archivos de apoyo (`references/flujo-hotfix.sh`, `refer
 |-------|--------|-------------------|---------------|-------------------|------|
 | **1: desde DEVELOP** | develop | Feature mergeada via PR | release/vX.Y.Z | Ya tiene el fix | Banco crea en DES |
 | **2a: feature/fix** | feature branch | NO está en develop | PR feature → develop | Después de PR | Banco crea en DES |
-| **2b: hotfix** | tag ambiente | Código en PRU/PREPRO/PRO | hotfix/* → release/vX.Y.Z+1 | Merge --no-ff primero | Banco crea en DES |
+| **2b: hotfix** | tag de la versión con la falla | Fix revisado en `fix/*` o commits de develop | hotfix/vX.Y.Z (bloqueada) + 4 PR borrador | PR activo después | Pipeline: vX.Y.Z y vX.Y.Z-{AMB} |
 | **2c: corrección en certificación** | Enrutador | Banco pide fix sobre versión entregada | Las de 2a o 2b | Las de 2a o 2b | Las de 2a o 2b |
 
 ### Reglas obligatorias
@@ -158,20 +158,20 @@ Cada fase referencia sus archivos de apoyo (`references/flujo-hotfix.sh`, `refer
 | Crear tag vX.Y.Z desde CEIBA | El tag lo crea el banco en DES |
 | Hotfix sin merge a develop primero | El flujo es develop → des → pru → prepro → pro |
 | Corregir sobre la release entregada o crear `release/vX.Y.Z-rc.N` | Ya no hay RC: puede esperar → 2a → 1; urgente → 2b (Regla 3) |
-| Merge directo a main/des en hotfix | Primero develop, luego crear release |
+| Implementar el fix dentro de la skill o en `hotfix/*` | El fix se desarrolla y revisa en `fix/*` desde el tag base; cada push a `hotfix/*` dispara el pipeline |
 | Generar release-notes incremental | Siempre desde cero con `git log <TAG>..HEAD` |
 | No generar `config-entorno_{nombre_ms}_vX.Y.Z.md` | Ejecutar `@env-config-audit sobre el diff origin/<amb>..vX.Y.Z` por ambiente (Opción 1; en 2a/2b el diff de su fase) manualmente por separado |
 | `--ff-only` forzado | Si falla, hay commits propios en release — detener |
-| Bloquear la entrega por tags de promoción faltantes | El chequeo de Opción 1 paso 2 / 2b paso 2 es informativo, nunca un gate — bloquearlo frenaría un hotfix urgente por el ritmo del banco, que es independiente de CEIBA |
+| Bloquear la entrega por tags de promoción faltantes | El chequeo de Opción 1 paso 2 / 2b paso 1 es informativo, nunca un gate — bloquearlo frenaría un hotfix urgente por el ritmo del banco, que es independiente de CEIBA |
 
 ## Skills complementarias (se invocan aparte; esta skill solo las referencia)
 
 | Skill | Qué hace | Cuándo ejecutarla | Comando sugerido |
 |-------|----------|-------------------|------------------|
-| `env-config-audit` |  analiza el diff | Checklist opción 1, 2a, 2b | Opción 1 (uno por ambiente): `@env-config-audit sobre el diff origin/<des\|pru\|prepro\|main>..vX.Y.Z` · 2a: `@env-config-audit sobre el diff develop..<rama>` · 2b: `@env-config-audit sobre el diff develop..hotfix/<hotfix>` |
-| `ado-pipeline-analyzer` | Valida build, tests, cobertura, DAST, SonarQube.| Opción 1 pasos 1 y 6 | `@ado-pipeline-analyzer build latest del pipeline <nombre_pipeline> en rama develop` · `... en rama release/vX.Y.Z` |
-| `ado-pr-creator` | Crea los PR en ADO (en borrador) | Opción 1 paso 7 | `@ado-pr-creator crear PR en borrador (isDraft=true) de release/vX.Y.Z hacia <des\|pru\|prepro\|main> con título exacto "Release vX.Y.Z → <AMB>"` |
-| `email-composer` | Redacta el correo de entrega | Opción 1 paso 10 | `@email-composer correo laboral de entrega vX.Y.Z de {nombre_repo} al banco con el contenido de resumen-entrega_release_vX.Y.Z.txt` |
+| `env-config-audit` |  analiza el diff | Checklist opción 1, 2a, 2b | Opción 1 (uno por ambiente): `@env-config-audit sobre el diff origin/<des\|pru\|prepro\|main>..vX.Y.Z` · 2a: `@env-config-audit sobre el diff develop..<rama>` · 2b (uno por ambiente): `@env-config-audit sobre el diff origin/<des\|pru\|prepro\|main>..vX.Y.Z` |
+| `ado-pipeline-analyzer` | Valida build, tests, cobertura, DAST, SonarQube.| Opción 1 pasos 1 y 6 · 2b paso 6 | `@ado-pipeline-analyzer build latest del pipeline <nombre_pipeline> en rama develop` · `... en rama release/vX.Y.Z` |
+| `ado-pr-creator` | Crea los PR en ADO (a ambientes en borrador) | Opción 1 paso 7 · 2b pasos 7 y 8 | `@ado-pr-creator crear PR en borrador (isDraft=true) de release/vX.Y.Z hacia <des\|pru\|prepro\|main> con título exacto "Release vX.Y.Z → <AMB>"` |
+| `email-composer` | Redacta el correo de entrega | Opción 1 paso 10 · 2b paso 11 | `@email-composer correo laboral de entrega vX.Y.Z de {nombre_repo} al banco con el contenido de resumen-entrega_release_vX.Y.Z.txt` |
 | `sac-analizar-seguridad` | Auditoría estática (SAST) de todo lo que se va a promover.  | Checklist opción 1, `scope=commits` | `@sac-analizar-seguridad scope=commits sobre release/vX.Y.Z` |
 | `sac-analizar-calidad-codigo` | Code smells y violaciones arquitectónicas de los cambios del release  | Checklist opción 1, `scope=commits` | `@sac-analizar-calidad-codigo scope=commits sobre release/vX.Y.Z` |
 
