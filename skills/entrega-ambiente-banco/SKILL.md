@@ -37,6 +37,9 @@ START: User requests release handoff
 ├─ Is the feature ALREADY merged into develop via approved PR?
 │  │
 │  ├─ YES ──────────────────────────────────────── Option 1
+│  │       → Paso 0: estado-ambientes in 2 PARALLEL sub-agents
+│  │         (@estado-ambientes <nombre_repo> -t des + @estado-ambientes <nombre_repo> -d)
+│  │         → results + recommendation → user decides (✋)
 │  │       Release from DEVELOP
 │  │       → Verify develop, fix <sha>, generate release notes
 │  │       → Create release/vX.Y.Z once on <sha> + lock (isLocked)
@@ -46,6 +49,9 @@ START: User requests release handoff
 │  │
 │  └─ NO
 │     ├─ Is this a HOTFIX on a delivered version? ── Option 2b
+│     │  → Paso 0: estado-ambientes in 2 PARALLEL sub-agents
+│     │    (@estado-ambientes <nombre_repo> -t des + @estado-ambientes <nombre_repo> -d)
+│     │    → results + recommendation → user decides (✋)
 │     │  → Identify environment + affected version
 │     │  → reviewed fix from base tag → hotfix/vX.Y.Z + lock
 │     │  → wait pipeline → 4 DRAFT PR to envs → PR to develop
@@ -165,11 +171,13 @@ Cada fase referencia sus archivos de apoyo (`references/checklist-entrega.txt` e
 | Completar un PR con squash | Merge commit obligatorio: el squash rompe el vínculo con el tag (Regla 6) |
 | Adelantar pasos mientras se espera un resultado | Un paso a la vez (Regla 9) |
 | Bloquear la entrega por tags de promoción faltantes | El chequeo de Opción 1 paso 2 / 2b paso 1 es informativo, nunca un gate — bloquearlo frenaría un hotfix urgente por el ritmo del banco, que es independiente de CEIBA |
+| Cortar la release o el hotfix sin la validación previa de estado de ambientes | Paso 0 obligatorio en Opción 1 y 2b: 2 sub-agentes en paralelo (`@estado-ambientes <nombre_repo> -t des` + `-d`), presentar los resultados con una recomendación y esperar la decisión ✋ del usuario |
 
-## Skills complementarias (se invocan aparte; esta skill solo las referencia)
+## Skills complementarias (se invocan aparte o vía sub-agentes; esta skill solo las referencia)
 
 | Skill | Qué hace | Cuándo ejecutarla | Comando sugerido |
 |-------|----------|-------------------|------------------|
+| `estado-ambientes` | Diagnóstico de solo lectura: ¿hace falta nueva entrega/corte (`-t des`) y ¿hay desvíos en los ambientes (`-d`)? | Opción 1 y 2b, **paso 0** — 2 sub-agentes **en paralelo**, esperando a ambos | `@estado-ambientes <nombre_repo> -t des` · `@estado-ambientes <nombre_repo> -d` |
 | `env-config-audit` |  analiza el diff | Checklist opción 1, 2a, 2b | Opción 1 (uno por ambiente): `@env-config-audit sobre el diff origin/<des\|pru\|prepro\|main>..vX.Y.Z` · 2a: `@env-config-audit sobre el diff origin/develop...origin/<rama>` · 2b (uno por ambiente): `@env-config-audit sobre el diff origin/<des\|pru\|prepro\|main>..vX.Y.Z` |
 | `ado-pipeline-analyzer` | Valida build, tests, cobertura, DAST, SonarQube.| Opción 1 pasos 1 y 6 · 2b paso 6 | `@ado-pipeline-analyzer build latest del pipeline <nombre_pipeline> en rama develop` · `... en rama release/vX.Y.Z` |
 | `ado-pr-creator` | Crea los PR en ADO (a ambientes en borrador) | Opción 1 paso 7 · 2b pasos 7 y 8 | `@ado-pr-creator crear PR en borrador (isDraft=true) de release/vX.Y.Z hacia <des\|pru\|prepro\|main> con título exacto "Release vX.Y.Z → <AMB>"` |

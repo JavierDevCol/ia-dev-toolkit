@@ -25,7 +25,7 @@
 - Rama `hotfix/vX.Y.Z` en `origin`, creada una sola vez sobre `<sha>` y bloqueada (`isLocked = true`). El tag `vX.Y.Z` y la imagen `{nombre_ms}:X.Y.Z` los crea el **pipeline** — CEIBA nunca crea tags.
 - 4 PR `hotfix/vX.Y.Z → des, pru, prepro, main` **en borrador** (los publica el banco) y 1 PR **activo** `hotfix/vX.Y.Z → develop`.
 
-**Confirmaciones del usuario:** ✋ versión base (paso 1) · ✋ fix completo y revisado (paso 4) · ✋ push y bloqueo (paso 5) · ✋ 4 PR en borrador (paso 7) · ✋ PR a develop (paso 8) · ✋ cierre del checklist (paso 10).
+**Confirmaciones del usuario:** ✋ decisión sobre la recomendación del paso 0 · ✋ versión base (paso 1) · ✋ fix completo y revisado (paso 4) · ✋ push y bloqueo (paso 5) · ✋ 4 PR en borrador (paso 7) · ✋ PR a develop (paso 8) · ✋ cierre del checklist (paso 10).
 
 ## Ejecución por pasos (obligatorio)
 
@@ -33,6 +33,7 @@ Cada paso vive en su propio archivo de esta carpeta. **Cargar un solo archivo de
 
 | Paso | Archivo |
 |---|---|
+| 0 | `paso_cero.md` — Validación de estado de ambientes (2 sub-agentes en paralelo) |
 | 1 | `paso_uno.md` — Versión base |
 | 2 | `paso_dos.md` — Versión del hotfix y prechequeos |
 | 3 | `paso_tres.md` — Recibir y validar el fix |
@@ -45,4 +46,4 @@ Cada paso vive en su propio archivo de esta carpeta. **Cargar un solo archivo de
 | 10 | `paso_diez.md` — Checklist de entrega |
 | 11 | `paso_once.md` — Resumen y correo |
 
-**Siguiente:** cargar `paso_uno.md`.
+**Siguiente:** cargar `paso_cero.md`.
