@@ -19,7 +19,7 @@
 - Rama `release/vX.Y.Z` en `origin`, creada una sola vez sobre el commit validado. La skill la bloquea (`isLocked = true`) al crearla. El tag `vX.Y.Z` y la imagen `{nombre_ms}:X.Y.Z` los crea el **pipeline de release** — CEIBA nunca crea tags.
 - 4 PR `release/vX.Y.Z → des, pru, prepro, main` **en borrador** en ADO, creados tras el pipeline de release OK. Los publica el banco.
 
-**Confirmaciones del usuario:** ✋ versión en el paso 2 · ✋ OK para crear y bloquear la rama · ✋ OK para crear los 4 PR en borrador · ✋ cierre del checklist como estado real.
+**Confirmaciones del usuario:** ✋ decisión sobre la recomendación del paso 0 · ✋ versión en el paso 2 · ✋ OK para crear y bloquear la rama · ✋ OK para crear los 4 PR en borrador · ✋ cierre del checklist como estado real.
 
 ## Ejecución por pasos (obligatorio)
 
@@ -27,6 +27,7 @@ Cada paso vive en su propio archivo de esta carpeta. **Cargar un solo archivo de
 
 | Paso | Archivo |
 |---|---|
+| 0 | `paso_cero.md` — Validación de estado de ambientes (2 sub-agentes en paralelo) |
 | 1 | `paso_uno.md` — Verificar develop y fijar <sha> |
 | 2 | `paso_dos.md` — Versión anterior y versión de la entrega |
 | 3 | `paso_tres.md` — Release notes |
@@ -38,4 +39,4 @@ Cada paso vive en su propio archivo de esta carpeta. **Cargar un solo archivo de
 | 9 | `paso_nueve.md` — Checklist de entrega |
 | 10 | `paso_diez.md` — Resumen y correo |
 
-**Siguiente:** cargar `paso_uno.md`.
+**Siguiente:** cargar `paso_cero.md`.
