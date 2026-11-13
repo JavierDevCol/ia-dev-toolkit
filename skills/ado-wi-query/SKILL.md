@@ -104,7 +104,7 @@ ORDER BY [System.ChangedDate] DESC
 4. Sin servidor MCP `ado` disponible: informar SOLO eso y pedir que se conecte (el
    profile guard y `ado-profile-setup` no aplican aquí: no mezclar los mensajes).
    Fallback REST+PAT solo como último recurso (patrón de `ado-variable-groups`:
-   PAT en `.env`, clave `pat_ado`, org = `{ado_org}`; nunca imprimir el PAT).
+   PAT en la variable de entorno `PAT_AZURE`, org = `{ado_org}`; nunca imprimir el PAT).
 
 ### 4. Salida
 

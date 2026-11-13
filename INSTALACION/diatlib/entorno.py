@@ -2,8 +2,10 @@
 
 Idempotente y cross-shell (zsh/bash/fish) en Unix; registro + broadcast en Windows.
 Lo usa el bootstrap (garantía inicial) y `diat --check`/`--status` (auto-reparación).
+También ofrece crear PAT_AZURE (PAT de Azure DevOps) para las skills que lo usan.
 """
 
+import getpass
 import os
 from pathlib import Path
 
@@ -55,7 +57,6 @@ def _ensure_path_unix(bin_dir):
 
 def _ensure_path_windows(bin_dir):
     import winreg
-    import ctypes
     bin_str = str(bin_dir)
     key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, "Environment", 0,
                          winreg.KEY_READ | winreg.KEY_WRITE)
@@ -71,11 +72,16 @@ def _ensure_path_windows(bin_dir):
                           ";".join(parts + [bin_str]))
     finally:
         winreg.CloseKey(key)
+    _broadcast_env_change()
+    return True
+
+
+def _broadcast_env_change():
+    import ctypes
     HWND_BROADCAST, WM_SETTINGCHANGE, SMTO_ABORTIFHUNG = 0xFFFF, 0x1A, 0x2
     ctypes.windll.user32.SendMessageTimeoutW(
         HWND_BROADCAST, WM_SETTINGCHANGE, 0, "Environment",
         SMTO_ABORTIFHUNG, 5000, None)               # avisa a procesos nuevos
-    return True
 
 
 def ensure_bin_on_path():
@@ -146,3 +152,70 @@ def _remove_path_windows(bin_dir):
         winreg.SetValueEx(key, "Path", 0, winreg.REG_EXPAND_SZ, ";".join(parts))
     finally:
         winreg.CloseKey(key)
+
+
+# ============================================================
+# PAT_AZURE
+# ============================================================
+PAT_VAR = "PAT_AZURE"
+PAT_SKILLS = {"ado-variable-groups", "ado-variable-groups-write", "ado-wi-query",
+              "entrega-ambiente-banco"}
+PAT_BEGIN, PAT_END = "# >>> diat PAT_AZURE >>>", "# <<< diat PAT_AZURE <<<"
+
+
+def has_pat():
+    return bool(os.environ.get(PAT_VAR))
+
+
+def _write_pat_unix(pat):
+    """Escribe (o reemplaza) el bloque PAT_AZURE en los rc del usuario y los deja en 600."""
+    for rc in _rc_targets():
+        content = rc.read_text(encoding="utf-8") if rc.exists() else ""
+        out, skip = [], False
+        for ln in content.splitlines():             # quita un bloque previo
+            if ln.strip() == PAT_BEGIN:
+                skip = True
+            elif ln.strip() == PAT_END:
+                skip = False
+            elif not skip:
+                out.append(ln)
+        line = (f"set -gx {PAT_VAR} '{pat}'" if rc.name == "config.fish"
+                else f"export {PAT_VAR}='{pat}'")
+        rc.parent.mkdir(parents=True, exist_ok=True)
+        rc.write_text("\n".join(out).rstrip() + f"\n\n{PAT_BEGIN}\n{line}\n{PAT_END}\n",
+                      encoding="utf-8")
+        rc.chmod(0o600)                             # el PAT queda en texto plano
+
+
+def _write_pat_windows(pat):
+    import winreg
+    key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, "Environment", 0, winreg.KEY_WRITE)
+    try:
+        winreg.SetValueEx(key, PAT_VAR, 0, winreg.REG_SZ, pat)
+    finally:
+        winreg.CloseKey(key)
+    _broadcast_env_change()
+
+
+def ensure_pat(installed_skills, interactive=True):
+    """Si alguna skill instalada usa PAT_AZURE y no existe, la pide y la persiste.
+    Sin PAT (vacío o no interactivo) se continúa avisando. Nunca imprime el PAT."""
+    needed = sorted(PAT_SKILLS & set(installed_skills))
+    if not needed or has_pat():
+        return
+    pat = ""
+    if interactive:
+        print(f"\n  🔑 {PAT_VAR} no existe. La usan: {', '.join(needed)}")
+        pat = getpass.getpass("     PAT de Azure DevOps (Enter para omitir): ").strip()
+    if pat and ("'" in pat or any(c.isspace() for c in pat)):
+        print_warning("PAT con caracteres inválidos; no se guardó.")
+        pat = ""
+    if not pat:
+        print_warning(f"Falta {PAT_VAR}: estas skills no funcionarán bien hasta crearla: "
+                      f"{', '.join(needed)}")
+        print(f"     Créala con: export {PAT_VAR}='<tu PAT>' en tu perfil del shell"
+              if os.name != "nt" else f"     Créala con: setx {PAT_VAR} \"<tu PAT>\"")
+        return
+    _write_pat_windows(pat) if os.name == "nt" else _write_pat_unix(pat)
+    os.environ[PAT_VAR] = pat                       # disponible ya en este proceso
+    print_warning(f"{PAT_VAR} guardada. Reinicia la terminal y Claude Code/OpenCode para que la tomen.")

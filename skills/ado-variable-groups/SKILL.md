@@ -8,7 +8,7 @@ ready: true
 
 ## Overview
 
-Consulta la Library de Azure DevOps por REST API usando el PAT de `.env`. El MCP de ADO **no** expone Variable Groups y `az` CLI no está instalado en este entorno — esta skill es la única vía de lectura.
+Consulta la Library de Azure DevOps por REST API usando el PAT de la variable de entorno `PAT_AZURE`. El MCP de ADO **no** expone Variable Groups y `az` CLI no está instalado en este entorno — esta skill es la única vía de lectura.
 
 ## When to Use
 
@@ -27,7 +27,7 @@ Consulta la Library de Azure DevOps por REST API usando el PAT de `.env`. El MCP
 
 | Requisito | Detalle |
 |---|---|
-| PAT | En `.env` de la raíz del proyecto, clave `pat_ado` |
+| PAT | Variable de entorno `PAT_AZURE` |
 | Scope del PAT | Lectura sobre **Library** (`vso.variablegroups_read`) |
 | Organización / Proyecto | `--org` / `--project` (o `ADO_ORG` / `ADO_PROJECT`); ver abajo |
 
@@ -43,7 +43,7 @@ memctl es solo lectura y su salida ES la respuesta; si memctl no existe (exit 12
 
 **Profile guard:** si `perfil_activo` es null, su perfil no existe o no resuelve proyecto, detenerse y pedir al usuario que ejecute `ado-profile-setup`.
 
-El script busca `.env` subiendo desde el directorio actual. Nunca imprime el PAT ni el valor de variables marcadas `isSecret`.
+El script lee `PAT_AZURE` del entorno. Nunca imprime el PAT ni el valor de variables marcadas `isSecret`.
 
 ## Implementation
 

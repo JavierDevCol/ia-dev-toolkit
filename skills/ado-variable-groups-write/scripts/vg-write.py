@@ -21,21 +21,6 @@ from datetime import datetime
 API = "7.1-preview.2"
 
 
-def buscar_env(inicio):
-    """Sube directorios buscando un .env con pat_ado."""
-    d = os.path.abspath(inicio)
-    while True:
-        p = os.path.join(d, ".env")
-        if os.path.exists(p):
-            for linea in open(p, encoding="utf-8"):
-                if linea.startswith("pat_ado="):
-                    return linea.split("=", 1)[1].strip()
-        padre = os.path.dirname(d)
-        if padre == d:
-            return None
-        d = padre
-
-
 class Ado:
     def __init__(self, org, proyecto, pat):
         self.base = (f"https://dev.azure.com/{org}/{proyecto}"
@@ -105,9 +90,9 @@ def main():
     if not nuevas:
         sys.exit("hace falta al menos un --var CLAVE=VALOR")
 
-    pat = buscar_env(os.getcwd())
+    pat = os.environ.get("PAT_AZURE")
     if not pat:
-        sys.exit("no se encontro pat_ado en ningun .env de los directorios padre")
+        sys.exit("falta la variable de entorno PAT_AZURE")
 
     ado = Ado(a.org, a.project, pat)
 
