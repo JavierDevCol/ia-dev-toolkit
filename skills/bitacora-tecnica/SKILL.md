@@ -4,8 +4,9 @@ description: >
   Use when a work session has a clear goal and something crucial happens that
   helps resume later or avoid repeating work (checks with results on DB/pods/logs,
   files or classes touched, branch and commits, root causes, dead ends, pending
-  items), when the user wants to resume a task ("retomar", "bitácora"), or when
-  closing a work log ("cerrar bitácora").
+  items), when the user wants to resume a task ("retomar", "bitácora"), when
+  closing a work log ("cerrar bitácora"), or when the user asks for a work-time
+  summary of the day ("resumen del día", "cuánto tiempo trabajé hoy").
 ready: true
 ---
 
@@ -21,6 +22,7 @@ La escritura la hace un **subagente** para no cargar la sesión con el contenido
 
 - La sesión ya tiene un objetivo claro y ocurre algo crucial → registrar checkpoint
 - El usuario quiere retomar una tarea → leer la bitácora y resumir
+- El usuario pide un resumen del día o pregunta cuánto tiempo trabajó → reporte de duración por sesión (solo lectura)
 
 **Cuándo NO usar:**
 - Sesiones solo de consulta o sin objetivo claro
@@ -52,15 +54,16 @@ Lanzar un subagente (Claude Code: herramienta `Agent`, `general-purpose`; OpenCo
 
 ```
 Lee <skill-dir>/references/escritor.md y sigue sus instrucciones.
-modo: crear | checkpoint | retomar | cerrar
+modo: crear | checkpoint | retomar | cerrar | resumen
 raiz_proyecto: <ruta absoluta>
 slug: <slug-kebab-case>
 titulo, objetivo, rama: <solo en modo crear>
 checkpoints: <1–2 líneas cada uno; solo en crear/checkpoint/cerrar>
+fecha: <opcional, solo en resumen; default hoy>
 ```
 
 - **Slug** = ID = nombre de carpeta: `kebab-case` corto, sin fecha (ej. `hu-1234-timeout-pagos`).
-- El subagente responde solo `✅ creada|actualizada|cerrada: <ruta>` (en `retomar`, un resumen ≤10 líneas). No leer la bitácora en la sesión principal.
+- El subagente responde solo `✅ creada|actualizada|cerrada: <ruta>` (en `retomar`, un resumen ≤10 líneas; en `resumen`, el reporte del día). No leer la bitácora en la sesión principal.
 - Si responde `⚠️ slug existe con otro objetivo`, preguntar al usuario: actualizar esa bitácora o usar otro slug.
 
 ### Retomar
@@ -70,6 +73,10 @@ Usuario dice "retomar [tarea]" → subagente en modo `retomar` (si no hay slug, 
 ### Cierre
 
 Usuario dice "cerrar bitácora" → subagente en modo `cerrar`: agrega los checkpoints pendientes, escribe la **duración estimada** (siempre, aunque haya un solo checkpoint: suma de los tramos de cada `## Sesión`, contados desde su `· inicio HH:MM`), marca `**Estado:** Cerrada` y firma. Detalle de cálculo: `references/escritor.md`.
+
+### Resumen
+
+Usuario dice "resumen del día / de la sesión / de <fecha>" o pregunta cuánto tiempo trabajó → subagente en modo `resumen` con la fecha pedida (sin fecha, hoy). **Solo lectura:** devuelve el reporte en chat (duración estimada y lo hecho por cada sesión del día), no escribe en la bitácora. Formato y cálculo: `references/escritor.md`.
 
 ## Common Mistakes
 

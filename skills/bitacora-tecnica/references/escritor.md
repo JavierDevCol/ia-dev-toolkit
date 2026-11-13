@@ -59,6 +59,18 @@ Mientras el bloque más reciente esté dentro del plazo de 2h, los checkpoints s
    ⚠️ Incidencias abiertas: • ...
    ```
 
+**resumen**
+1. Sin slug → listar `bitacora-tecnica/*/bitacora.md` con su título y estado, y responder esa lista. Con slug → leer el archivo. **Solo lectura: no escribir nada.**
+2. Fecha pedida = campo `fecha` (aceptar `YYYY-MM-DD` o `DD-MM-YYYY`); sin campo, la fecha de hoy. Filtrar los bloques `## Sesión <fecha>` (el header usa `YYYY-MM-DD`).
+3. Duración de cada bloque = misma regla que `cerrar`: último checkpoint − `· inicio HH:MM` (sin `· inicio`, el primer checkpoint; o `**Creada:**` si es anterior y es el primer bloque). Excepción: el último bloque del archivo, si su fecha es la de hoy y quedó abierto → hora actual − inicio, marcado `(en curso)`. Bloques sin checkpoints no cuentan.
+4. Responder el reporte (formato de tiempo `Xd Yh Zm` como en `cerrar`):
+   ```
+   📋 Resumen <fecha> · <título>
+   ⏱ Estimado: <total> en <n> sesión|sesiones (pluralizar: 1 sesión, 2+ sesiones)
+   · HH:MM–HH:MM (<tramo>): <lo hecho en la sesión, 1 línea>
+   ```
+   Sesión abierta: `· HH:MM–ahora (<tramo>, en curso): …`. Sin bloques ese día → `📅 Sin sesiones el <fecha>`.
+
 ## Respuesta
 
-Solo una línea (salvo `retomar`): `✅ creada|actualizada|cerrada: <ruta>` o el `⚠️` correspondiente. Sin explicar el contenido escrito.
+Solo una línea (salvo `retomar` y `resumen`): `✅ creada|actualizada|cerrada: <ruta>` o el `⚠️` correspondiente. Sin explicar el contenido escrito.
