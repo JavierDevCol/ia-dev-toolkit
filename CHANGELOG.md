@@ -2,6 +2,29 @@
 
 ## [Unreleased]
 
+## [4.1.0] - 2026-11-13
+
+### Added
+- feat(bitacora-tecnica): add session time summary mode
+- feat(chat-equipo): add template catalog for team messages
+- feat(entrega-ambiente-banco): pre-validate env state in options 1 and 2b
+- feat(entrega-ambiente-banco): promote option 3 flow and keep previous flow as entrega-ambiente-banco-v1
+- feat(diat): check PAT_AZURE on install and offer to create it
+- feat(entrega-ambiente-banco-opcion3): redesign hotfix as step files from base tag with draft PRs
+- feat(entrega-ambiente-banco-opcion3): rewrite option 1 for single-build release and draft PRs
+- feat(entrega-ambiente-banco-opcion3): copy skill as base for option 3 flow
+
+### Changed
+- test(e2e): replace obsolete .env scenario for vault-manager with missing env credentials
+- docs(entrega-ambiente-banco-opcion3): poll in-progress develop pipeline in option 1 step 1
+- refactor(ado): read PAT from PAT_AZURE env var instead of .env
+- docs(entrega-ambiente-banco-opcion3): drop versioning from option 2a and use merge-base diff
+- docs(entrega-ambiente-banco-opcion3): align rules and common mistakes with option 3 flow
+- refactor(entrega-ambiente-banco-opcion3): split option 1 into one file per step
+- refactor(entrega-ambiente-banco-opcion3): replace RC adjustment with certification-correction router
+
+**Full Changelog**: https://github.com/JavierDevCol/ia-dev-toolkit/compare/v4.0.0...v4.1.0
+
 ## [4.0.0] - 2026-11-05
 
 ### Breaking
