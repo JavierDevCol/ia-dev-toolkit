@@ -9,6 +9,7 @@ Archivo: `<raiz_proyecto>/bitacora-tecnica/<slug>/bitacora.md`. Plantilla: `../a
 - Evidencias solo como enlaces/rutas; no pegar logs completos.
 - Fecha y hora actuales del sistema (`date "+%d-%m-%Y %H:%M"`): la misma hora para todos los checkpoints de una llamada; nunca inventar horas. Cada checkpoint lleva fecha y hora (`DD-MM-YYYY HH:MM`) para distinguir horas iguales en días distintos.
 - No modificar nada fuera de `bitacora-tecnica/<slug>/`.
+- Formato de pendiente: abierto = `- [ ] <texto> — desde DD-MM-YYYY`; cerrado = `- [x] <texto> — desde DD-MM-YYYY · cierra DD-MM-YYYY` (fecha del checkpoint que lo cierra).
 
 ## Sesiones de trabajo
 
@@ -30,7 +31,12 @@ Mientras el bloque más reciente esté dentro del plazo de 2h, los checkpoints s
 **checkpoint**
 1. Leer el archivo. Si no existe → responder `⚠️ no existe: <ruta>` y no crear.
 2. Elegir el bloque según la regla de sesiones: si el bloque más reciente tiene su último evento a ≤2h de esta llamada y en la misma fecha, escribir ahí. Si no, crear antes de `## Incidencias y solución` el bloque `## Sesión <fecha de hoy> · inicio HH:MM` (HH:MM = hora de esta llamada).
-3. Agregar `- DD-MM-YYYY HH:MM — <checkpoint>` al final de esa sesión. Si el checkpoint es un problema resuelto o un camino descartado, agregarlo también en `## Incidencias y solución`; si es un pendiente, en `## Pendientes` (y marcar `[x]` los pendientes que el checkpoint cierre). Actualizar `**Rama:**` si cambió.
+3. Agregar `- DD-MM-YYYY HH:MM — <checkpoint>` al final de esa sesión. Si el checkpoint es un problema resuelto o un camino descartado, agregarlo también en `## Incidencias y solución`. Después, sincronizar `## Pendientes` ítem por ítem con lo que reporta el checkpoint:
+   - Trabajo reportado como hecho o resuelto con pendiente existente → marcar `[x]` y anotar `· cierra DD-MM-YYYY`.
+   - Cierre no concluyente (parcial, borrador, falta confirmación) o correspondencia ambigua entre checkpoint y pendiente → conservar el ítem sin `[x]`, anotar `— ¿cierra DD-MM-YYYY? revisar` y avisar en la respuesta. Cuando el cierre se confirme, el checkpoint que lo haga marca `[x]`, quita la marca `¿cierra …? revisar` y anota `· cierra DD-MM-YYYY`.
+   - Trabajo nuevo pendiente → agregar `- [ ] <texto> — desde DD-MM-YYYY`; si ya existe un pendiente igual o equivalente, conservar el actual sin duplicar.
+   - Pendientes que el checkpoint no menciona → conservarlos idénticos, en su mismo orden.
+   - Actualizar `**Rama:**` si cambió.
 
 **cerrar**
 1. Si llegan checkpoints, agregarlos igual que en `checkpoint`. Si no llegan, no crear bloques de sesión vacíos.
@@ -73,4 +79,4 @@ Mientras el bloque más reciente esté dentro del plazo de 2h, los checkpoints s
 
 ## Respuesta
 
-Solo una línea (salvo `retomar` y `resumen`): `✅ creada|actualizada|cerrada: <ruta>` o el `⚠️` correspondiente. Sin explicar el contenido escrito.
+Una línea `✅ creada|actualizada|cerrada: <ruta>` o el `⚠️` correspondiente (en `retomar`, un resumen ≤10 líneas; en `resumen`, el reporte del día). Sin explicar el contenido escrito. Por cada marca `¿cierra …? revisar` agregada, añadir una línea `⚠️ cierre incierto: "<pendiente>" — <motivo>`.
