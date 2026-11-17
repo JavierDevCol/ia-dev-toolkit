@@ -14,7 +14,8 @@
 - [Problema] → [solución o camino descartado]
 
 ## Pendientes / próxima sesión
-- [ ] [Pendiente]
+- [ ] [Pendiente] — desde DD-MM-YYYY
+- [x] [Pendiente hecho] — desde DD-MM-YYYY · cierra DD-MM-YYYY
 
 ## Evidencias
 - [Descripción](ruta-o-enlace)

@@ -63,7 +63,7 @@ fecha: <opcional, solo en resumen; default hoy>
 ```
 
 - **Slug** = ID = nombre de carpeta: `kebab-case` corto, sin fecha (ej. `hu-1234-timeout-pagos`).
-- El subagente responde solo `✅ creada|actualizada|cerrada: <ruta>` (en `retomar`, un resumen ≤10 líneas; en `resumen`, el reporte del día). No leer la bitácora en la sesión principal.
+- El subagente responde solo `✅ creada|actualizada|cerrada: <ruta>` (en `retomar`, un resumen ≤10 líneas; en `resumen`, el reporte del día). No leer la bitácora en la sesión principal. Si responde `⚠️ cierre incierto`, presentar esos avisos al usuario y preguntar qué pendientes cerrar.
 - Si responde `⚠️ slug existe con otro objetivo`, preguntar al usuario: actualizar esa bitácora o usar otro slug.
 
 ### Retomar
@@ -81,6 +81,8 @@ Usuario dice "resumen del día / de la sesión / de <fecha>" o pregunta cuánto 
 ## Common Mistakes
 
 - **Escribir paso a paso:** solo checkpoints que eviten repetir trabajo o ayuden a retomar
+- **Reescribir `## Pendientes` en bloque:** se reconcilia ítem por ítem con cada checkpoint; los abiertos sin mención permanecen idénticos y cada cerrado lleva `· cierra <fecha>`
+- **Cerrar pendientes por inferencia:** si el checkpoint no confirma el cierre, dejar `¿cierra …? revisar` y consultar al usuario; nunca marcar `[x]` por suposición
 - **Acumular para el final:** registrar cada checkpoint cuando ocurre
 - **Crear bitácora en sesiones de consulta:** esperar objetivo claro o preguntar
 - **Leer la bitácora en la sesión principal:** delegar siempre al subagente
