@@ -9,6 +9,7 @@ below or the "Block Types" section in SKILL.md.
 This module only generates HTML. It never sends email or creates
 drafts in any mail client.
 """
+from html import escape
 from pathlib import Path
 from string import Template
 
@@ -32,33 +33,73 @@ def _read(name):
     return (TEMPLATES_DIR / name).read_text(encoding="utf-8")
 
 
+def _esc(value):
+    """Escape a plain-text value for safe HTML insertion (quote=True).
+
+    Fields documented as `content (html)` are NOT escaped — they may hold
+    nested render_callout() output or intentional inline markup.
+    """
+    return escape(str(value), quote=True)
+
+
+_REQUIRED_KEYS = {
+    "text": ("content",),
+    "heading": ("title",),
+    "callout": ("content",),
+    "table": ("headers", "rows"),
+    "card": ("title", "content"),
+    "list": ("items",),
+}
+
+
 def render_callout(variant, label, content):
     """Standalone callout box; also usable nested inside a card's content."""
+    if variant not in CALLOUT_COLORS:
+        raise ValueError(f"unknown callout variant: {variant!r}; valid: {', '.join(sorted(CALLOUT_COLORS))}")
     c = CALLOUT_COLORS[variant]
-    body = f"<strong>{label}</strong> {content}" if label else content
+    body = f"<strong>{_esc(label)}</strong> {content}" if label else content
     return Template(_read("block_callout.html")).substitute(bg=c["bg"], border=c["border"], body=body)
 
 
 def _render_table(headers, rows):
+    if not isinstance(headers, list):
+        raise TypeError(f"headers must be a list, got {type(headers).__name__}")
+    if not isinstance(rows, list):
+        raise TypeError(f"rows must be a list, got {type(rows).__name__}")
     th_tpl = Template(_read("table_th.html"))
     td_tpl = Template(_read("table_td.html"))
-    header_row = "<tr style=\"background-color:#eef2f7;\">" + "".join(th_tpl.substitute(text=h) for h in headers) + "</tr>"
+    header_row = "<tr style=\"background-color:#eef2f7;\">" + "".join(th_tpl.substitute(text=_esc(h)) for h in headers) + "</tr>"
     body_rows = ""
     for i, row in enumerate(rows):
+        if not isinstance(row, (list, tuple)):
+            raise TypeError(f"row {i} must be a list of cells, got {type(row).__name__}")
+        if len(row) != len(headers):
+            raise ValueError(f"row {i} has {len(row)} cells, expected {len(headers)}")
         style = ' style="background-color:#fbfcfd;"' if i % 2 else ""
-        cells = "".join(td_tpl.substitute(text=cell) for cell in row)
+        cells = "".join(td_tpl.substitute(text=_esc(cell)) for cell in row)
         body_rows += f"<tr{style}>{cells}</tr>"
     return Template(_read("table_wrap.html")).substitute(header_row=header_row, body_rows=body_rows)
 
 
 def _render_block(block, header_color):
-    kind = block["type"]
+    kind = block.get("type")
+    if not kind:
+        raise ValueError("block missing required key: type")
+
+    if kind not in _REQUIRED_KEYS:
+        raise ValueError(f"unknown block type: {kind!r}")
+
+    missing = [key for key in _REQUIRED_KEYS[kind] if key not in block]
+    if missing:
+        raise ValueError(f"block type {kind!r} missing required key: {', '.join(missing)}")
 
     if kind == "text":
         return Template(_read("block_text.html")).substitute(content=block["content"])
 
     if kind == "heading":
-        numbered_title = f"{block['number']}. {block['title']}" if block.get("number") else block["title"]
+        number = block.get("number")
+        title = _esc(block["title"])
+        numbered_title = f"{_esc(number)}. {title}" if number is not None and number != "" else title
         html = Template(_read("block_heading.html")).substitute(header_color=header_color, numbered_title=numbered_title)
         if block.get("content"):
             html += Template(_read("block_text.html")).substitute(content=block["content"])
@@ -71,10 +112,10 @@ def _render_block(block, header_color):
         return _render_table(block["headers"], block["rows"])
 
     if kind == "card":
-        return Template(_read("block_card.html")).substitute(title=block["title"], content=block["content"])
+        return Template(_read("block_card.html")).substitute(title=_esc(block["title"]), content=block["content"])
 
     if kind == "list":
-        items = "".join(Template(_read("list_item.html")).substitute(text=i) for i in block["items"])
+        items = "".join(Template(_read("list_item.html")).substitute(text=_esc(i)) for i in block["items"])
         return Template(_read("block_list_wrap.html")).substitute(items=items)
 
     raise ValueError(f"unknown block type: {kind!r}")
@@ -88,23 +129,52 @@ def render_email(email_type, header, blocks):
         omit blocks freely depending on the email's purpose (informativo,
         decisión, sincronización, ...) — there is no fixed section list.
     """
+    if email_type not in COLORS:
+        raise ValueError(f"unknown email_type: {email_type!r}; valid: {', '.join(sorted(COLORS))}")
+    if not isinstance(header, dict):
+        raise TypeError(f"header must be a dict, got {type(header).__name__}")
+    if not isinstance(blocks, list):
+        raise TypeError(f"blocks must be a list, got {type(blocks).__name__}")
+    for i, b in enumerate(blocks):
+        if not isinstance(b, dict):
+            raise TypeError(f"block {i} must be a dict, got {type(b).__name__}")
+
     header_color = COLORS[email_type]["header"]
 
     header_html = Template(_read("header.html")).substitute(
         header_color=header_color,
-        kicker=header.get("kicker", ""),
-        title=header.get("title", ""),
-        subtitle=header.get("subtitle", ""),
+        kicker=_esc(header.get("kicker", "")),
+        title=_esc(header.get("title", "")),
+        subtitle=_esc(header.get("subtitle", "")),
     )
     body_html = "".join(_render_block(b, header_color) for b in blocks)
     signature_html = _read("signature.html")
 
     return Template(_read("base_email.html")).substitute(
-        page_title=header.get("title", ""),
+        page_title=_esc(header.get("title", "")),
         header_html=header_html,
         body_html=body_html,
         signature_html=signature_html,
     )
+
+
+def save_email(html, dest_dir, filename):
+    """Write the finished email HTML to dest_dir/filename and return its Path.
+
+    Creates dest_dir recursively if missing; overwrites an existing file.
+    filename must be a bare name — writing outside dest_dir is forbidden.
+    """
+    if not isinstance(html, str):
+        raise TypeError(f"html must be a str, got {type(html).__name__}")
+    if not isinstance(filename, str) or not filename.strip():
+        raise ValueError(f"filename must be a non-empty str, got {filename!r}")
+    if any(ch in filename for ch in ("/", "\\", ":")) or filename in (".", ".."):
+        raise ValueError(f"filename must be a bare name without path separators: {filename!r}")
+    dest = Path(dest_dir)
+    dest.mkdir(parents=True, exist_ok=True)
+    path = dest / filename
+    path.write_text(html, encoding="utf-8")
+    return path
 
 
 if __name__ == "__main__":

@@ -23,9 +23,9 @@ Sets the header banner color only — it doesn't constrain which blocks you use.
 
 | Type | Header color |
 |---|---|
-| laboral | #4169E1 |
-| comunicado | #50C878 |
-| urgente | #DC143C |
+| laboral | #3c4043 |
+| comunicado | #0d904f |
+| urgente | #d93025 |
 
 ## Block Types
 
@@ -35,16 +35,30 @@ Each email is an ordered list of blocks. Use whichever mix fits the content — 
 |---|---|---|
 | `text` | Greeting, plain paragraphs, closing | `content` (html) |
 | `heading` | Numbered section title (like a report) | `title`, `number` (optional), `content` (optional paragraph below) |
-| `callout` | Something that needs to stand out | `variant` (`amber`=decisión/nota, `red`=riesgo/bloqueo, `green`=resuelto/ok, `blue`=informativo), `label`, `content` |
+| `callout` | Something that needs to stand out | `variant` (optional, default `amber` — `amber`=decisión/nota, `red`=riesgo/bloqueo, `green`=resuelto/ok, `blue`=informativo), `label` (optional), `content` (required) |
 | `table` | Comparable/structured data (status, estimates) | `headers` (list), `rows` (list of lists) |
 | `card` | One bordered unit of detail (e.g. one task) — nest a `render_callout(...)` inside `content` if it has a risk/decision | `title`, `content` (html) |
 | `list` | Bullet points | `items` (list of str) |
 
+**Escaping contract:** plain-text fields — `header.kicker`/`title`/`subtitle`, `heading.title`/`number`, `callout.label`, `card.title`, table cells, list `items` — are HTML-escaped by `render_email`/`render_callout`. `content` fields are inserted as raw HTML: they may hold nested `render_callout(...)` output or intentional inline markup.
+
 ## Three-Layer Flow
 
 1. **This file (SKILL.md)** — process only: what to ask, what to show, which blocks fit which purpose. Never contains markup.
-2. **`build_email_html.py`** — reusable base: `COLORS` map, `render_email(email_type, header, blocks)`, and `render_callout(variant, label, content)` for nesting a callout inside a card. Reads `templates/*.html` and returns the finished HTML string.
+2. **`build_email_html.py`** — reusable base: `COLORS` map, `render_email(email_type, header, blocks)`, `render_callout(variant, label, content)` for nesting a callout inside a card, and `save_email(html, dest_dir, filename)` for archiving. Reads `templates/*.html` and returns the finished HTML string.
 3. **Custom script per email** — written fresh for each request: imports from `build_email_html.py`, builds the `header` and the exact list of `blocks` this email needs, and prints/saves the resulting HTML. This is the final deliverable — nothing is sent or drafted.
+
+## Configuration (SAC memory)
+
+Used only to archive generated emails — never to produce the HTML. Before archiving (Step 3), run the command: **its output IS the placeholder value**, used as-is (never recalculate or invent paths):
+
+| Placeholder | Command |
+|---|---|
+| `{documentacion_sac_path}` | `sh .SAC/memctl.sh get documentacion_sac_path` |
+
+> memctl es solo lectura y su salida ES la respuesta; si memctl no existe (exit 127), leer `.SAC/config/sac.json` con `jq`; si sale con exit 1 (JSON inválido o vacío), detenerse y avisar: no leer ni editar el archivo a mano; nunca inventar valores. `null`, vacío o exit 2 → no configurado.
+
+No SAC installation (no `.SAC/config/sac.json`) or unconfigured value: warn "No hay instalación SAC" and skip archiving — the email is **never blocked**.
 
 ## Procedure
 
@@ -58,10 +72,10 @@ When the user wants to compose an email, ask:
 
 ### Step 2: Build HTML
 
-Write a custom script per email (layer 3) that imports from `build_email_html.py` in this skill's directory and calls it with the real content:
+Write a custom script per email (layer 3) that imports from `build_email_html.py` in this skill's directory and calls it with the real content. If the script lives outside the skill directory, make the module importable first — e.g. `sys.path.insert(0, <skill_dir>)` or `PYTHONPATH=<skill_dir>`:
 
 ```python
-from build_email_html import render_email, render_callout
+from build_email_html import render_email, render_callout, save_email
 
 html = render_email(
     email_type="laboral",
@@ -90,6 +104,12 @@ Show the generated HTML to the user (or save it to a `.html` file if they want t
 • ...
 ```
 
+Then archive the HTML (skip with a warning if SAC is not configured — the email is never blocked):
+
+1. Resolve `{documentacion_sac_path}` per the Configuration section — its output IS the path.
+2. Call `save_email(html, "{documentacion_sac_path}/correos_salientes", "correo_{asunto-slug}_{fecha}.html")` — create the subfolder if missing; **never write outside** `{documentacion_sac_path}`. Slug: `re.sub(r"[^a-z0-9]+", "-", asunto.lower()).strip("-")[:60]` (canonical rule). `{fecha}` = `YYYY-MM-DD`.
+3. Report: `✅ Correo archivado | Ruta: [ruta]`
+
 ## Signature
 
 Same signature for every email type, appended automatically by `render_email` — never pass or choose one:
@@ -106,4 +126,4 @@ Tel: Medellín (+57)604-444-5111 || Cel: (+57)3105789665
 - Never ship placeholder text as final content — always fill blocks with the real information the user gave you.
 - Don't force every email into the same block sequence — an informativo email and a decisión email should look different.
 - Show the full HTML/summary before considering the task done.
-- Check that the HTML renders correctly (no broken tags).
+- Check that the HTML renders correctly (no broken tags) — the module self-check (`python3 build_email_html.py`) renders every block type with asserts and works as a quick smoke test.
