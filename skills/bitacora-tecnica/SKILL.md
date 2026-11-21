@@ -55,7 +55,7 @@ Capturar el checkpoint aunque suene a estado (ej. "esperando…"); la clasificac
 
 - No iniciar al abrir la sesión: solo cuando haya un objetivo claro.
 - Si la sesión es ambigua o muy sencilla, preguntar **una vez**: `¿Creo bitácora para esta sesión? [S/N]`.
-- Iniciada la bitácora, registrar cada checkpoint **en el momento** en que ocurre, no al final.
+- Iniciada la bitácora (`crear`/`retomar`), el registro queda en **automático**: cada evento crucial se captura **en el momento** en que ocurre, no al final y sin esperar petición del usuario; se detiene con `cerrar` o al terminar la sesión.
 
 ### Delegar al subagente
 
@@ -98,7 +98,7 @@ Variación: retomar (sin checkpoints; sin slug → lista de bitácoras), cerrar 
 
 ### Retomar
 
-Usuario dice "retomar [tarea]" → subagente en modo `retomar` (si no hay slug, lista las bitácoras y se pregunta cuál; si hay hueco >2h u otra fecha, abre sesión nueva con `· inicio HH:MM`). Presentar el resumen y continuar.
+Usuario dice "retomar [tarea]" → subagente en modo `retomar` (si no hay slug, lista las bitácoras y se pregunta cuál; si hay hueco >2h u otra fecha, abre sesión nueva con `· inicio HH:MM`). Presentar el resumen y continuar en registro automático.
 
 ### Cierre
 
@@ -113,7 +113,7 @@ Usuario dice "resumen del día / de la sesión / de <fecha>" o pregunta cuánto 
 - **Escribir paso a paso:** solo checkpoints que eviten repetir trabajo o ayuden a retomar
 - **Reescribir `## Pendientes` en bloque:** se reconcilia ítem por ítem con cada checkpoint; los abiertos sin mención permanecen idénticos y cada cerrado lleva `· cierra <fecha>`
 - **Cerrar pendientes por inferencia:** si el checkpoint no confirma el cierre, dejar `¿cierra …? revisar` y consultar al usuario; nunca marcar `[x]` por suposición
-- **Acumular para el final:** registrar cada checkpoint cuando ocurre
+- **Acumular para el final o esperar petición:** el registro es automático desde `crear`/`retomar`; cada checkpoint se registra cuando ocurre
 - **Crear bitácora en sesiones de consulta:** esperar objetivo claro o preguntar
 - **Leer la bitácora en la sesión principal:** delegar siempre al subagente
 - **Estimar duración como creación → último checkpoint:** son los tramos de cada sesión sumados; los días entre sesiones no cuentan
