@@ -7,6 +7,7 @@ edge case de number=0 en heading, y regresiones del renderizado.
 
 import re
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -226,6 +227,46 @@ class RegressionTest(unittest.TestCase):
         for email_type, spec in beh.COLORS.items():
             html = render([], email_type=email_type)
             self.assertIn(spec["header"], html)
+
+
+class SaveEmailTest(unittest.TestCase):
+    def test_save_email_crea_directorio_y_escribe_html(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            dest = Path(tmp) / "correos_salientes"
+            ruta = beh.save_email("<html>ok</html>", dest, "correo-test_2026-11-21.html")
+            self.assertEqual(ruta, dest / "correo-test_2026-11-21.html")
+            self.assertTrue(ruta.is_file())
+            self.assertEqual(ruta.read_text(encoding="utf-8"), "<html>ok</html>")
+
+    def test_save_email_sobrescribe_si_existe(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            dest = Path(tmp)
+            beh.save_email("v1", dest, "correo-x.html")
+            beh.save_email("v2", dest, "correo-x.html")
+            self.assertEqual((dest / "correo-x.html").read_text(encoding="utf-8"), "v2")
+
+    def test_save_email_nombre_con_separador_es_value_error(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            for malo in ("../x.html", "sub/x.html", "sub\\x.html", "..", "."):
+                exc = capture_exc(beh.save_email, "<html/>", Path(tmp), malo)
+                self.assertIsInstance(
+                    exc, ValueError,
+                    f"esperaba ValueError para {malo!r}, llegó {type(exc).__name__}: {exc}")
+
+    def test_save_email_filename_vacio_es_value_error(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            for malo in ("", "   "):
+                exc = capture_exc(beh.save_email, "<html/>", Path(tmp), malo)
+                self.assertIsInstance(
+                    exc, ValueError,
+                    f"esperaba ValueError para {malo!r}, llegó {type(exc).__name__}: {exc}")
+
+    def test_save_email_html_no_str_es_type_error(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            exc = capture_exc(beh.save_email, 123, Path(tmp), "correo-x.html")
+            self.assertIsInstance(
+                exc, TypeError,
+                f"esperaba TypeError, llegó {type(exc).__name__}: {exc}")
 
 
 if __name__ == "__main__":

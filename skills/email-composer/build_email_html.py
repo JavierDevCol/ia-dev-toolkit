@@ -156,6 +156,25 @@ def render_email(email_type, header, blocks):
     )
 
 
+def save_email(html, dest_dir, filename):
+    """Write the finished email HTML to dest_dir/filename and return its Path.
+
+    Creates dest_dir recursively if missing; overwrites an existing file.
+    filename must be a bare name — writing outside dest_dir is forbidden.
+    """
+    if not isinstance(html, str):
+        raise TypeError(f"html must be a str, got {type(html).__name__}")
+    if not isinstance(filename, str) or not filename.strip():
+        raise ValueError(f"filename must be a non-empty str, got {filename!r}")
+    if "/" in filename or "\\" in filename or filename in (".", ".."):
+        raise ValueError(f"filename must be a bare name without path separators: {filename!r}")
+    dest = Path(dest_dir)
+    dest.mkdir(parents=True, exist_ok=True)
+    path = dest / filename
+    path.write_text(html, encoding="utf-8")
+    return path
+
+
 if __name__ == "__main__":
     # Self-check: every block type renders correctly. No Gmail call.
     html = render_email(
