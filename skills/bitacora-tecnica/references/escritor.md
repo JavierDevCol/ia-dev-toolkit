@@ -9,7 +9,27 @@ Archivo: `<raiz_proyecto>/bitacora-tecnica/<slug>/bitacora.md`. Plantilla: `../a
 - Evidencias solo como enlaces/rutas; no pegar logs completos.
 - Fecha y hora actuales del sistema (`date "+%d-%m-%Y %H:%M"`): la misma hora para todos los checkpoints de una llamada; nunca inventar horas. Cada checkpoint lleva fecha y hora (`DD-MM-YYYY HH:MM`) para distinguir horas iguales en días distintos.
 - No modificar nada fuera de `bitacora-tecnica/<slug>/`.
-- Formato de pendiente: abierto = `- [ ] <texto> — desde DD-MM-YYYY`; cerrado = `- [x] <texto> — desde DD-MM-YYYY · cierra DD-MM-YYYY` (fecha del checkpoint que lo cierra).
+- Formato de pendiente: abierto = `- [ ] <texto> — desde DD-MM-YYYY`; cerrado = `- [x] <texto> — desde DD-MM-YYYY · cierra DD-MM-YYYY` (fecha del checkpoint que lo cierra). Redactar `<texto>` como resultado esperado (ej. `Respuesta de pepito sobre permisos`), nunca como estado (`Esperando respuesta…`); el estado vive en la línea de checkpoint.
+
+## Tipos de checkpoint
+
+Un checkpoint puede tener varios efectos a la vez (ej. "Se envió correo a pepito; esperando respuesta" = estándar + apertura).
+
+| Tipo | Señal | Efecto en el archivo |
+|---|---|---|
+| estándar | acción pasada + resultado | línea en `## Sesión` |
+| apertura | expectativa o bloqueo: "esperando", "pendiente de", "bloqueado por" | línea + `- [ ] … — desde DD-MM-YYYY` |
+| cierre confirmado | resolución que casa con un `- [ ]` existente | línea + `[x] … · cierra DD-MM-YYYY` |
+| cierre incierto | cierre parcial, borrador, falta de confirmación o correspondencia ambigua | línea + `— ¿cierra DD-MM-YYYY? revisar` y `⚠️ cierre incierto` en la respuesta |
+| incidencia | causa raíz encontrada o camino descartado | línea + entrada en `## Incidencias y solución` |
+
+Clasificación de cada checkpoint (los efectos mecánicos se aplican en el paso 3 de `**checkpoint**`):
+
+1. Trabajo hecho o resuelto → estándar.
+2. Expectativa futura → apertura (si ya existe un pendiente igual o equivalente, no duplicar).
+3. Resolución que casa con un `- [ ]` existente → cierre confirmado.
+4. Cierre parcial o correspondencia ambigua → cierre incierto; nunca `[x]` por suposición.
+5. Causa raíz encontrada o camino descartado → incidencia.
 
 ## Sesiones de trabajo
 
@@ -26,7 +46,7 @@ Mientras el bloque más reciente esté dentro del plazo de 2h, los checkpoints s
 **crear**
 1. Si el archivo ya existe y su `## Objetivo` es de otra tarea → no escribir; responder `⚠️ slug existe con otro objetivo: <ruta>`. Si es la misma tarea → seguir como `checkpoint`.
 2. Crear la carpeta (`mkdir -p`) y el archivo desde la plantilla con título, slug, rama, objetivo y `- **Creada:** DD-MM-YYYY HH:MM` (hora actual del sistema; se registra solo al crear). Quitar las secciones de ejemplo que queden vacías salvo `## Pendientes / próxima sesión`.
-3. Agregar los checkpoints recibidos bajo `## Sesión <fecha de hoy> · inicio HH:MM` (HH:MM = la hora de `**Creada:**`).
+3. Agregar los checkpoints recibidos bajo `## Sesión <fecha de hoy> · inicio HH:MM` (HH:MM = la hora de `**Creada:**`) y sincronizar `## Pendientes` ítem por ítem como en el paso 3 de `checkpoint`.
 
 **checkpoint**
 1. Leer el archivo. Si no existe → responder `⚠️ no existe: <ruta>` y no crear.
@@ -37,6 +57,7 @@ Mientras el bloque más reciente esté dentro del plazo de 2h, los checkpoints s
    - Trabajo nuevo pendiente → agregar `- [ ] <texto> — desde DD-MM-YYYY`; si ya existe un pendiente igual o equivalente, conservar el actual sin duplicar.
    - Pendientes que el checkpoint no menciona → conservarlos idénticos, en su mismo orden.
    - Actualizar `**Rama:**` si cambió.
+   - Clasificación de tipos: ver `## Tipos de checkpoint`.
 
 **cerrar**
 1. Si llegan checkpoints, agregarlos igual que en `checkpoint`. Si no llegan, no crear bloques de sesión vacíos.
