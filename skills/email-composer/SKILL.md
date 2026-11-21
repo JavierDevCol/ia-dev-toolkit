@@ -48,6 +48,18 @@ Each email is an ordered list of blocks. Use whichever mix fits the content — 
 2. **`build_email_html.py`** — reusable base: `COLORS` map, `render_email(email_type, header, blocks)`, and `render_callout(variant, label, content)` for nesting a callout inside a card. Reads `templates/*.html` and returns the finished HTML string.
 3. **Custom script per email** — written fresh for each request: imports from `build_email_html.py`, builds the `header` and the exact list of `blocks` this email needs, and prints/saves the resulting HTML. This is the final deliverable — nothing is sent or drafted.
 
+## Configuration (SAC memory)
+
+Used only to archive generated emails — never to produce the HTML. Before archiving (Step 3), run the command: **its output IS the placeholder value**, used as-is (never recalculate or invent paths):
+
+| Placeholder | Command |
+|---|---|
+| `{documentacion_sac_path}` | `sh .SAC/memctl.sh get documentacion_sac_path` |
+
+> memctl es solo lectura y su salida ES la respuesta; si memctl no existe (exit 127), leer `.SAC/config/sac.json` con `jq`; si sale con exit 1 (JSON inválido o vacío), detenerse y avisar: no leer ni editar el archivo a mano; nunca inventar valores. `null`, vacío o exit 2 → no configurado.
+
+No SAC installation (no `.SAC/config/sac.json`) or unconfigured value: warn "No hay instalación SAC" and skip archiving — the email is **never blocked**.
+
 ## Procedure
 
 ### Step 1: Detect Intent
@@ -91,6 +103,12 @@ Show the generated HTML to the user (or save it to a `.html` file if they want t
 • [block 2 summary]
 • ...
 ```
+
+Then archive the HTML (skip with a warning if SAC is not configured — the email is never blocked):
+
+1. Resolve `{documentacion_sac_path}` per the Configuration section — its output IS the path.
+2. Call `save_email(html, "{documentacion_sac_path}/correos_salientes", "correo_{asunto-slug}_{fecha}.html")` — create the subfolder if missing; **never write outside** `{documentacion_sac_path}`. Slug: lowercase, non-alphanumerics → `-`, max 60 chars. `{fecha}` = `YYYY-MM-DD`.
+3. Report: `✅ Correo archivado | Ruta: [ruta]`
 
 ## Signature
 

@@ -75,6 +75,28 @@ class DocsContractTest(unittest.TestCase):
         self.assertIn("python3 build_email_html.py", doc)
 
 
+class DocsSacIntegrationTest(unittest.TestCase):
+    def _doc(self):
+        return (SKILL_DIR / "SKILL.md").read_text(encoding="utf-8")
+
+    def test_docs_have_memctl_config_block(self):
+        doc = self._doc()
+        self.assertIn("sh .SAC/memctl.sh get documentacion_sac_path", doc)
+        self.assertIn("{documentacion_sac_path}", doc)
+        self.assertIn("No hay instalación SAC", doc)
+
+    def test_docs_define_correos_salientes_folder(self):
+        self.assertIn("correos_salientes", self._doc())
+
+    def test_docs_mention_save_email_helper(self):
+        self.assertIn("save_email", self._doc())
+
+    def test_docs_state_never_block_and_never_write_outside(self):
+        doc = self._doc()
+        self.assertIn("never block", doc)
+        self.assertIn("never write outside", doc)
+
+
 class EscapingTest(unittest.TestCase):
     def test_table_cells_are_escaped(self):
         html = render([{"type": "table", "headers": ["A & B"],
