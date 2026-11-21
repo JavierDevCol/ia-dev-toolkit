@@ -46,7 +46,7 @@ Mientras el bloque más reciente esté dentro del plazo de 2h, los checkpoints s
 **crear**
 1. Si el archivo ya existe y su `## Objetivo` es de otra tarea → no escribir; responder `⚠️ slug existe con otro objetivo: <ruta>`. Si es la misma tarea → seguir como `checkpoint`.
 2. Crear la carpeta (`mkdir -p`) y el archivo desde la plantilla con título, slug, rama, objetivo y `- **Creada:** DD-MM-YYYY HH:MM` (hora actual del sistema; se registra solo al crear). Quitar las secciones de ejemplo que queden vacías salvo `## Pendientes / próxima sesión`.
-3. Agregar los checkpoints recibidos bajo `## Sesión <fecha de hoy> · inicio HH:MM` (HH:MM = la hora de `**Creada:**`).
+3. Agregar los checkpoints recibidos bajo `## Sesión <fecha de hoy> · inicio HH:MM` (HH:MM = la hora de `**Creada:**`) y sincronizar `## Pendientes` ítem por ítem como en el paso 3 de `checkpoint`.
 
 **checkpoint**
 1. Leer el archivo. Si no existe → responder `⚠️ no existe: <ruta>` y no crear.
