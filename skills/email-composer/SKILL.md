@@ -45,7 +45,7 @@ Each email is an ordered list of blocks. Use whichever mix fits the content — 
 ## Three-Layer Flow
 
 1. **This file (SKILL.md)** — process only: what to ask, what to show, which blocks fit which purpose. Never contains markup.
-2. **`build_email_html.py`** — reusable base: `COLORS` map, `render_email(email_type, header, blocks)`, and `render_callout(variant, label, content)` for nesting a callout inside a card. Reads `templates/*.html` and returns the finished HTML string.
+2. **`build_email_html.py`** — reusable base: `COLORS` map, `render_email(email_type, header, blocks)`, `render_callout(variant, label, content)` for nesting a callout inside a card, and `save_email(html, dest_dir, filename)` for archiving. Reads `templates/*.html` and returns the finished HTML string.
 3. **Custom script per email** — written fresh for each request: imports from `build_email_html.py`, builds the `header` and the exact list of `blocks` this email needs, and prints/saves the resulting HTML. This is the final deliverable — nothing is sent or drafted.
 
 ## Configuration (SAC memory)
@@ -75,7 +75,7 @@ When the user wants to compose an email, ask:
 Write a custom script per email (layer 3) that imports from `build_email_html.py` in this skill's directory and calls it with the real content. If the script lives outside the skill directory, make the module importable first — e.g. `sys.path.insert(0, <skill_dir>)` or `PYTHONPATH=<skill_dir>`:
 
 ```python
-from build_email_html import render_email, render_callout
+from build_email_html import render_email, render_callout, save_email
 
 html = render_email(
     email_type="laboral",
@@ -107,7 +107,7 @@ Show the generated HTML to the user (or save it to a `.html` file if they want t
 Then archive the HTML (skip with a warning if SAC is not configured — the email is never blocked):
 
 1. Resolve `{documentacion_sac_path}` per the Configuration section — its output IS the path.
-2. Call `save_email(html, "{documentacion_sac_path}/correos_salientes", "correo_{asunto-slug}_{fecha}.html")` — create the subfolder if missing; **never write outside** `{documentacion_sac_path}`. Slug: lowercase, non-alphanumerics → `-`, max 60 chars. `{fecha}` = `YYYY-MM-DD`.
+2. Call `save_email(html, "{documentacion_sac_path}/correos_salientes", "correo_{asunto-slug}_{fecha}.html")` — create the subfolder if missing; **never write outside** `{documentacion_sac_path}`. Slug: `re.sub(r"[^a-z0-9]+", "-", asunto.lower()).strip("-")[:60]` (canonical rule). `{fecha}` = `YYYY-MM-DD`.
 3. Report: `✅ Correo archivado | Ruta: [ruta]`
 
 ## Signature

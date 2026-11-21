@@ -91,6 +91,14 @@ class DocsSacIntegrationTest(unittest.TestCase):
     def test_docs_mention_save_email_helper(self):
         self.assertIn("save_email", self._doc())
 
+    def test_docs_teach_save_email_import_and_signature(self):
+        doc = self._doc()
+        self.assertIn("import render_email, render_callout, save_email", doc)
+        self.assertIn("save_email(html, dest_dir, filename)", doc)
+
+    def test_docs_pin_canonical_slug_rule(self):
+        self.assertIn('re.sub(r"[^a-z0-9]+", "-", asunto.lower())', self._doc())
+
     def test_docs_state_never_block_and_never_write_outside(self):
         doc = self._doc()
         self.assertIn("never block", doc)
@@ -167,6 +175,12 @@ class ValidationTest(unittest.TestCase):
             exc, ValueError, f"esperaba ValueError, llegó {type(exc).__name__}: {exc}")
         self.assertIn("content", str(exc))
         self.assertIn("text", str(exc))
+
+    def test_block_sin_type_es_value_error(self):
+        exc = capture_exc(render, [{"content": "x"}])
+        self.assertIsInstance(
+            exc, ValueError, f"esperaba ValueError, llegó {type(exc).__name__}: {exc}")
+        self.assertIn("type", str(exc))
 
     def test_row_length_mismatch_raises_value_error(self):
         exc = capture_exc(
@@ -278,6 +292,14 @@ class SaveEmailTest(unittest.TestCase):
     def test_save_email_filename_vacio_es_value_error(self):
         with tempfile.TemporaryDirectory() as tmp:
             for malo in ("", "   "):
+                exc = capture_exc(beh.save_email, "<html/>", Path(tmp), malo)
+                self.assertIsInstance(
+                    exc, ValueError,
+                    f"esperaba ValueError para {malo!r}, llegó {type(exc).__name__}: {exc}")
+
+    def test_save_email_nombre_con_dos_puntos_es_value_error(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            for malo in ("C:x.html", "x:y.html"):
                 exc = capture_exc(beh.save_email, "<html/>", Path(tmp), malo)
                 self.assertIsInstance(
                     exc, ValueError,

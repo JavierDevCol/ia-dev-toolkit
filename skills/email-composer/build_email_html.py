@@ -82,7 +82,9 @@ def _render_table(headers, rows):
 
 
 def _render_block(block, header_color):
-    kind = block["type"]
+    kind = block.get("type")
+    if not kind:
+        raise ValueError("block missing required key: type")
 
     if kind not in _REQUIRED_KEYS:
         raise ValueError(f"unknown block type: {kind!r}")
@@ -166,7 +168,7 @@ def save_email(html, dest_dir, filename):
         raise TypeError(f"html must be a str, got {type(html).__name__}")
     if not isinstance(filename, str) or not filename.strip():
         raise ValueError(f"filename must be a non-empty str, got {filename!r}")
-    if "/" in filename or "\\" in filename or filename in (".", ".."):
+    if any(ch in filename for ch in ("/", "\\", ":")) or filename in (".", ".."):
         raise ValueError(f"filename must be a bare name without path separators: {filename!r}")
     dest = Path(dest_dir)
     dest.mkdir(parents=True, exist_ok=True)
