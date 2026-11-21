@@ -23,9 +23,9 @@ Sets the header banner color only — it doesn't constrain which blocks you use.
 
 | Type | Header color |
 |---|---|
-| laboral | #4169E1 |
-| comunicado | #50C878 |
-| urgente | #DC143C |
+| laboral | #3c4043 |
+| comunicado | #0d904f |
+| urgente | #d93025 |
 
 ## Block Types
 
@@ -35,10 +35,12 @@ Each email is an ordered list of blocks. Use whichever mix fits the content — 
 |---|---|---|
 | `text` | Greeting, plain paragraphs, closing | `content` (html) |
 | `heading` | Numbered section title (like a report) | `title`, `number` (optional), `content` (optional paragraph below) |
-| `callout` | Something that needs to stand out | `variant` (`amber`=decisión/nota, `red`=riesgo/bloqueo, `green`=resuelto/ok, `blue`=informativo), `label`, `content` |
+| `callout` | Something that needs to stand out | `variant` (optional, default `amber` — `amber`=decisión/nota, `red`=riesgo/bloqueo, `green`=resuelto/ok, `blue`=informativo), `label` (optional), `content` (required) |
 | `table` | Comparable/structured data (status, estimates) | `headers` (list), `rows` (list of lists) |
 | `card` | One bordered unit of detail (e.g. one task) — nest a `render_callout(...)` inside `content` if it has a risk/decision | `title`, `content` (html) |
 | `list` | Bullet points | `items` (list of str) |
+
+**Escaping contract:** plain-text fields — `header.kicker`/`title`/`subtitle`, `heading.title`/`number`, `callout.label`, `card.title`, table cells, list `items` — are HTML-escaped by `render_email`/`render_callout`. `content` fields are inserted as raw HTML: they may hold nested `render_callout(...)` output or intentional inline markup.
 
 ## Three-Layer Flow
 
@@ -58,7 +60,7 @@ When the user wants to compose an email, ask:
 
 ### Step 2: Build HTML
 
-Write a custom script per email (layer 3) that imports from `build_email_html.py` in this skill's directory and calls it with the real content:
+Write a custom script per email (layer 3) that imports from `build_email_html.py` in this skill's directory and calls it with the real content. If the script lives outside the skill directory, make the module importable first — e.g. `sys.path.insert(0, <skill_dir>)` or `PYTHONPATH=<skill_dir>`:
 
 ```python
 from build_email_html import render_email, render_callout
@@ -106,4 +108,4 @@ Tel: Medellín (+57)604-444-5111 || Cel: (+57)3105789665
 - Never ship placeholder text as final content — always fill blocks with the real information the user gave you.
 - Don't force every email into the same block sequence — an informativo email and a decisión email should look different.
 - Show the full HTML/summary before considering the task done.
-- Check that the HTML renders correctly (no broken tags).
+- Check that the HTML renders correctly (no broken tags) — the module self-check (`python3 build_email_html.py`) renders every block type with asserts and works as a quick smoke test.
